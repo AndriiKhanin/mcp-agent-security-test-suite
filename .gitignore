@@ -1,0 +1,10 @@
+
+node_modules/
+coverage/
+*.log
+*.pem
+*.pfx
+*.key
+.env
+.env.*
+*.zip
