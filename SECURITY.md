@@ -1,11 +1,11 @@
-# Security policy (pre-release)
+# Security Policy
 
-There is currently **no published executable source release** in this repository.
+**Status:** early v0.0.9 synthetic-only test suite; no production or real MCP target testing is supported.
 
-**Do not post** passwords, API keys, OAuth tokens, private logs, real tool-call transcripts, internal URLs, customer records or undisclosed vulnerabilities in public GitHub Issues.
+For private vulnerability disclosures, use GitHub’s **Report a vulnerability** feature if available, or contact the repository owner privately through a trusted channel. Do not publish exploit details or secrets in GitHub Issues.
 
-For the planned initial release, all fixtures will be fictional and offline. Its simulated effects will not demonstrate the absence of unrelated filesystem, network or OS side effects, and process separation alone will not sandbox untrusted executables. Passing a synthetic contract test will not certify a system's security.
+Do not upload API keys, OAuth tokens, real agent logs, confidential MCP tool responses, private endpoints, or customer data. Only fictional fixtures are expected by the initial test suite.
 
-Before code publication the project will define supported versions, a private vulnerability-reporting path and a disclosure process. Until then, Issues should be restricted to **nonconfidential** project feedback and use cases.
+The library does not claim to provide a sandbox for malicious programs, independent verification of third-party MCP servers, OAuth token validation, or security certification. The process-separated tests use the launching account’s usual permissions and must only run the bundled fixed synthetic worker.
 
-This project is unaffiliated with MCP, OWASP or OpenAI security-certification programs.
+No guaranteed response SLA is offered at this stage. Non-sensitive feature requests are welcome through Issues.

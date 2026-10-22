@@ -1,0 +1,68 @@
+{
+  "era": "modern",
+  "events": [
+    {
+      "from": "client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": "d1",
+        "method": "server/discover",
+        "params": {
+          "_meta": {
+            "io.modelcontextprotocol/clientCapabilities": {},
+            "io.modelcontextprotocol/clientInfo": {
+              "name": "SyntheticClient",
+              "version": "1.0"
+            }
+          }
+        }
+      }
+    },
+    {
+      "from": "server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": "d1",
+        "result": {
+          "resultType": "complete",
+          "supportedVersions": [
+            "2026-07-28"
+          ],
+          "capabilities": {
+            "tools": {}
+          },
+          "cacheScope": "private",
+          "ttlMs": 0
+        }
+      }
+    },
+    {
+      "from": "client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 7,
+        "method": "initialize",
+        "params": {
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientCapabilities": {},
+            "io.modelcontextprotocol/clientInfo": {
+              "name": "SyntheticClient",
+              "version": "1.0"
+            }
+          }
+        }
+      }
+    },
+    {
+      "from": "server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 7,
+        "result": {
+          "tools": []
+        }
+      }
+    }
+  ]
+}

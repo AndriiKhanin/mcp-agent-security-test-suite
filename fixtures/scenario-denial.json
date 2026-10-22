@@ -1,0 +1,286 @@
+{
+  "version": 1,
+  "id": "access-boundaries",
+  "clock": 100,
+  "policy": {
+    "owner": "dev-a",
+    "resource": "mcp://synthetic-a",
+    "scopes": [
+      "note:read",
+      "note:write",
+      "note:delete"
+    ],
+    "generation": 2
+  },
+  "actions": [
+    {
+      "tool": "write-note",
+      "owner": "dev-b",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "OWNER_MISMATCH",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-b",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "AUDIENCE_MISMATCH",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "INSUFFICIENT_SCOPE",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 1,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "STALE_GENERATION",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 100,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "EXPIRED_GRANT",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 101,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "NOT_YET_VALID",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "untrusted",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "UNTRUSTED_ORIGIN",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "execute-shell",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "UNKNOWN_TOOL",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "delete-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-1"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "APPROVAL_REQUIRED",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-2"
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "reason": "AUTHORIZED",
+        "effect": "WRITE"
+      }
+    },
+    {
+      "tool": "read-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "fictional-nonce-3"
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "reason": "AUTHORIZED",
+        "effect": "READ"
+      }
+    }
+  ],
+  "expectedFinal": {
+    "allowed": 2,
+    "denied": 9,
+    "reads": 1,
+    "writes": 1,
+    "notes": 1
+  }
+}

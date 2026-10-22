@@ -1,0 +1,45 @@
+{
+  "requests": [
+    {
+      "jsonrpc": "2.0",
+      "id": 7,
+      "method": "tools/call",
+      "params": {
+        "name": "fake.read",
+        "arguments": {}
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": "write-a",
+      "method": "tools/call",
+      "params": {
+        "name": "fake.write",
+        "arguments": {
+          "label": "synthetic"
+        }
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "method": "notifications/synthetic"
+    }
+  ],
+  "responses": [
+    {
+      "jsonrpc": "2.0",
+      "id": "write-a",
+      "error": {
+        "code": -32603,
+        "message": "Synthetic failure"
+      }
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": 7,
+      "result": {
+        "content": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "requests": [
+    {
+      "jsonrpc": "2.0",
+      "id": "same",
+      "method": "tools/call",
+      "params": {
+        "name": "fake.read",
+        "arguments": {}
+      }
+    }
+  ],
+  "responses": [
+    {
+      "jsonrpc": "2.0",
+      "id": "same",
+      "error": {
+        "code": -32600,
+        "message": "Synthetic error"
+      },
+      "result": {}
+    },
+    {
+      "jsonrpc": "2.0",
+      "id": "unexpected",
+      "result": {}
+    }
+  ]
+}

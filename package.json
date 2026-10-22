@@ -1,0 +1,21 @@
+{
+  "name": "mcp-agent-security-test-suite",
+  "version": "0.0.9",
+  "type": "module",
+  "description": "Offline synthetic MCP and AI agent security contract tests with zero runtime dependencies",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "scenario": "node src/cli.mjs scenario fixtures/scenario-denial.json",
+    "mock": "node src/cli.mjs mock fixtures/scenario-denial.json",
+    "witness": "node src/cli.mjs witness fixtures/scenario-denial.json",
+    "process": "node src/cli.mjs process fixtures/scenario-denial.json",
+    "trace": "node src/cli.mjs trace fixtures/trace-safe.jsonl",
+    "jsonrpc": "node src/cli.mjs jsonrpc fixtures/jsonrpc-safe.json",
+    "era": "node src/cli.mjs era fixtures/mcp-modern-safe.json",
+    "negotiate": "node src/cli.mjs negotiate fixtures/mcp-negotiate-safe.json"
+  },
+  "license": "MIT"
+}

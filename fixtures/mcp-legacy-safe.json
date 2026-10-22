@@ -1,0 +1,62 @@
+{
+  "era": "legacy",
+  "events": [
+    {
+      "from": "client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {},
+          "clientInfo": {
+            "name": "SyntheticClient",
+            "version": "1.0"
+          }
+        }
+      }
+    },
+    {
+      "from": "server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+          "protocolVersion": "2025-11-25",
+          "capabilities": {},
+          "serverInfo": {
+            "name": "SyntheticServer",
+            "version": "1.0"
+          }
+        }
+      }
+    },
+    {
+      "from": "client",
+      "message": {
+        "jsonrpc": "2.0",
+        "method": "notifications/initialized"
+      }
+    },
+    {
+      "from": "client",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "tools/list",
+        "params": {}
+      }
+    },
+    {
+      "from": "server",
+      "message": {
+        "jsonrpc": "2.0",
+        "id": 2,
+        "result": {
+          "tools": []
+        }
+      }
+    }
+  ]
+}

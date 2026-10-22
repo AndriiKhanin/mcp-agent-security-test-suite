@@ -1,0 +1,172 @@
+{
+  "version": 1,
+  "id": "recovery-and-replay",
+  "clock": 100,
+  "policy": {
+    "owner": "dev-a",
+    "resource": "mcp://synthetic-a",
+    "scopes": [
+      "note:read",
+      "note:write",
+      "note:delete"
+    ],
+    "generation": 2
+  },
+  "actions": [
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "first"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "SIMULATED_PRECOMMIT_FAILURE",
+        "effect": "NONE"
+      },
+      "fault": "before-commit"
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "first"
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "reason": "AUTHORIZED",
+        "effect": "WRITE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "first"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "REPLAYED_NONCE",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "second"
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "reason": "AUTHORIZED",
+        "effect": "WRITE",
+        "outcome": "UNKNOWN"
+      },
+      "fault": "after-commit"
+    },
+    {
+      "tool": "write-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "second"
+      },
+      "expected": {
+        "decision": "DENY",
+        "reason": "REPLAYED_NONCE",
+        "effect": "NONE"
+      }
+    },
+    {
+      "tool": "delete-note",
+      "owner": "dev-a",
+      "resource": "mcp://synthetic-a",
+      "origin": "owner",
+      "grant": {
+        "owner": "dev-a",
+        "resource": "mcp://synthetic-a",
+        "scopes": [
+          "note:read",
+          "note:write",
+          "note:delete"
+        ],
+        "generation": 2,
+        "notBefore": 1,
+        "expiresAt": 999,
+        "nonce": "third"
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "reason": "AUTHORIZED",
+        "effect": "WRITE"
+      },
+      "approved": true
+    }
+  ],
+  "expectedFinal": {
+    "allowed": 3,
+    "denied": 3,
+    "reads": 0,
+    "writes": 3,
+    "notes": 1
+  }
+}

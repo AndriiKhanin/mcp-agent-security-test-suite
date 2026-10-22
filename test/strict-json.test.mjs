@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { parseStrictJson } from '../src/strict-json.mjs';
+import { parseJsonl } from '../src/trace.mjs';
+test('ordinary nested JSON parses unchanged',()=>{const source=' { "a": [{"b": true}, null, 3], "c": "hello" } ';assert.deepEqual(parseStrictJson(source),JSON.parse(source))});
+test('top-level duplicate rejected',()=>assert.throws(()=>parseStrictJson('{"scope":1,"scope":2}'),/DUPLICATE_JSON_KEY/));
+test('nested duplicate rejected',()=>assert.throws(()=>parseStrictJson('{"grant":{"owner":"a","owner":"b"}}'),/DUPLICATE_JSON_KEY/));
+test('escaped equivalent duplicate keys rejected',()=>assert.throws(()=>parseStrictJson('{"owner":1,"\\u006fwner":2}'),/DUPLICATE_JSON_KEY/));
+test('same key in different objects is allowed',()=>assert.deepEqual(parseStrictJson('{"one":{"x":1},"two":{"x":2}}'),{one:{x:1},two:{x:2}}));
+test('quoted punctuation does not break parser',()=>assert.equal(parseStrictJson('{"a":"}[\\\"x, ]", "b": ["}","{"]}').a,'}["x, ]'));
+test('malformed JSON rejects',()=>assert.throws(()=>parseStrictJson('{"a":1,}'),/SyntaxError/));
+test('too large rejects',()=>assert.throws(()=>parseStrictJson('"'+'X'.repeat(1024*1024)+'"'),/INVALID_INPUT_SIZE/));
+test('trace parser rejects duplicate fields',()=>assert.throws(()=>parseJsonl('{"decision":"DENY","decision":"ALLOW"}'),/INVALID_JSON_LINE/));
+test('empty JSON arrays and objects parse',()=>assert.deepEqual(parseStrictJson('{"a":[],"b":{}}'),{a:[],b:{}}));

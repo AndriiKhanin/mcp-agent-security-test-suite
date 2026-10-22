@@ -1,0 +1,85 @@
+{
+  "profile": "modern-2026-offline-negotiation",
+  "clientVersions": [
+    "2099-01-01",
+    "2026-07-28"
+  ],
+  "grantedCapabilities": {},
+  "steps": [
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": "first",
+        "method": "tools/list",
+        "params": {
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2099-01-01",
+            "io.modelcontextprotocol/clientCapabilities": {}
+          }
+        }
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": "first",
+        "error": {
+          "code": -32022,
+          "message": "Synthetic modern MCP error",
+          "data": {
+            "supported": [
+              "2026-07-28"
+            ],
+            "requested": "2099-01-01"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": "retry",
+        "method": "tools/list",
+        "params": {
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientCapabilities": {}
+          }
+        }
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": "retry",
+        "result": {
+          "tools": []
+        }
+      }
+    },
+    {
+      "request": {
+        "jsonrpc": "2.0",
+        "id": "needs-grant",
+        "method": "tools/list",
+        "params": {
+          "_meta": {
+            "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+            "io.modelcontextprotocol/clientCapabilities": {}
+          }
+        }
+      },
+      "response": {
+        "jsonrpc": "2.0",
+        "id": "needs-grant",
+        "error": {
+          "code": -32021,
+          "message": "Synthetic modern MCP error",
+          "data": {
+            "requiredCapabilities": {
+              "elicitation": {
+                "form": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

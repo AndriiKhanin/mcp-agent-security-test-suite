@@ -1,0 +1,100 @@
+// OFFLINE synthetic test-profile validator for modern MCP version/capability errors.
+// No network, no auth decisions, no real MCP transport and no auto-retry execution.
+export const UNSUPPORTED_PROTOCOL_VERSION = -32022;
+export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32021;
+const own = (o,k) => Object.hasOwn(o,k);
+const record = x => x !== null && typeof x === 'object' && !Array.isArray(x);
+const string = (s,max=128) => typeof s==='string' && s.length>0 && s.length<=max;
+const versions = v => Array.isArray(v) && v.length>0 && v.length<=16 &&
+  v.every(x=>typeof x==='string' && /^\d{4}-\d{2}-\d{2}$/.test(x)) && new Set(v).size===v.length;
+const id = x => string(x) || Number.isSafeInteger(x);
+const capabilitySet = x => record(x) && Object.keys(x).length<=32 &&
+  Object.entries(x).every(([k,v])=>string(k,128) && record(v) && JSON.stringify(v).length<=2048);
+const same = (a,b) => JSON.stringify(a)===JSON.stringify(b);
+const fields = (v,names) => Object.keys(v).every(x=>names.includes(x));
+
+export function auditModernNegotiation(input) {
+  if (!record(input) || input.profile !== 'modern-2026-offline-negotiation' ||
+      !fields(input,['profile','clientVersions','grantedCapabilities','steps']) ||
+      !versions(input.clientVersions) || !capabilitySet(input.grantedCapabilities) ||
+      !Array.isArray(input.steps) || !input.steps.length || input.steps.length>64) {
+    throw new TypeError('INVALID_NEGOTIATION_FIXTURE');
+  }
+  let failureCount=0;
+  const findings=[];
+  const flag=(step,rule)=>{failureCount++;if(findings.length<200)findings.push({step,rule});};
+  let pendingRetry = null;
+  let pendingMethod = null; // accepted intersection from the preceding unsupported-version response
+  let completed = 0;
+  const seenIds = new Set();
+  for (let index=0;index<input.steps.length;index++) {
+    const at=index+1, pair=input.steps[index];
+    if (!record(pair) || !fields(pair,['request','response']) ||
+        !record(pair.request) || !record(pair.response)) {
+      flag(at,'INVALID_EXCHANGE_STEP'); continue;
+    }
+    const req=pair.request,res=pair.response;
+    if (req.jsonrpc!=='2.0' || !id(req.id) || !string(req.method) ||
+        req.method==='initialize' || req.method==='notifications/initialized' ||
+        !fields(req,['jsonrpc','id','method','params']) || !record(req.params) ||
+        !record(req.params._meta)) {flag(at,'INVALID_MODERN_REQUEST');continue;}
+    const meta=req.params._meta;
+    const requested=meta['io.modelcontextprotocol/protocolVersion'];
+    const capabilities=meta['io.modelcontextprotocol/clientCapabilities'];
+    if (!string(requested,32) || !input.clientVersions.includes(requested) ||
+        !capabilitySet(capabilities)) flag(at,'INVALID_PER_REQUEST_DECLARATION');
+    if (capabilitySet(capabilities) && Object.entries(capabilities).some(([key,value])=>
+        !own(input.grantedCapabilities,key) || !same(input.grantedCapabilities[key],value))) {
+      flag(at,'UNAUTHORIZED_CAPABILITY_DECLARATION');
+    }
+    const key=typeof req.id+':'+String(req.id);
+    if (seenIds.has(key)) flag(at,'REUSED_REQUEST_ID');
+    seenIds.add(key);
+    if (pendingRetry !== null) {
+      if (!pendingRetry.includes(requested)) flag(at,'RETRY_VERSION_NOT_MUTUALLY_SUPPORTED');
+      if (req.method!==pendingMethod) flag(at,'RETRY_METHOD_CHANGED');
+      pendingRetry=null; pendingMethod=null;
+    }
+    if (res.jsonrpc!=='2.0' || !own(res,'id') ||
+        typeof res.id!==typeof req.id || res.id!==req.id ||
+        own(res,'result')===own(res,'error') ||
+        !fields(res,['jsonrpc','id','result','error'])) {
+      flag(at,'INVALID_NEGOTIATION_RESPONSE');continue;
+    }
+    if (own(res,'result')) { completed++; continue; }
+    const error=res.error;
+    if (!record(error) || !Number.isSafeInteger(error.code) ||
+        !string(error.message,512) || !fields(error,['code','message','data'])) {
+      flag(at,'INVALID_PROTOCOL_ERROR');continue;
+    }
+    if (error.code===UNSUPPORTED_PROTOCOL_VERSION) {
+      const data=error.data;
+      if (!record(data) || !fields(data,['requested','supported']) ||
+          !versions(data.supported) || data.requested!==requested ||
+          data.supported.includes(requested)) {
+        flag(at,'INVALID_UNSUPPORTED_VERSION_EVIDENCE');continue;
+      }
+      const overlap=data.supported.filter(v=>input.clientVersions.includes(v));
+      if (overlap.length>0) {
+        pendingRetry=overlap; pendingMethod=req.method;
+      } else if (index<input.steps.length-1) {
+        flag(at,'RETRY_AFTER_NO_COMMON_VERSION');
+      }
+    } else if (error.code===MISSING_REQUIRED_CLIENT_CAPABILITY) {
+      const data=error.data;
+      if (!record(data) || !fields(data,['requiredCapabilities']) ||
+          !capabilitySet(data.requiredCapabilities) ||
+          Object.keys(data.requiredCapabilities).length===0 ||
+          Object.entries(data.requiredCapabilities).every(([k,v])=>
+            own(capabilities,k) && same(capabilities[k],v))) {
+        flag(at,'INVALID_REQUIRED_CAPABILITY_EVIDENCE');
+      }
+    }
+  }
+  if (pendingRetry!==null) flag(0,'MISSING_MUTUAL_VERSION_RETRY');
+  return {
+    status:failureCount===0?'PASS':'FAIL', profile:input.profile,
+    stepsChecked:input.steps.length, completedExchanges:completed,
+    failureCount, findingsTruncated:failureCount>findings.length, findings
+  };
+}

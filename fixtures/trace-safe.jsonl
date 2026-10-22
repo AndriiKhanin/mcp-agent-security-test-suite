@@ -1,0 +1,2 @@
+{"decision":"ALLOW","effect":"WRITE","ownerAuthorized":true,"scopeAuthorized":true,"leaseFresh":true,"secretLogged":false}
+{"decision":"DENY","effect":"NONE","secretLogged":false}

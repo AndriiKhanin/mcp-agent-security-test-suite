@@ -1,37 +1,35 @@
-# MCP Agent Security Test Suite
+# MCP Agent Security Test Suite — v0.0.9
 
-A new, independent project for reproducible testing of **synthetic** MCP and AI-agent security scenarios.
+**Early open-source release.** Synthetic contract tests only; not a vulnerability scanner or security certification.
 
-> **Public project scaffold — source release pending.** The first code release is undergoing an independent-source and licensing review. This repository currently does **not** offer an installable or certified security product.
+Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-only: no real MCP server, credentials, external connections, real tool execution, live vulnerability scanning, independent OAuth verification or security certification.
 
-## Intended scope
+## Modules
 
-The initial independently developed prototype covers:
+- `scenario` — synthetic authorization, replay, scoped resources and failure semantics
+- `mock`, `witness`, `process` — fixed simulated tools, parent-owned in-memory effects and forked in-repository mock worker. Process isolation is *not* an OS sandbox.
+- `trace` — consistency checks for fictional action logs; does not actually search for secrets.
+- `jsonrpc` — offline request/reply envelope checks with a deliberately strict profile.
+- `era` — explicitly selected synthetic modern (2026) and legacy (2025) MCP transcript profiles.
+- `negotiate` — fictional modern version/capability error and safe retry checks.
 
-- Fictional tool authorization checks: owner, resource audience, scope, expiration, replay and approval.
-- Deterministic fault and recovery scenarios, including uncertain post-commit outcomes.
-- In-memory mock tool calls and harness-owned synthetic-effect observation.
-- Offline JSON-RPC message correlation, with separate modern and legacy MCP transcript test profiles.
-- Synthetic protocol version and capability negotiation errors.
+## Test
 
-The existing prototype has passed **243 of 243 tests on Windows (Node.js 22.18.0)** as of 2026-10-22. These are developer-authored tests of synthetic fixtures, **not** independently verified security findings or certification. The code and test report are not published here yet.
+Requires Node.js 20+.
 
-## Safety boundaries
+```bash
+node --test
+node src/cli.mjs scenario fixtures/scenario-denial.json
+node src/cli.mjs process fixtures/scenario-recovery.json
+node src/cli.mjs jsonrpc fixtures/jsonrpc-safe.json
+node src/cli.mjs era fixtures/mcp-modern-safe.json
+node src/cli.mjs negotiate fixtures/mcp-negotiate-safe.json
+```
 
-This project will **not** publish proprietary agent runtimes, internal customer data, credentials or real activity logs. The initial public release will not connect to external MCP servers, make remote calls or execute arbitrary tools. Process separation in the prototype is not an operating-system sandbox.
+CLI `0` = passing contracts, `1` = violations, `2` = invalid input. No `npm install` required.
 
-A passing test can only show consistency with the tested rules and supplied synthetic evidence; it does not prove that an actual agent or MCP server is secure.
+Previous owner Windows validation: 243/243 developer-authored tests PASS on Node.js 22.18.0, October 22, 2026. This does **not** establish compatibility with all platforms, compliance with MCP, safety of external systems or an independent audit.
 
-## Status and participation
+We welcome nonconfidential problem statements or proposals. Never upload real private logs or credentials. Licensed under [MIT](LICENSE). Current repository maintains an open [roadmap](ROADMAP.md).
 
-See [ROADMAP.md](ROADMAP.md) for release gates and planned improvements, and [SECURITY.md](SECURITY.md) before sharing a security report. Issues are welcome for use-case discussion, but **do not attach private logs, real secrets, internal endpoint URLs or confidential source code**.
-
-License and source publication are pending owner IP/provenance review. Until a license is added, please do not assume permission to redistribute a future source snapshot.
-
-## Reference specifications
-
-- [Model Context Protocol](https://modelcontextprotocol.io/)
-- [JSON-RPC 2.0](https://www.jsonrpc.org/specification)
-- [OWASP Agentic Security Initiative](https://genai.owasp.org/)
-
-No affiliation with, endorsement by or certification from the reference organizations is implied.
+References: [MCP](https://modelcontextprotocol.io/), [JSON-RPC](https://www.jsonrpc.org/specification/), [OWASP Agentic Security](https://genai.owasp.org/). No affiliation or endorsement is claimed.
