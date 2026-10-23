@@ -12,7 +12,7 @@ import { runFirstPartyStagingProcessSelftest } from './staging-process-harness.m
 import { parseStrictJson } from './strict-json.mjs';
 import { inspectProjectAdapter } from './project-adapter.mjs';
 import { evaluateAdapterConsent } from './adapter-consent.mjs';
-import { runFirstPartyAdapterSelftest } from './local-adapter-drivers.mjs';
+import { runFirstPartyAdapterSelftest, runFixedModernStagingAdapterSelftest } from './local-adapter-drivers.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
 import { auditJsonRpcExchange } from './jsonrpc-contract.mjs';
 import { auditMcpEraTranscript } from './mcp-era-contract.mjs';
@@ -57,10 +57,10 @@ async function main() {
     '--help':'help', '-h':'help', '--version':'version', '-V':'version'
   });
   const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
-  const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest';
+  const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest';
   if (!CLI_COMMANDS.includes(command) ||
       (noFile ? args.length !== 1 : args.length !== 2 || args[1].startsWith('-'))) {
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest OR adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest OR adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -85,6 +85,11 @@ async function main() {
     }
     if (command === 'staging-selftest') {
       const report=buildCliReport('staging-selftest',await runFirstPartyStagingSelftest());
+      emit(report);
+      return report.exitCode;
+    }
+    if (command === 'adapter-staging-selftest') {
+      const report=buildCliReport('adapter-staging-selftest',await runFixedModernStagingAdapterSelftest());
       emit(report);
       return report.exitCode;
     }
