@@ -7,6 +7,7 @@ Zero-runtime-dependency Node.js 20+ project for synthetic security-contract test
 ## Modules
 
 - `scenario` — synthetic authorization, replay, scoped resources and failure semantics
+- `stdio` — fixed local JSON-RPC-over-stdio batch mock: fictional initialize, tool list, allowed read and denied write; no user executable or inherited credentials. See [limits](docs/STDIO_MOCK.md). Not a general MCP server or OS sandbox.
 - `mock`, `witness`, `process` — fixed simulated tools, parent-owned in-memory effects and forked in-repository mock worker. Process isolation is *not* an OS sandbox.
 - `trace` — consistency checks for fictional action logs; does not actually search for secrets.
 - `jsonrpc` — offline request/reply envelope checks with a deliberately strict profile.
@@ -27,6 +28,9 @@ Requires Node.js 20+.
 node --test
 node src/cli.mjs scenario fixtures/scenario-denial.json
 node src/cli.mjs process fixtures/scenario-recovery.json
+node src/cli.mjs stdio fixtures/stdio-mock-safe.json
+# Deliberate synthetic protocol violation, expected exit 1
+node src/cli.mjs stdio fixtures/stdio-mock-unsafe.json
 node src/cli.mjs jsonrpc fixtures/jsonrpc-safe.json
 node src/cli.mjs era fixtures/mcp-modern-safe.json
 node src/cli.mjs negotiate fixtures/mcp-negotiate-safe.json
@@ -36,7 +40,7 @@ node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
 
 CLI `0` = passing contracts, `1` = violations, `2` = invalid input. All invocations emit [versioned JSON schema v1](docs/CLI_REPORTS.md) on stdout, including generic input errors; existing command-specific fields are preserved. No `npm install` required.
 
-Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The current v0.0.10-rc.1 main commit passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39915428327): 288/288 developer-authored synthetic tests in each of four jobs (before the M2-01 addition). These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
+Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). Before M3-01, the v0.0.10-rc.1 main branch passed [GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39917967269): 311/311 developer-authored synthetic tests in each of four jobs. The new stdio feature requires its own CI validation before being described as accepted. These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
 
 We welcome nonconfidential problem statements or proposals. Never upload real private logs or credentials. Licensed under [MIT](LICENSE). Current repository maintains an open [roadmap](ROADMAP.md).
 
