@@ -9,6 +9,7 @@ import { auditRecords, parseJsonl } from './trace.mjs';
 import { auditJsonRpcExchange } from './jsonrpc-contract.mjs';
 import { auditMcpEraTranscript } from './mcp-era-contract.mjs';
 import { auditModernNegotiation } from './mcp-modern-negotiation.mjs';
+import { CLI_COMMANDS, buildCliReport, buildCliErrorReport } from './report-contract.mjs';
 
 async function readBoundedFile(path) {
   // Open a single handle with O_NOFOLLOW where available; reject non-regular file.
@@ -25,10 +26,13 @@ async function readBoundedFile(path) {
     return new TextDecoder('utf-8', {fatal: true}).decode(buff.subarray(0, bytesRead));
   } finally { await h.close(); }
 }
+const emit = payload => process.stdout.write(JSON.stringify(payload,null,2)+'\n');
+
 async function main() {
   const args=process.argv.slice(2);
-  if (args.length!==2 || !['scenario','trace','mock','witness','process','jsonrpc','era','negotiate'].includes(args[0]) || args[1].startsWith('-')) {
+  if (args.length!==2 || !CLI_COMMANDS.includes(args[0]) || args[1].startsWith('-')) {
     process.stderr.write('USAGE: node src/cli.mjs scenario|trace|mock|witness|process|jsonrpc|era|negotiate <synthetic-file>\n');
+    emit(buildCliErrorReport(CLI_COMMANDS.includes(args[0])?args[0]:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
   try {
@@ -40,11 +44,13 @@ async function main() {
       args[0] === 'mock' ? await runMockMcpScenario(parseStrictJson(source)) :
       args[0] === 'witness' ? await runWitnessedScenario(parseStrictJson(source)) :
       args[0] === 'process' ? await runProcessMcpScenario(parseStrictJson(source)) : auditRecords(parseJsonl(source));
-    process.stdout.write(JSON.stringify(result,null,2)+'\n');
-    return result.status==='PASS'?0:1;
+    const report = buildCliReport(args[0],result);
+    emit(report);
+    return report.exitCode;
   } catch {
     // Fail closed; never echo paths, input or parser messages.
     process.stderr.write('ERROR: INVALID_OR_UNREADABLE_INPUT\n');
+    emit(buildCliErrorReport(args[0],'INVALID_OR_UNREADABLE_INPUT'));
     return 2;
   }
 }
