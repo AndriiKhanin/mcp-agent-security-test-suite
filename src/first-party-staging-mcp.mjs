@@ -38,7 +38,7 @@ function duplicateSensitive(req){
   }
   return false;
 }
-function error(res,status,code) {
+function error(res,status,code,requested=null) {
   if(res.headersSent)return;
   // Fixed symbolic errors only: never reflect untrusted headers or payloads.
   const payload=JSON.stringify({jsonrpc:'2.0',id:1,error:{
@@ -46,7 +46,9 @@ function error(res,status,code) {
     message:code===-32601?'Method not found':
       code===-32022?'Unsupported protocol version':
       code===-32020?'Header mismatch':'Fixed staging request rejected',
-    ...(code===-32022?{data:{supported:[VERSION],requested:'2099-01-01'}}:{})
+    ...(code===-32022?{data:{supported:[VERSION],
+      requested:typeof requested==='string' && /^\d{4}-\d{2}-\d{2}$/.test(requested)
+        ?requested:'INVALID_VERSION'}}:{})
   }});
   res.writeHead(status,{'content-type':'application/json','cache-control':'no-store',
     connection:'close','content-length':String(Buffer.byteLength(payload))});
@@ -103,7 +105,7 @@ function serve(fault,counts,port){
          request.method!==req.headers['mcp-method']){
         error(res,400,-32020);return;
       }
-      if(bodyVersion!==VERSION){error(res,400,-32022);return;}
+      if(bodyVersion!==VERSION){error(res,400,-32022,bodyVersion);return;}
       if(request.method!==METHOD){error(res,404,-32601);return;}
       // A deliberately strict first-party fixture, not general MCP semantics.
       if(!isDeepStrictEqual(request,REQUEST)){error(res,403,-32020);return;}

@@ -14,7 +14,7 @@ This stage checks exact response status and JSON-RPC error code against the offi
 | Wrong Origin / Host or forbidden GET | 403 | Local strict first-party policy |
 | Request after the fixture's single-request budget | 403 | Local strict first-party policy |
 
-The `-32022` response contains ONLY the *fixed fictional* `supported: ["2026-07-28"]` and `requested: "2099-01-01"` data, never reflected attacker-controlled input. The mock is not a generally configurable MCP implementation. A missing or mismatched version is **not** an unsupported-version error, and a method header/body mismatch is **not** a method-not-found error.
+The `-32022` response contains the *fixed* `supported: ["2026-07-28"]` and a bounded, syntax-validated ten-character `requested` version (or the literal `INVALID_VERSION`), never raw arbitrary strings, URLs, credentials or parser messages. Test cases cover `2099-01-01` and legacy `2025-11-25`. The mock is not a generally configurable MCP implementation. A missing or mismatched version is **not** an unsupported-version error, and a method header/body mismatch is **not** a method-not-found error.
 
 ## Controlled adversarial corpus
 

@@ -92,6 +92,20 @@ test('M4-B6-D: unsupported version with matching metadata is 400/-32022',async()
   assert.equal(result.accepted,0);
 });
 
+test('M4-B6-D: unsupported legacy protocol keeps precise requested version',async()=>{
+  const data=request();
+  data.params._meta['io.modelcontextprotocol/protocolVersion']='2025-11-25';
+  const {observed,result}=await contact(port=>send(port,{
+    data,version:'2025-11-25'
+  }));
+  assert.equal(observed.status,400);
+  assert.equal(observed.response.error.code,-32022);
+  assert.deepEqual(observed.response.error.data,{
+    supported:[VERSION],requested:'2025-11-25'
+  });
+  assert.equal(result.accepted,0);
+});
+
 test('M4-B6-D: unknown method with matching headers is 404/-32601',async()=>{
   const data=request();data.method='tools/call';
   const {observed,result}=await contact(port=>send(port,{
