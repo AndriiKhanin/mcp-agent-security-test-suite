@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 488 synthetic/local, packaging, consent, first-party modern MCP discovery error semantics, SSE negatives and staging resource witness | [M4-B6-D PR #89](../../pull/89), [post-merge main CI #39996632533](../../actions/runs/39996632533): **4/4 PASS, 488/488 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 510 synthetic/local, packaging, bounded first-party SSE logs/keepalive/negative controls, consent and resource witness | [M4-B6-E PR #92](../../pull/92), [post-merge CI #40001080374](../../actions/runs/40001080374): **4/4 PASS, 510/510 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -29,7 +29,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
-| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D DONE; M4-B6-E FIRST-PARTY BOUNDED SSE IN PROGRESS; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
+| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D/B6-E ENGINEERING DONE; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
@@ -89,7 +89,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M4-B6-E — bounded first-party request-scoped SSE
 
-- **M4-B6-E — IN PROGRESS:** [Issue #91](../../issues/91) adds finite first-party request-scoped SSE logging notices, comments, multiline data and TCP-fragmented positive controls; strict rejects for unsolicited JSON-RPC, missing/extra final, events/comments over limits, unknown notices, malformed UTF-8, wrong event, and missing delimiter. [Scope](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md). Owned literal `127.0.0.1` only; reviewed npm inventory **80 unchanged**. No user-selected target, general MCP conformance, publication or security certification.
+- **M4-B6-E — DONE (finite first-party SSE only):** [Issue #91](../../issues/91), [merged PR #92](../../pull/92), [post-merge CI #40001080374](../../actions/runs/40001080374): **4/4 PASS, 510/510 tests/job, 0 failed/skipped**. Fixed request-related logging notice, SSE comments/keepalive, multiline data, HTTP fragment reassembly and strict rejection of unsolicited requests, missing/duplicate final, malformed UTF-8/events and excess notification/comment budgets. [Explicit narrow limits](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md). Preserved exact **80-path package inventory** and unchanged existing R2/R5 release gates. **Not** a general MCP client, OS sandbox, complete spec certification, real user-server authorization or npm publication.
 
 ## M4-B6-D — first-party modern protocol negative controls
 
