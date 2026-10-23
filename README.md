@@ -49,7 +49,10 @@ node src/cli.mjs adapter-check examples/adapter-profiles/streamable-http-project
 
 These commands **validate configuration only** and return `connectionStatus: "NOT_ATTEMPTED"` and `executionEnabled: false`. [M4-B0 #61](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/61) is accepted; [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) tracks the next first-party local transport-driver stage. They do not connect to the user's server, execute the configured subprocess, perform DNS resolution or prove target ownership. Actual opt-in connections require a separately reviewed and authorized transport implementation. No external MCP contact has been approved.
 
-## First-party local driver selftest (M4-B1)
+## First-party local driver selftest (M4-B1 — accepted)
+
+[Merged PR #65](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/65) and [main CI #39966437277](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39966437277): **4/4 PASS, 407/407 tests per job**. The next offline permission layer is [M4-B2 #66](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/66); user-owned target execution remains prohibited.
+
 
 ```sh
 node src/cli.mjs adapter-selftest
@@ -94,7 +97,7 @@ node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
 
 CLI `0` = passing contracts, `1` = violations, `2` = invalid input. All invocations emit [versioned JSON schema v1](docs/CLI_REPORTS.md) on stdout, including generic input errors; existing command-specific fields are preserved. No `npm install` required.
 
-Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679) after [M4-B0 PR #62](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/62): **397/397** synthetic, local-only, packaging, onboarding, beta-protocol and universal adapter configuration tests on each Windows/Ubuntu Node20/22 job. The initial six tasks and **owner-approved M4-A local loopback mock** are complete ([PR #24](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/24)). **M4-B external MCP integrations remain unauthorized; M5 is in progress, and M6 is future work.** Stable v0.0.10 has **not** been published; see [release preflight](docs/RELEASE_READINESS.md). These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
+Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679) after [M4-B1 PR #65](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/65): **407/407** synthetic, local-only, packaging, onboarding, beta-protocol and universal adapter configuration tests on each Windows/Ubuntu Node20/22 job. The initial six tasks and **owner-approved M4-A local loopback mock** are complete ([PR #24](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/24)). **M4-B external MCP integrations remain unauthorized; M5 is in progress, and M6 is future work.** Stable v0.0.10 has **not** been published; see [release preflight](docs/RELEASE_READINESS.md). These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
 
 We welcome nonconfidential problem statements or proposals through the [synthetic-only GitHub Issue forms](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose). Report a reproduction with bundled fictional fixtures and symbolic rule codes only; see the [contributor feedback procedure](CONTRIBUTING.md). For confidential vulnerabilities use [SECURITY.md](SECURITY.md) rather than a public Issue. Never upload real private logs or credentials. Licensed under [MIT](LICENSE). Current repository maintains an open [roadmap](ROADMAP.md).
 
