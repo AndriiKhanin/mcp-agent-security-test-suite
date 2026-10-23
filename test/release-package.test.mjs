@@ -21,7 +21,7 @@ test('R0: package stays prerelease with license, engine and no dependency instal
   assert.equal(pkg.scripts.test,'node --test');
   assert.equal(pkg.bin['mcp-agent-security'],bin);
   const source=readFileSync(join(root,bin),'utf8');
-  assert.ok(source.startsWith('#!/usr/bin/env node\n'));
+  assert.match(source,/^#!\/usr\/bin\/env node\r?\n/);
   for(const script of ['preinstall','install','postinstall','prepare','prepack','postpack','prepublish','prepublishOnly']){
     assert.equal(Object.hasOwn(pkg.scripts,script),false,script);
   }
