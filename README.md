@@ -26,8 +26,11 @@ Read the source-grounded [threat model](docs/THREAT_MODEL.md) for assets, attack
 Start from a clean clone using [Getting Started](docs/GETTING_STARTED.md). It gives one reproducible PASS, one intentionally detected FAIL and a [SHA-pinned offline CI example](examples/offline-contract-check.yml); no paid API or npm installation.
 
 ```sh
+node src/cli.mjs demo
 node examples/offline-ci-check.mjs
 ```
+
+The new `demo` mode runs two **bundled fictional fixtures**, validates both an expected PASS and an intentionally detected FAIL, and returns one machine-readable JSON report without requiring any fixture path. It is **not** an MCP server scan or a security assessment of the host.
 
 ## Candidate packaging (not yet published)
 

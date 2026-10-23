@@ -30,7 +30,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
 | **M4 — Authorized integration preview** | Start with fixed first-party local loopback, external staging separate | **M4-A DONE (1/1); M4-B NOT AUTHORIZED** | [M4-A #23](../../issues/23), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
-| **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **FUTURE** | Issues to be scoped | Repeatable installation/use, versioned releases, triaged external feedback |
+| **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — first-run demo** | [M5-01 #45](../../issues/45) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
@@ -68,6 +68,10 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 6. Close the linked Issue with PR and CI evidence, then update **this progress table**, version/release notes if applicable, and choose the next Issue.
 
 **Progress report format:** `DONE / IN PROGRESS / BLOCKED / NEXT`, relevant GitHub links, verified test count and risks. A pending item is not a completed milestone.
+
+## M5 beta onboarding (active)
+
+- **M5-01 — IN PROGRESS:** [Issue #45](../../issues/45) adds a zero-argument offline CLI `demo`, verifying a known synthetic PASS and expected negative control from the candidate's installed package; it does not scan any user's MCP environment. Reviewed PR and CI acceptance pending. Independent [R5-B #43](../../issues/43) and release authorization remain open.
 
 ## Release gates and boundaries
 

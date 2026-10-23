@@ -2,14 +2,14 @@
 
 The standalone MIT [MCP Agent Security Test Suite](../README.md) emits a machine-readable **JSON object on stdout** for every supported CLI invocation, including invalid input. Results are from **fictional offline contract checks**, not a live MCP server scan or a security certification.
 
-**Applies to:** `node src/cli.mjs <command> <synthetic-file>`. Supported commands are `scenario`, `trace`, `mock`, `witness`, `process`, `stdio`, `loopback`, `jsonrpc`, `era`, and `negotiate`. Node.js 20+ and no `npm install` or paid API are required.
+**Applies to:** `node src/cli.mjs <command> <synthetic-file>` for the ten fixture commands, or `node src/cli.mjs demo` with **no arguments**. Supported commands are `scenario`, `trace`, `mock`, `witness`, `process`, `stdio`, `loopback`, `jsonrpc`, `era`, `negotiate`, and `demo`. Node.js 20+ and no `npm install` or paid API are required.
 
 ## Stable fields (v1)
 
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `reportSchemaVersion` | integer, exactly `1` | Major JSON report contract version, **not** package version |
-| `command` | one of the ten supported command strings, or `null` | Validated command; unknown untrusted argument is never echoed |
+| `command` | one of the eleven supported command strings, or `null` | Validated command; unknown untrusted argument is never echoed |
 | `status` | `"PASS"`, `"FAIL"`, `"ERROR"` | Test contracts pass, violations detected, or CLI input/usage invalid |
 | `exitCode` | integer `0`, `1`, `2` | Mirrors process exit code |
 | `summary.failureCount` | nonnegative integer | Number of violations reported by the validator, or length of legacy mismatch array |
@@ -31,6 +31,12 @@ These fields are **additive** to pre-existing command-specific top-level fields 
 | `2` | `ERROR` | Invalid invocation, unreadable path, malformed/oversized input or failed processing; no input path, user payload or exception text is included in the **generic error report** |
 
 `stderr` retains a fixed help/error string for humans. Do not treat `stderr` contents as JSON. When exit code is `2`, stdout holds a generic structured error with `command`, `errorCode` and an empty summary; the CLI does **not** emit full input, stack traces or exception text. Usage errors do not include unknown command text.
+
+## Built-in first-run demo (M5-01)
+
+Run `node src/cli.mjs demo` from a checkout or the installed candidate CLI. It reads **only two bundled fictional fixtures** using the existing bounded file reader: the policy-denial scenario must PASS with known effect counts, and the deliberately mutated negotiation must FAIL with exactly the expected `RETRY_PARAMS_CHANGED` rule. When both expectations hold, the **demo report itself** is `PASS` and exits 0.
+
+The `demo` result adds `profile: "bundled-fictional-demo-v1"`, `checks: 2` and two fixed `expectations` with booleans. If either check deviates it exits 1 with `DEMO_POSITIVE_CONTROL_MISMATCH` or `DEMO_NEGATIVE_CONTROL_MISSED`. Extra arguments are rejected with exit 2 and a generic v1 `ERROR` report. This is **not a live security scan or a statement that the user's system is safe**; no custom file, URL or executable can be supplied.
 
 ## Examples
 
