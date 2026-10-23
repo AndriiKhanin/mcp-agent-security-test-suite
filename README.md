@@ -68,6 +68,10 @@ Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a 
 
 [The finite SSE test scope](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) admits the first-party server's reviewed request-related logging notice and SSE keepalive comments **before** the single final response, within strict finite limits. Unsolicited server RPCs, duplicate/missing finals, malformed UTF-8, excess events and unsupported payloads fail closed. **No generic MCP transport client or external target contact.**
 
+## Bounded incremental first-party SSE cancellation (M4-B6-F)
+
+[Transport and cleanup limits](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) now cover finite incremental SSE decoding, split CRLF across chunks, cancel-after-headers/notice/final and oversized chunked streams. The ephemeral owned `127.0.0.1` response must close even on rejected or aborted tests. This remains a **test-only fixed first-party mock**, not generic MCP interoperability, real target scanning or an OS sandbox.
+
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 
 Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:
