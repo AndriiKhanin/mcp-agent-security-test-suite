@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "Security vulnerability / confidential disclosure"
+    url: "https://github.com/AndriiKhanin/mcp-agent-security-test-suite/blob/main/SECURITY.md"
+    about: "Do not report vulnerabilities or secrets publicly; follow the private disclosure instructions in SECURITY.md."

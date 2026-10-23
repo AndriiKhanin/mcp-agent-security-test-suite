@@ -1,0 +1,90 @@
+name: "Synthetic bug report"
+description: "Report a reproducible issue using fictional offline data only."
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a PUBLIC issue. Do not paste API keys, OAuth tokens, credentials,
+        private paths, customer records, production traces, or private MCP URLs.
+        Use only bundled fictional fixtures or made-up synthetic data.
+        Suspected security vulnerabilities: read SECURITY.md and use a private
+        disclosure channel, NOT a public issue.
+  - type: input
+    id: version
+    attributes:
+      label: "Project version"
+      description: "Candidate version from package.json; never include your local path."
+      placeholder: "0.0.10-rc.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: "Operating system"
+      options:
+        - "Windows"
+        - "Ubuntu or other Linux"
+        - "macOS"
+        - "Other (describe without host identifiers)"
+    validations:
+      required: true
+  - type: input
+    id: node_version
+    attributes:
+      label: "Node.js version"
+      placeholder: "v22.x"
+      description: "Output of node --version only; no environment dumps."
+    validations:
+      required: true
+  - type: dropdown
+    id: offline_command
+    attributes:
+      label: "Reproduction command (bundled fixtures only)"
+      options:
+        - "node src/cli.mjs demo"
+        - "node src/cli.mjs scenario fixtures/scenario-denial.json"
+        - "node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json"
+        - "node src/cli.mjs trace fixtures/trace-unsafe.jsonl"
+        - "node examples/offline-ci-check.mjs"
+        - "Other offline first-party fixture (describe only if fictional)"
+    validations:
+      required: true
+  - type: input
+    id: rule_code
+    attributes:
+      label: "Symbolic rule code"
+      description: "Use a reported summary.ruleCodes entry or NONE; never paste payloads."
+      placeholder: "RETRY_PARAMS_CHANGED"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "Minimal synthetic reproduction"
+      description: "Steps using only bundled fictional files or sanitized toy data."
+      placeholder: "1. Clone the public repository. 2. Run the selected offline command. 3. Describe the observed behavior without logs or private values."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected behavior"
+      placeholder: "A fictional negative control should return FAIL with its known rule."
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Observed behavior (sanitized summary only)"
+      description: "Do not paste native report bodies, stack traces, token-like strings, or private paths."
+      placeholder: "Status and generic rule code only; no real data."
+    validations:
+      required: true
+  - type: checkboxes
+    id: safe_disclosure
+    attributes:
+      label: "Public disclosure confirmation"
+      options:
+        - label: "I confirm this report contains only fictional or public data, and no credentials, private URLs, customer records, production logs, or security exploit details."
+          required: true
