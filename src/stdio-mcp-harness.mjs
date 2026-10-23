@@ -8,6 +8,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { dirname } from 'node:path';
 import { parseStrictJson } from './strict-json.mjs';
+import { noteFirstPartyMockAttempt } from './mock-attempt-observer.mjs';
 
 const WORKER = fileURLToPath(new URL('./stdio-mcp-mock-worker.mjs',import.meta.url));
 const WORKDIR = dirname(WORKER);
@@ -50,6 +51,7 @@ export function runLocalStdioMock({fault='none',timeoutMs=8000}={}) {
     findingsTruncated:false,findings});
   // No shell, no PATH lookup, no user executable or arguments, no inherited
   // credentials, no stdout/stderr passthrough, fixed cwd and bounded resources.
+  noteFirstPartyMockAttempt('stdio-spawn'); // actual reviewed worker call site
   const run=spawnSync(process.execPath,[WORKER,fault],{
     shell:false,windowsHide:true,cwd:WORKDIR,
     env:{NODE_NO_WARNINGS:'1'},input:Buffer.from(input,'utf8'),
@@ -117,6 +119,7 @@ export function runLocalStdioInitialization({timeoutMs=8000}={}) {
   const flag=rule=>findings.push({step:1,rule});
   let received=0;
   // Reviewed built-in worker only; do not inherit caller environment.
+  noteFirstPartyMockAttempt('stdio-spawn'); // initialize-only worker call site
   const run=spawnSync(process.execPath,[WORKER,'init-only'],{
     shell:false,windowsHide:true,cwd:WORKDIR,env:{NODE_NO_WARNINGS:'1'},
     input:Buffer.from(JSON.stringify(request)+'\n','utf8'),encoding:'buffer',

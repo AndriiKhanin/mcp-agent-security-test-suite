@@ -8,6 +8,7 @@
  */
 import { runLocalStdioMock, runLocalStdioInitialization } from './stdio-mcp-harness.mjs';
 import { runLoopbackHttpMock } from './loopback-http-mock.mjs';
+import { noteFirstPartyMockAttempt } from './mock-attempt-observer.mjs';
 
 const TRANSPORTS = Object.freeze(['stdio','streamable-http']);
 const STATUS = 'FIRST_PARTY_MOCK_ONLY';
@@ -71,6 +72,7 @@ export function createFirstPartyDriver(transport, options={}) {
     async probe() {
       if(state!=='connected') failState();
       state='probed'; // single-shot; fail closed even on underlying rejection
+      noteFirstPartyMockAttempt('driver-probe'); // test-only event at probe entry
       try {
         const native=transport==='stdio'
           ? (mode==='initialize-only'
