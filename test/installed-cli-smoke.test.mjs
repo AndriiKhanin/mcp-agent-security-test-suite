@@ -186,6 +186,21 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(local.connectionStatus,'FIRST_PARTY_MOCK_ONLY');
     assert.equal(local.externalTargetContacted,false);
     assert.deepEqual([local.transportCount,local.passed,local.failed],[2,2,0]);
+    // Intentional expired self-assertion: validates the offline policy
+    // report from the actual installed package without authorizing access.
+    const expired=join(packageDir,'examples','adapter-profiles','consent-expired.json');
+    assert.ok(existsSync(expired),'reviewed consent fixture must be packed');
+    const policyCheck=invokeNode(executable,['adapter-policy-check',expired],temp,env);
+    assert.equal(policyCheck.status,1,'installed policy preview must deny expired consent');
+    const policyResult=JSON.parse(policyCheck.stdout);
+    assert.equal(policyResult.reportSchemaVersion,1);
+    assert.equal(policyResult.command,'adapter-policy-check');
+    assert.equal(policyResult.status,'FAIL');
+    assert.equal(policyResult.reviewRule,'ADAPTER_GRANT_EXPIRED_OR_INVALID');
+    assert.equal(policyResult.authorizationStatus,'UNVERIFIED_SELF_ASSERTION');
+    assert.equal(policyResult.executionEnabled,false);
+    assert.equal(policyResult.connectionStatus,'NOT_ATTEMPTED');
+
     const fakePath = join(temp, 'FICTIONAL_MISSING_INPUT_DO_NOT_ECHO.json');
     const invalid = invokeNode(executable, ['scenario', fakePath], temp, env);
     assert.equal(invalid.status, 2, 'invalid input must fail closed');
