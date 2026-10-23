@@ -10,9 +10,12 @@ Copy these commands into a terminal (Windows PowerShell 7, CMD, Linux shell, or 
 git clone https://github.com/AndriiKhanin/mcp-agent-security-test-suite.git
 cd mcp-agent-security-test-suite
 node --version
+node src/cli.mjs demo
 node examples/offline-ci-check.mjs
 node --test
 ```
+
+The new **zero-argument** `demo` command emits a versioned JSON report with `command: "demo"`, `status: "PASS"`, `checks: 2` and both fictional expectations marked `matched: true`. The intentionally unsafe negotiation fixture must be detected for the whole demo to pass. Do not interpret this as a scan of your computer or any MCP target. The separately supplied `examples/offline-ci-check.mjs` script below remains available for compact terminal summaries.
 
 Expected demonstration (the exact messages are fixed and intentionally contain no fixture payloads):
 

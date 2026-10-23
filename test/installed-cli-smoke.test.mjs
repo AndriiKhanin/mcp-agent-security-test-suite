@@ -121,6 +121,16 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(negativeReport.exitCode, 1);
     assert.ok(negativeReport.summary.ruleCodes.includes('RETRY_PARAMS_CHANGED'));
 
+    // New M5 zero-config demo must also work from the actual installed tgz.
+    const demo = invokeNode(executable, ['demo'], temp, env);
+    assert.equal(demo.status, 0, 'installed demo must pass both fixed controls');
+    const demoReport = JSON.parse(demo.stdout);
+    assert.equal(demoReport.reportSchemaVersion, 1);
+    assert.equal(demoReport.command, 'demo');
+    assert.equal(demoReport.status, 'PASS');
+    assert.deepEqual(demoReport.expectations.map(v => v.matched), [true, true]);
+    assert.equal(demoReport.summary.failureCount, 0);
+
     const fakePath = join(temp, 'FICTIONAL_MISSING_INPUT_DO_NOT_ECHO.json');
     const invalid = invokeNode(executable, ['scenario', fakePath], temp, env);
     assert.equal(invalid.status, 2, 'invalid input must fail closed');

@@ -4,7 +4,7 @@
  */
 export const REPORT_SCHEMA_VERSION = 1;
 export const CLI_COMMANDS = Object.freeze([
-  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate'
+  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo'
 ]);
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);
@@ -58,5 +58,38 @@ export function buildCliErrorReport(command,errorCode) {
     status:'ERROR',
     errorCode,
     summary:EMPTY_SUMMARY()
+  };
+}
+
+
+/**
+ * Fixed first-run demonstration verdict. Accept only the *known synthetic*
+ * positive and negative controls. Never copy untrusted fixture fields.
+ * This is not an assessment of any real user's MCP installation.
+ */
+export function buildOfflineDemoResult(positive, negative) {
+  const positiveMatches = positive?.status === 'PASS' &&
+    positive.checks === 11 && positive.actualFinal?.denied === 9 &&
+    positive.actualFinal?.allowed === 2 && positive.actualFinal?.writes === 1 &&
+    positive.actualFinal?.reads === 1 &&
+    Array.isArray(positive.mismatches) && positive.mismatches.length === 0;
+  const negativeMatches = negative?.status === 'FAIL' &&
+    negative.failureCount === 1 && Array.isArray(negative.findings) &&
+    negative.findings.length === 1 &&
+    negative.findings[0]?.rule === 'RETRY_PARAMS_CHANGED';
+  const findings = [];
+  if (!positiveMatches) findings.push({step:1, rule:'DEMO_POSITIVE_CONTROL_MISMATCH'});
+  if (!negativeMatches) findings.push({step:2, rule:'DEMO_NEGATIVE_CONTROL_MISSED'});
+  return {
+    status: findings.length ? 'FAIL' : 'PASS',
+    profile:'bundled-fictional-demo-v1',
+    checks:2,
+    expectations:[
+      {name:'SYNTHETIC_AUTHORIZATION_DENIALS',matched:positiveMatches},
+      {name:'SYNTHETIC_RETRY_MUTATION_DETECTED',matched:negativeMatches}
+    ],
+    failureCount:findings.length,
+    findingsTruncated:false,
+    findings
   };
 }
