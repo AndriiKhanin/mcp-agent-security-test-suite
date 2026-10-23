@@ -60,6 +60,10 @@ Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a 
 
 [M4-B6-C resource verification](docs/STAGING_RESOURCE_WITNESS.md) independently probes whether our **own child** holds its temporary `127.0.0.1` TCP port and whether it can be rebound after worker exit, including failures. No public listener/target option, no external network or OS sandbox claim.
 
+## Modern MCP discovery negative controls (M4-B6-D)
+
+[The pinned first-party protocol-negative matrix](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) checks exact HTTP/JSON-RPC status distinctions for header mismatch (`-32020`), unsupported version (`-32022`), method-not-found (`-32601`), and malformed SSE. This only tests our own temporary localhost fixture; it is not general MCP conformance or a real-target scanner.
+
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 
 Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:

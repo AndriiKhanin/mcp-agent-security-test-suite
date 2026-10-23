@@ -43,12 +43,19 @@ async function rejectedRequest(port,kind){
     'content-type':'application/json',
     accept:'application/json, text/event-stream',
     'mcp-protocol-version':'2026-07-28',
-    'mcp-method':'tools/call',
-    'content-length':'2'
+    'mcp-method':'tools/call'
   };
   if(kind==='wrong-host')headers.host='wrong.invalid:8';
   if(kind==='wrong-origin')headers.origin='http://wrong.invalid';
-  const payload='{}';
+  // A genuinely unknown method with matching mirrored header/body must
+  // produce the normative HTTP 404, not a HeaderMismatch HTTP 400.
+  const payload=JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/call',
+    params:{name:'fictional-never-executed',arguments:{},_meta:{
+      'io.modelcontextprotocol/protocolVersion':'2026-07-28',
+      'io.modelcontextprotocol/clientInfo':{name:'fictional-client',version:'1'},
+      'io.modelcontextprotocol/clientCapabilities':{}
+    }}});
+  headers['content-length']=String(Buffer.byteLength(payload));
   return await new Promise((resolve,reject)=>{
     const req=http.request({hostname:FIXED_IP,port,path:'/mcp',
       method:'POST',agent:false,headers},res=>{

@@ -14,7 +14,9 @@ const VERSION='2026-07-28', METHOD='server/discover', PATH='/mcp';
 const REQUEST_MAX=4096, RESPONSE_MAX=32768, DEFAULT_DEADLINE=5000;
 const CASES=new Set(['allowed','sse','wrong-origin','wrong-host','wrong-method',
   'forbidden-tool','wrong-version','wrong-path','invalid-json','oversized-request',
-  'response-id','response-canary','response-oversized','response-redirect','response-hang']);
+  'response-id','response-canary','response-oversized','response-redirect','response-hang',
+  'response-version','response-content-type','response-sse-extra',
+  'response-sse-missing-final','response-sse-unsolicited']);
 const REQUEST=Object.freeze({jsonrpc:'2.0',id:1,method:METHOD,params:{_meta:{
   'io.modelcontextprotocol/protocolVersion':VERSION,
   'io.modelcontextprotocol/clientInfo':{name:'fixed-staging-client',version:'1'},
@@ -36,10 +38,18 @@ function duplicateSensitive(req){
   }
   return false;
 }
-function error(res,status,code) {
+function error(res,status,code,requested=null) {
   if(res.headersSent)return;
+  // Fixed symbolic errors only: never reflect untrusted headers or payloads.
   const payload=JSON.stringify({jsonrpc:'2.0',id:1,error:{
-    code,message:code===-32601?'Method not found':'Fixed staging request rejected'}});
+    code,
+    message:code===-32601?'Method not found':
+      code===-32022?'Unsupported protocol version':
+      code===-32020?'Header mismatch':'Fixed staging request rejected',
+    ...(code===-32022?{data:{supported:[VERSION],
+      requested:typeof requested==='string' && /^\d{4}-\d{2}-\d{2}$/.test(requested)
+        ?requested:'INVALID_VERSION'}}:{})
+  }});
   res.writeHead(status,{'content-type':'application/json','cache-control':'no-store',
     connection:'close','content-length':String(Buffer.byteLength(payload))});
   res.end(payload);
@@ -49,8 +59,11 @@ function serve(fault,counts,port){
     counts.received++;
     // All rejected requests are denied before dispatch; a local hostile
     // process is NOT prevented from attempting this temporary socket.
+    if(duplicateSensitive(req)){
+      error(res,400,-32020);req.resume();return;
+    }
     if(counts.received!==1 || req.socket.remoteAddress!==HOST ||
-       duplicateSensitive(req) || req.method!=='POST' || req.url!==PATH ||
+       req.method!=='POST' || req.url!==PATH ||
        req.headers.host!==HOST+':'+port || req.headers.origin!==ORIGIN ||
        req.headers['content-type']!=='application/json' ||
        req.headers.accept!=='application/json, text/event-stream' ||
@@ -80,15 +93,21 @@ function serve(fault,counts,port){
         request=parseStrictJson(new TextDecoder('utf-8',{fatal:true})
           .decode(Buffer.concat(chunks)));
       }catch{error(res,400,-32700);return;}
-      // Strict mirrored HTTP metadata must match the RPC body.
-      if(req.headers['mcp-protocol-version']!==VERSION ||
-         req.headers['mcp-method']!==METHOD ||
-         !request || typeof request!=='object' || Array.isArray(request) ||
-         request.method!==METHOD ||
-         request.params?._meta?.['io.modelcontextprotocol/protocolVersion']!==VERSION){
-        error(res,req.headers['mcp-method']==='tools/call'?404:400,
-          req.headers['mcp-method']==='tools/call'?-32601:-32020);return;
+      // Pinned MCP 2026-07-28: first verify header/body fields; only then
+      // distinguish unsupported-version (400/-32022) from unknown method
+      // (404/-32601). Never silently fall back to legacy initialize.
+      const bodyVersion=request?.params?._meta?.['io.modelcontextprotocol/protocolVersion'];
+      if(typeof bodyVersion!=='string' ||
+         typeof req.headers['mcp-protocol-version']!=='string' ||
+         bodyVersion!==req.headers['mcp-protocol-version'] ||
+         typeof request?.method!=='string' ||
+         typeof req.headers['mcp-method']!=='string' ||
+         request.method!==req.headers['mcp-method']){
+        error(res,400,-32020);return;
       }
+      if(bodyVersion!==VERSION){error(res,400,-32022,bodyVersion);return;}
+      if(request.method!==METHOD){error(res,404,-32601);return;}
+      // A deliberately strict first-party fixture, not general MCP semantics.
       if(!isDeepStrictEqual(request,REQUEST)){error(res,403,-32020);return;}
       counts.accepted++;
       if(fault==='response-hang')return; // timeout exercised by fixed client
@@ -100,10 +119,25 @@ function serve(fault,counts,port){
       if(fault==='response-id')response={...RESPONSE,id:99};
       if(fault==='response-canary')response={...RESPONSE,result:{
         ...RESPONSE.result,untrusted:'FICTIONAL_CANARY_DO_NOT_ECHO'}};
+      if(fault==='response-version')response={...RESPONSE,result:{
+        ...RESPONSE.result,supportedVersions:['2099-01-01']}};
       let payload=JSON.stringify(response);
       if(fault==='response-oversized')payload='Z'.repeat(RESPONSE_MAX+128);
       if(fault==='sse')payload='event: message\n'+'data: '+payload+'\n\n';
-      res.writeHead(200,{'content-type':fault==='sse'?'text/event-stream':'application/json',
+      if(fault==='response-sse-extra')
+        payload='event: message\n'+'data: '+payload+'\n\n'+
+          'event: message\n'+'data: '+payload+'\n\n';
+      if(fault==='response-sse-missing-final')
+        payload='event: message\n'+'data: '+JSON.stringify({jsonrpc:'2.0',
+          method:'notifications/progress',params:{progress:1,total:2}})+'\n\n';
+      if(fault==='response-sse-unsolicited')
+        payload='event: message\n'+'data: '+JSON.stringify({jsonrpc:'2.0',
+          id:2,method:'sampling/createMessage',params:{messages:[]}})+'\n\n'+
+          'event: message\n'+'data: '+JSON.stringify(RESPONSE)+'\n\n';
+      const sse=['sse','response-sse-extra','response-sse-missing-final',
+        'response-sse-unsolicited'].includes(fault);
+      res.writeHead(200,{'content-type':fault==='response-content-type'
+        ?'text/plain':sse?'text/event-stream':'application/json',
         'cache-control':'no-store',connection:'close',
         'content-length':String(Buffer.byteLength(payload))});
       res.end(payload);
