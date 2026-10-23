@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0–R4, R5-A and M5-01/02/03/04/05 engineering accepted** (R3 internal, R5-A heuristic; not an independent audit or beta validation). [M5-05 PR #58](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/58) and [post-merge main CI #39959008260](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39959008260): **4/4 PASS, 390/390 tests per job**. Independent beta gate [M5-06 #59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) and security gate [R5-B #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) OPEN. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0–R4, R5-A and M5-01/02/03/04/05 engineering accepted** (R3 internal, R5-A heuristic; not an independent audit or beta validation). [M4-B0 PR #62](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/62) and [post-merge main CI #39962836679](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679): **4/4 PASS, 397/397 tests per job**. This universal descriptor validation does not authorize actual target connections. Independent beta gate [M5-06 #59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) and security gate [R5-B #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) OPEN. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
@@ -78,6 +78,10 @@ This check guards **package membership**, not the safety of bytes inside an alre
 ## M5-05 — fictional beta protocol (engineering accepted; external gate open)
 
 [Issue #57](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/57) shipped an offline first-party runner with five fixed synthetic cases, of which one deliberately failing negative control must be detected. Two reviewed public package files expand exact membership **58 to 60**. [Merged PR #58](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/58) and [main CI #39959008260](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39959008260) were **4/4 PASS, 390/390 tests per job**. This attests only to engineering functionality, **not** that an independent developer has used it. Genuine beta-test results are tracked under [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59); independent source/security review [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and explicit publication permission remain mandatory.
+
+## M4-B0 universal project configuration — accepted, connection disabled
+
+[Issue #61](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/61), [merged PR #62](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/62) and [post-merge main CI #39962836679](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679) confirmed **4/4 PASS, 397/397 tests per job**. The universal stdio/Streamable-HTTP descriptor performs validation only: `executionEnabled: false`, `connectionStatus: NOT_ATTEMPTED`. No real MCP project was contacted, and no secrets or arbitrary commands used. Four reviewed file paths increase package membership 60→64. [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) tracks fixed first-party mock transport execution; real target approvals and independent [R5-B #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) remain OPEN.
 
 ## Explicit release gates — NOT ALL COMPLETE
 
