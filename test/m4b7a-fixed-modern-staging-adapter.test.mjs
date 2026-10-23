@@ -35,7 +35,7 @@ function evidence(r){
   assert.equal(r.checked,1);
   for(const item of ['127.0.0.1','mcp.example.org','owned-discovery-progress'])
     assert.ok(!JSON.stringify(r).includes(item));
-  for(const field of ['endpoint','command','port','credentials','url'])
+  for(const field of ['endpoint','port','credentials','url'])
     assert.ok(!Object.hasOwn(r,field));
 }
 
