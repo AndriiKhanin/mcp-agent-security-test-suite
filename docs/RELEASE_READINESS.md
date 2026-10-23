@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0–R4, R5-A and M5-01/02/03 engineering acceptance recorded** (R3 internal, R5-A heuristic; neither independent audit). Latest [M5-03 PR #52](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/52) and [post-merge main CI #39955000316](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39955000316): **4/4 PASS, 379/379 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0–R4, R5-A and M5-01/02/03/04 engineering acceptance recorded** (R3 internal, R5-A heuristic; neither independent audit). Latest [M5-04 PR #55](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/55) and [post-merge main CI #39956798014](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39956798014): **4/4 PASS, 384/384 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
@@ -70,6 +70,10 @@ This check guards **package membership**, not the safety of bytes inside an alre
 ## M5-02/03 — diagnostic guidance and OSS feedback (accepted engineering scope)
 
 [M5-02 #49](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/49) added strictly bounded symbolic remediation guidance, accepted via [main CI #39953093188](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39953093188) (**4/4, 374/374**). [M5-03 #48](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/48) added fictional-only public GitHub feedback forms, with five tests and required disclosure confirmation, accepted via [PR #52](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/52) and [main CI #39955000316](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39955000316) (**4/4, 379/379**). Public forms cannot sanitize submitted text and confidential vulnerability reports must use the private reporting procedure in SECURITY.md. Neither step constitutes external adoption, independent security review or authorization to publish.
+
+## M5-04 — local CLI discovery (accepted)
+
+[M5-04 #54](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/54) adds canonical `help`/`version` commands with `--help/-h/--version/-V` aliases, using only static offline guidance and validated bundled `package.json` metadata. The installed local tarball smoke verifies both commands; [main CI #39956798014](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39956798014) passed **4/4, 384/384 tests per job**. No package membership change or publication implied. Independent review, owner consent, final version, destination and provenance remain open.
 
 ## Explicit release gates — NOT ALL COMPLETE
 
