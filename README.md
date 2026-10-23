@@ -56,6 +56,10 @@ node src/cli.mjs staging-process-selftest
 
 Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a **disposable Node child process** with a reduced environment, ignored stdout/stderr and bounded IPC. No arbitrary executable, external destination or credential. Child-process separation **is not** an OS sandbox. See [worker safety guide](docs/FIRST_PARTY_STAGING_WORKER.md).
 
+## Test-only staging resource witness (M4-B6-C)
+
+[M4-B6-C resource verification](docs/STAGING_RESOURCE_WITNESS.md) independently probes whether our **own child** holds its temporary `127.0.0.1` TCP port and whether it can be rebound after worker exit, including failures. No public listener/target option, no external network or OS sandbox claim.
+
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 
 Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:

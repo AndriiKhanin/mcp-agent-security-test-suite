@@ -43,13 +43,26 @@ export async function runFirstPartyStagingProcessSelftest(options={}){
   if(!MODES.has(fault) || !Number.isSafeInteger(deadlineMs) ||
     deadlineMs<250 || deadlineMs>DEFAULT_MS)invalid();
   return new Promise(resolve=>{
-    let child,settled=false,valid=false,messages=0,timer;
+    let child,settled=false,valid=false,messages=0,timer,killTimer;
+    let pendingFailure=null;
     const end=code=>{
       if(settled)return;
       settled=true;
-      if(timer)clearTimeout(timer);
-      if(child && child.exitCode===null && !child.killed)child.kill();
+      clearTimeout(timer);
+      clearTimeout(killTimer);
       resolve(report(code));
+    };
+    // Never report that a child has been cleaned up before observing exit.
+    // If exit cannot be confirmed, emit a different symbolic failure.
+    const abort=code=>{
+      if(settled || pendingFailure)return;
+      pendingFailure=code;
+      if(!child || child.exitCode!==null){end(code);return;}
+      child.kill();
+      killTimer=setTimeout(()=>{
+        if(child.exitCode===null)child.kill('SIGKILL');
+        end('STAGING_WORKER_REAP_UNCONFIRMED');
+      },1000);
     };
     try{
       child=fork(WORKER,[fault],{
@@ -60,18 +73,18 @@ export async function runFirstPartyStagingProcessSelftest(options={}){
     }catch{
       end('STAGING_WORKER_LAUNCH_FAILED');return;
     }
-    timer=setTimeout(()=>end('STAGING_WORKER_TIMEOUT'),deadlineMs);
+    timer=setTimeout(()=>abort('STAGING_WORKER_TIMEOUT'),deadlineMs);
     child.on('message',m=>{
       messages++;
       if(messages!==1 || !accepted(m)){
-        end('STAGING_WORKER_IPC_REJECTED');
+        abort('STAGING_WORKER_IPC_REJECTED');
       }else valid=true;
     });
-    child.once('error',()=>end('STAGING_WORKER_LAUNCH_FAILED'));
+    child.once('error',()=>abort('STAGING_WORKER_LAUNCH_FAILED'));
     child.once('exit',(code,signal)=>{
       if(settled)return;
-      end(valid && messages===1 && code===0 && !signal
-        ? null : 'STAGING_WORKER_EXIT_FAILED');
+      end(pendingFailure ?? (valid && messages===1 && code===0 && !signal
+        ? null : 'STAGING_WORKER_EXIT_FAILED'));
     });
   });
 }
