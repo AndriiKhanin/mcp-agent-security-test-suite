@@ -135,7 +135,7 @@ test('M4-B1: selftest rejects all arguments and does not echo caller input',()=>
     'examples/adapter-profiles/stdio-project.json',
     'https://private.example.org/mcp',
     '--command=malicious-private-program',
-    'stdio'
+    'private-transport-selection'
   ]) {
     const x=cli('adapter-selftest',input);
     assert.equal(x.status,2);
