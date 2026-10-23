@@ -10,4 +10,6 @@ Start with [Getting Started](docs/GETTING_STARTED.md): run `node examples/offlin
 4. Run `node examples/offline-ci-check.mjs` and `node --test` locally; describe the expected-negative-control behavior in your PR, then require four green CI jobs.
 5. By submitting, you agree that your contribution may be distributed under the repository’s MIT License. Only submit code you have the right to license.
 
+Release candidates must pass the [offline package preflight](docs/RELEASE_READINESS.md). A contributor PR or green CI does not authorize `npm publish`, a stable tag or external MCP-target probing.
+
 See [SECURITY.md](SECURITY.md) for security reporting.

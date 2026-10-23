@@ -17,7 +17,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
 | Real external MCP-server interoperability/security testing | **Not yet implemented** | See **M4**; no live-scanner claim |
-| Deployment, hosted service, npm release, certification | **Not yet delivered** | Future milestones |
+| Deployment, hosted service, npm release, certification | **Not yet delivered** | [Release-preflight gates](docs/RELEASE_READINESS.md), [R0 Issue #26](../../issues/26) |
 
 The numbers above measure **engineering acceptance only**, not commercial traction, protocol certification or proven effectiveness against real attacks.
 
@@ -71,7 +71,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## Release gates and boundaries
 
-- A `-rc` package is a **release candidate**, not a stable or independently security-audited product.
+- A `-rc` package is a **release candidate**, not a stable or independently security-audited product. Stable `v0.0.10` and npm publication remain unapproved; see [R0 release readiness](docs/RELEASE_READINESS.md).
 - Preserve genuine public MIT provenance. Never import commercial/private Stable Bridge code, history, secrets, internal logs or credentials.
 - Default execution is offline, synthetic and deterministic. No paid API calls or live-system scanning without separately approved design and authorization.
 - Process separation does **not** equal an OS sandbox; avoid that security claim until independently demonstrated.

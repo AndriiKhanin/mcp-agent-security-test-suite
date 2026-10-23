@@ -9,7 +9,7 @@
 
 ## 1. Why this milestone exists
 
-The present project offers 330 developer-authored **synthetic** contract tests, structured CLI JSON reports, independent golden negative controls, and a fixed first-party stdio batch mock. These are useful for reproducible security regression design but **do not demonstrate actual MCP interoperability or real-world target safety**.
+The M4-A-accepted candidate offers 353 developer-authored **synthetic and fixed-loopback** contract tests, structured CLI JSON reports, independent golden negative controls, and a fixed first-party stdio batch mock. These are useful for reproducible security regression design but **do not demonstrate actual MCP interoperability or real-world target safety**.
 
 M4's proposed value is an evidence-based *pre-deployment diagnostic* for an operator's **own staging/sandbox MCP servers**, with a narrow, explicitly consented discovery profile at first. Later, independently reviewed capabilities could compare an endpoint's observed responses with declared, operator-approved security expectations. The tool must never silently turn a fictional test into a production scanner.
 

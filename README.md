@@ -29,6 +29,10 @@ Start from a clean clone using [Getting Started](docs/GETTING_STARTED.md). It gi
 node examples/offline-ci-check.mjs
 ```
 
+## Candidate packaging (not yet published)
+
+The prerelease package declares an executable `mcp-agent-security`, a reviewed `files` allowlist and zero dependencies. To inspect **only** the local archive manifest without creating/uploading a package, run `npm run release:preflight`. This invokes `npm pack --dry-run --json --ignore-scripts --offline` and is also exercised by `node --test`. Do not run `npm publish` or create stable tags without separate explicit release approval. See [release readiness](docs/RELEASE_READINESS.md).
+
 ## Test
 
 Requires Node.js 20+.
@@ -52,7 +56,7 @@ node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
 
 CLI `0` = passing contracts, `1` = violations, `2` = invalid input. All invocations emit [versioned JSON schema v1](docs/CLI_REPORTS.md) on stdout, including generic input errors; existing command-specific fields are preserved. No `npm install` required.
 
-Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39921138853): **330/330** developer-authored synthetic tests in each of four Windows/Ubuntu Node20/22 jobs. The initial six-task roadmap is complete. **M4-A loopback-only transport is in a separately authorized development candidate** and requires its own PR/CI acceptance; M4-B external integrations, M5 and M6 are **not** implemented. These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
+Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39926302349): **353/353** synthetic and fixed-localhost tests on each Windows/Ubuntu Node20/22 job. The initial six tasks and **owner-approved M4-A local loopback mock** are complete ([PR #24](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/24)). **M4-B external MCP integrations, M5 and M6 remain unimplemented/unapproved.** Stable v0.0.10 has **not** been published; see [release preflight](docs/RELEASE_READINESS.md). These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
 
 We welcome nonconfidential problem statements or proposals. Never upload real private logs or credentials. Licensed under [MIT](LICENSE). Current repository maintains an open [roadmap](ROADMAP.md).
 
