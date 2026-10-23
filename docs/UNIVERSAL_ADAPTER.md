@@ -70,3 +70,7 @@ The [local driver interface](LOCAL_ADAPTER_DRIVERS.md) adds `adapter-selftest` t
 ## M4-B0 engineering acceptance — 2026-10-23
 
 The configuration-only preview passed [PR #62](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/62) and [post-merge main CI #39962836679](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679): **4/4 PASS, 397/397 tests per Windows/Ubuntu Node20/22 job**, no failures/skips. No live target contact or independent review is claimed. The next locally safe first-party driver layer is tracked in [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63).
+
+## Fixed local transport driver acceptance
+
+[M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) and [main CI #39966437277](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39966437277) confirm **4/4 PASS, 407/407 tests/job**. The no-argument local driver selftest is not a connection to the project given to adapter-check. Offline operator permission rules are next under [M4-B2 #66](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/66); real target execution remains unapproved.
