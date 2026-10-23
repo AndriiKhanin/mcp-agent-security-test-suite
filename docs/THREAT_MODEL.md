@@ -79,7 +79,7 @@ Current test runs assume an authorized operator on a trusted developer machine o
 
 ## 6. Validation and change control
 
-- The offline baseline is `node --test`; for released `v0.0.10-rc.1`, [post-merge CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39910034366) recorded four green jobs (Ubuntu/Windows × Node.js 20/22), with 254 synthetic tests in each.
+- The prerelease candidate baseline is `node --test`; [post-merge CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39926302349) recorded four green jobs (Ubuntu/Windows × Node.js 20/22), with **353 synthetic/fixed-localhost tests** per job. The optional `loopback` tests open temporary local sockets; external-target scanning remains unsupported.
 - A `FAIL` in an intentionally unsafe fixture is **expected** and does not mean the suite is compromised; assert rule identity and no unsupported side effects.
 - New threat assumptions must become tracked Issues. Every significant change needs a scoped PR, positive and negative test, and observed CI evidence; do not close acceptance criteria by documentation assertion alone.
 - Responsible disclosure: see [SECURITY.md](../SECURITY.md). Never put real vulnerabilities, tokens, private system information or personal data in a public fixture.

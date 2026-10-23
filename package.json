@@ -2,7 +2,7 @@
   "name": "mcp-agent-security-test-suite",
   "version": "0.0.10-rc.1",
   "type": "module",
-  "description": "Offline synthetic MCP and AI agent security contract tests with zero runtime dependencies",
+  "description": "Offline-first fictional MCP agent security contract checks and fixed local-only loopback mock; no external target scanning",
   "engines": {
     "node": ">=20"
   },
@@ -15,7 +15,32 @@
     "trace": "node src/cli.mjs trace fixtures/trace-safe.jsonl",
     "jsonrpc": "node src/cli.mjs jsonrpc fixtures/jsonrpc-safe.json",
     "era": "node src/cli.mjs era fixtures/mcp-modern-safe.json",
-    "negotiate": "node src/cli.mjs negotiate fixtures/mcp-negotiate-safe.json"
+    "negotiate": "node src/cli.mjs negotiate fixtures/mcp-negotiate-safe.json",
+    "stdio": "node src/cli.mjs stdio fixtures/stdio-mock-safe.json",
+    "loopback": "node src/cli.mjs loopback fixtures/loopback-safe.json",
+    "release:preflight": "node --test test/release-package.test.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "bin": {
+    "mcp-agent-security": "src/cli.mjs"
+  },
+  "files": [
+    "src",
+    "fixtures",
+    "docs",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "ROADMAP.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndriiKhanin/mcp-agent-security-test-suite.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues"
+  },
+  "homepage": "https://github.com/AndriiKhanin/mcp-agent-security-test-suite#readme"
 }
