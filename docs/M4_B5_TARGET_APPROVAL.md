@@ -1,6 +1,6 @@
 # M4-B5 — decision packet for a future user-owned MCP target preview
 
-**Status: DESIGN + OFFLINE NON-CONTACT REGRESSION ONLY. NO REAL-TARGET IMPLEMENTATION OR OWNER APPROVAL.**  
+**Status: DESIGN + OFFLINE NON-CONTACT ENGINEERING ACCEPTED. NO REAL-TARGET IMPLEMENTATION OR OWNER APPROVAL.**  
 **Tracking:** [M4-B5 #76](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/76); original [M4 real-target RFC #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21).  
 **Baseline:** fixed first-party mock [M4-B4 #72](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/72), 438/438 tests per job.  
 **Candidate:** `0.0.10-rc.1`; no npm publish or stable release approval.
@@ -84,3 +84,9 @@ These are proposals, **not decisions already granted**. Record a new dated, issu
 - [Official 2026-07-28 Streamable HTTP transport](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/docs/specification/2026-07-28/basic/transports/streamable-http.mdx)
 - [Original M4 architecture / approval RFC](M4_AUTHORIZED_INTEGRATIONS_RFC.md)
 - [Current offline universal descriptor](UNIVERSAL_ADAPTER.md) and [fictional consent policy](ADAPTER_CONSENT_POLICY.md)
+
+## 6. Internal engineering acceptance (2026-10-23)
+
+[M4-B5 Issue #76](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/76) completed the scoped **preparation-only** change in [merged PR #77](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/77), main commit `3be12ee998b0f98263f1986ea90aaeb002ffbc04`. The [PR CI #39986278270](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39986278270) and [post-merge main CI #39986507745](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39986507745) passed **4/4 Ubuntu/Windows Node20/22 jobs**, **447/447 tests per job**, **0 failures and 0 skipped**. The reviewed npm package manifest added exactly one document path (**72 → 73**) and no new networking or runtime dependency.
+
+This is **internal test and architecture acceptance only**, not approval by a real endpoint owner, a reliable proof of staging target ownership, permission to contact any target, an independent beta report, or independent security sign-off. All checkbox decisions in section 5 remain **unchecked**. Real-target RFC [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21) must remain open pending explicitly scoped owner decisions.
