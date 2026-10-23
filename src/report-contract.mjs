@@ -38,14 +38,14 @@ const GUIDES = Object.freeze({
 const ERROR_GUIDES = Object.freeze({
   INVALID_CLI_ARGUMENTS: Object.freeze({
     code:'INVALID_CLI_ARGUMENTS',
-    explanation:'The command or its argument count was not accepted.',
-    nextStep:'Use a documented command with a bundled fictional fixture; demo takes no arguments.',
+    explanation:'Invalid command or argument count.',
+    nextStep:'Try the no-argument fictional demo.',
     exampleCommand:'node src/cli.mjs demo'
   }),
   INVALID_OR_UNREADABLE_INPUT: Object.freeze({
     code:'INVALID_OR_UNREADABLE_INPUT',
-    explanation:'The input was rejected or a fixed offline test could not complete.',
-    nextStep:'Check that the input is a bounded UTF-8 fictional fixture; do not paste its contents into diagnostics.',
+    explanation:'Input rejected or offline test incomplete.',
+    nextStep:'Check bounded UTF-8 fictional input. Never share its contents.',
     exampleCommand:'node src/cli.mjs demo'
   })
 });
