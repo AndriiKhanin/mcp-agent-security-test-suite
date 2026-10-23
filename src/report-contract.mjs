@@ -44,8 +44,8 @@ const ERROR_GUIDES = Object.freeze({
   }),
   INVALID_OR_UNREADABLE_INPUT: Object.freeze({
     code:'INVALID_OR_UNREADABLE_INPUT',
-    explanation:'Input rejected or offline test incomplete.',
-    nextStep:'Check bounded UTF-8 fictional input. Never share its contents.',
+    explanation:'Invalid or unreadable fictional input.',
+    nextStep:'Check UTF-8 and 1 MiB size limit.',
     exampleCommand:'node src/cli.mjs demo'
   })
 });
