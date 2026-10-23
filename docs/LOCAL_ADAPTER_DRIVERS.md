@@ -28,6 +28,8 @@ For the actual universal adapter to connect to a user project, independently rev
 
 [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) was accepted through [PR #65](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/65) and [main CI #39966437277](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39966437277): **4/4 PASS, 407/407 tests/job**, 0 failures/skips. The next offline consent-policy stage is [M4-B2 #66](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/66). No arbitrary target connection or stable release is authorized.
 
-## M4-B3 admission control (in development)
+## M4-B3 admission control (engineering accepted; mock-only)
 
 The top-level `adapter-selftest` now routes through a [fixed synthetic admission gate](LOCAL_CONSENT_GATE.md). A denied fictional claim returns **before** the first-party mock driver is constructed. For admitted stdio, the guarded path uses a new separate **initialize-only** fixture that does not send tool discovery or tool invocation. The existing lower-level four-message legacy harness (including deliberate allowed/denied fictional tool calls) is preserved solely as an independent synthetic regression test. An admitted HTTP case still uses a fixed 127.0.0.1 ping. No real authorization, arbitrary child or remote endpoint has been enabled.
+
+Verified via [M4-B3 main CI #39979727977](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39979727977): **4/4 PASS, 428/428 tests/job**, 0 failures/skips. The lower-level driver remains callable by other developer test code. [M4-B4 #72](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/72) tracks test-only instrumentation for independently observed process/socket attempt boundaries; this is not an OS sandbox.
