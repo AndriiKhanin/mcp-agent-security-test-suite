@@ -48,6 +48,14 @@ node src/cli.mjs staging-selftest
 
 One temporary **127.0.0.1-only** staging MCP server and one fixed `server/discover` exchange using **MCP 2026-07-28** request metadata and mirrored HTTP headers, with JSON/SSE regression variants. [Safety boundaries and tests](docs/FIRST_PARTY_STAGING_MCP.md). No user server is contacted; no arbitrary URL, stdio program, credential, OAuth or remote deployment is supported.
 
+## Fixed subprocess staging selftest (M4-B6-B; owned local process only)
+
+```sh
+node src/cli.mjs staging-process-selftest
+```
+
+Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a **disposable Node child process** with a reduced environment, ignored stdout/stderr and bounded IPC. No arbitrary executable, external destination or credential. Child-process separation **is not** an OS sandbox. See [worker safety guide](docs/FIRST_PARTY_STAGING_WORKER.md).
+
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 
 Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:
