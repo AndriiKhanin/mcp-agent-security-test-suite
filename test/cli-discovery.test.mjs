@@ -26,8 +26,8 @@ test('M5-04: canonical and aliased help enumerate only reviewed fictional modes'
   assert.equal(data.command,'help');
   assert.equal(data.status,'PASS');
   assert.deepEqual(data.commands,CLI_COMMANDS);
-  assert.equal(data.commands.length,13);
-  assert.equal(data.commands.every(x=>/^[a-z]+$/.test(x)),true);
+  assert.equal(data.commands.length,14);
+  assert.equal(data.commands.every(x=>/^[a-z]+(?:-[a-z]+)*$/.test(x)),true);
   assert.deepEqual(data.summary,{failureCount:0,reportedFindings:0,
     findingsTruncated:false,ruleCodes:[]});
   assert.ok(data.examples.every(s=>s.startsWith('node src/cli.mjs ')));
