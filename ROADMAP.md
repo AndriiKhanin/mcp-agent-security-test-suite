@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 407 synthetic/local, packaging, onboarding, beta-protocol and fixed-local adapter driver checks | [M4-B1 PR #65](../../pull/65) and [post-merge CI](../../actions/runs/39966437277) — 4/4 jobs, 407/407 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 417 synthetic/local, packaging, beta-protocol, first-party transport and offline consent policy checks | [M4-B2 PR #68](../../pull/68) and [post-merge CI](../../actions/runs/39972783779) — 4/4 jobs, 417/417 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -29,7 +29,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
-| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1 DONE; M4-B2 IN PROGRESS (OFFLINE); REAL M4-B NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
+| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2 DONE; M4-B3 NEXT (FIRST-PARTY ONLY); REAL M4-B NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
@@ -83,12 +83,13 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M4-B2 — offline consent consistency preview
 
-- **M4-B2 — IN PROGRESS:** [Issue #66](../../issues/66) adds a portable versioned consent-envelope validator, exact canonical SHA-256 descriptor binding, short-lived *fictional/self-asserted* claims, strict `initialize`/`ping` method checks, revoked/expired/mismatch/replay negative controls and an offline `adapter-policy-check` CLI. It never verifies operator identity, permits runtime execution, launches a user executable or contacts a real endpoint. Three public package paths grow inventory **66→69**; all real-connection authorization remains blocked.
+- **M4-B2 — DONE (offline self-asserted consistency only):** [Issue #66](../../issues/66) delivered via [PR #68](../../pull/68), with [post-merge main CI #39972783779](../../actions/runs/39972783779), **4/4 PASS, 417/417 tests per job**, zero failed/skipped. Portable policy-envelope version, exact canonical descriptor SHA-256, short fictional five-minute lifetime, strict `initialize`/`ping` methods, revoked/expired/mismatch/replay controls and generic `adapter-policy-check` CLI. Three reviewed package paths increase inventory **66→69**. The operator is **NOT authenticated** and real connection remains disabled.
+- **M4-B3 — NEXT:** [Issue #69](../../issues/69) integrates strict mock-only permission enforcement before any fixed first-party local probe. User-configured stdio processes and HTTP endpoints remain prohibited.
 
 ## M4-B1 — fixed first-party transport drivers
 
 - **M4-B1 — DONE (fixed first-party only):** [Issue #63](../../issues/63), [merged PR #65](../../pull/65) and [main CI #39966437277](../../actions/runs/39966437277): **4/4 PASS, 407/407 tests per job**, 0 failed/skipped. One lifecycle, two fixed local mocks, strict negative tests and installed-package smoke. Package inventory **64→66**. No user-selected commands, endpoints or credentials.
-- **M4-B2 — NEXT:** [Issue #66](../../issues/66) for OFFLINE portable permission/admission rules. External MCP targets remain gated by [M4 RFC #21](../../issues/21).
+- **M4-B2 — DONE:** [Issue #66](../../issues/66) implements OFFLINE policy consistency only. The mock-only enforcement continuation is [M4-B3 #69](../../issues/69). External MCP targets remain gated by [M4 RFC #21](../../issues/21).
 
 ## Universal project adapter (M4-B0)
 
