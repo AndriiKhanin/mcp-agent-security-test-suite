@@ -107,7 +107,7 @@ test('M5-03: issue forms stay outside npm archive; contributor documentation is 
   const manifest = JSON.parse(
     readFileSync(join(root, 'test', 'expected-package-files.json'), 'utf8')
   );
-  assert.equal(manifest.length, 73, 'M4-B5 reviewed package inventory adds architecture decision packet');
+  assert.equal(manifest.length, 75, 'M4-B6-A reviewed package inventory adds staging server and guide');
   for (const path of [
     '.github/ISSUE_TEMPLATE/bug_report.yml',
     '.github/ISSUE_TEMPLATE/feature_request.yml',
