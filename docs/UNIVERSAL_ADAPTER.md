@@ -67,6 +67,10 @@ Official references: [2026-07-28 MCP transport overview](https://github.com/mode
 
 The [local driver interface](LOCAL_ADAPTER_DRIVERS.md) adds `adapter-selftest` to exercise only two **fixed first-party** stdio/loopback mocks via `connect/probe/close`. It does not connect the project described by `adapter-check`; project profiles remain inert. Real user-project runtime connections require separate approval.
 
+## Separate offline consent policy (M4-B2)
+
+The [M4-B2 policy preview](ADAPTER_CONSENT_POLICY.md) checks a self-asserted, short-lived grant against the **exact** canonical project descriptor SHA-256, method and expiry in memory. It is never a signed operator grant and always returns `operatorVerified: false`, `executionEnabled: false` and `connectionStatus: "NOT_ATTEMPTED"`. An example expired claim is included for a deliberately denied CLI run. A future real transport needs independently verified authority and network/host safeguards.
+
 ## M4-B0 engineering acceptance — 2026-10-23
 
 The configuration-only preview passed [PR #62](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/62) and [post-merge main CI #39962836679](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679): **4/4 PASS, 397/397 tests per Windows/Ubuntu Node20/22 job**, no failures/skips. No live target contact or independent review is claimed. The next locally safe first-party driver layer is tracked in [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63).

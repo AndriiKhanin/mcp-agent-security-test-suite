@@ -1,0 +1,43 @@
+{
+  "policySchemaVersion": 1,
+  "descriptor": {
+    "adapterSchemaVersion": 1,
+    "project": {
+      "name": "example-node-project"
+    },
+    "transport": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "server.mjs"
+      ]
+    },
+    "protocolVersion": "2026-07-28",
+    "policy": {
+      "mode": "validate-only",
+      "allowNetwork": false,
+      "allowProcessSpawn": false,
+      "allowToolCalls": false,
+      "allowCredentials": false
+    }
+  },
+  "request": {
+    "project": "example-node-project",
+    "transport": "stdio",
+    "method": "initialize",
+    "operatorId": "fictional-reviewer"
+  },
+  "claim": {
+    "operatorId": "fictional-reviewer",
+    "projectFingerprint": "31e0a392f6f89f942d52ac3b0aa4c4514208ff1c73b449d23b17ff7ab79f63ed",
+    "transport": "stdio",
+    "methods": [
+      "initialize",
+      "ping"
+    ],
+    "issuedAt": 1767225600000,
+    "expiresAt": 1767225720000,
+    "nonce": "fictional-expired-example",
+    "revoked": false
+  }
+}

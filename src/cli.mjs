@@ -9,6 +9,7 @@ import { runStdioMockScenario } from './stdio-mcp-harness.mjs';
 import { runLoopbackHttpScenario } from './loopback-http-mock.mjs';
 import { parseStrictJson } from './strict-json.mjs';
 import { inspectProjectAdapter } from './project-adapter.mjs';
+import { evaluateAdapterConsent } from './adapter-consent.mjs';
 import { runFirstPartyAdapterSelftest } from './local-adapter-drivers.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
 import { auditJsonRpcExchange } from './jsonrpc-contract.mjs';
@@ -57,7 +58,7 @@ async function main() {
   const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-selftest';
   if (!CLI_COMMANDS.includes(command) ||
       (noFile ? args.length !== 1 : args.length !== 2 || args[1].startsWith('-'))) {
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest OR adapter-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest OR adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -86,7 +87,8 @@ async function main() {
       return report.exitCode;
     }
     const source = await readBoundedFile(args[1]);
-    const result = args[0] === 'adapter-check' ? inspectProjectAdapter(parseStrictJson(source)) :
+    const result = args[0] === 'adapter-policy-check' ? evaluateAdapterConsent(parseStrictJson(source)) :
+      args[0] === 'adapter-check' ? inspectProjectAdapter(parseStrictJson(source)) :
       args[0] === 'negotiate' ? auditModernNegotiation(parseStrictJson(source)) :
       args[0] === 'era' ? auditMcpEraTranscript(parseStrictJson(source)) :
       args[0] === 'jsonrpc' ? auditJsonRpcExchange(parseStrictJson(source)) :

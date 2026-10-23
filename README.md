@@ -49,6 +49,14 @@ node src/cli.mjs adapter-check examples/adapter-profiles/streamable-http-project
 
 These commands **validate configuration only** and return `connectionStatus: "NOT_ATTEMPTED"` and `executionEnabled: false`. [M4-B0 #61](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/61) is accepted; [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) tracks the next first-party local transport-driver stage. They do not connect to the user's server, execute the configured subprocess, perform DNS resolution or prove target ownership. Actual opt-in connections require a separately reviewed and authorized transport implementation. No external MCP contact has been approved.
 
+## Offline adapter consent-policy preview (M4-B2)
+
+```sh
+node src/cli.mjs adapter-policy-check examples/adapter-profiles/consent-expired.json
+```
+
+This example **intentionally FAILS** (expired, fictional claim), and the output never grants execution: `authorizationStatus: "UNVERIFIED_SELF_ASSERTION"`, `connectionStatus: "NOT_ATTEMPTED"`, `executionEnabled: false`. The [policy guide](docs/ADAPTER_CONSENT_POLICY.md) explains exact descriptor fingerprints, five-minute consistency windows, strict method denials and why a self-asserted JSON claim **cannot** verify operator ownership or authorize a real MCP connection.
+
 ## First-party local driver selftest (M4-B1 — accepted)
 
 [Merged PR #65](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/65) and [main CI #39966437277](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39966437277): **4/4 PASS, 407/407 tests per job**. The next offline permission layer is [M4-B2 #66](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/66); user-owned target execution remains prohibited.

@@ -85,6 +85,10 @@ Use the [GitHub Issue chooser](https://github.com/AndriiKhanin/mcp-agent-securit
 
 The [universal adapter guide](UNIVERSAL_ADAPTER.md) documents two supported connection descriptors: local `stdio` and `streamable-http`. Try `node src/cli.mjs adapter-check examples/adapter-profiles/stdio-project.json` or `node src/cli.mjs adapter-check examples/adapter-profiles/streamable-http-project.json`. A `PASS` means configuration validation only; `connectionStatus` is always `NOT_ATTEMPTED` and `executionEnabled` is always false. No actual MCP project can be connected via this preview yet. Do not put tokens, customer logs or private system paths into public fixtures.
 
+## Review offline project permission consistency (M4-B2)
+
+Try `node src/cli.mjs adapter-policy-check examples/adapter-profiles/consent-expired.json`. The included fictional example deliberately **fails** with `ADAPTER_GRANT_EXPIRED_OR_INVALID`. This is a demonstration of fail-closed consent consistency, **not operator verification, login or access**. Even an internally consistent short-lived self-assertion can never enable a connection. See [consent policy limitations](ADAPTER_CONSENT_POLICY.md).
+
 ## Optional independent beta acceptance (M5-05)
 
 Run `node examples/beta-acceptance-check.mjs` from the public checkout, with **no arguments**. It returns a separate, bounded `betaSchemaVersion: 1` JSON report with exactly five fixed, offline fictional controls. Four must give CLI PASS (including `help`, `version`, `demo` and a synthetic denial scenario); the deliberately mutated negotiation must give CLI FAIL with `RETRY_PARAMS_CHANGED`. The **combined** beta result is PASS only if all expectations match. Record the exact public Git commit SHA and submit only sanitized evidence using the [beta feedback form](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose). Never use real MCP servers or credentials. Full [beta procedure and independent acceptance criteria](BETA_TESTING.md).
