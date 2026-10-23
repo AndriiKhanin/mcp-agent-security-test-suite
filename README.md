@@ -2,7 +2,7 @@
 
 **Release candidate for validation before the stable v0.0.10 release.** Synthetic contract tests only; not a vulnerability scanner or security certification.
 
-Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-first: no real MCP server, credentials, external connections, real tool execution, live vulnerability scanning, independent OAuth verification or security certification. The optional first-party `loopback` command opens a temporary **local-only IPv4 127.0.0.1 socket**; it never contacts an external target.
+Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-first: no **external/user-owned** MCP server, credentials, real tool execution, live vulnerability scanning, independent OAuth verification or security certification. M4-B6-A adds only a first-party ephemeral modern MCP-shaped staging listener on 127.0.0.1. The optional first-party `loopback` command opens a temporary **local-only IPv4 127.0.0.1 socket**; it never contacts an external target.
 
 ## Modules
 
