@@ -59,6 +59,10 @@ This check guards **package membership**, not the safety of bytes inside an alre
 
 [Issue #38](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/38) introduces a [two-pack local artifact test](R4_ARTIFACT_INTEGRITY.md) with per-job SHA-256/sha512 checks and source-to-installed-file byte comparisons. The new R4 document intentionally grows the exact package inventory from R3's **55** to **56** files. This is *not* an independently signed or uploaded artifact, a provenance attestation, or publication approval. The [six-file PR #39](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/39) merged after corrected 4/4 PR CI; [post-merge main CI 39938436907](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39938436907) passed **4/4, 360/360 per job**, 0 failed/skipped. The strict install-file comparison allows only npm's known first-line Windows bin-shebang CRLF→LF normalization for `src/cli.mjs`. R4 is accepted as **same-job** offline reproducibility evidence, not independent provenance. The release gates below remain open.
 
+## R5-A — content hygiene and assessor handoff (in progress)
+
+[R5-A Issue #41](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/41) adds a [bounded source-content preflight and independent reviewer checklist](R5_INDEPENDENT_REVIEW.md). New public documentation deliberately changes the expected package inventory to **57 paths**. The heuristic can detect only selected synthetic key/token signatures and invalid text; it is **not** a comprehensive private-source/secret audit, a third-party review or a provenance attestation. This step requires its own reviewed PR and four-job post-merge CI. The independent auditor and owner release gates below remain unchecked.
+
 ## Explicit release gates — NOT ALL COMPLETE
 
 - [x] Current source/license/package metadata inspected. `package.json` retains release-candidate version.
