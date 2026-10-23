@@ -81,6 +81,10 @@ The example workflow assumes the **same repository files** (the script and ficti
 
 Use the [GitHub Issue chooser](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose) to report a **fictional bug** or suggest an **offline-first feature**. For bug reports, include the candidate version (for example `0.0.10-rc.1`), OS, Node version, the exact bundled offline command, a symbolic `summary.ruleCodes` entry such as `RETRY_PARAMS_CHANGED`, a minimal fictional reproduction and expected/observed outcomes. Do not paste native report payloads or confidential host details. The form requires a privacy confirmation but cannot independently filter what you type. For possible security vulnerabilities use [SECURITY.md](../SECURITY.md) and a private channel, not public Issues. Full [safe-feedback rules](../CONTRIBUTING.md).
 
+## Optional independent beta acceptance (M5-05)
+
+Run `node examples/beta-acceptance-check.mjs` from the public checkout, with **no arguments**. It returns a separate, bounded `betaSchemaVersion: 1` JSON report with exactly five fixed, offline fictional controls. Four must give CLI PASS (including `help`, `version`, `demo` and a synthetic denial scenario); the deliberately mutated negotiation must give CLI FAIL with `RETRY_PARAMS_CHANGED`. The **combined** beta result is PASS only if all expectations match. Record the exact public Git commit SHA and submit only sanitized evidence using the [beta feedback form](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose). Never use real MCP servers or credentials. Full [beta procedure and independent acceptance criteria](BETA_TESTING.md).
+
 ## Contributing and boundaries
 
 1. Start with a [GitHub Issue](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues), using fictional examples only.

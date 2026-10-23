@@ -147,6 +147,17 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(versionReport.packageName,packageInfo.name);
     assert.equal(versionReport.reportSchemaVersion,1);
 
+    // Beta protocol must work from the real installed temporary npm tarball.
+    const betaRunner = join(packageDir,'examples','beta-acceptance-check.mjs');
+    assert.ok(existsSync(betaRunner),'beta runner must be packed');
+    const beta = invokeNode(betaRunner, [], temp, env);
+    assert.equal(beta.status,0,'installed beta acceptance must pass all fictional controls');
+    const betaResult=JSON.parse(beta.stdout);
+    assert.equal(betaResult.betaSchemaVersion,1);
+    assert.equal(betaResult.profile,'fictional-beta-acceptance-v1');
+    assert.deepEqual([betaResult.total,betaResult.passed,betaResult.failed],[5,5,0]);
+    assert.ok(betaResult.cases.every(x=>x.matched===true));
+
     const fakePath = join(temp, 'FICTIONAL_MISSING_INPUT_DO_NOT_ECHO.json');
     const invalid = invokeNode(executable, ['scenario', fakePath], temp, env);
     assert.equal(invalid.status, 2, 'invalid input must fail closed');
