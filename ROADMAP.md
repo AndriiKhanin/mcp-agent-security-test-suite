@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 447 synthetic/local, packaging, mock and M4-B5 no-contact regression checks | [M4-B5 PR #77](../../pull/77) and [post-merge CI](../../actions/runs/39986507745) — 4/4 jobs, 447/447 tests each, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 457 synthetic/local, package, consent, fixed MCP 2026 discovery and staging negative controls | [M4-B6-A PR #80](../../pull/80) and [post-merge main CI #39990071235](../../actions/runs/39990071235): **4/4 jobs, 457/457 tests each**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -29,7 +29,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
-| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5 DONE; M4-B6-A FIRST-PARTY STAGING IN PROGRESS; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
+| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A DONE; FIRST-PARTY STAGING ONLY; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
@@ -89,7 +89,8 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M4-B6 — owner-approved first-party isolated staging only
 
-- **M4-B6-A — IN PROGRESS:** [Issue #79](../../issues/79) implements a temporary, literal `127.0.0.1` first-party MCP 2026-07-28 `server/discover` staging test with modern mirrored headers and strictly limited JSON/request-scoped SSE. [Safety design](docs/FIRST_PARTY_STAGING_MCP.md). Requires four-job PR and post-merge main CI and exact reviewed package inventory (**73→75**). No external user targets, arbitrary commands, remote deployment, credentials, production action or new release approval. [Real-target RFC #21](../../issues/21) stays OPEN.
+- **M4-B6-A — DONE (own local staging test-only):** [Issue #79](../../issues/79), [merged PR #80](../../pull/80), [post-merge main CI #39990071235](../../actions/runs/39990071235) **4/4 PASS, 457/457 tests/job, 0 failed/skipped**. Temporary literal `127.0.0.1` fixed first-party MCP 2026-07-28 `server/discover`, modern header/body validation, JSON/SSE, negative controls, cleanup and installed-package smoke. [Boundaries](docs/FIRST_PARTY_STAGING_MCP.md). Exact reviewed package path count **75**. This is not a remotely deployed staging server, a sandbox or authorization to contact user targets. [Real-target RFC #21](../../issues/21) remains OPEN.
+- **M4-B6-B — NEXT (proposed):** design a distinct first-party test-process lifecycle and independently observable closed-socket / resource cleanup checks; no user URL, arbitrary stdio program or external egress. Scope in its own Issue, test-first; explicit claim of OS sandboxing remains forbidden.
 
 ## M4-B5 — future user-target authorization decision (no live connection)
 
