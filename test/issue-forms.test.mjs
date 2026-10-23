@@ -107,7 +107,7 @@ test('M5-03: issue forms stay outside npm archive; contributor documentation is 
   const manifest = JSON.parse(
     readFileSync(join(root, 'test', 'expected-package-files.json'), 'utf8')
   );
-  assert.equal(manifest.length, 58, 'M5-03 expected package inventory must remain reviewed');
+  assert.equal(manifest.length, 60, 'M5-05 reviewed package inventory includes exactly two beta files');
   for (const path of [
     '.github/ISSUE_TEMPLATE/bug_report.yml',
     '.github/ISSUE_TEMPLATE/feature_request.yml',
