@@ -32,10 +32,10 @@ function assertSameArchive(first, second) {
     'R4_ARCHIVE_DIGEST_MISMATCH');
   assert.ok(first.equals(second), 'R4_ARCHIVE_BYTES_MISMATCH');
 }
-function assertSourceBytes(source, installed) {
+function assertSourceBytes(source, installed, label = 'synthetic') {
   assert.equal(hash(source, 'sha256'), hash(installed, 'sha256'),
-    'R4_FILE_CONTENT_MISMATCH');
-  assert.ok(source.equals(installed), 'R4_FILE_BYTES_MISMATCH');
+    'R4_FILE_CONTENT_MISMATCH:' + label);
+  assert.ok(source.equals(installed), 'R4_FILE_BYTES_MISMATCH:' + label);
 }
 function runNpm(args, cwd, env) {
   const result = spawnSync(process.execPath, [npmCli, ...args], {
@@ -137,7 +137,7 @@ test('R4: two offline packs match and temporary installation matches all source 
       const originalFile = join(root, path);
       const installedFile = join(installedRoot, path);
       assert.ok(statSync(installedFile).isFile(), 'R4_INSTALLED_FILE_MISSING');
-      assertSourceBytes(readFileSync(originalFile), readFileSync(installedFile));
+      assertSourceBytes(readFileSync(originalFile), readFileSync(installedFile), path);
     }
   } finally {
     // Delete both actual tgz archives, three npm homes/caches and installation.
