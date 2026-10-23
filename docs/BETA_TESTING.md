@@ -43,3 +43,9 @@ Include only: full **public Git commit SHA**, candidate version, OS family, Node
 - **Stable release remains gated:** independent security/provenance assessment [R5-B #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43), owner authorization, final artifact identity and publication destination are separate obligations.
 
 The synthetic policy checks are not a penetration test, real-server MCP conformance test or independent security certification.
+
+## Engineering acceptance evidence (2026-10-23)
+
+The script and opt-in form were accepted in [M5-05 Issue #57](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/57) through [merged PR #58](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/58), source commit `8f163154e1cacc617dbb48f603502daa80533c09`. [Post-merge main CI #39959008260](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39959008260) confirmed **4/4 PASS and 390/390 tests/job** across Windows/Ubuntu Node20/22, 0 failures/skips, including the actual disposable locally installed npm tarball check.
+
+This verifies the test protocol itself, not independent usage, and does not imply any invitation was sent. [M5-06 independent beta feedback #59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) is **OPEN**, as is [R5-B external security/provenance audit #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43).

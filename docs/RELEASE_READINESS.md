@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0–R4, R5-A and M5-01/02/03/04 engineering acceptance recorded** (R3 internal, R5-A heuristic; neither independent audit). Latest [M5-04 PR #55](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/55) and [post-merge main CI #39956798014](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39956798014): **4/4 PASS, 384/384 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0–R4, R5-A and M5-01/02/03/04/05 engineering accepted** (R3 internal, R5-A heuristic; not an independent audit or beta validation). [M5-05 PR #58](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/58) and [post-merge main CI #39959008260](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39959008260): **4/4 PASS, 390/390 tests per job**. Independent beta gate [M5-06 #59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) and security gate [R5-B #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) OPEN. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
@@ -74,6 +74,10 @@ This check guards **package membership**, not the safety of bytes inside an alre
 ## M5-04 — local CLI discovery (accepted)
 
 [M5-04 #54](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/54) adds canonical `help`/`version` commands with `--help/-h/--version/-V` aliases, using only static offline guidance and validated bundled `package.json` metadata. The installed local tarball smoke verifies both commands; [main CI #39956798014](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39956798014) passed **4/4, 384/384 tests per job**. No package membership change or publication implied. Independent review, owner consent, final version, destination and provenance remain open.
+
+## M5-05 — fictional beta protocol (engineering accepted; external gate open)
+
+[Issue #57](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/57) shipped an offline first-party runner with five fixed synthetic cases, of which one deliberately failing negative control must be detected. Two reviewed public package files expand exact membership **58 to 60**. [Merged PR #58](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/58) and [main CI #39959008260](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39959008260) were **4/4 PASS, 390/390 tests per job**. This attests only to engineering functionality, **not** that an independent developer has used it. Genuine beta-test results are tracked under [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59); independent source/security review [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and explicit publication permission remain mandatory.
 
 ## Explicit release gates — NOT ALL COMPLETE
 
