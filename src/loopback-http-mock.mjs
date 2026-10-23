@@ -168,7 +168,11 @@ function sendFixedRequest(port,fault,signal,counts){
  * credentials, executable paths, HTTP method override and tool arguments are
  * never accepted. The only contacted socket is 127.0.0.1:ephemeral-owned-port.
  */
-export async function runLoopbackHttpMock({fault='none',deadlineMs=5000}={}){
+export async function runLoopbackHttpMock(options={}){
+  if(!options || typeof options!=='object' || Array.isArray(options) ||
+     Object.keys(options).some(k=>!['fault','deadlineMs'].includes(k)))
+    throw new TypeError('INVALID_LOOPBACK_OPTIONS');
+  const {fault='none',deadlineMs=5000}=options;
   if(!ALLOWED.has(fault))throw new TypeError('INVALID_LOOPBACK_FAULT');
   if(!Number.isSafeInteger(deadlineMs)||deadlineMs<250||deadlineMs>5000)
     throw new TypeError('INVALID_LOOPBACK_DEADLINE');
