@@ -105,7 +105,7 @@ export async function runGatedFixedMockCase(type,options={}) {
     !mockIdentity?'ADAPTER_FIXED_MOCK_IDENTITY_DENIED':'NONE';
   if(rule!=='NONE') return rejected(type,rule);
   // Fixed-only factory. Never pass the descriptor, claimed executable or URL.
-  const driver=createFirstPartyDriver(type);
+  const driver=createFirstPartyDriver(type,type==='stdio'?{mode:'initialize-only'}:{});
   try {
     await driver.connect();
     const result=await driver.probe();
