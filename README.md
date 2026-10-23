@@ -38,6 +38,8 @@ The new `demo` mode runs two **bundled fictional fixtures**, validates both an e
 
 **M5-02 remediation preview:** FAIL reports also provide bounded, fixed-text `guidance` for three representative synthetic rule codes, with approved next steps and bundled offline reproduction commands. Generic usage/input errors have fixed guidance too. Unrecognized rules are never interpolated into advice; existing native result fields are **not** a DLP filter. See [CLI guidance contract](docs/CLI_REPORTS.md).
 
+**M4-B5 next-stage architecture (not activated):** a [reviewable future target-approval decision packet](docs/M4_B5_TARGET_APPROVAL.md) defines independent ownership verification, operator consent, exact-method scope and SSRF/TLS/egress gates. It adds offline denial regressions, not remote connectivity; live MCP targets remain prohibited without a separate owner-approved implementation.
+
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 
 Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:
