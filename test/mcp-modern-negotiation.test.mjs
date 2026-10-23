@@ -59,3 +59,74 @@ test('CLI returns exit one on unsafe fixture, not exit two',()=>{const x=run('fi
 test('CLI does not expose missing paths',()=>{const x=run('fixtures/nonexistent-secret-path.json');assert.equal(x.status,2);assert.ok(!x.stderr.includes('nonexistent-secret-path'));});
 test('legacy handshake cannot be substituted for modern-version retry',()=>{let x=clone(safe);x.steps[1].request.method='initialize';assert.ok(has(audit(x),'INVALID_MODERN_REQUEST'));});
 test('modern retry must preserve request method',()=>{let x=clone(safe);x.steps[1].request.method='prompts/list';assert.ok(has(audit(x),'RETRY_METHOD_CHANGED'));});
+
+// v0.0.10: a synthetic version retry must not silently change tool arguments,
+// requested capabilities or extra metadata along with the protocol version.
+function versionRetryWithPayload() {
+  const fixture=clone(safe);
+  fixture.steps=fixture.steps.slice(0,2);
+  for (const step of fixture.steps) {
+    step.request.method='tools/call';
+    step.request.params.name='fictional-read-note';
+    step.request.params.arguments={note:{id:'public',tags:['fixture']},limit:3};
+  }
+  return fixture;
+}
+test('negotiated version-only retry with identical nested arguments passes',()=>{
+  assert.equal(audit(versionRetryWithPayload()).status,'PASS');
+});
+test('mutating a tool argument during version retry fails closed',()=>{
+  const f=versionRetryWithPayload();
+  f.steps[1].request.params.arguments.limit=999;
+  assert.ok(has(audit(f),'RETRY_PARAMS_CHANGED'));
+});
+test('nested payload modification during version retry is detected',()=>{
+  const f=versionRetryWithPayload();
+  f.steps[1].request.params.arguments.note.tags.push('changed');
+  assert.ok(has(audit(f),'RETRY_PARAMS_CHANGED'));
+});
+test('removing an argument during retry fails closed',()=>{
+  const f=versionRetryWithPayload();
+  delete f.steps[1].request.params.arguments.limit;
+  assert.ok(has(audit(f),'RETRY_PARAMS_CHANGED'));
+});
+test('adding an argument during retry fails closed',()=>{
+  const f=versionRetryWithPayload();
+  f.steps[1].request.params.arguments.extra=true;
+  assert.ok(has(audit(f),'RETRY_PARAMS_CHANGED'));
+});
+test('additional metadata cannot change on version retry',()=>{
+  const f=versionRetryWithPayload();
+  f.steps[1].request.params._meta.syntheticMarker='modified';
+  assert.ok(has(audit(f),'RETRY_PARAMS_CHANGED'));
+});
+test('authorized capabilities cannot grow during version retry',()=>{
+  const f=versionRetryWithPayload();
+  f.grantedCapabilities={elicitation:{form:{}}};
+  f.steps[1].request.params._meta['io.modelcontextprotocol/clientCapabilities']={elicitation:{form:{}}};
+  assert.ok(has(audit(f),'RETRY_PARAMS_CHANGED'));
+});
+test('unchanged capability declaration survives version retry',()=>{
+  const f=versionRetryWithPayload();
+  f.grantedCapabilities={elicitation:{form:{}}};
+  for(const step of f.steps)step.request.params._meta['io.modelcontextprotocol/clientCapabilities']={elicitation:{form:{}}};
+  assert.equal(audit(f).status,'PASS');
+});
+test('JSON object key ordering is not treated as payload modification',()=>{
+  const f=versionRetryWithPayload();
+  f.steps[1].request.params.arguments={limit:3,note:{tags:['fixture'],id:'public'}};
+  assert.equal(audit(f).status,'PASS');
+});
+test('retry findings report rules only, never submitted arguments',()=>{
+  const f=versionRetryWithPayload();
+  f.steps[1].request.params.arguments.note.id='SYNTHETIC_DO_NOT_ECHO';
+  const result=audit(f);
+  assert.ok(has(result,'RETRY_PARAMS_CHANGED'));
+  assert.ok(!JSON.stringify(result).includes('SYNTHETIC_DO_NOT_ECHO'));
+});
+test('safe retry fixture with a deliberate new argument fails CLI contract',()=>{
+  const result=run('fixtures/mcp-negotiate-unsafe-params.json');
+  assert.equal(result.status,1,result.stderr);
+  const report=JSON.parse(result.stdout);
+  assert.ok(has(report,'RETRY_PARAMS_CHANGED'));
+});
