@@ -26,7 +26,7 @@ const isTime=x=>Number.isSafeInteger(x) && x>=0;
 function descriptorPayload(descriptor) {
   // Validates *all* transport/policy fields first, then hashes only the known
   // ordered values; JSON key order cannot silently change its identity.
-  inspectProjectAdapter(descriptor);
+  try { inspectProjectAdapter(descriptor); } catch { deny(); }
   const transport=descriptor.transport.type==='stdio'
     ? ['stdio',descriptor.transport.command,...descriptor.transport.args]
     : ['streamable-http',descriptor.transport.endpoint];
