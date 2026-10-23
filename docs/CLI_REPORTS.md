@@ -2,14 +2,14 @@
 
 The standalone MIT [MCP Agent Security Test Suite](../README.md) emits a machine-readable **JSON object on stdout** for every supported CLI invocation, including invalid input. Results are from **fictional offline contract checks**, not a live MCP server scan or a security certification.
 
-**Applies to:** `node src/cli.mjs <command> <synthetic-file>`. Supported commands are `scenario`, `trace`, `mock`, `witness`, `process`, `jsonrpc`, `era`, and `negotiate`. Node.js 20+ and no `npm install` or paid API are required.
+**Applies to:** `node src/cli.mjs <command> <synthetic-file>`. Supported commands are `scenario`, `trace`, `mock`, `witness`, `process`, `stdio`, `loopback`, `jsonrpc`, `era`, and `negotiate`. Node.js 20+ and no `npm install` or paid API are required.
 
 ## Stable fields (v1)
 
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `reportSchemaVersion` | integer, exactly `1` | Major JSON report contract version, **not** package version |
-| `command` | one of the eight supported command strings, or `null` | Validated command; unknown untrusted argument is never echoed |
+| `command` | one of the ten supported command strings, or `null` | Validated command; unknown untrusted argument is never echoed |
 | `status` | `"PASS"`, `"FAIL"`, `"ERROR"` | Test contracts pass, violations detected, or CLI input/usage invalid |
 | `exitCode` | integer `0`, `1`, `2` | Mirrors process exit code |
 | `summary.failureCount` | nonnegative integer | Number of violations reported by the validator, or length of legacy mismatch array |
@@ -91,7 +91,7 @@ For workflows, check the operating-system exit code, then parse stdout JSON for 
 - Error handling never copies input filenames, source payloads, parser messages or exception stacks into generic CLI error objects. `summary.ruleCodes` only uses bounded uppercase internal-looking codes; nonmatching values are displayed as `UNCLASSIFIED_FINDING` in **summary**.
 - Existing **native per-command detail fields remain unchanged** for backward compatibility. In particular, a fixture's syntactically valid fictional `scenario` identifier and some native result fields may appear in output. This is **not general-purpose DLP** and does not authorize real credentials or customer data as fixture input.
 - `summary.reportedFindings` can be smaller than `summary.failureCount` when a validator truncates its detailed findings. Missing findings are not reconstructed or guessed; callers should honor `summary.findingsTruncated`.
-- No network connection, arbitrary subprocess, paid API or remote target is introduced by this report format. Existing `process` tests still use the fixed bundled child process, **not** untrusted binaries.
+- The report format itself makes no network connection, arbitrary subprocess, paid API call or remote target request. The optional `loopback` command separately opens a **fixed temporary local TCP listener on 127.0.0.1**, and never accepts an external URL. Existing `process` tests still use the fixed bundled child process, **not** untrusted binaries.
 - All coverage is developer-authored synthetic regression evidence. It does not prove real MCP security, complete JSON-RPC/MCP conformance or independent certification.
 
 See [SECURITY.md](../SECURITY.md), [threat model](THREAT_MODEL.md) and [Roadmap M2-01 (#5)](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/5).

@@ -5,6 +5,7 @@ import { runMockMcpScenario } from './adapter-harness.mjs';
 import { runWitnessedScenario } from './witness-harness.mjs';
 import { runProcessMcpScenario } from './process-mcp-harness.mjs';
 import { runStdioMockScenario } from './stdio-mcp-harness.mjs';
+import { runLoopbackHttpScenario } from './loopback-http-mock.mjs';
 import { parseStrictJson } from './strict-json.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
 import { auditJsonRpcExchange } from './jsonrpc-contract.mjs';
@@ -32,7 +33,7 @@ const emit = payload => process.stdout.write(JSON.stringify(payload,null,2)+'\n'
 async function main() {
   const args=process.argv.slice(2);
   if (args.length!==2 || !CLI_COMMANDS.includes(args[0]) || args[1].startsWith('-')) {
-    process.stderr.write('USAGE: node src/cli.mjs scenario|trace|mock|witness|process|stdio|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(args[0])?args[0]:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -45,7 +46,8 @@ async function main() {
       args[0] === 'mock' ? await runMockMcpScenario(parseStrictJson(source)) :
       args[0] === 'witness' ? await runWitnessedScenario(parseStrictJson(source)) :
       args[0] === 'process' ? await runProcessMcpScenario(parseStrictJson(source)) :
-      args[0] === 'stdio' ? runStdioMockScenario(parseStrictJson(source)) : auditRecords(parseJsonl(source));
+      args[0] === 'stdio' ? runStdioMockScenario(parseStrictJson(source)) :
+      args[0] === 'loopback' ? await runLoopbackHttpScenario(parseStrictJson(source)) : auditRecords(parseJsonl(source));
     const report = buildCliReport(args[0],result);
     emit(report);
     return report.exitCode;

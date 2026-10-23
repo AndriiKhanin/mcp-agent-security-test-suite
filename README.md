@@ -2,12 +2,13 @@
 
 **Release candidate for validation before the stable v0.0.10 release.** Synthetic contract tests only; not a vulnerability scanner or security certification.
 
-Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-only: no real MCP server, credentials, external connections, real tool execution, live vulnerability scanning, independent OAuth verification or security certification.
+Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-first: no real MCP server, credentials, external connections, real tool execution, live vulnerability scanning, independent OAuth verification or security certification. The optional first-party `loopback` command opens a temporary **local-only IPv4 127.0.0.1 socket**; it never contacts an external target.
 
 ## Modules
 
 - `scenario` — synthetic authorization, replay, scoped resources and failure semantics
 - `stdio` — fixed local JSON-RPC-over-stdio batch mock: fictional initialize, tool list, allowed read and denied write; no user executable or inherited credentials. See [limits](docs/STDIO_MOCK.md). Not a general MCP server or OS sandbox.
+- `loopback` — owner-approved M4-A fixed **127.0.0.1 ephemeral HTTP** ping test with strict Host/Origin/method/version controls and no external destinations, credentials or tool calls; see [local transport limits](docs/LOOPBACK_HTTP_MOCK.md). Opens a temporary local socket, not a live MCP scanner.
 - `mock`, `witness`, `process` — fixed simulated tools, parent-owned in-memory effects and forked in-repository mock worker. Process isolation is *not* an OS sandbox.
 - `trace` — consistency checks for fictional action logs; does not actually search for secrets.
 - `jsonrpc` — offline request/reply envelope checks with a deliberately strict profile.
@@ -37,6 +38,9 @@ node --test
 node src/cli.mjs scenario fixtures/scenario-denial.json
 node src/cli.mjs process fixtures/scenario-recovery.json
 node src/cli.mjs stdio fixtures/stdio-mock-safe.json
+node src/cli.mjs loopback fixtures/loopback-safe.json
+# Synthetic invalid Origin, expected exit 1
+node src/cli.mjs loopback fixtures/loopback-unsafe.json
 # Deliberate synthetic protocol violation, expected exit 1
 node src/cli.mjs stdio fixtures/stdio-mock-unsafe.json
 node src/cli.mjs jsonrpc fixtures/jsonrpc-safe.json
@@ -48,7 +52,7 @@ node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
 
 CLI `0` = passing contracts, `1` = violations, `2` = invalid input. All invocations emit [versioned JSON schema v1](docs/CLI_REPORTS.md) on stdout, including generic input errors; existing command-specific fields are preserved. No `npm install` required.
 
-Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39921138853): **330/330** developer-authored synthetic tests in each of four Windows/Ubuntu Node20/22 jobs. The current six-task roadmap is complete; future M4–M6 product capabilities are **not** implemented. These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
+Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39921138853): **330/330** developer-authored synthetic tests in each of four Windows/Ubuntu Node20/22 jobs. The initial six-task roadmap is complete. **M4-A loopback-only transport is in a separately authorized development candidate** and requires its own PR/CI acceptance; M4-B external integrations, M5 and M6 are **not** implemented. These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
 
 We welcome nonconfidential problem statements or proposals. Never upload real private logs or credentials. Licensed under [MIT](LICENSE). Current repository maintains an open [roadmap](ROADMAP.md).
 
