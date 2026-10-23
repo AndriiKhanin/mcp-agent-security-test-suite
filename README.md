@@ -72,6 +72,10 @@ Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a 
 
 [Transport and cleanup limits](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) now cover finite incremental SSE decoding, split CRLF across chunks, cancel-after-headers/notice/final and oversized chunked streams. The ephemeral owned `127.0.0.1` response must close even on rejected or aborted tests. This remains a **test-only fixed first-party mock**, not generic MCP interoperability, real target scanning or an OS sandbox.
 
+## Owned-only adapter staging bridge (M4-B7-A)
+
+`node src/cli.mjs adapter-staging-selftest` tests the separate **fixed** modern Streamable HTTP adapter lifecycle against our own ephemeral `127.0.0.1` discovery fixture only. It uses no project descriptor, arbitrary URL or command. This is **not** project connectivity: `adapter-check <file>` remains validate-only, `connectionStatus: "NOT_ATTEMPTED"`, and cannot be used to enable this bridge. [Boundary and limitations](docs/UNIVERSAL_ADAPTER.md).
+
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 
 Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:

@@ -8,6 +8,7 @@
  */
 import { runLocalStdioMock, runLocalStdioInitialization } from './stdio-mcp-harness.mjs';
 import { runLoopbackHttpMock } from './loopback-http-mock.mjs';
+import { runFirstPartyStagingSelftest } from './first-party-staging-mcp.mjs';
 import { noteFirstPartyMockAttempt } from './mock-attempt-observer.mjs';
 
 const TRANSPORTS = Object.freeze(['stdio','streamable-http']);
@@ -98,4 +99,95 @@ export function createFirstPartyDriver(transport, options={}) {
 export async function runFirstPartyAdapterSelftest() {
   const { runGatedFirstPartySelftest }=await import('./local-consent-gate.mjs');
   return runGatedFirstPartySelftest();
+}
+
+
+/**
+ * M4-B7-A: a SEPARATE fixed modern transport adapter boundary. This is NOT
+ * sourced from inspectProjectAdapter's user-controlled descriptor and cannot
+ * be activated by changing a project policy. Only an internally owned
+ * ephemeral 127.0.0.1 modern server/discover fixture runs here.
+ */
+const MODERN_FIXED_FAULTS=new Set(['allowed','sse','sse-comment-log',
+  'wrong-origin','wrong-host','wrong-method','forbidden-tool','wrong-version',
+  'response-redirect','response-oversized','response-hang',
+  'response-sse-unsolicited','response-sse-stall-after-notice']);
+const STAGING_STATUS='FIXED_FIRST_PARTY_STAGING_ONLY';
+function checkModernOptions(options){
+  if(!options || typeof options!=='object' || Array.isArray(options) ||
+     Object.getPrototypeOf(options)!==Object.prototype ||
+     Object.keys(options).some(k=>!['fault','deadlineMs'].includes(k))) {
+    throw new TypeError('INVALID_FIXED_MODERN_ADAPTER_OPTIONS');
+  }
+  const fault=options.fault??'allowed',deadlineMs=options.deadlineMs??5000;
+  if(!MODERN_FIXED_FAULTS.has(fault) || !Number.isSafeInteger(deadlineMs) ||
+     deadlineMs<250 || deadlineMs>5000)
+    throw new TypeError('INVALID_FIXED_MODERN_ADAPTER_OPTIONS');
+  return {fault,deadlineMs};
+}
+function modernAdapterReport(native){
+  // Native bytes/IDs/ports never cross this reporting boundary. Close must
+  // be observed even when an intentional negative transport fault occurs.
+  const witnessed=!!native && native.checked===1 && native.received===1 &&
+    native.socketClosedCount===1 && native.externalTargetContacted===false &&
+    Number.isSafeInteger(native.accepted) && native.accepted>=0 &&
+    native.accepted<=1;
+  const passed=witnessed && native.status==='PASS' &&
+    native.accepted===1 && native.failureCount===0 &&
+    Array.isArray(native.findings) && native.findings.length===0;
+  const raw=Array.isArray(native?.findings)?native.findings[0]?.rule:null;
+  const code=!witnessed?'FIXED_STAGING_RESOURCE_UNCONFIRMED':
+    typeof raw==='string' && RULE.test(raw)?raw:
+      'FIXED_STAGING_ADAPTER_MISMATCH';
+  return {
+    status:passed?'PASS':'FAIL',
+    profile:'fixed-modern-first-party-adapter-bridge-v1',
+    transport:'streamable-http',
+    protocolVersion:'2026-07-28',
+    allowedMethod:'server/discover',
+    connectionStatus:STAGING_STATUS,
+    adapterDescriptorUsed:false,projectConnectionAuthorized:false,
+    executedFirstPartyMock:true,externalTargetContacted:false,
+    operatorVerified:false,osSandboxed:false,
+    checked:1,matched:passed,socketCleanupConfirmed:witnessed,
+    failureCount:passed?0:1,findingsTruncated:false,
+    findings:passed?[]:[{step:1,rule:code}]
+  };
+}
+/** One fixed connect / probe / close lifecycle; no descriptor, endpoint,
+ * stdio command, credential, dynamic transport or external target can enter.
+ * Fault selectors are for trusted direct in-repository tests, not the CLI.
+ */
+export function createFixedModernStagingAdapter(options={}){
+  const checked=checkModernOptions(options);
+  let state='new';
+  return Object.freeze({
+    async connect(){
+      if(state!=='new')failState();
+      state='connected'; // state only; does NOT initiate any network I/O
+      return {transport:'streamable-http',connectionStatus:STAGING_STATUS,
+        externalTargetContacted:false};
+    },
+    async probe(){
+      if(state!=='connected')failState();
+      state='probed';
+      noteFirstPartyMockAttempt('driver-probe');
+      try{
+        const result=await runFirstPartyStagingSelftest(checked);
+        return modernAdapterReport(result);
+      }catch{return modernAdapterReport(null);}
+    },
+    async close(){
+      state='closed';
+      return {closed:true};
+    }
+  });
+}
+/** Public no-argument CLI test delegates only to fixed owned staging. */
+export async function runFixedModernStagingAdapterSelftest(){
+  const driver=createFixedModernStagingAdapter();
+  try{
+    await driver.connect();
+    return await driver.probe();
+  }finally{await driver.close();}
 }
