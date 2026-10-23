@@ -38,6 +38,17 @@ The new `demo` mode runs two **bundled fictional fixtures**, validates both an e
 
 **M5-02 remediation preview:** FAIL reports also provide bounded, fixed-text `guidance` for three representative synthetic rule codes, with approved next steps and bundled offline reproduction commands. Generic usage/input errors have fixed guidance too. Unrecognized rules are never interpolated into advice; existing native result fields are **not** a DLP filter. See [CLI guidance contract](docs/CLI_REPORTS.md).
 
+## Universal MCP project adapter (M4-B0: safe offline configuration preview)
+
+Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:
+
+```sh
+node src/cli.mjs adapter-check examples/adapter-profiles/stdio-project.json
+node src/cli.mjs adapter-check examples/adapter-profiles/streamable-http-project.json
+```
+
+These commands **validate configuration only** and return `connectionStatus: "NOT_ATTEMPTED"` and `executionEnabled: false`. They do not connect to the user's server, execute the configured subprocess, perform DNS resolution or prove target ownership. Actual opt-in connections require a separately reviewed and authorized transport implementation. No external MCP contact has been approved.
+
 ## Fictional-only beta self-check (M5-05)
 
 The [beta acceptance protocol](docs/BETA_TESTING.md) describes a clean public checkout and a zero-input runner:

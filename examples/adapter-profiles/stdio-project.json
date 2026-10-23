@@ -1,0 +1,21 @@
+{
+  "adapterSchemaVersion": 1,
+  "project": {
+    "name": "example-node-project"
+  },
+  "transport": {
+    "type": "stdio",
+    "command": "node",
+    "args": [
+      "server.mjs"
+    ]
+  },
+  "protocolVersion": "2026-07-28",
+  "policy": {
+    "mode": "validate-only",
+    "allowNetwork": false,
+    "allowProcessSpawn": false,
+    "allowToolCalls": false,
+    "allowCredentials": false
+  }
+}

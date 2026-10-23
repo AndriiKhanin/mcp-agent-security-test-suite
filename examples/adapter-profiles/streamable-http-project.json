@@ -1,0 +1,18 @@
+{
+  "adapterSchemaVersion": 1,
+  "project": {
+    "name": "example-http-project"
+  },
+  "transport": {
+    "type": "streamable-http",
+    "endpoint": "https://mcp.example.org/mcp"
+  },
+  "protocolVersion": "2026-07-28",
+  "policy": {
+    "mode": "validate-only",
+    "allowNetwork": false,
+    "allowProcessSpawn": false,
+    "allowToolCalls": false,
+    "allowCredentials": false
+  }
+}

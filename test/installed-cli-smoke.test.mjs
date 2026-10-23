@@ -158,6 +158,24 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.deepEqual([betaResult.total,betaResult.passed,betaResult.failed],[5,5,0]);
     assert.ok(betaResult.cases.every(x=>x.matched===true));
 
+    // The user's universal adapter descriptor can be checked from the installed
+    // package, but MUST NOT connect to any stdio/HTTP target.
+    for (const [file, expected] of [
+      ['stdio-project.json','stdio'],
+      ['streamable-http-project.json','streamable-http']
+    ]) {
+      const descriptorFile=join(packageDir,'examples','adapter-profiles',file);
+      assert.ok(existsSync(descriptorFile));
+      const adapter=invokeNode(executable,['adapter-check',descriptorFile],temp,env);
+      assert.equal(adapter.status,0,'installed adapter config must validate offline');
+      const result=JSON.parse(adapter.stdout);
+      assert.equal(result.reportSchemaVersion,1);
+      assert.equal(result.status,'PASS');
+      assert.equal(result.connectionStatus,'NOT_ATTEMPTED');
+      assert.equal(result.executionEnabled,false);
+      assert.equal(result.transport,expected);
+    }
+
     const fakePath = join(temp, 'FICTIONAL_MISSING_INPUT_DO_NOT_ECHO.json');
     const invalid = invokeNode(executable, ['scenario', fakePath], temp, env);
     assert.equal(invalid.status, 2, 'invalid input must fail closed');
