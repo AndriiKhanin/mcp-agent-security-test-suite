@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 357 synthetic/loopback/package-preflight/local-install tests | [PR #30](../../pull/30) and [post-merge CI](../../actions/runs/39931897702) — 4/4 jobs, 357/357 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 358 synthetic/loopback/package-preflight/local-install/inventory tests | [R2 PR #33](../../pull/33) and [post-merge CI](../../actions/runs/39934465115) — 4/4 jobs, 358/358 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -71,7 +71,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## Release gates and boundaries
 
-- **R2 package inventory hardening — IN PROGRESS:** [Issue #32](../../issues/32) tracks an exact offline npm package file inventory and positive/negative mutation tests. R0/R1 are accepted; R2 is not accepted until its PR and post-merge CI pass. This is **not** approval to tag or publish.
+- **R2 package inventory hardening — DONE:** [Issue #32](../../issues/32) accepted via [merged PR #33](../../pull/33) and [main CI](../../actions/runs/39934465115), 4/4 PASS with 358/358 tests per job. A 54-path exact offline package inventory and two mutation controls prevent unnoticed file additions or omissions. This is **not** a content-security audit or approval to tag or publish.
 
 
 - A `-rc` package is a **release candidate**, not a stable or independently security-audited product. Stable `v0.0.10` and npm publication remain unapproved; see [R0 release readiness](docs/RELEASE_READINESS.md).
