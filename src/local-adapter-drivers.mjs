@@ -42,7 +42,7 @@ function report(transport, result, mode='legacy-batch') {
   const success=result?.status==='PASS' &&
     result.checked===checked && result.failureCount===0 &&
     Array.isArray(result.findings) && result.findings.length===0 &&
-    (transport==='stdio' ? result.received===4 :
+    (transport==='stdio' ? result.received===(mode==='initialize-only'?1:4) :
       result.received===1 && result.accepted===1 && result.simulatedEffects===0);
   const rawRule=result?.findings?.[0]?.rule;
   const code=typeof rawRule==='string' && RULE.test(rawRule)
