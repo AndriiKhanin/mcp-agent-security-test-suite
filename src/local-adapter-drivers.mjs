@@ -11,7 +11,6 @@ import { runLoopbackHttpMock } from './loopback-http-mock.mjs';
 
 const TRANSPORTS = Object.freeze(['stdio','streamable-http']);
 const STATUS = 'FIRST_PARTY_MOCK_ONLY';
-const PROFILE = 'universal-fixed-local-mock-drivers-v1';
 const FAULTS = Object.freeze({
   stdio: Object.freeze(['none','wrong-id','invalid-json','oversized-output',
     'hang','changed-result','stderr-canary','env-probe']),
@@ -91,32 +90,10 @@ export function createFirstPartyDriver(transport, options={}) {
   });
 }
 
-/** No CLI arguments or target profile; tests both fixed local mock transports. */
+/** Routes all first-party selftests through synthetic admission before any
+ * built-in mock probe. Direct low-level driver remains a test utility only.
+ */
 export async function runFirstPartyAdapterSelftest() {
-  const outcomes=[];
-  for(const transport of TRANSPORTS) {
-    const driver=createFirstPartyDriver(transport);
-    try {
-      await driver.connect();
-      outcomes.push(await driver.probe());
-    } catch {
-      outcomes.push(report(transport,null));
-    } finally {
-      await driver.close();
-    }
-  }
-  const failures=outcomes.filter(x=>!x.matched);
-  return {
-    status:failures.length?'FAIL':'PASS',
-    profile:PROFILE,
-    connectionStatus:STATUS,
-    externalTargetContacted:false,
-    transportCount:2,
-    passed:outcomes.length-failures.length,
-    failed:failures.length,
-    failureCount:failures.length,
-    findingsTruncated:false,
-    findings:failures.map((x,i)=>({step:i+1,rule:x.rule})),
-    outcomes
-  };
+  const { runGatedFirstPartySelftest }=await import('./local-consent-gate.mjs');
+  return runGatedFirstPartySelftest();
 }
