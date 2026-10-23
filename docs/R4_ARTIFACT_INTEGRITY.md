@@ -23,3 +23,9 @@ Run as part of `node --test`; `npm test` invokes the same suite. The R4 test int
 - **Rebuild evidence is conditional.** Acceptance requires the scoped PR, four successful Windows/Ubuntu × Node20/22 CI jobs, a merge and four successful post-merge jobs. A future *actual release* requires separate source/content review, final artifact hash/attestation decision, explicit owner authorization, destination selection and independent validation.
 
 See [release readiness](RELEASE_READINESS.md), [R3 internal review](R3_INTERNAL_RELEASE_REVIEW.md), [threat model](THREAT_MODEL.md) and [roadmap](../ROADMAP.md).
+
+## Accepted engineering evidence (2026-10-23)
+
+- [Issue #38](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/38) closed after [PR #39](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/39) merged at `7297b2e919dfa15efc16b518f7d23084b77e12ae`.
+- [Corrected PR CI 39938264780](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39938264780) and [post-merge main CI 39938436907](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39938436907): **4/4 PASS, 360/360 tests on each Windows/Ubuntu Node20/22 job**, 0 failed/skipped. Earlier red Windows jobs were resolved by the strictly scoped npm bin-shebang normalization check; they are not counted as passing.
+- **Release disposition:** Still NOT RELEASED. Independent source review, final artifact identity/provenance, owner destination decision, explicit authorization and final post-publication verification remain separate outstanding obligations.
