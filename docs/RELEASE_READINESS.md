@@ -2,14 +2,14 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **Release candidate under review**. No stable `v0.0.10` tag, GitHub Release, npm publication or distribution approval is implied by passing CI.
+**Disposition:** **R0 package preflight ACCEPTED** by merged [PR #27](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/27) and [post-merge CI 39928732232](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39928732232) (**4/4 PASS; 356/356 per job**). Stable `v0.0.10` remains **NOT RELEASED**; no tag, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
 - MIT-licensed, zero-runtime-dependency Node.js >=20 security-contract test suite with fictional authorization, replay and MCP-shaped JSON-RPC fixtures.
 - Additive JSON report schema v1. Explicit exit codes 0=PASS, 1=detected violation, 2=invalid input.
 - First-party fixed stdio mock and owner-approved **M4-A first-party IPv4 loopback-only** mock. The latter **opens a temporary real OS socket** at `127.0.0.1`; no external MCP target or network scanning is supported.
-- Previous main acceptance: [M4-A PR #24](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/24), [CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39926302349) **353/353 per job**, Ubuntu/Windows × Node20/22. Any additional preflight tests must be independently revalidated before updating the count.
+- M4-A baseline: [PR #24](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/24), [CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39926302349) **353/353 per job**. After three R0 package tests, [main CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39928732232) confirms **356/356 per job** on Ubuntu/Windows Node20/22.
 - **M4-B external targets, credentials, OAuth, production testing, independent security certification and general MCP interoperability remain unimplemented and unapproved.**
 
 These checks are intentionally synthetic; they are **not** real vulnerability detection or an independent audit.
@@ -49,8 +49,8 @@ The preflight test itself invokes **local npm pack in dry-run and offline mode**
 - [x] Current source/license/package metadata inspected. `package.json` retains release-candidate version.
 - [x] Define `bin` and an explicit package-file allowlist without adding dependencies or install scripts.
 - [x] Add automated offline, dry-run package manifest test covering required paths and forbidden archive entries.
-- [ ] **Verify four CI jobs** (Ubuntu/Windows × Node20/22) on a reviewed PR for this release-preflight change.
-- [ ] **Verify post-merge main CI**, counts, test failures and a clean diff; record immutable SHA and exact package list.
+- [x] **Verified four CI jobs** (Ubuntu/Windows × Node20/22) on reviewed [PR #27](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/27): [run 39928377400](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39928377400), **4/4 PASS**.
+- [x] **Verified post-merge main CI** [run 39928732232](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39928732232): **4/4, 356/356 per job, 0 failed/skipped**; main SHA `401df77d2e73d6c10e563f9b558b2abf480db587`. Package manifest is checked automatically by offline dry-run. Actual distribution artifact and install remain untested and require separate approval.
 - [ ] **Perform independent release/security review:** no secrets or private source, accurate threat claims, bounded local sockets, permissions/provenance, disclaimer and changelog.
 - [ ] **Choose publication destination and owner authorization:** GitHub signed/annotated tag + Release only, npm registry, or both. Registry account name, 2FA, provenance and any public package-name collision must be checked *before* attempting npm publication.
 - [ ] **Package installation smoke test** of an actual versioned, offline artifact after explicit release-artifact authorization (distinct from dry-run).
