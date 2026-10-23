@@ -412,11 +412,18 @@ export async function runFirstPartyStagingSelftest(options={}) {
     deadlineMs<250 || deadlineMs>DEFAULT_DEADLINE)
     throw new TypeError('INVALID_FIXED_STAGING_OPTIONS');
   const server=http.createServer(),controller=new AbortController();
-  // Watch real TCP socket closure independently from HTTP response close.
-  server.on('connection',socket=>{
-    socket.once('close',()=>{counts.socketClosed++;});
-  });
   const counts={received:0,accepted:0,responseClosed:0,socketClosed:0};
+  const socketCloseAcks=[];
+  // Observe actual TCP socket close, which may be delivered *after* the
+  // server.close callback. An unconfirmed close is always a FAIL.
+  server.on('connection',socket=>{
+    socketCloseAcks.push(new Promise(resolve=>{
+      socket.once('close',()=>{
+        counts.socketClosed++;
+        resolve();
+      });
+    }));
+  });
   let timer,rule='STAGING_BIND_OR_TRANSPORT_FAILED';
   try{
     await new Promise((resolve,reject)=>{
@@ -443,6 +450,19 @@ export async function runFirstPartyStagingSelftest(options={}) {
       const closed=new Promise(resolve=>server.close(resolve));
       server.closeAllConnections();
       await closed;
+    }
+    // Allow socket 'close' callbacks to settle on Windows and Linux after
+    // server.close. Do not call cleanup successful if they never settle.
+    if(socketCloseAcks.length){
+      let cleanupTimer;
+      const witnessed=await Promise.race([
+        Promise.all(socketCloseAcks).then(()=>true),
+        new Promise(resolve=>{
+          cleanupTimer=setTimeout(()=>resolve(false),1000);
+        })
+      ]);
+      clearTimeout(cleanupTimer);
+      if(!witnessed)rule='STAGING_SOCKET_CLOSE_UNCONFIRMED';
     }
   }
   return report(rule,counts);
