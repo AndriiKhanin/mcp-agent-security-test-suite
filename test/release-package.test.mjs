@@ -9,6 +9,26 @@ import {fileURLToPath} from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
 const bin='src/cli.mjs';
+const expectedPackPaths=Object.freeze(JSON.parse(
+  readFileSync(join(root,'test','expected-package-files.json'),'utf8')
+));
+function verifyExactPackInventory(actualPaths){
+  assert.deepEqual([...actualPaths].sort(),expectedPackPaths,
+    'R2 packaged files changed; review and update the exact inventory');
+}
+test('R2: locked file inventory rejects synthetic additions and omissions',()=>{
+  assert.ok(expectedPackPaths.length>=25 && expectedPackPaths.length<=80);
+  assert.deepEqual([...new Set(expectedPackPaths)].sort(),expectedPackPaths,
+    'manifest entries must be sorted and unique');
+  assert.doesNotThrow(()=>verifyExactPackInventory(expectedPackPaths));
+  assert.throws(()=>verifyExactPackInventory(
+    [...expectedPackPaths,'src/fictional-unreviewed-extra.mjs']
+  ),/R2 packaged files changed/);
+  assert.throws(()=>verifyExactPackInventory(
+    expectedPackPaths.filter(p=>p!=='src/cli.mjs')
+  ),/R2 packaged files changed/);
+});
+
 test('R0: package stays prerelease with license, engine and no dependency install',()=>{
   assert.equal(pkg.name,'mcp-agent-security-test-suite');
   assert.match(pkg.version,/^0\.0\.10-rc\.[1-9]\d*$/);
@@ -68,6 +88,7 @@ test('R0: offline npm pack dry-run contains only reviewed source/fixtures/docs',
   assert.equal(output[0].name,pkg.name);
   assert.equal(output[0].version,pkg.version);
   const paths=output[0].files.map(f=>f.path.replaceAll('\\','/'));
+  verifyExactPackInventory(paths);
   assert.ok(paths.length>=25 && paths.length<=80,'bounded package contents');
   assert.equal(paths.length,new Set(paths).size,'no duplicate paths');
   for(const required of [

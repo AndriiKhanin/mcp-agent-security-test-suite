@@ -45,6 +45,12 @@ node examples/offline-ci-check.mjs
 
 The R0 manifest test invokes **npm pack in dry-run and offline mode**. The R1 smoke also packs an actual `.tgz` **only into a disposable OS temp directory** and uses offline npm install from that local file with all lifecycle scripts disabled; it validates that the installed CLI handles PASS/FAIL/ERROR correctly and deletes the temporary tarball, npm cache and installation. Neither publishes a package nor contacts an npm registry. `npm test` includes both tests. Separately, M4-A tests briefly open fixed 127.0.0.1 TCP sockets, never remote targets.
 
+## R2: exact package-file inventory lock (review in progress)
+
+[R2 Issue #32](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) adds an explicit, sorted filename inventory under `test/expected-package-files.json`, **outside the packaged distribution**. The existing offline npm dry-run manifest test must match it exactly. Additional or missing packaged paths fail the test; an intentional package-content change therefore requires an explicit diff and inventory update. Separate synthetic mutation controls ensure both extra and missing filenames are rejected.
+
+This check guards **package membership**, not the safety of bytes inside an already-approved file. It is **not** a secret scanner, independent security audit, protocol certification or release authorization. Acceptance requires PR and post-merge four-job CI evidence; do not mark R2 complete before those results.
+
 ## Explicit release gates — NOT ALL COMPLETE
 
 - [x] Current source/license/package metadata inspected. `package.json` retains release-candidate version.
