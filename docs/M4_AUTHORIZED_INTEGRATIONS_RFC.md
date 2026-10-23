@@ -1,11 +1,13 @@
 # RFC M4-00 — Authorized MCP integration testing: architecture and approval gates
 
-**Status:** M4-A FIXED LOOPBACK-ONLY DEVELOPMENT APPROVED (2026-10-23); M4-B EXTERNAL TARGETS **NOT APPROVED**  
+**Status:** M4-A + M4-B0 offline descriptor validation ACCEPTED ([#61](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/61)); real M4-B external target contact **NOT APPROVED**  
 **Issue:** [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)  
 **As of:** 2026-10-23  
 **Product:** the independent MIT [MCP Agent Security Test Suite](../README.md)
 
 > The maintainer has separately approved **only M4-A**, a fixed first-party temporary `127.0.0.1` loopback HTTP test double, tracked in [Issue #23](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/23). It opens a local socket; no external target, arbitrary URL, credentials, OAuth, paid service, tool execution or real MCP endpoint is approved. M4-B and later phases require a **new explicit authorization**.
+
+**Implementation boundary:** The public [universal project descriptor](UNIVERSAL_ADAPTER.md) now accepts stdio or Streamable-HTTP profiles but its `adapter-check` CLI never connects or launches a user process. [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) tracks fixed first-party local mock driver development. This is no approval for arbitrary stdio commands, network scanning or credentials.
 
 ## 1. Why this milestone exists
 
