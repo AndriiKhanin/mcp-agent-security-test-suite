@@ -63,6 +63,10 @@ Official references: [2026-07-28 MCP transport overview](https://github.com/mode
 
 **Separate open gates:** [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21) M4-B real-target authorization, [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) independent security/provenance, [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) independent beta feedback. Stable release and npm publication remain unapproved.
 
+## Local transport drivers (M4-B1)
+
+The [local driver interface](LOCAL_ADAPTER_DRIVERS.md) adds `adapter-selftest` to exercise only two **fixed first-party** stdio/loopback mocks via `connect/probe/close`. It does not connect the project described by `adapter-check`; project profiles remain inert. Real user-project runtime connections require separate approval.
+
 ## M4-B0 engineering acceptance — 2026-10-23
 
 The configuration-only preview passed [PR #62](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/62) and [post-merge main CI #39962836679](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679): **4/4 PASS, 397/397 tests per Windows/Ubuntu Node20/22 job**, no failures/skips. No live target contact or independent review is claimed. The next locally safe first-party driver layer is tracked in [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63).

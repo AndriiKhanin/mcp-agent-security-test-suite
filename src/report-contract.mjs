@@ -4,7 +4,7 @@
  */
 export const REPORT_SCHEMA_VERSION = 1;
 export const CLI_COMMANDS = Object.freeze([
-  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check'
+  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check','adapter-selftest'
 ]);
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);
@@ -153,6 +153,7 @@ export function buildCliHelpResult() {
       'node src/cli.mjs version',
       'node src/cli.mjs demo',
       'node src/cli.mjs adapter-check examples/adapter-profiles/stdio-project.json',
+      'node src/cli.mjs adapter-selftest',
       'node src/cli.mjs <fixture-command> <bundled-fictional-file>'
     ],
     examples:[
