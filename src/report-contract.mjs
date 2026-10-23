@@ -4,7 +4,7 @@
  */
 export const REPORT_SCHEMA_VERSION = 1;
 export const CLI_COMMANDS = Object.freeze([
-  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo'
+  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version'
 ]);
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);
@@ -138,5 +138,45 @@ export function buildOfflineDemoResult(positive, negative) {
     failureCount:findings.length,
     findingsTruncated:false,
     findings
+  };
+}
+
+
+/** Reviewed, literal-only offline command discovery, not remote capability probing. */
+export function buildCliHelpResult() {
+  return {
+    status:'PASS',
+    profile:'local-offline-cli-help-v1',
+    commands:[...CLI_COMMANDS],
+    syntax:[
+      'node src/cli.mjs help',
+      'node src/cli.mjs version',
+      'node src/cli.mjs demo',
+      'node src/cli.mjs <fixture-command> <bundled-fictional-file>'
+    ],
+    examples:[
+      'node src/cli.mjs demo',
+      'node src/cli.mjs scenario fixtures/scenario-denial.json',
+      'node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json'
+    ],
+    scope:'fictional offline contract checks and fixed first-party localhost mock only'
+  };
+}
+
+/** Expose only allowlisted release-candidate metadata read from local package.json. */
+export function buildCliVersionResult(metadata) {
+  if (!metadata || typeof metadata !== 'object' ||
+      metadata.name !== 'mcp-agent-security-test-suite' ||
+      typeof metadata.version !== 'string' ||
+      !/^[0-9]+\.[0-9]+\.[0-9]+(?:-rc\.[0-9]+)?$/.test(metadata.version) ||
+      metadata.engines?.node !== '>=20') {
+    throw new TypeError('INVALID_BUNDLED_PACKAGE_METADATA');
+  }
+  return {
+    status:'PASS',
+    packageName:'mcp-agent-security-test-suite',
+    version:metadata.version,
+    minimumNodeVersion:'20',
+    scope:'local candidate metadata; does not claim publication'
   };
 }

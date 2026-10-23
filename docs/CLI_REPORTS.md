@@ -2,14 +2,14 @@
 
 The standalone MIT [MCP Agent Security Test Suite](../README.md) emits a machine-readable **JSON object on stdout** for every supported CLI invocation, including invalid input. Results are from **fictional offline contract checks**, not a live MCP server scan or a security certification.
 
-**Applies to:** `node src/cli.mjs <command> <synthetic-file>` for the ten fixture commands, or `node src/cli.mjs demo` with **no arguments**. Supported commands are `scenario`, `trace`, `mock`, `witness`, `process`, `stdio`, `loopback`, `jsonrpc`, `era`, `negotiate`, and `demo`. Node.js 20+ and no `npm install` or paid API are required.
+**Applies to:** `node src/cli.mjs <command> <synthetic-file>` for the ten fixture commands; `node src/cli.mjs demo|help|version` with **no additional arguments**; or the aliases `--help`, `-h`, `--version`, `-V`. Supported canonical commands are `scenario`, `trace`, `mock`, `witness`, `process`, `stdio`, `loopback`, `jsonrpc`, `era`, `negotiate`, `demo`, `help`, and `version`. Node.js 20+ and no `npm install` or paid API are required.
 
 ## Stable fields (v1)
 
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `reportSchemaVersion` | integer, exactly `1` | Major JSON report contract version, **not** package version |
-| `command` | one of the eleven supported command strings, or `null` | Validated command; unknown untrusted argument is never echoed |
+| `command` | one of the thirteen canonical command strings, or `null` | Validated command; unknown untrusted argument is never echoed |
 | `status` | `"PASS"`, `"FAIL"`, `"ERROR"` | Test contracts pass, violations detected, or CLI input/usage invalid |
 | `exitCode` | integer `0`, `1`, `2` | Mirrors process exit code |
 | `summary.failureCount` | nonnegative integer | Number of violations reported by the validator, or length of legacy mismatch array |
@@ -32,6 +32,10 @@ These fields are **additive** to pre-existing command-specific top-level fields 
 | `2` | `ERROR` | Invalid invocation, unreadable path, malformed/oversized input or failed processing; no input path, user payload or exception text is included in the **generic error report** |
 
 `stderr` retains a fixed help/error string for humans. Do not treat `stderr` contents as JSON. When exit code is `2`, stdout holds a generic structured error with `command`, `errorCode` and an empty summary; the CLI does **not** emit full input, stack traces or exception text. Usage errors do not include unknown command text.
+
+## CLI discoverability (M5-04)
+
+`help`/`--help`/`-h` returns a JSON-v1 `PASS` report with the fixed `commands`, `syntax`, `examples` and a scope disclaimer. `version`/`--version`/`-V` returns the candidate `packageName`, `version`, `minimumNodeVersion` and an explicit disclaimer that local metadata does **not** establish registry publication. No user-supplied target, file or executable is accepted by these modes. Invalid combinations return schema-v1 `ERROR` exit 2 with generic `INVALID_CLI_ARGUMENTS`. These modes do not scan local MCP servers or inspect arbitrary user files.
 
 ## Built-in first-run demo (M5-01)
 
