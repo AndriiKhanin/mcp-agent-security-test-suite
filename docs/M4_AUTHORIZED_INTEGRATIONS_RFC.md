@@ -9,6 +9,8 @@
 
 **Implementation boundary:** The public [universal project descriptor](UNIVERSAL_ADAPTER.md) now accepts stdio or Streamable-HTTP profiles but its `adapter-check` CLI never connects or launches a user process. [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) tracks fixed first-party local mock driver development. This is no approval for arbitrary stdio commands, network scanning or credentials.
 
+**M4-B5 design continuation (NO LIVE TARGET IMPLEMENTATION):** the [future-target decision packet](M4_B5_TARGET_APPROVAL.md) expands the real operator/target-ownership, per-run grant and DNS/TLS/SSRF gates after M4-B4 fixed-mock acceptance. It is an offline architecture and regression effort only. The separate approval checklist in this RFC is still open.
+
 ## 1. Why this milestone exists
 
 At M4-A acceptance the candidate had 353 developer-authored **synthetic and fixed-loopback** contract tests (plus three [release-package preflight tests](RELEASE_READINESS.md) accepted afterward, bringing the latest total to 356), structured CLI JSON reports, independent golden negative controls, and a fixed first-party stdio batch mock. These are useful for reproducible security regression design but **do not demonstrate actual MCP interoperability or real-world target safety**.
