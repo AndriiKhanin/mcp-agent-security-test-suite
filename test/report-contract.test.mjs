@@ -177,3 +177,73 @@ test('M2-01 a safe error constructor only accepts allowlisted symbolic codes',()
   assert.throws(()=>buildCliErrorReport('scenario','PRIVATE_INFO'),/INVALID_REPORT_ERROR_CODE/);
   assert.throws(()=>buildCliErrorReport('unknown-command','INVALID_CLI_ARGUMENTS'),/INVALID_REPORT_COMMAND/);
 });
+
+test('M5-02: fixed remediation advice for two bundled fictional negative controls',()=>{
+  for(const [command,path,code,expectedCommand] of [
+    ['negotiate','fixtures/mcp-negotiate-unsafe-params.json','RETRY_PARAMS_CHANGED',
+      'node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json'],
+    ['trace','fixtures/trace-unsafe.jsonl','DENIED_ACTION_HAD_EFFECT',
+      'node src/cli.mjs trace fixtures/trace-unsafe.jsonl'],
+    ['trace','fixtures/trace-unsafe-secret.jsonl','FLAGGED_SECRET_IN_AUDIT_LOG',
+      'node src/cli.mjs trace fixtures/trace-unsafe-secret.jsonl']
+  ]) {
+    const run=cli(command,path);
+    assert.equal(run.status,1,run.stderr);
+    const report=parseReport(run);
+    assert.ok(report.summary.ruleCodes.includes(code));
+    assert.deepEqual(report.guidance.map(x=>x.code),[code]);
+    assert.equal(report.guidance[0].exampleCommand,expectedCommand);
+    assert.equal(report.guidance[0].nextStep.length>10,true);
+    assert.equal(report.exitCode,1);
+  }
+});
+
+test('M5-02: guidance is a strict allowlist, deterministic and capped independently of native rows',()=>{
+  const canary='FICTIONAL_PRIVATE_CANARY';
+  const findings=[
+    {step:1,rule:'RETRY_PARAMS_CHANGED',payload:canary},
+    {step:2,rule:'DENIED_ACTION_HAD_EFFECT',message:canary},
+    {step:3,rule:'FLAGGED_SECRET_IN_AUDIT_LOG',path:canary},
+    {step:4,rule:canary},
+    {step:5,rule:'__proto__'},
+    {step:6,rule:'PRIVATE:' + canary}
+  ];
+  const payload={status:'FAIL',failureCount:6,findings};
+  const first=buildCliReport('negotiate',payload);
+  const second=buildCliReport('negotiate',structuredClone(payload));
+  assert.deepEqual(first.guidance,second.guidance);
+  assert.deepEqual(first.guidance.map(x=>x.code),[
+    'DENIED_ACTION_HAD_EFFECT','FLAGGED_SECRET_IN_AUDIT_LOG','RETRY_PARAMS_CHANGED'
+  ]);
+  assert.ok(first.guidance.length<=3);
+  assert.ok(!JSON.stringify(first.guidance).includes(canary));
+  assert.ok(!JSON.stringify(first.guidance).includes('__proto__'));
+  assert.ok(!JSON.stringify(first.guidance).includes('PRIVATE:'));
+  assert.ok(JSON.stringify(first).includes(canary),
+    'native fields remain unchanged; guidance is not a DLP guarantee');
+});
+
+test('M5-02: unknown-only, passing, and malformed rule sets provide no forged advice',()=>{
+  const a=buildCliReport('trace',{status:'FAIL',findings:[
+    {rule:'PRIVATE_SECRET_PLACEHOLDER'}, {rule:'unknown data'}
+  ]});
+  assert.deepEqual(a.guidance,[]);
+  assert.deepEqual(buildCliReport('trace',{status:'PASS',failures:[]}).guidance,[]);
+  assert.equal(a.summary.reportedFindings,2);
+});
+
+test('M5-02: invalid CLI inputs emit only fixed template with safe example',()=>{
+  for(const [args,code] of [
+    [['unknown-fake-token','PRIVATE_SENTINEL'], 'INVALID_CLI_ARGUMENTS'],
+    [['scenario','PRIVATE_SENTINEL_MISSING.json'], 'INVALID_OR_UNREADABLE_INPUT']
+  ]) {
+    const run=cli(...args);
+    assert.equal(run.status,2);
+    const report=parseReport(run);
+    assert.equal(report.errorCode,code);
+    assert.deepEqual(report.guidance.map(x=>x.code),[code]);
+    assert.equal(report.guidance[0].exampleCommand,'node src/cli.mjs demo');
+    assert.ok(!JSON.stringify(report).includes('PRIVATE_SENTINEL'));
+    assert.ok(!run.stderr.includes('PRIVATE_SENTINEL'));
+  }
+});

@@ -9,6 +9,51 @@ export const CLI_COMMANDS = Object.freeze([
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);
 const RULE = /^[A-Z][A-Z0-9_]{0,127}$/;
+
+/**
+ * M5-02: reviewed literal advice only. Never interpolate native finding text,
+ * paths, parameter values or exception messages. This is not redaction/DLP.
+ */
+const GUIDE_LIMIT = 3;
+const GUIDES = Object.freeze({
+  DENIED_ACTION_HAD_EFFECT: Object.freeze({
+    code:'DENIED_ACTION_HAD_EFFECT',
+    explanation:'A fictional denied action still produced an effect.',
+    nextStep:'Make denial produce NONE; assert no read or write occurs.',
+    exampleCommand:'node src/cli.mjs trace fixtures/trace-unsafe.jsonl'
+  }),
+  FLAGGED_SECRET_IN_AUDIT_LOG: Object.freeze({
+    code:'FLAGGED_SECRET_IN_AUDIT_LOG',
+    explanation:'A synthetic audit event explicitly flags logged secret material.',
+    nextStep:'Remove confidential fields from logs; keep only sanitized boolean evidence.',
+    exampleCommand:'node src/cli.mjs trace fixtures/trace-unsafe-secret.jsonl'
+  }),
+  RETRY_PARAMS_CHANGED: Object.freeze({
+    code:'RETRY_PARAMS_CHANGED',
+    explanation:'A fictional protocol-version retry changed other request parameters.',
+    nextStep:'Keep the method and every parameter except the negotiated protocol version unchanged.',
+    exampleCommand:'node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json'
+  })
+});
+const ERROR_GUIDES = Object.freeze({
+  INVALID_CLI_ARGUMENTS: Object.freeze({
+    code:'INVALID_CLI_ARGUMENTS',
+    explanation:'Invalid command or argument count.',
+    nextStep:'Try the no-argument fictional demo.',
+    exampleCommand:'node src/cli.mjs demo'
+  }),
+  INVALID_OR_UNREADABLE_INPUT: Object.freeze({
+    code:'INVALID_OR_UNREADABLE_INPUT',
+    explanation:'Invalid or unreadable fictional input.',
+    nextStep:'Check UTF-8 and 1 MiB size limit.',
+    exampleCommand:'node src/cli.mjs demo'
+  })
+});
+function safeGuidance(codes) {
+  return codes.filter(code=>Object.hasOwn(GUIDES,code))
+    .slice(0,GUIDE_LIMIT).map(code=>({...GUIDES[code]}));
+}
+
 const EMPTY_SUMMARY = () => ({
   failureCount:0, reportedFindings:0, findingsTruncated:false, ruleCodes:[]
 });
@@ -43,7 +88,8 @@ export function buildCliReport(command,result) {
       reportedFindings:rows.length,
       findingsTruncated:result.findingsTruncated===true,
       ruleCodes
-    }
+    },
+    guidance: result.status==='FAIL' ? safeGuidance(ruleCodes) : []
   };
 }
 
@@ -57,7 +103,8 @@ export function buildCliErrorReport(command,errorCode) {
     exitCode:2,
     status:'ERROR',
     errorCode,
-    summary:EMPTY_SUMMARY()
+    summary:EMPTY_SUMMARY(),
+    guidance:[{...ERROR_GUIDES[errorCode]}]
   };
 }
 

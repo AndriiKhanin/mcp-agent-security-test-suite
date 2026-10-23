@@ -36,6 +36,7 @@
   "fixtures/stdio-mock-safe.json",
   "fixtures/stdio-mock-unsafe.json",
   "fixtures/trace-safe.jsonl",
+  "fixtures/trace-unsafe-secret.jsonl",
   "fixtures/trace-unsafe.jsonl",
   "package.json",
   "src/adapter-harness.mjs",
