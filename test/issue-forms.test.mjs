@@ -120,3 +120,32 @@ test('M5-03: issue forms stay outside npm archive; contributor documentation is 
   assert.match(docs, /summary\.ruleCodes/);
   assert.match(docs, /fictional-only/);
 });
+
+
+test('M5-05: independent beta intake requires fixed public revision and fictional-only consent',()=>{
+  const raw=read('beta_feedback.yml');
+  const betaIds=['source_commit','version','os','node_major','runner_result',
+    'matched_count','deviations','usability','safe_disclosure','actual_test'];
+  assert.deepEqual(checkForm(raw,betaIds),[]);
+  assert.match(raw,/docs\/BETA_TESTING\.md/);
+  assert.match(raw,/not independent beta-tester evidence/);
+  assert.match(raw,/0\.0\.10-rc\.1/);
+  assert.match(raw,/BETA_\*/);
+  assert.match(raw,/personally ran the fixed fictional beta protocol/);
+  const statement=sections(raw).find(x=>x.id==='actual_test');
+  assert.equal(statement?.type,'checkboxes');
+  assert.match(statement.raw,/^\s+required: true$/m);
+  const missing=raw.replace(/^    id: source_commit$/m,'    id: missing_commit');
+  assert.ok(checkForm(missing,betaIds).includes('M5_FORM_REQUIRED_FIELD_MISSING'));
+  const noConsent=raw.replace(
+    /(id: safe_disclosure[\s\S]*?required: )true/,
+    '$1false'
+  );
+  assert.ok(checkForm(noConsent,betaIds).includes('M5_FORM_PRIVACY_CONFIRMATION_MISSING'));
+  const noPersonalRun=raw.replace(
+    /(id: actual_test[\s\S]*?required: )true/,
+    '$1false'
+  );
+  const brokenStatement=sections(noPersonalRun).find(x=>x.id==='actual_test');
+  assert.doesNotMatch(brokenStatement.raw,/^\s+required: true$/m);
+});

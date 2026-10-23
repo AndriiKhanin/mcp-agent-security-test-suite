@@ -38,6 +38,16 @@ The new `demo` mode runs two **bundled fictional fixtures**, validates both an e
 
 **M5-02 remediation preview:** FAIL reports also provide bounded, fixed-text `guidance` for three representative synthetic rule codes, with approved next steps and bundled offline reproduction commands. Generic usage/input errors have fixed guidance too. Unrecognized rules are never interpolated into advice; existing native result fields are **not** a DLP filter. See [CLI guidance contract](docs/CLI_REPORTS.md).
 
+## Fictional-only beta self-check (M5-05)
+
+The [beta acceptance protocol](docs/BETA_TESTING.md) describes a clean public checkout and a zero-input runner:
+
+```sh
+node examples/beta-acceptance-check.mjs
+```
+
+It checks five **bundled fictional** cases, including one intentionally detected `FAIL`, and emits bounded JSON with exact expected statuses and symbolic rule codes. It does **not** connect to an external MCP target, independently certify security, sanitize arbitrary user input, or claim any real developer has participated. Real independent feedback must be submitted voluntarily using the [fictional beta report form](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose), with no credentials, private logs or machine paths.
+
 ## Candidate packaging (not yet published)
 
 The prerelease package declares an executable `mcp-agent-security`, an audited `files` allowlist and zero dependencies. `npm run release:preflight` checks the archive manifest in offline dry-run mode; the full `node --test` suite also performs a **disposable offline local tarball installation smoke**, verifies the installed CLI and deletes all temp files. The [R2 exact package inventory guard](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) fails on unreviewed new or missing packaged file paths; it does not inspect the safety of approved file contents. No registry access or publication occurs. Do not run `npm publish` or create stable tags without separate explicit approval. See [release readiness](docs/RELEASE_READINESS.md), the [R3 internal release review](docs/R3_INTERNAL_RELEASE_REVIEW.md), the [R4 offline artifact-integrity checks](docs/R4_ARTIFACT_INTEGRITY.md) and the [R5 independent-review handoff](docs/R5_INDEPENDENT_REVIEW.md). None substitutes for the still-open [R5-B independent reviewer release gate](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) or permission to publish.

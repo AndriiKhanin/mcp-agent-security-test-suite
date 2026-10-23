@@ -1,0 +1,96 @@
+name: "Fictional beta acceptance report"
+description: "Share independently run, fictional-only offline acceptance results; no sensitive logs."
+title: "[Beta]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a PUBLIC Issue. Run only the fixed local protocol described in
+        docs/BETA_TESTING.md. Do not paste confidential output, private MCP
+        endpoints, credentials, customer logs, screenshots with private data
+        or environment dumps. For vulnerabilities see SECURITY.md and use a
+        private reporting channel, not public feedback.
+        A green CI run is not independent beta-tester evidence.
+  - type: input
+    id: source_commit
+    attributes:
+      label: "Full public source commit SHA"
+      description: "From git rev-parse HEAD on the public checkout (not your machine path)."
+      placeholder: "40-character public Git commit hash"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: "Candidate version"
+      placeholder: "0.0.10-rc.1"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: "Operating system"
+      options:
+        - "Windows"
+        - "Ubuntu"
+        - "Other (unvalidated; fictional-only feedback)"
+    validations:
+      required: true
+  - type: dropdown
+    id: node_major
+    attributes:
+      label: "Node.js major version"
+      options:
+        - "20"
+        - "22"
+        - "Other (not part of four-job CI acceptance)"
+    validations:
+      required: true
+  - type: dropdown
+    id: runner_result
+    attributes:
+      label: "Offline beta runner result"
+      options:
+        - "PASS (all five fixed controls matched)"
+        - "FAIL (one or more expected controls differed)"
+        - "ERROR (bad invocation; no tests accepted)"
+    validations:
+      required: true
+  - type: input
+    id: matched_count
+    attributes:
+      label: "Matched fictional controls"
+      description: "Use a number from 0 to 5, not a raw log or secret."
+      placeholder: "5"
+    validations:
+      required: true
+  - type: textarea
+    id: deviations
+    attributes:
+      label: "Unexpected cases or symbolic rule codes (if any)"
+      description: "List only OFFLINE_HELP, LOCAL_VERSION, FIXED_DEMO, POLICY_DENIAL, RETRY_MUTATION and BETA_* codes, or NONE."
+      placeholder: "NONE"
+    validations:
+      required: true
+  - type: textarea
+    id: usability
+    attributes:
+      label: "Instructions and usability feedback"
+      description: "Describe clarity, rough edges and reproducible fictional-only observations. No real logs."
+      placeholder: "Using public synthetic fixtures, I found..."
+    validations:
+      required: true
+  - type: checkboxes
+    id: safe_disclosure
+    attributes:
+      label: "Public disclosure confirmation"
+      options:
+        - label: "I confirm this report contains only fictional or public information, with no credentials, private endpoints, customer records, raw production logs, confidential source or exploit details."
+          required: true
+  - type: checkboxes
+    id: actual_test
+    attributes:
+      label: "Independent execution statement"
+      options:
+        - label: "I personally ran the fixed fictional beta protocol on the reported public checkout; this is not a copied CI result."
+          required: true
