@@ -49,6 +49,14 @@ node src/cli.mjs adapter-check examples/adapter-profiles/streamable-http-project
 
 These commands **validate configuration only** and return `connectionStatus: "NOT_ATTEMPTED"` and `executionEnabled: false`. [M4-B0 #61](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/61) is accepted; [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) tracks the next first-party local transport-driver stage. They do not connect to the user's server, execute the configured subprocess, perform DNS resolution or prove target ownership. Actual opt-in connections require a separately reviewed and authorized transport implementation. No external MCP contact has been approved.
 
+## First-party local driver selftest (M4-B1)
+
+```sh
+node src/cli.mjs adapter-selftest
+```
+
+This no-argument mode uses only the known first-party stdio child and temporary `127.0.0.1` HTTP mock through a common `connect → probe → close` lifecycle. It does **not** use your project descriptor, contact an external MCP target, or authenticate a real server. [Driver scope and limitations](docs/LOCAL_ADAPTER_DRIVERS.md).
+
 ## Fictional-only beta self-check (M5-05)
 
 The [beta acceptance protocol](docs/BETA_TESTING.md) describes a clean public checkout and a zero-input runner:

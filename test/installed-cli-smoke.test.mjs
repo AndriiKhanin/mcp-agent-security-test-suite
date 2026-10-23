@@ -176,6 +176,16 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       assert.equal(result.transport,expected);
     }
 
+    // Only fixed stdio child and ephemeral first-party 127.0.0.1 mock.
+    const drivers=invokeNode(executable,['adapter-selftest'],temp,env);
+    assert.equal(drivers.status,0,'installed local driver selftest must pass');
+    const local=JSON.parse(drivers.stdout);
+    assert.equal(local.reportSchemaVersion,1);
+    assert.equal(local.command,'adapter-selftest');
+    assert.equal(local.status,'PASS');
+    assert.equal(local.connectionStatus,'FIRST_PARTY_MOCK_ONLY');
+    assert.equal(local.externalTargetContacted,false);
+    assert.deepEqual([local.transportCount,local.passed,local.failed],[2,2,0]);
     const fakePath = join(temp, 'FICTIONAL_MISSING_INPUT_DO_NOT_ECHO.json');
     const invalid = invokeNode(executable, ['scenario', fakePath], temp, env);
     assert.equal(invalid.status, 2, 'invalid input must fail closed');
