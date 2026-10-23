@@ -27,3 +27,7 @@ For the actual universal adapter to connect to a user project, independently rev
 ## Engineering acceptance — 2026-10-23
 
 [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) was accepted through [PR #65](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/65) and [main CI #39966437277](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39966437277): **4/4 PASS, 407/407 tests/job**, 0 failures/skips. The next offline consent-policy stage is [M4-B2 #66](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/66). No arbitrary target connection or stable release is authorized.
+
+## M4-B3 admission control (in development)
+
+The top-level `adapter-selftest` now routes through a [fixed synthetic admission gate](LOCAL_CONSENT_GATE.md). A denied fictional claim returns **before** the first-party mock driver is constructed. For admitted stdio, the guarded path uses a new separate **initialize-only** fixture that does not send tool discovery or tool invocation. The existing lower-level four-message legacy harness (including deliberate allowed/denied fictional tool calls) is preserved solely as an independent synthetic regression test. An admitted HTTP case still uses a fixed 127.0.0.1 ping. No real authorization, arbitrary child or remote endpoint has been enabled.

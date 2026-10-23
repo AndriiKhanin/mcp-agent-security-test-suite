@@ -32,3 +32,7 @@ Actual connection requires a new reviewed stdio/HTTP driver bound to explicit ow
 ## M4-B2 engineering acceptance — 2026-10-23
 
 [M4-B2 #66](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/66) was merged in [PR #68](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/68); [post-merge main CI #39972783779](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39972783779) confirmed **4/4 PASS, 417/417 tests per Windows/Ubuntu Node20/22 job**, 0 failed/skipped. The reviewed exact archive grew **66→69**. This is engineering acceptance of non-executing, self-asserted consistency rules only, NOT verified authorization. [M4-B3 #69](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/69) is the next first-party mock-only enforcement task.
+
+## M4-B3 mock-only policy integration (in development)
+
+The [first-party local gate](LOCAL_CONSENT_GATE.md) applies this module's **synthetic consistency** decisions before constructing a fixed mock driver. It never accepts a caller-supplied grant or upgrades `operatorVerified`; even passing test claims represent no real ownership or permission to use an external MCP server. The guarded stdio request is initialize-only.

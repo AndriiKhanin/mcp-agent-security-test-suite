@@ -59,7 +59,9 @@ node src/cli.mjs adapter-policy-check examples/adapter-profiles/consent-expired.
 
 This example **intentionally FAILS** (expired, fictional claim), and the output never grants execution: `authorizationStatus: "UNVERIFIED_SELF_ASSERTION"`, `connectionStatus: "NOT_ATTEMPTED"`, `executionEnabled: false`. The [policy guide](docs/ADAPTER_CONSENT_POLICY.md) explains exact descriptor fingerprints, five-minute consistency windows, strict method denials and why a self-asserted JSON claim **cannot** verify operator ownership or authorize a real MCP connection.
 
-## First-party local driver selftest (M4-B1 — accepted)
+## First-party local driver selftest (M4-B1 and M4-B3 mock-only gate)
+
+The [M4-B3 admission design](docs/LOCAL_CONSENT_GATE.md) checks a fixed suite-owned fictional identity **before** constructing either mock driver. The stdio guarded path sends only `initialize` (no `tools/list` or `tools/call`); the HTTP guarded path sends the fixed local `ping`. The lower-level legacy test harness still exists for separate explicit synthetic security tests, not as real target authorization.
 
 [Merged PR #65](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/65) and [main CI #39966437277](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39966437277): **4/4 PASS, 407/407 tests per job**. The offline permission consistency layer [M4-B2 #66](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/66) has now been accepted; the next [M4-B3 mock enforcement #69](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/69) remains strictly first-party-only. User-owned target execution remains prohibited.
 

@@ -182,10 +182,15 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     const local=JSON.parse(drivers.stdout);
     assert.equal(local.reportSchemaVersion,1);
     assert.equal(local.command,'adapter-selftest');
+    assert.equal(local.consentProfile,'fixed-first-party-admission-v1');
+    assert.equal(local.authorizationStatus,'FIRST_PARTY_SYNTHETIC_ONLY');
+    assert.equal(local.operatorVerified,false);
     assert.equal(local.status,'PASS');
     assert.equal(local.connectionStatus,'FIRST_PARTY_MOCK_ONLY');
     assert.equal(local.externalTargetContacted,false);
     assert.deepEqual([local.transportCount,local.passed,local.failed],[2,2,0]);
+    assert.deepEqual(local.outcomes.map(o=>o.checked),[1,1]);
+    assert.ok(local.outcomes.every(o=>o.gateStatus==='MOCK_ADMITTED' && o.mockProbeAttempted));
     // Intentional expired self-assertion: validates the offline policy
     // report from the actual installed package without authorizing access.
     const expired=join(packageDir,'examples','adapter-profiles','consent-expired.json');
