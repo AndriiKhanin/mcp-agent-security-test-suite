@@ -1,6 +1,6 @@
 {
   "name": "mcp-agent-security-test-suite",
-  "version": "0.0.9",
+  "version": "0.0.10-rc.1",
   "type": "module",
   "description": "Offline synthetic MCP and AI agent security contract tests with zero runtime dependencies",
   "engines": {

@@ -1,5 +1,6 @@
 // OFFLINE synthetic test-profile validator for modern MCP version/capability errors.
 // No network, no auth decisions, no real MCP transport and no auto-retry execution.
+import { isDeepStrictEqual } from 'node:util';
 export const UNSUPPORTED_PROTOCOL_VERSION = -32022;
 export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32021;
 const own = (o,k) => Object.hasOwn(o,k);
@@ -11,6 +12,14 @@ const id = x => string(x) || Number.isSafeInteger(x);
 const capabilitySet = x => record(x) && Object.keys(x).length<=32 &&
   Object.entries(x).every(([k,v])=>string(k,128) && record(v) && JSON.stringify(v).length<=2048);
 const same = (a,b) => JSON.stringify(a)===JSON.stringify(b);
+const VERSION_META_KEY = 'io.modelcontextprotocol/protocolVersion';
+// Preserve the entire retry payload except the single negotiated version field.
+// isDeepStrictEqual treats reordered object keys as equal; no arguments are logged.
+function withoutNegotiatedVersion(params) {
+  const copy = { ...params, _meta: { ...params._meta } };
+  delete copy._meta[VERSION_META_KEY];
+  return copy;
+}
 const fields = (v,names) => Object.keys(v).every(x=>names.includes(x));
 
 export function auditModernNegotiation(input) {
@@ -24,7 +33,8 @@ export function auditModernNegotiation(input) {
   const findings=[];
   const flag=(step,rule)=>{failureCount++;if(findings.length<200)findings.push({step,rule});};
   let pendingRetry = null;
-  let pendingMethod = null; // accepted intersection from the preceding unsupported-version response
+  let pendingMethod = null; // method from the preceding unsupported-version response
+  let pendingParams = null; // frozen-by-convention read-only baseline, with version omitted
   let completed = 0;
   const seenIds = new Set();
   for (let index=0;index<input.steps.length;index++) {
@@ -39,7 +49,7 @@ export function auditModernNegotiation(input) {
         !fields(req,['jsonrpc','id','method','params']) || !record(req.params) ||
         !record(req.params._meta)) {flag(at,'INVALID_MODERN_REQUEST');continue;}
     const meta=req.params._meta;
-    const requested=meta['io.modelcontextprotocol/protocolVersion'];
+    const requested=meta[VERSION_META_KEY];
     const capabilities=meta['io.modelcontextprotocol/clientCapabilities'];
     if (!string(requested,32) || !input.clientVersions.includes(requested) ||
         !capabilitySet(capabilities)) flag(at,'INVALID_PER_REQUEST_DECLARATION');
@@ -53,7 +63,10 @@ export function auditModernNegotiation(input) {
     if (pendingRetry !== null) {
       if (!pendingRetry.includes(requested)) flag(at,'RETRY_VERSION_NOT_MUTUALLY_SUPPORTED');
       if (req.method!==pendingMethod) flag(at,'RETRY_METHOD_CHANGED');
-      pendingRetry=null; pendingMethod=null;
+      if (!isDeepStrictEqual(withoutNegotiatedVersion(req.params), pendingParams)) {
+        flag(at,'RETRY_PARAMS_CHANGED');
+      }
+      pendingRetry=null; pendingMethod=null; pendingParams=null;
     }
     if (res.jsonrpc!=='2.0' || !own(res,'id') ||
         typeof res.id!==typeof req.id || res.id!==req.id ||
@@ -77,6 +90,7 @@ export function auditModernNegotiation(input) {
       const overlap=data.supported.filter(v=>input.clientVersions.includes(v));
       if (overlap.length>0) {
         pendingRetry=overlap; pendingMethod=req.method;
+        pendingParams=withoutNegotiatedVersion(req.params);
       } else if (index<input.steps.length-1) {
         flag(at,'RETRY_AFTER_NO_COMMON_VERSION');
       }
