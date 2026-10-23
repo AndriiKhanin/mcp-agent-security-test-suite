@@ -1,6 +1,6 @@
 # M4-B6-B — disposable fixed first-party staging process
 
-**Status: implementation / engineering CI pending**. [Issue #82](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/82). Owner authorized building **our own isolated staging** only. No external/user-owned MCP, remote deployment, customer credentials or unreviewed process execution.
+**Status: first-party owned process engineering ACCEPTED; no external target permission.** [Issue #82](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/82). Owner authorized building **our own isolated staging** only. No external/user-owned MCP, remote deployment, customer credentials or unreviewed process execution.
 
 ## Run
 
@@ -29,4 +29,4 @@ Real external target [authorization RFC #21](https://github.com/AndriiKhanin/mcp
 
 ## Acceptance
 
-After reviewed PR 4/4 CI and post-merge main CI 4/4, record actual job/test counts, commit and package 78-path manifest here. Do not claim accepted before verified evidence.
+Completed through [merged PR #83](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/83), main commit `21b51d143cdd3716a21c0b6f75bfc7d8917fbbf0`. [PR CI #39991529128](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39991529128) and [post-merge main CI #39991717781](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39991717781): **4/4 PASS, 466/466 tests per Windows/Ubuntu Node 20/22 job, 0 failures/skips**, individual logs reviewed. Exact reviewed npm package manifest **75→78 paths**. This is first-party engineering acceptance only, **not** OS sandbox evidence, external MCP interoperability or approval to test real user targets.
