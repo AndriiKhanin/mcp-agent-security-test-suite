@@ -186,20 +186,20 @@ function serve(fault,counts,port){
         'response-sse-wrong-event','response-sse-truncated',
         'response-sse-bad-utf8','response-sse-dangling-data'].includes(fault);
       // Raw malformed UTF-8 is intentionally local and NEVER reflected in reports.
-      const bytes=fault==='response-sse-bad-utf8'
+      const responseBytes=fault==='response-sse-bad-utf8'
         ?Buffer.concat([Buffer.from('event: message\ndata: '),
           Buffer.from([0xC3,0x28]),Buffer.from('\n\n')])
         :Buffer.from(payload,'utf8');
       res.writeHead(200,{'content-type':fault==='response-content-type'
         ?'text/plain':sse?'text/event-stream':'application/json',
         'cache-control':'no-store',connection:'close',
-        'content-length':String(bytes.length)});
+        'content-length':String(responseBytes.length)});
       if(fault==='sse-fragmented'){
         // Exercise client reassembly across HTTP data chunks.
-        const cut=Math.floor(bytes.length/2);
-        res.write(bytes.subarray(0,cut));
-        res.end(bytes.subarray(cut));
-      }else res.end(bytes);
+        const cut=Math.floor(responseBytes.length/2);
+        res.write(responseBytes.subarray(0,cut));
+        res.end(responseBytes.subarray(cut));
+      }else res.end(responseBytes);
     });
     req.on('error',()=>{}); // never log or echo transport errors
   };
