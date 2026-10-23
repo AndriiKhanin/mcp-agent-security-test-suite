@@ -1,0 +1,295 @@
+{
+  "format": "mcp-agent-negative-controls-v1",
+  "scope": "offline-fictional-only",
+  "positive": {
+    "policy": "baseline fictional authorized write",
+    "protocol": "fixtures/mcp-negotiate-safe.json (first two exchanges)"
+  },
+  "policyCases": [
+    {
+      "id": "wrong-request-owner",
+      "path": [
+        "actions",
+        0,
+        "owner"
+      ],
+      "value": "fixture-other",
+      "expected": {
+        "decision": "DENY",
+        "reason": "OWNER_MISMATCH",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "wrong-grant-owner",
+      "path": [
+        "actions",
+        0,
+        "grant",
+        "owner"
+      ],
+      "value": "fixture-other",
+      "expected": {
+        "decision": "DENY",
+        "reason": "OWNER_MISMATCH",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "wrong-request-resource",
+      "path": [
+        "actions",
+        0,
+        "resource"
+      ],
+      "value": "mcp://fixture-b",
+      "expected": {
+        "decision": "DENY",
+        "reason": "AUDIENCE_MISMATCH",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "wrong-grant-resource",
+      "path": [
+        "actions",
+        0,
+        "grant",
+        "resource"
+      ],
+      "value": "mcp://fixture-b",
+      "expected": {
+        "decision": "DENY",
+        "reason": "AUDIENCE_MISMATCH",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "stale-generation",
+      "path": [
+        "actions",
+        0,
+        "grant",
+        "generation"
+      ],
+      "value": 6,
+      "expected": {
+        "decision": "DENY",
+        "reason": "STALE_GENERATION",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "early-grant",
+      "path": [
+        "actions",
+        0,
+        "grant",
+        "notBefore"
+      ],
+      "value": 101,
+      "expected": {
+        "decision": "DENY",
+        "reason": "NOT_YET_VALID",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "expired-grant",
+      "path": [
+        "actions",
+        0,
+        "grant",
+        "expiresAt"
+      ],
+      "value": 100,
+      "expected": {
+        "decision": "DENY",
+        "reason": "EXPIRED_GRANT",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "missing-grant-write-scope",
+      "path": [
+        "actions",
+        0,
+        "grant",
+        "scopes"
+      ],
+      "value": [
+        "note:read"
+      ],
+      "expected": {
+        "decision": "DENY",
+        "reason": "INSUFFICIENT_SCOPE",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "missing-policy-write-scope",
+      "path": [
+        "policy",
+        "scopes"
+      ],
+      "value": [
+        "note:read"
+      ],
+      "expected": {
+        "decision": "DENY",
+        "reason": "INSUFFICIENT_SCOPE",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "untrusted-origin",
+      "path": [
+        "actions",
+        0,
+        "origin"
+      ],
+      "value": "untrusted",
+      "expected": {
+        "decision": "DENY",
+        "reason": "UNTRUSTED_ORIGIN",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "unknown-tool",
+      "path": [
+        "actions",
+        0,
+        "tool"
+      ],
+      "value": "fictional-other-tool",
+      "expected": {
+        "decision": "DENY",
+        "reason": "UNKNOWN_TOOL",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "precommit-fault",
+      "path": [
+        "actions",
+        0,
+        "fault"
+      ],
+      "value": "before-commit",
+      "expected": {
+        "decision": "DENY",
+        "reason": "SIMULATED_PRECOMMIT_FAILURE",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    },
+    {
+      "id": "unapproved-delete",
+      "path": [
+        "actions",
+        0,
+        "tool"
+      ],
+      "value": "delete-note",
+      "expected": {
+        "decision": "DENY",
+        "reason": "APPROVAL_REQUIRED",
+        "effect": "NONE",
+        "writes": 0,
+        "notes": 0
+      }
+    }
+  ],
+  "protocolCases": [
+    {
+      "id": "changed-method",
+      "path": [
+        "steps",
+        1,
+        "request",
+        "method"
+      ],
+      "value": "prompts/list",
+      "rule": "RETRY_METHOD_CHANGED"
+    },
+    {
+      "id": "changed-arguments",
+      "path": [
+        "steps",
+        1,
+        "request",
+        "params",
+        "arguments"
+      ],
+      "value": {
+        "fictionalMarker": "altered"
+      },
+      "rule": "RETRY_PARAMS_CHANGED"
+    },
+    {
+      "id": "changed-capabilities",
+      "path": [
+        "steps",
+        1,
+        "request",
+        "params",
+        "_meta",
+        "io.modelcontextprotocol/clientCapabilities"
+      ],
+      "value": {
+        "elicitation": {
+          "form": {}
+        }
+      },
+      "rule": "UNAUTHORIZED_CAPABILITY_DECLARATION"
+    },
+    {
+      "id": "unapproved-version",
+      "path": [
+        "steps",
+        1,
+        "request",
+        "params",
+        "_meta",
+        "io.modelcontextprotocol/protocolVersion"
+      ],
+      "value": "2099-01-01",
+      "rule": "RETRY_VERSION_NOT_MUTUALLY_SUPPORTED"
+    },
+    {
+      "id": "mismatched-response-id",
+      "path": [
+        "steps",
+        1,
+        "response",
+        "id"
+      ],
+      "value": "other-retry",
+      "rule": "INVALID_NEGOTIATION_RESPONSE"
+    }
+  ]
+}
