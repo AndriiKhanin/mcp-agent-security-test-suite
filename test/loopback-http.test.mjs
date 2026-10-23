@@ -106,8 +106,8 @@ test('M4-A refuse target URL, shell command, custom method and timeout from fixt
     {profile:'fixed-first-party-loopback-v1',fault:'not-allowed'}
   ];
   for(const value of bad) assert.throws(()=>runLoopbackHttpScenario(value),/INVALID_LOOPBACK_FIXTURE/);
-  assert.throws(()=>runLoopbackHttpMock({fault:'not-allowed'}),/INVALID_LOOPBACK_FAULT/);
-  assert.throws(()=>runLoopbackHttpMock({deadlineMs:6000}),/INVALID_LOOPBACK_DEADLINE/);
+  await assert.rejects(runLoopbackHttpMock({fault:'not-allowed'}),/INVALID_LOOPBACK_FAULT/);
+  await assert.rejects(runLoopbackHttpMock({deadlineMs:6000}),/INVALID_LOOPBACK_DEADLINE/);
 });
 test('M4-A invalid fixture CLI fails with generic error and no URL echo',()=>{
   const run=cli('fixtures/loopback-invalid.json');
