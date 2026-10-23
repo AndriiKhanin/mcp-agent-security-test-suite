@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 370 synthetic/local, packaging, content-hygiene and M5 first-run tests | [M5-01 PR #46](../../pull/46) and [post-merge CI](../../actions/runs/39944760146) — 4/4 jobs, 370/370 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 374 synthetic/local, packaging, content-hygiene and M5 onboarding/diagnostics tests | [M5-02 PR #50](../../pull/50) and [post-merge CI](../../actions/runs/39953093188) — 4/4 jobs, 374/374 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -71,7 +71,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M5 beta onboarding (active)
 
-- **M5-02 — IN PROGRESS:** [Issue #49](../../issues/49) adds strictly allowlisted, bounded human-readable guidance to JSON v1 reports, plus reproducible fictional negative fixtures and malicious-data tests. Feature branch and CI required before acceptance; no release publication.
+- **M5-02 — DONE:** [Issue #49](../../issues/49), [merged PR #50](../../pull/50) and [post-merge main CI #39953093188](../../actions/runs/39953093188) verified **4/4 PASS, 374/374 tests per job**. Strictly allowlisted, bounded human-readable guidance and three reproducible fictional negative controls are integrated into JSON v1. Native fields are not DLP-filtered; publication and independent [R5-B #43](../../issues/43) remain unapproved.
 - **M5-01 — DONE:** [Issue #45](../../issues/45) delivered `node src/cli.mjs demo` with no arguments, verifying one bundled synthetic PASS and one expected negative control from both source and the candidate's temporarily installed package. [Merged PR #46](../../pull/46) and [post-merge main CI #39944760146](../../actions/runs/39944760146): **4/4 PASS, 370/370 tests per job**. This is not a live scanner; independent [R5-B #43](../../issues/43) and release authorization remain open.
 
 ## Release gates and boundaries
