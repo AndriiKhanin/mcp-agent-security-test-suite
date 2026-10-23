@@ -55,6 +55,10 @@ This check guards **package membership**, not the safety of bytes inside an alre
 
 [R3 Issue #35](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/35) records a [targeted internal review](R3_INTERNAL_RELEASE_REVIEW.md) of the synthetic source and its release surface. Its presence in `docs/` intentionally expands the exact package path inventory from the R2 historical baseline of **54** to **55** reviewed paths. The path lock does not attest package bytes, code provenance or secret absence. **This is not an independent review and does not satisfy the independent review, destination, version, authorization or post-publication gates below.** R3 internal-review delivery is **accepted** via [PR #36](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/36) and [post-merge main CI 39935969302](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39935969302) — **4/4 PASS and 358/358 tests per job**, 0 failures/skips. The independent review and release gates below remain unchecked.
 
+## R4 — offline artifact reproducibility preflight (pending acceptance)
+
+[Issue #38](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/38) introduces a [two-pack local artifact test](R4_ARTIFACT_INTEGRITY.md) with per-job SHA-256/sha512 checks and source-to-installed-file byte comparisons. The new R4 document intentionally grows the exact package inventory from R3's **55** to **56** files. This is *not* an independently signed or uploaded artifact, a provenance attestation, or publication approval. The change requires a reviewed PR and post-merge 4/4 CI before R4 may be marked accepted.
+
 ## Explicit release gates — NOT ALL COMPLETE
 
 - [x] Current source/license/package metadata inspected. `package.json` retains release-candidate version.
