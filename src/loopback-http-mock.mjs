@@ -7,6 +7,7 @@
 import http from 'node:http';
 import { isDeepStrictEqual } from 'node:util';
 import { parseStrictJson } from './strict-json.mjs';
+import { noteFirstPartyMockAttempt } from './mock-attempt-observer.mjs';
 
 const HOST='127.0.0.1';
 const ORIGIN='http://127.0.0.1';
@@ -126,6 +127,7 @@ function sendFixedRequest(port,fault,signal,counts){
   return new Promise(resolve=>{
     let settled=false;
     const finish=(rule)=>{if(!settled){settled=true;resolve(rule);}};
+    noteFirstPartyMockAttempt('http-request'); // first-party client call site
     const req=http.request({
       hostname:HOST,port,path:params.path,method:params.method,
       headers:params.headers,agent:false,signal
@@ -185,6 +187,7 @@ export async function runLoopbackHttpMock(options={}){
     await new Promise((resolve,reject)=>{
       const onError=error=>reject(error);
       server.once('error',onError);
+      noteFirstPartyMockAttempt('http-bind'); // actual loopback bind call site
       server.listen({host:HOST,port:0,exclusive:true},()=>{
         server.off('error',onError);resolve();
       });

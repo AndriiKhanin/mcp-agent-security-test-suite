@@ -22,6 +22,12 @@ The `src/local-consent-gate.mjs` module constructs **private, program-generated*
 
 The public test helper `runGatedFixedMockCase` supports a **finite set of first-party synthetic fault selectors only**: `revoked`, `expired`, `wrong-project`, `wrong-operator`, `wrong-method`, `changed-descriptor`, `replay` and `forbidden-method`. No caller-supplied descriptor, URL, executable path, custom method, credentials or raw MCP payloads can be used. A test can provide a process-local replay Set or a synthetic time override; **neither is real-world authorization**. Negative controls assert zero attempted mock effects. The direct lower-level `createFirstPartyDriver()` remains an intentionally unprivileged test utility, not a comprehensive security boundary for arbitrary code running in the Node process.
 
+## M4-B4 test-only transport-attempt observation (IN PROGRESS)
+
+A reviewable, in-process `AsyncLocalStorage` instrumentation seam attaches **only when a trusted in-repository test calls** `observeFirstPartyMockAttempts(run)`. It records fixed symbolic attempts **at real first-party source call sites**, not fields from the authorization result: `driver-probe` at the driver probe entry, `stdio-spawn` immediately before the first-party worker `spawnSync`, `http-bind` immediately before `server.listen`, and `http-request` immediately before the fixed loopback `http.request`. Rejected mock admissions are expected to yield **zero observed attempts**. Positive controls must observe the expected events when the fixed mocks actually run. Concurrent tests have isolated scopes.
+
+This improves source-level evidence over M4-B3's self-reported flags, but does **not** instrument kernel process creation, network syscalls, other modules or external activity. The observer records no addresses, ports, credentials or messages and does not appear in CLI JSON; raw external profile objects cannot register it. Arbitrary JavaScript in the same process may invoke the separate low-level drivers and bypass the admission helper. The observer itself neither prevents nor authorizes effects.
+
 ## Critical limitations
 
 - **Synthetic, not authenticated:** an in-memory example does not prove control of a user-owned project. A self-computed SHA-256 is not a signature. This gate must **never** be reused as real authorization.

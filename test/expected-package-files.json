@@ -58,6 +58,7 @@
   "src/loopback-http-mock.mjs",
   "src/mcp-era-contract.mjs",
   "src/mcp-modern-negotiation.mjs",
+  "src/mock-attempt-observer.mjs",
   "src/mock-mcp.mjs",
   "src/policy.mjs",
   "src/process-mcp-harness.mjs",
