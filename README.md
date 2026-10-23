@@ -64,6 +64,10 @@ Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a 
 
 [The pinned first-party protocol-negative matrix](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) checks exact HTTP/JSON-RPC status distinctions for header mismatch (`-32020`), unsupported version (`-32022`), method-not-found (`-32601`), and malformed SSE. This only tests our own temporary localhost fixture; it is not general MCP conformance or a real-target scanner.
 
+## Bounded request-scoped SSE on owned staging (M4-B6-E)
+
+[The finite SSE test scope](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) admits the first-party server's reviewed request-related logging notice and SSE keepalive comments **before** the single final response, within strict finite limits. Unsolicited server RPCs, duplicate/missing finals, malformed UTF-8, excess events and unsupported payloads fail closed. **No generic MCP transport client or external target contact.**
+
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 
 Users can describe their own MCP projects using a [portable project descriptor](docs/UNIVERSAL_ADAPTER.md), choosing `stdio` or `streamable-http` without product-specific code:

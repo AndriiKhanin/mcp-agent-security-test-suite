@@ -12,11 +12,17 @@ import { noteFirstPartyMockAttempt } from './mock-attempt-observer.mjs';
 const HOST='127.0.0.1', ORIGIN='http://127.0.0.1';
 const VERSION='2026-07-28', METHOD='server/discover', PATH='/mcp';
 const REQUEST_MAX=4096, RESPONSE_MAX=32768, DEFAULT_DEADLINE=5000;
+const SSE_MAX_BLOCKS=12, SSE_MAX_NOTIFICATIONS=2, SSE_MAX_COMMENTS=8;
 const CASES=new Set(['allowed','sse','wrong-origin','wrong-host','wrong-method',
   'forbidden-tool','wrong-version','wrong-path','invalid-json','oversized-request',
   'response-id','response-canary','response-oversized','response-redirect','response-hang',
   'response-version','response-content-type','response-sse-extra',
-  'response-sse-missing-final','response-sse-unsolicited']);
+  'response-sse-missing-final','response-sse-unsolicited',
+  'sse-comment-log','sse-comment-only','sse-multiline-data','sse-fragmented',
+  'response-sse-invalid-json','response-sse-unknown-notification',
+  'response-sse-over-event-limit','response-sse-over-comment-limit',
+  'response-sse-final-first','response-sse-wrong-event','response-sse-truncated',
+  'response-sse-bad-utf8','response-sse-dangling-data']);
 const REQUEST=Object.freeze({jsonrpc:'2.0',id:1,method:METHOD,params:{_meta:{
   'io.modelcontextprotocol/protocolVersion':VERSION,
   'io.modelcontextprotocol/clientInfo':{name:'fixed-staging-client',version:'1'},
@@ -26,6 +32,11 @@ const RESPONSE=Object.freeze({jsonrpc:'2.0',id:1,result:{
   resultType:'complete',supportedVersions:[VERSION],capabilities:{},
   _meta:{'io.modelcontextprotocol/serverInfo':{name:'fixed-staging-server',version:'1'}}
 }});
+// Literal reviewed first-party logging event; a request-scoped notification,
+// NOT permission to subscribe or dispatch arbitrary server-originated RPCs.
+const LOG_NOTICE=Object.freeze({jsonrpc:'2.0',method:'notifications/message',
+  params:{level:'info',data:'owned-discovery-progress'}});
+const sseMessage=value=>'event: message\n'+'data: '+JSON.stringify(value)+'\n\n';
 const SENSITIVE=new Set(['host','origin','content-type','content-length',
   'mcp-protocol-version','mcp-method','mcp-name','accept','authorization',
   'cookie','proxy-authorization','transfer-encoding','mcp-session-id']);
@@ -133,14 +144,62 @@ function serve(fault,counts,port){
       if(fault==='response-sse-unsolicited')
         payload='event: message\n'+'data: '+JSON.stringify({jsonrpc:'2.0',
           id:2,method:'sampling/createMessage',params:{messages:[]}})+'\n\n'+
-          'event: message\n'+'data: '+JSON.stringify(RESPONSE)+'\n\n';
+          sseMessage(RESPONSE);
+      // All variants are source-owned finite test faults, never CLI parameters.
+      if(fault==='sse-comment-log')
+        payload=': owned keepalive\r\n\r\n'+sseMessage(LOG_NOTICE)+
+          ': still owned\n\n'+sseMessage(RESPONSE);
+      if(fault==='sse-comment-only')
+        payload=': keepalive\n\n'+sseMessage(RESPONSE);
+      if(fault==='sse-multiline-data'){
+        const json=JSON.stringify(RESPONSE);
+        const split=json.indexOf(',"id"');
+        payload='event: message\n'+'data: '+json.slice(0,split+1)+
+          '\n'+'data: '+json.slice(split+1)+'\n\n';
+      }
+      if(fault==='sse-fragmented')
+        payload=': keepalive\n\n'+sseMessage(LOG_NOTICE)+sseMessage(RESPONSE);
+      if(fault==='response-sse-invalid-json')
+        payload='event: message\n'+'data: {"jsonrpc":"2.0",\n\n';
+      if(fault==='response-sse-unknown-notification')
+        payload=sseMessage({jsonrpc:'2.0',method:'notifications/tools/list_changed',
+          params:{}})+sseMessage(RESPONSE);
+      if(fault==='response-sse-over-event-limit')
+        payload=sseMessage(LOG_NOTICE).repeat(SSE_MAX_NOTIFICATIONS+1)+
+          sseMessage(RESPONSE);
+      if(fault==='response-sse-over-comment-limit')
+        payload=': keepalive\n\n'.repeat(SSE_MAX_COMMENTS+1)+sseMessage(RESPONSE);
+      if(fault==='response-sse-final-first')
+        payload=sseMessage(RESPONSE)+sseMessage(LOG_NOTICE);
+      if(fault==='response-sse-wrong-event')
+        payload='event: unsolicited\n'+'data: '+JSON.stringify(RESPONSE)+'\n\n';
+      if(fault==='response-sse-truncated')
+        payload='event: message\n'+'data: '+JSON.stringify(RESPONSE);
+      if(fault==='response-sse-dangling-data')
+        payload='data: '+JSON.stringify(LOG_NOTICE)+'\n\n'+
+          'data: '+JSON.stringify(RESPONSE)+'\n\n'+'data:';
       const sse=['sse','response-sse-extra','response-sse-missing-final',
-        'response-sse-unsolicited'].includes(fault);
+        'response-sse-unsolicited','sse-comment-log','sse-comment-only',
+        'sse-multiline-data','sse-fragmented','response-sse-invalid-json',
+        'response-sse-unknown-notification','response-sse-over-event-limit',
+        'response-sse-over-comment-limit','response-sse-final-first',
+        'response-sse-wrong-event','response-sse-truncated',
+        'response-sse-bad-utf8','response-sse-dangling-data'].includes(fault);
+      // Raw malformed UTF-8 is intentionally local and NEVER reflected in reports.
+      const responseBytes=fault==='response-sse-bad-utf8'
+        ?Buffer.concat([Buffer.from('event: message\ndata: '),
+          Buffer.from([0xC3,0x28]),Buffer.from('\n\n')])
+        :Buffer.from(payload,'utf8');
       res.writeHead(200,{'content-type':fault==='response-content-type'
         ?'text/plain':sse?'text/event-stream':'application/json',
         'cache-control':'no-store',connection:'close',
-        'content-length':String(Buffer.byteLength(payload))});
-      res.end(payload);
+        'content-length':String(responseBytes.length)});
+      if(fault==='sse-fragmented'){
+        // Exercise client reassembly across HTTP data chunks.
+        const cut=Math.floor(responseBytes.length/2);
+        res.write(responseBytes.subarray(0,cut));
+        res.end(responseBytes.subarray(cut));
+      }else res.end(responseBytes);
     });
     req.on('error',()=>{}); // never log or echo transport errors
   };
@@ -164,15 +223,46 @@ function makeRequest(fault){
 }
 function parseReply(type,data) {
   const utf8=new TextDecoder('utf-8',{fatal:true}).decode(data);
-  let value=utf8;
-  if(type==='text/event-stream'){
-    // Narrow fixed test-only SSE: exactly one request-scoped message event.
-    const lines=utf8.replace(/\r\n/g,'\n').split('\n');
-    if(lines.length!==4 || lines[0]!=='event: message' || !lines[1].startsWith('data: ') ||
-       lines[2]!=='' || lines[3]!=='')return false;
-    value=lines[1].slice(6);
-  }else if(type!=='application/json')return false;
-  return isDeepStrictEqual(parseStrictJson(value),RESPONSE);
+  if(type==='application/json')return isDeepStrictEqual(parseStrictJson(utf8),RESPONSE);
+  if(type!=='text/event-stream')return false;
+  // A finite, deliberately first-party-only SSE reader: no subscription,
+  // MRTR, Last-Event-ID, retry, independent request or new tool dispatch.
+  // UTF-8 decoded strictly. Every block must end in a blank line.
+  const text=utf8.replace(/\r\n|\r/g,'\n');
+  if(!text.endsWith('\n\n'))return false;
+  const blocks=text.slice(0,-2).split('\n\n');
+  if(blocks.length<1 || blocks.length>SSE_MAX_BLOCKS)return false;
+  let noticeCount=0,commentCount=0,finalCount=0;
+  for(const block of blocks){
+    let event='message',explicit=false,dataLines=[],hasData=false;
+    for(const line of block.split('\n')){
+      if(line.startsWith(':')){
+        if(++commentCount>SSE_MAX_COMMENTS || finalCount)return false;
+        continue;
+      }
+      if(line.startsWith('event:')){
+        if(explicit || hasData)return false;
+        event=line.slice(6).trimStart();explicit=true;
+        if(event!=='message')return false;
+      }else if(line==='data' || line.startsWith('data:')){
+        hasData=true;
+        const value=line==='data'?'':line.slice(5).replace(/^ /,'');
+        dataLines.push(value);
+        if(dataLines.length>4)return false;
+      }else return false; // No id/retry/unknown fields in fixed fixture
+    }
+    if(!hasData)continue; // SSE comments/keepalive carry no message
+    if(finalCount)return false; // No messages after the final response
+    let message;
+    try{message=parseStrictJson(dataLines.join('\n'));}catch{return false;}
+    if(isDeepStrictEqual(message,RESPONSE)){
+      finalCount++;
+    }else if(isDeepStrictEqual(message,LOG_NOTICE) &&
+      ++noticeCount<=SSE_MAX_NOTIFICATIONS){
+      // Only the exact reviewed request-scoped logging notice is accepted.
+    }else return false;
+  }
+  return finalCount===1;
 }
 function probe(port,fault,signal) {
   const {headers,payload,method,path}=makeRequest(fault);
