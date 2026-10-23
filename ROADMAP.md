@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 379 synthetic/local, packaging, content hygiene, M5 onboarding/diagnostics and feedback-form tests | [M5-03 PR #52](../../pull/52) and [post-merge CI](../../actions/runs/39955000316) — 4/4 jobs, 379/379 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 384 synthetic/local, packaging, content hygiene, M5 onboarding, feedback and CLI-discovery tests | [M5-04 PR #55](../../pull/55) and [post-merge CI](../../actions/runs/39956798014) — 4/4 jobs, 384/384 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -71,7 +71,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M5 beta onboarding (active)
 
-- **M5-04 — IN PROGRESS:** [Issue #54](../../issues/54) adds safe zero-argument CLI `help`/`version` (including standard aliases) with bounded JSON-v1 output and installed local-package tests. It reads only reviewed bundled metadata; no external target, registry, credentials or publication. Four-job PR and post-merge CI acceptance pending.
+- **M5-04 — DONE:** [Issue #54](../../issues/54) accepted via [merged PR #55](../../pull/55) and [post-merge main CI #39956798014](../../actions/runs/39956798014), **4/4 PASS, 384/384 tests per job**, 0 failed/skipped. CLI `help`/`version` and standard aliases return bounded JSON-v1, read only reviewed bundled metadata, reject extra arguments and pass disposable local package smoke. This is neither remote capability discovery nor publication proof. Independent [R5-B #43](../../issues/43) and final release authorization remain open.
 
 - **M5-03 — DONE:** [Issue #48](../../issues/48), [merged PR #52](../../pull/52), and [post-merge main CI #39955000316](../../actions/runs/39955000316) confirm **4/4 PASS, 379/379 tests per job**. GitHub Issue Forms, mandatory metadata/privacy confirmation, private-vulnerability routing, reproducible fictional-only contributor guidance and five structural/mutation controls are accepted. Forms remain outside the npm archive. They do **not** sanitize user-submitted text; independent [R5-B #43](../../issues/43) and release authorization remain open.
 
