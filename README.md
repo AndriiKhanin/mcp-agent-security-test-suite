@@ -48,7 +48,7 @@ node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
 
 CLI `0` = passing contracts, `1` = violations, `2` = invalid input. All invocations emit [versioned JSON schema v1](docs/CLI_REPORTS.md) on stdout, including generic input errors; existing command-specific fields are preserved. No `npm install` required.
 
-Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39920218577): 326/326 developer-authored synthetic tests in each of four jobs (before the M2-02 onboarding changes). These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
+Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39921138853): **330/330** developer-authored synthetic tests in each of four Windows/Ubuntu Node20/22 jobs. The current six-task roadmap is complete; future M4–M6 product capabilities are **not** implemented. These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
 
 We welcome nonconfidential problem statements or proposals. Never upload real private logs or credentials. Licensed under [MIT](LICENSE). Current repository maintains an open [roadmap](ROADMAP.md).
 
