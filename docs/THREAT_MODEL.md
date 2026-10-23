@@ -4,7 +4,7 @@
 **Scope:** the standalone MIT-licensed, offline MCP Agent Security Test Suite.  
 **Security claim:** reproducible checks of *fictional* authorization, protocol, trace and mock-tool contracts. **Not** an MCP implementation, a live vulnerability scanner, an OS sandbox, an OAuth validator, an independent audit or proof that an agent is safe.
 
-This document distinguishes **implemented controls** from **future design requirements**. The [roadmap](../ROADMAP.md) and tracked [M1-01 issue](../issues/2) govern progress. Any claim about actual third-party MCP behavior requires separate implementation, authorization, and independent evaluation.
+This document distinguishes **implemented controls** from **future design requirements**. The [roadmap](../ROADMAP.md) and tracked [M1-01 issue](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/2) govern progress. Any claim about actual third-party MCP behavior requires separate implementation, authorization, and independent evaluation.
 
 ## 1. Assets and security objectives
 
@@ -45,13 +45,13 @@ Threats tested here are **modeled**, not attacks executed against live services.
 
 | Threat / failure mode | Status today | Follow-up |
 | --- | --- | --- |
-| Unauthorized fictional write/read, wrong audience/owner/scope, stale or expired grant | **Modeled and checked** via fixture policy tests | [M1-03](../issues/4): independent negative-control coverage |
-| Replay of a committed synthetic mutation; unknown post-commit outcome | **Modeled and checked** in in-memory test executions | [M1-03](../issues/4): targeted mutation corpus |
-| False success, denial with side effects, forged synthetic snapshot | **Modeled and checked** with mock/witness/worker fault injection | [M1-03](../issues/4): independent behavioral oracle |
-| Retry changes method, protocol version, parameters or capability claims | **Modeled**; v0.0.10-rc.1 rejects modified retry parameters except selected version | [M1-02](../issues/3): malformed/interleaved state transitions |
-| Invalid JSON-RPC/era transcript, repeated IDs or contradictory error evidence | **Partially modeled** under strict synthetic profiles | [M1-02](../issues/3); no assertion of universal protocol conformance |
-| Sensitive data in actual third-party agent traces or results | **Not supported/verified**; synthetic canary and marker fields only | [M2-01](../issues/5): report schema and redaction tests |
-| Malicious arbitrary binaries or external MCP servers | **Not isolated, not supported** | [M3-01](../issues/6): fixed local mock; later M4 authorization design |
+| Unauthorized fictional write/read, wrong audience/owner/scope, stale or expired grant | **Modeled and checked** via fixture policy tests | [M1-03](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/4): independent negative-control coverage |
+| Replay of a committed synthetic mutation; unknown post-commit outcome | **Modeled and checked** in in-memory test executions | [M1-03](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/4): targeted mutation corpus |
+| False success, denial with side effects, forged synthetic snapshot | **Modeled and checked** with mock/witness/worker fault injection | [M1-03](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/4): independent behavioral oracle |
+| Retry changes method, protocol version, parameters or capability claims | **Modeled**; v0.0.10-rc.1 rejects modified retry parameters except selected version | [M1-02](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/3): malformed/interleaved state transitions |
+| Invalid JSON-RPC/era transcript, repeated IDs or contradictory error evidence | **Partially modeled** under strict synthetic profiles | [M1-02](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/3); no assertion of universal protocol conformance |
+| Sensitive data in actual third-party agent traces or results | **Not supported/verified**; synthetic canary and marker fields only | [M2-01](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/5): report schema and redaction tests |
+| Malicious arbitrary binaries or external MCP servers | **Not isolated, not supported** | [M3-01](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/6): fixed local mock; later M4 authorization design |
 | OAuth compromise, supply-chain malware, sandbox escape, production isolation | **Out of scope** | Future independent architecture/security review before making such claims |
 
 ### Assumptions and non-goals
@@ -62,7 +62,7 @@ Current test runs assume an authorized operator on a trusted developer machine o
 
 ## 5. Required checklist for any future adapter (not yet implemented)
 
-**No network-capable adapter may be described as safe or enabled by default without documented evidence for *every* gate below.** The [M3 local mock](../issues/6) remains fully offline. A future M4 integration is a separate owner-reviewed design decision.
+**No network-capable adapter may be described as safe or enabled by default without documented evidence for *every* gate below.** The [M3 local mock](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/6) remains fully offline. A future M4 integration is a separate owner-reviewed design decision.
 
 - [ ] **Explicit authorization:** recorded opt-in from the operator who controls the test target, limited to a named, user-owned *staging or sandbox* environment; refuse unclear ownership or third-party hosts.
 - [ ] **Exact target allowlist:** canonical endpoint/transport and approved operations are checked **before** connection and before each operation. Deny all targets/redirects outside the allowlist; no arbitrary host/IP ranges, shell command or production endpoint fallback.
@@ -77,7 +77,7 @@ Current test runs assume an authorized operator on a trusted developer machine o
 
 ## 6. Validation and change control
 
-- The offline baseline is `node --test`; for released `v0.0.10-rc.1`, [post-merge CI](../actions/runs/39910034366) recorded four green jobs (Ubuntu/Windows × Node.js 20/22), with 254 synthetic tests in each.
+- The offline baseline is `node --test`; for released `v0.0.10-rc.1`, [post-merge CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39910034366) recorded four green jobs (Ubuntu/Windows × Node.js 20/22), with 254 synthetic tests in each.
 - A `FAIL` in an intentionally unsafe fixture is **expected** and does not mean the suite is compromised; assert rule identity and no unsupported side effects.
 - New threat assumptions must become tracked Issues. Every significant change needs a scoped PR, positive and negative test, and observed CI evidence; do not close acceptance criteria by documentation assertion alone.
 - Responsible disclosure: see [SECURITY.md](../SECURITY.md). Never put real vulnerabilities, tokens, private system information or personal data in a public fixture.
