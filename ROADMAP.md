@@ -12,12 +12,12 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 353 synthetic/loopback tests | [PR #24](../../pull/24) and [post-merge CI](../../actions/runs/39925449081) — 4/4 jobs, 353/353 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 356 synthetic/loopback/package-preflight tests | [PR #27](../../pull/27) and [post-merge CI](../../actions/runs/39928732232) — 4/4 jobs, 356/356 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
 | Real external MCP-server interoperability/security testing | **Not yet implemented** | See **M4**; no live-scanner claim |
-| Deployment, hosted service, npm release, certification | **Not yet delivered** | [Release-preflight gates](docs/RELEASE_READINESS.md), [R0 Issue #26](../../issues/26) |
+| Deployment, hosted service, npm release, certification | **Not yet delivered**; package preflight accepted, publication not authorized | [Release-preflight gates](docs/RELEASE_READINESS.md), [R0 Issue #26](../../issues/26) |
 
 The numbers above measure **engineering acceptance only**, not commercial traction, protocol certification or proven effectiveness against real attacks.
 
