@@ -12,7 +12,7 @@ import { auditRecords, parseJsonl } from './trace.mjs';
 import { auditJsonRpcExchange } from './jsonrpc-contract.mjs';
 import { auditMcpEraTranscript } from './mcp-era-contract.mjs';
 import { auditModernNegotiation } from './mcp-modern-negotiation.mjs';
-import { CLI_COMMANDS, buildCliReport, buildCliErrorReport, buildOfflineDemoResult } from './report-contract.mjs';
+import { CLI_COMMANDS, buildCliReport, buildCliErrorReport, buildOfflineDemoResult, buildCliHelpResult, buildCliVersionResult } from './report-contract.mjs';
 
 async function readBoundedFile(path) {
   // Open a single handle with O_NOFOLLOW where available; reject non-regular file.
@@ -48,15 +48,32 @@ async function runOfflineDemo() {
 
 async function main() {
   const args=process.argv.slice(2);
-  const demo = args[0] === 'demo';
-  if (!CLI_COMMANDS.includes(args[0]) ||
-      (demo ? args.length !== 1 : args.length !== 2 || args[1].startsWith('-'))) {
-    process.stderr.write('USAGE: node src/cli.mjs demo OR scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
-    emit(buildCliErrorReport(CLI_COMMANDS.includes(args[0])?args[0]:null,'INVALID_CLI_ARGUMENTS'));
+  const aliases = Object.freeze({
+    '--help':'help', '-h':'help', '--version':'version', '-V':'version'
+  });
+  const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
+  const noFile = command === 'demo' || command === 'help' || command === 'version';
+  if (!CLI_COMMANDS.includes(command) ||
+      (noFile ? args.length !== 1 : args.length !== 2 || args[1].startsWith('-'))) {
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo OR scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
   try {
-    if (demo) {
+    if (command === 'help') {
+      const report = buildCliReport('help', buildCliHelpResult());
+      emit(report);
+      return report.exitCode;
+    }
+    if (command === 'version') {
+      const metadata = parseStrictJson(await readBoundedFile(fileURLToPath(
+        new URL('../package.json', import.meta.url)
+      )));
+      const report = buildCliReport('version', buildCliVersionResult(metadata));
+      emit(report);
+      return report.exitCode;
+    }
+    if (command === 'demo') {
       const report = buildCliReport('demo', await runOfflineDemo());
       emit(report);
       return report.exitCode;

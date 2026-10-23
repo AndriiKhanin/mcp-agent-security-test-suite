@@ -30,7 +30,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
 | **M4 — Authorized integration preview** | Start with fixed first-party local loopback, external staging separate | **M4-A DONE (1/1); M4-B NOT AUTHORIZED** | [M4-A #23](../../issues/23), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
-| **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — onboarding, diagnostics and safe feedback** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48) | Repeatable installation/use, versioned releases, triaged external feedback |
+| **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — onboarding, diagnostics and safe feedback** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
@@ -70,6 +70,8 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 **Progress report format:** `DONE / IN PROGRESS / BLOCKED / NEXT`, relevant GitHub links, verified test count and risks. A pending item is not a completed milestone.
 
 ## M5 beta onboarding (active)
+
+- **M5-04 — IN PROGRESS:** [Issue #54](../../issues/54) adds safe zero-argument CLI `help`/`version` (including standard aliases) with bounded JSON-v1 output and installed local-package tests. It reads only reviewed bundled metadata; no external target, registry, credentials or publication. Four-job PR and post-merge CI acceptance pending.
 
 - **M5-03 — DONE:** [Issue #48](../../issues/48), [merged PR #52](../../pull/52), and [post-merge main CI #39955000316](../../actions/runs/39955000316) confirm **4/4 PASS, 379/379 tests per job**. GitHub Issue Forms, mandatory metadata/privacy confirmation, private-vulnerability routing, reproducible fictional-only contributor guidance and five structural/mutation controls are accepted. Forms remain outside the npm archive. They do **not** sanitize user-submitted text; independent [R5-B #43](../../issues/43) and release authorization remain open.
 

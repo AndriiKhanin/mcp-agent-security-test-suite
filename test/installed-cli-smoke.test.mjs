@@ -131,6 +131,22 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.deepEqual(demoReport.expectations.map(v => v.matched), [true, true]);
     assert.equal(demoReport.summary.failureCount, 0);
 
+    const help = invokeNode(executable, ['--help'], temp, env);
+    assert.equal(help.status, 0, 'installed CLI --help must pass');
+    const helpReport=JSON.parse(help.stdout);
+    assert.equal(helpReport.command,'help');
+    assert.ok(helpReport.commands.includes('demo'));
+    assert.ok(helpReport.commands.includes('version'));
+    assert.equal(helpReport.reportSchemaVersion,1);
+
+    const version = invokeNode(executable, ['--version'], temp, env);
+    assert.equal(version.status,0,'installed CLI --version must pass');
+    const versionReport=JSON.parse(version.stdout);
+    assert.equal(versionReport.command,'version');
+    assert.equal(versionReport.version,packageInfo.version);
+    assert.equal(versionReport.packageName,packageInfo.name);
+    assert.equal(versionReport.reportSchemaVersion,1);
+
     const fakePath = join(temp, 'FICTIONAL_MISSING_INPUT_DO_NOT_ECHO.json');
     const invalid = invokeNode(executable, ['scenario', fakePath], temp, env);
     assert.equal(invalid.status, 2, 'invalid input must fail closed');
