@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0 packaging preflight and R1 disposable offline installation ACCEPTED** by [PR #27](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/27), [PR #30](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/30) and [post-merge CI 39931897702](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39931897702) (**4/4 PASS; 357/357 per job**). Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0 packaging preflight, R1 disposable offline installation and R2 exact package inventory ACCEPTED** by [PR #27](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/27), [PR #30](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/30) and [post-merge CI 39931897702](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39931897702) (**4/4 PASS; 357/357 per job**). Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
@@ -45,11 +45,11 @@ node examples/offline-ci-check.mjs
 
 The R0 manifest test invokes **npm pack in dry-run and offline mode**. The R1 smoke also packs an actual `.tgz` **only into a disposable OS temp directory** and uses offline npm install from that local file with all lifecycle scripts disabled; it validates that the installed CLI handles PASS/FAIL/ERROR correctly and deletes the temporary tarball, npm cache and installation. Neither publishes a package nor contacts an npm registry. `npm test` includes both tests. Separately, M4-A tests briefly open fixed 127.0.0.1 TCP sockets, never remote targets.
 
-## R2: exact package-file inventory lock (review in progress)
+## R2: exact package-file inventory lock — accepted
 
 [R2 Issue #32](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) adds an explicit, sorted filename inventory under `test/expected-package-files.json`, **outside the packaged distribution**. The existing offline npm dry-run manifest test must match it exactly. Additional or missing packaged paths fail the test; an intentional package-content change therefore requires an explicit diff and inventory update. Separate synthetic mutation controls ensure both extra and missing filenames are rejected.
 
-This check guards **package membership**, not the safety of bytes inside an already-approved file. It is **not** a secret scanner, independent security audit, protocol certification or release authorization. Acceptance requires PR and post-merge four-job CI evidence; do not mark R2 complete before those results.
+This check guards **package membership**, not the safety of bytes inside an already-approved file. It is **not** a secret scanner, independent security audit, protocol certification or release authorization. Acceptance evidence: [merged PR #33](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/33) (four reviewed files) and [post-merge main CI 39934465115](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39934465115) — **4/4 PASS, 358/358 tests per job**, 0 failures/skips. [Issue #32](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) is closed. Stable release remains gated.
 
 ## Explicit release gates — NOT ALL COMPLETE
 
