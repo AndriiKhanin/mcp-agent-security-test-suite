@@ -71,6 +71,9 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## Release gates and boundaries
 
+- **R2 package inventory hardening — IN PROGRESS:** [Issue #32](../../issues/32) tracks an exact offline npm package file inventory and positive/negative mutation tests. R0/R1 are accepted; R2 is not accepted until its PR and post-merge CI pass. This is **not** approval to tag or publish.
+
+
 - A `-rc` package is a **release candidate**, not a stable or independently security-audited product. Stable `v0.0.10` and npm publication remain unapproved; see [R0 release readiness](docs/RELEASE_READINESS.md).
 - Preserve genuine public MIT provenance. Never import commercial/private Stable Bridge code, history, secrets, internal logs or credentials.
 - Default execution is offline, synthetic and deterministic. No paid API calls or live-system scanning without separately approved design and authorization.
