@@ -42,9 +42,9 @@ function assertSourceBytes(source, installed, label = 'synthetic') {
 // all other changes, including changes to the remainder of the same file.
 function expectedInstalledBytes(path, source) {
   if (path !== 'src/cli.mjs') return source;
-  const crlf = Buffer.from('#!/usr/bin/env node\\r\\n'.replaceAll('\\r','\r').replaceAll('\\n','\n'));
+  const crlf = Buffer.from('#!/usr/bin/env node\r\n');
   if (!source.subarray(0, crlf.length).equals(crlf)) return source;
-  const lf = Buffer.from('#!/usr/bin/env node\\n'.replaceAll('\\n','\n'));
+  const lf = Buffer.from('#!/usr/bin/env node\n');
   return Buffer.concat([lf, source.subarray(crlf.length)]);
 }
 function runNpm(args, cwd, env) {
@@ -112,14 +112,11 @@ test('R4: integrity guards reject synthetic archive/content/path mutations', () 
   assert.doesNotThrow(() => assertSourceBytes(original, Buffer.from(original)));
   assert.throws(() => assertSourceBytes(original, modified),
     /R4_FILE_CONTENT_MISMATCH/);
-  const crlfCli = Buffer.from('#!/usr/bin/env node\\r\\nfictional();\\r\\n'
-    .replaceAll('\\r','\r').replaceAll('\\n','\n'));
-  const expectedCli = Buffer.from('#!/usr/bin/env node\\nfictional();\\r\\n'
-    .replaceAll('\\r','\r').replaceAll('\\n','\n'));
+  const crlfCli = Buffer.from('#!/usr/bin/env node\r\nfictional();\r\n');
+  const expectedCli = Buffer.from('#!/usr/bin/env node\nfictional();\r\n');
   assertSourceBytes(expectedCli, expectedInstalledBytes('src/cli.mjs', crlfCli));
   assertSourceBytes(crlfCli, expectedInstalledBytes('docs/fictional.txt', crlfCli));
-  const unrelatedChange = Buffer.from('#!/usr/bin/env node\\nfictional();\\n'
-    .replaceAll('\\n','\n'));
+  const unrelatedChange = Buffer.from('#!/usr/bin/env node\nfictional();\n');
   assert.throws(() =>
     assertSourceBytes(expectedInstalledBytes('src/cli.mjs', crlfCli), unrelatedChange),
     /R4_FILE_CONTENT_MISMATCH/);
