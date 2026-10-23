@@ -20,6 +20,14 @@ This is an **offline synthetic contract-testing tool**, not a live scanner, auth
 
 Read the source-grounded [threat model](docs/THREAT_MODEL.md) for assets, attacker capabilities, trust boundaries, residual risks and the mandatory authorization checklist for any future adapter. The [independent negative-control corpus](docs/NEGATIVE_CONTROLS.md) documents literal failure expectations, fault-injected examples and their limitations. All real-network integrations remain **unimplemented** and require separately approved, explicitly allowlisted user-owned test environments. See [Security Policy](SECURITY.md) for responsible disclosure.
 
+## Quickstart
+
+Start from a clean clone using [Getting Started](docs/GETTING_STARTED.md). It gives one reproducible PASS, one intentionally detected FAIL and a [SHA-pinned offline CI example](examples/offline-contract-check.yml); no paid API or npm installation.
+
+```sh
+node examples/offline-ci-check.mjs
+```
+
 ## Test
 
 Requires Node.js 20+.
@@ -40,7 +48,7 @@ node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
 
 CLI `0` = passing contracts, `1` = violations, `2` = invalid input. All invocations emit [versioned JSON schema v1](docs/CLI_REPORTS.md) on stdout, including generic input errors; existing command-specific fields are preserved. No `npm install` required.
 
-Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). Before M3-01, the v0.0.10-rc.1 main branch passed [GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39917967269): 311/311 developer-authored synthetic tests in each of four jobs. The new stdio feature requires its own CI validation before being described as accepted. These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
+Published v0.0.9 baseline passed 243 tests per CI job on Windows/Ubuntu with Node.js 20/22 (October 22, 2026). The v0.0.10-rc.1 main branch passed [post-merge GitHub Actions](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39920218577): 326/326 developer-authored synthetic tests in each of four jobs (before the M2-02 onboarding changes). These results do **not** establish complete MCP compliance, safety of external systems or an independent security audit.
 
 We welcome nonconfidential problem statements or proposals. Never upload real private logs or credentials. Licensed under [MIT](LICENSE). Current repository maintains an open [roadmap](ROADMAP.md).
 
