@@ -1,0 +1,51 @@
+name: "Synthetic feature request"
+description: "Propose an offline-first feature without confidential target details."
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a PUBLIC feature request. Use only fictional examples.
+        No private MCP targets, credentials, confidential architecture,
+        customer logs, private code, or real attack payloads.
+        For vulnerabilities, follow SECURITY.md and use a private channel.
+        Networked or real-system functionality requires separate owner authorization.
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Developer problem to solve"
+      description: "Explain the problem without sharing any private infrastructure."
+      placeholder: "A local synthetic contract test is hard to reproduce because..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_behavior
+    attributes:
+      label: "Requested offline behavior"
+      placeholder: "Add a fixed fictional fixture check that reports a symbolic rule..."
+    validations:
+      required: true
+  - type: textarea
+    id: synthetic_example
+    attributes:
+      label: "Fictional use case / expected positive and negative controls"
+      placeholder: "Example: a toy authorization grant should PASS, while a changed nonce should FAIL."
+    validations:
+      required: true
+  - type: dropdown
+    id: security_scope
+    attributes:
+      label: "Proposed scope"
+      options:
+        - "Offline fictional fixtures only"
+        - "Fixed first-party local mock only"
+        - "Requires separate future approval (no implementation requested yet)"
+    validations:
+      required: true
+  - type: checkboxes
+    id: safe_disclosure
+    attributes:
+      label: "Public disclosure confirmation"
+      options:
+        - label: "I confirm this request contains only fictional or public data and does not include credentials, private endpoints, production traces, or confidential source."
+          required: true
