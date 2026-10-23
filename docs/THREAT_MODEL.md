@@ -1,7 +1,7 @@
 # Threat model and trust boundaries
 
 **Status:** M1-01 design baseline for `v0.0.10-rc.1` (reviewed 2026-10-23).  
-**Scope:** the standalone MIT-licensed, offline MCP Agent Security Test Suite.  
+**Scope:** the standalone MIT-licensed MCP Agent Security Test Suite. Synthetic offline checks are the default; the owner-approved M4-A fixed first-party `loopback` mode opens only a temporary local IPv4 listener.  
 **Security claim:** reproducible checks of *fictional* authorization, protocol, trace and mock-tool contracts. **Not** an MCP implementation, a live vulnerability scanner, an OS sandbox, an OAuth validator, an independent audit or proof that an agent is safe.
 
 This document distinguishes **implemented controls** from **future design requirements**. The [roadmap](../ROADMAP.md) and tracked [M1-01 issue](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/2) govern progress. Any claim about actual third-party MCP behavior requires separate implementation, authorization, and independent evaluation.
@@ -36,6 +36,7 @@ Threats tested here are **modeled**, not attacks executed against live services.
 | Parsed fixture → policy oracle | `validateScenario` restricts shapes/action count and `decide` checks owner, resource, grant generation/time, scopes, approval and replay | The owner/grant fields are **unauthenticated test data**. A PASS does not authenticate a real user or grant |
 | Oracle → in-memory mock | `src/mock-mcp.mjs` exposes only fake note tools and intentional defects | Effects are fictional; the mock does not implement real tools, external resources or transport |
 | Test harness → parent-owned witness | `src/effect-witness.mjs` stores simulated effects separately from the adapter under test | A shared host/process still controls both; the witness is not an adversarially tamper-proof external oracle |
+| Parent Node process → fixed HTTP mock on ephemeral 127.0.0.1 | `src/loopback-http-mock.mjs` uses a first-party temporary loopback-only HTTP listener and a hard-coded one-message `ping` client, strict Host/Origin/version/body/result checks, timeouts and cleanup | This **does** open a local socket under normal user privileges; it does **not** authenticate other local processes or test any external MCP service |
 | Parent Node process → fixed stdio mock over JSON-RPC JSONL | `src/stdio-mcp-harness.mjs` uses only a fixed in-repository child, hard-coded fictional batch, reduced child environment, no shell and bounded runtime/output; validates responses and denies fake writes | Offline finite batch test double, not an interactive general-purpose MCP endpoint, OS sandbox or protection against malicious Node/runtime |
 | Parent Node process → fixed worker over IPC | `src/process-mcp-harness.mjs` forks a known repository child with fixed arguments, a reduced environment, timeouts, and parent-owned effect ledger | Child code inherits the launch account's OS rights; `fork` + IPC is **not an OS sandbox**. No arbitrary untrusted child code is safe to run |
 | Fixture → JSON-RPC/MCP-shaped validators | Request/reply envelope, era, capability and retry rules are checked without a real transport | Profiles are intentionally restrictive or fictional; real MCP behavior may differ. Reported PASS is not MCP certification |
@@ -57,7 +58,7 @@ Threats tested here are **modeled**, not attacks executed against live services.
 
 ### Assumptions and non-goals
 
-Current test runs assume an authorized operator on a trusted developer machine or CI runner, trusted checkout of this project's source and Node.js runtime, **fictional** inputs and a fixed first-party child process. The suite neither makes outbound network connections to test targets nor runs arbitrary external commands as part of the documented modes. It does not accept third-party production logs or credentials as supported fixtures. It is not an authenticated policy decision point, network penetration tester, malware runner, product certification or host-defense boundary.
+Current test runs assume an authorized operator on a trusted developer machine or CI runner, trusted checkout of this project's source and Node.js runtime, **fictional** inputs and a fixed first-party child process. The suite makes **no outbound connections to external test targets** and runs no arbitrary external commands as part of documented modes. The separately authorized M4-A first-party loopback mock opens and closes a temporary **127.0.0.1** TCP listener; it is not a no-network operation. It does not accept third-party production logs or credentials as supported fixtures. It is not an authenticated policy decision point, network penetration tester, malware runner, product certification or host-defense boundary.
 
 `process` tests run a child process under ordinary OS permissions. Do **not** use them to execute untrusted code. Any success is evidence about the specified synthetic contract only; **do not** infer actual target authorization or data confidentiality.
 

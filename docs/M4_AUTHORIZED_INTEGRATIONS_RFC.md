@@ -1,11 +1,11 @@
 # RFC M4-00 — Authorized MCP integration testing: architecture and approval gates
 
-**Status:** PROPOSED / DESIGN ONLY — **NOT APPROVED FOR IMPLEMENTATION**  
+**Status:** M4-A FIXED LOOPBACK-ONLY DEVELOPMENT APPROVED (2026-10-23); M4-B EXTERNAL TARGETS **NOT APPROVED**  
 **Issue:** [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)  
 **As of:** 2026-10-23  
 **Product:** the independent MIT [MCP Agent Security Test Suite](../README.md)
 
-> This document is a safety/architecture proposal. It creates **no network-capable code, no new privileges, no secrets integration, no deployment, no paid API usage**, and **no permission to probe any real MCP endpoint**. M1–M3 remain offline synthetic. Explicit maintainer approval is required before implementation begins.
+> The maintainer has separately approved **only M4-A**, a fixed first-party temporary `127.0.0.1` loopback HTTP test double, tracked in [Issue #23](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/23). It opens a local socket; no external target, arbitrary URL, credentials, OAuth, paid service, tool execution or real MCP endpoint is approved. M4-B and later phases require a **new explicit authorization**.
 
 ## 1. Why this milestone exists
 
@@ -48,7 +48,7 @@ For 2026-07-28, distinguish modern header-based negotiation/error handling from 
 
 ### M4-A: fixed loopback transport *test fixture* — lowest-risk candidate
 
-A first-party fixed HTTP mock bound exclusively to loopback, with a predetermined target, port-selection mechanism and deterministic responses. No arbitrary URL, external DNS, proxy use, credential reading or tool execution. It can validate HTTP message framing and version behavior without touching third-party systems. **Not built yet.** Even opening a localhost listener is an effectful architecture change and requires owner sign-off.
+A first-party fixed HTTP mock bound exclusively to loopback, with a predetermined target, port-selection mechanism and deterministic responses. No arbitrary URL, external DNS, proxy use, credential reading or tool execution. It can validate HTTP message framing and version behavior without touching third-party systems. **Owner-approved for implementation as first-party loopback-only** (2026-10-23), tracked by [M4-A #23](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/23); acceptance still requires PR review and four CI jobs. Opening a localhost listener is an effectful change. Nothing beyond M4-A has been authorized.
 
 **Gate:** explicit approval for first-party loopback-only traffic; ephemeral binding, limited concurrent connections, strict Origin policy, graceful cleanup, no external network and positive/negative CI on both supported OSes.
 
@@ -111,7 +111,7 @@ This is an **RFC example**, not a supported CLI/API option. An external profile 
 - [x] Version-specific transport differences and official reference sources identified
 - [x] Phased options and explicit no-contact boundaries documented
 - [x] Threat classes, consent model and denial gates proposed
-- [ ] **OWNER:** Select M4-A loopback-only fixture, M4-B staging discovery, or defer all networked work
+- [x] **OWNER:** Approved M4-A fixed first-party loopback-only fixture on 2026-10-23; no external targets, no credentials, no tool execution ([Issue #23](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/23))
 - [ ] **OWNER:** Approve scope, consent/ownership evidence, exact methods and isolation requirement
 - [ ] **OWNER:** Approve separate implementation Issue, including no-paid-API and no-production-contact rules
 
@@ -133,4 +133,4 @@ This is an **RFC example**, not a supported CLI/API option. An external profile 
 6. **Isolation:** define whether native loopback under normal user permissions is acceptable for a **fixed first-party mock**; do not treat it as safe for arbitrary code.
 7. **Release strategy:** release stable offline v0.0.10 separately from any network-preview deliverable after its own review.
 
-**Until answered:** status `PROPOSAL_ONLY / OWNER_APPROVAL_PENDING`. Continue improving offline reliability, packaging, documentation and test coverage; do **not** open sockets to targets or introduce runtime network transports.
+**Current authorization boundary:** M4-A **localhost-only implementation** is approved, and only if its regression and CI safety gates pass. M4-B, real servers, authentication, arbitrary remote URLs and production traffic remain `OWNER_APPROVAL_PENDING`. No implementation of those unapproved capabilities is permitted.
