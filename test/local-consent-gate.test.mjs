@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { runGatedFixedMockCase,runGatedFirstPartySelftest }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
+import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const cli=(...args)=>spawnSync(process.execPath,['src/cli.mjs',...args],{
@@ -138,4 +139,34 @@ test('M4-B3: repeat local selftest closes both first-party resources',async()=>{
     assert.equal(result.outcomes.length,2);
     assert.ok(result.outcomes.every(o=>o.matched));
   }
+});
+
+
+test('M4-B3: admitted stdio exchange sends and verifies initialize only',async()=>{
+  const result=await runGatedFixedMockCase('stdio');
+  assert.equal(result.status,'PASS');
+  assert.equal(result.checked,1);
+  assert.equal(result.gateStatus,'MOCK_ADMITTED');
+  assert.equal(result.mockProbeAttempted,true);
+  const fixed=runLocalStdioInitialization({timeoutMs:6000});
+  assert.equal(fixed.status,'PASS');
+  assert.deepEqual([fixed.checked,fixed.received,fixed.failureCount],[1,1,0]);
+  assert.deepEqual(fixed.findings,[]);
+});
+
+test('M4-B3: initialize-only worker rejects any appended tools/call frame with no output',()=>{
+  const worker=fileURLToPath(new URL('../src/stdio-mcp-mock-worker.mjs',import.meta.url));
+  const initialize={jsonrpc:'2.0',id:1,method:'initialize',params:{
+    protocolVersion:'2026-07-28',capabilities:{},
+    clientInfo:{name:'fictional-client',version:'1'}}};
+  const extra={jsonrpc:'2.0',id:2,method:'tools/call',
+    params:{name:'fictional-write',arguments:{}}};
+  const input=[initialize,extra].map(x=>JSON.stringify(x)).join('\n')+'\n';
+  const out=spawnSync(process.execPath,[worker,'init-only'],{
+    input,encoding:'utf8',shell:false,timeout:6000,maxBuffer:8192
+  });
+  assert.equal(out.error,undefined);
+  assert.equal(out.status,2);
+  assert.equal(out.stdout,'');
+  assert.ok(!out.stderr.includes('fictional-write'));
 });
