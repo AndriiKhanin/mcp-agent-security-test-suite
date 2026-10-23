@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 // This is NOT a complete YAML parser or a moderation/privacy filter.
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const forms = join(root, '.github', 'ISSUE_TEMPLATE');
-const read = path => readFileSync(join(forms, path), 'utf8');
+const read = path => readFileSync(join(forms, path), 'utf8').replace(/\r\n/g, '\n');
 
 function sections(source) {
   return source.split(/^  - type: /m).slice(1).map(item => {
