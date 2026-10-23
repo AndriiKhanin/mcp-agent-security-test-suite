@@ -31,3 +31,5 @@ Official pinned protocol references: [modern MCP discovery](https://modelcontext
 ## Engineering acceptance
 
 Tracking [M4-B6-A #79](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/79). Accepted through [merged PR #80](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/80), main commit `8e1a2fbfde472b998bc0667c6b4ebeb0708105e9`. [PR CI #39989886996](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39989886996) and [post-merge main CI #39990071235](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39990071235): **4/4 PASS, 457/457 tests per Windows/Ubuntu Node20/22 job**, zero failed/skipped, individual logs reviewed. Installed offline tarball selftest passed; exact packaged path inventory **73→75**. No remote deployment, independent conformance audit or external network contact was authorized.
+
+The separately scoped [M4-B6-B fixed-process stage](FIRST_PARTY_STAGING_WORKER.md) runs this exact in-repository local fixture in a disposable child. It does not replace the in-process `staging-selftest` command or confer OS-sandbox protection.

@@ -26,7 +26,7 @@ test('M5-04: canonical and aliased help enumerate only reviewed fictional modes'
   assert.equal(data.command,'help');
   assert.equal(data.status,'PASS');
   assert.deepEqual(data.commands,CLI_COMMANDS);
-  assert.equal(data.commands.length,17);
+  assert.equal(data.commands.length,18);
   assert.equal(data.commands.every(x=>/^[a-z]+(?:-[a-z]+)*$/.test(x)),true);
   assert.deepEqual(data.summary,{failureCount:0,reportedFindings:0,
     findingsTruncated:false,ruleCodes:[]});

@@ -203,6 +203,18 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(stagingReport.externalTargetContacted,false);
     assert.deepEqual([stagingReport.received,stagingReport.accepted],[1,1]);
 
+    // M4-B6-B: own fixed staging worker runs in disposable process with safe IPC.
+    const processStage=invokeNode(executable,['staging-process-selftest'],temp,env);
+    assert.equal(processStage.status,0,'installed fixed staging worker must pass');
+    const processReport=JSON.parse(processStage.stdout);
+    assert.equal(processReport.command,'staging-process-selftest');
+    assert.equal(processReport.reportSchemaVersion,1);
+    assert.equal(processReport.childProcessUsed,true);
+    assert.equal(processReport.osSandboxed,false);
+    assert.equal(processReport.status,'PASS');
+    assert.equal(processReport.externalTargetContacted,false);
+    assert.equal(processReport.allowedMethod,'server/discover');
+
     // Intentional expired self-assertion: validates the offline policy
     // report from the actual installed package without authorizing access.
     const expired=join(packageDir,'examples','adapter-profiles','consent-expired.json');
