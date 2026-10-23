@@ -33,3 +33,5 @@ Requires **4/4 PR and post-merge main CI** across Ubuntu/Windows × Node.js 20/2
 ## Engineering acceptance (2026-10-23)
 
 [M4-B6-D #88](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/88) accepted through [merged PR #89](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/89), main commit `7a46b8d387238d644425a86045adc5a2577f1f96`. [PR CI #39996467390](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39996467390) and [post-merge main CI #39996632533](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39996632533) both **4/4 PASS, 488/488 tests per Ubuntu/Windows Node20/22 job, 0 failures/skips**, individual logs inspected. Exactly one reviewed npm package path added (**79→80**, this guide); development tests remain outside shipped package. No external MCP target, full protocol conformance, OS sandbox or release permission was asserted.
+
+A future scoped enhancement to the deliberately strict one-final-event reader is [M4-B6-E's bounded first-party request-scoped SSE](M4_B6E_SSE_REQUEST_SCOPE.md), explicitly distinct from full MCP/SSE conformance or real-target authorization.
