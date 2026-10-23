@@ -34,6 +34,8 @@ The top-level `adapter-selftest` now routes through a [fixed synthetic admission
 
 Verified via [M4-B3 main CI #39979727977](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39979727977): **4/4 PASS, 428/428 tests/job**, 0 failures/skips. The lower-level driver remains callable by other developer test code. [M4-B4 #72](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/72) tracks test-only instrumentation for independently observed process/socket attempt boundaries; this is not an OS sandbox.
 
-## M4-B7-A — distinct first-party modern staging lifecycle (engineering CI pending)
+## M4-B7-A — distinct first-party modern staging lifecycle (engineering accepted)
 
 `node src/cli.mjs adapter-staging-selftest` performs one reviewed modern MCP `server/discover` only against our fixed `127.0.0.1:0` staging fixture. It is **separate** from the earlier legacy ping/stdio mock lifecycle. The `createFixedModernStagingAdapter()` transport facade has connect/probe/close with one-shot probe, hardcoded protocol and method, bounded deadline, checked first-party TCP socket close and symbolic JSON v1 output. `adapter-check` is still inert; an operator cannot point this test at their project by changing a descriptor. The test-only fault selector cannot be supplied via CLI. No real target, auth or arbitrary subprocess is enabled.
+
+Accepted via [M4-B7-A Issue #97](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/97) and [PR #98](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/98). Post-merge [CI #40007735850](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40007735850) **4/4 PASS, 539/539 tests/job**, 0 failed/skipped. One-shot fixed transport proof only; the actual real-target RFC #21, audit #43 and independent beta #59 remain OPEN.
