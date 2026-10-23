@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 526 synthetic/local, packaging, fixed staging, bounded incremental SSE, cancellation and TCP-close evidence | [M4-B6-F PR #95](../../pull/95), [post-merge CI #40005050367](../../actions/runs/40005050367): **4/4 PASS, 526/526 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 539 synthetic/local, fixed modern adapter bridge, packaging, bounded SSE, consent and TCP cleanup evidence | [M4-B7-A PR #98](../../pull/98), [post-merge main CI #40007735850](../../actions/runs/40007735850): **4/4 PASS, 539/539 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -29,7 +29,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
-| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D/B6-E/B6-F DONE; M4-B7-A FIXED MODERN ADAPTER BRIDGE IN PROGRESS; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
+| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D/B6-E/B6-F/B7-A ENGINEERING DONE; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
@@ -89,7 +89,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M4-B7-A — test-only universal driver lifecycle to owned staging
 
-- **M4-B7-A — IN PROGRESS:** [Issue #97](../../issues/97) connects the **fixed** transport driver lifecycle (connect/probe/close) to first-party MCP 2026-07-28 ephemeral 127.0.0.1 `server/discover`. No user profile, URL, command, tool call, or auth flows are accepted by this bridge. The descriptor validator `adapter-check` stays **NOT_ATTEMPTED / non-executing**. [Boundary](docs/UNIVERSAL_ADAPTER.md). Exact reviewed npm path inventory remains **80** (all edits to existing sources/docs). CI acceptance and independent review pending.
+- **M4-B7-A — DONE (first-party modern adapter only):** [Issue #97](../../issues/97), [merged PR #98](../../pull/98), [post-merge main CI #40007735850](../../actions/runs/40007735850): **4/4 PASS, 539/539 tests/job, 0 failed/skipped**. Adds a separate no-arg `adapter-staging-selftest` and fixed `connect/probe/close` facade executing only the owned temporary `127.0.0.1` MCP 2026-07-28 `server/discover` request. [Boundary](docs/UNIVERSAL_ADAPTER.md). Universal `adapter-check` stays **NOT_ATTEMPTED** with no network/process effects; no user URL, arbitrary worker, OAuth, tool calls or external targets. **80-path package** unchanged. Independent security review #43 and beta #59 still pending.
 
 ## M4-B6-F — incremental own staging SSE cancellation
 
