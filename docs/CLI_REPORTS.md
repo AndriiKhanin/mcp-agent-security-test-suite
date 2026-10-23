@@ -17,6 +17,7 @@ The standalone MIT [MCP Agent Security Test Suite](../README.md) emits a machine
 | `summary.findingsTruncated` | boolean | True when a validator signals that it omitted additional findings |
 | `summary.ruleCodes` | lexicographically sorted unique array of symbolic codes | Codes from retained findings only; not counts of omitted findings |
 | `errorCode` | symbolic string **only when** `status=ERROR` | Either `INVALID_CLI_ARGUMENTS` or `INVALID_OR_UNREADABLE_INPUT` |
+| `guidance` | array (0–3 objects) | **Additive M5-02:** fixed reviewed `code`, `explanation`, `nextStep`, `exampleCommand` strings; no interpolated source fields |
 
 These fields are **additive** to pre-existing command-specific top-level fields such as `findings`, `failures`, `mismatches`, `steps`, `checks`, `scenario`, `actualFinal`, `observedFinal` or `failureCount`. Existing consumers of `status` or a command's native finding arrays still work; consumers requiring only the versioned contract should select the common fields above. A new major schema version is necessary before deliberately removing or renaming v1 fields.
 
@@ -89,7 +90,34 @@ Bad invocation / invalid input (excerpt; `errorCode` is stable but deliberately 
 }
 ```
 
-For workflows, check the operating-system exit code, then parse stdout JSON for `status`, `reportSchemaVersion` and `summary.ruleCodes`. The existing SHA-pinned repository [CI](../.github/workflows/ci.yml) exercises these cases on Ubuntu/Windows with Node20/22.
+For workflows, check the operating-system exit code, then parse stdout JSON for `status`, `reportSchemaVersion` and `summary.ruleCodes`; use `guidance` for the small allowlisted remediation subset. The existing SHA-pinned repository [CI](../.github/workflows/ci.yml) exercises these cases on Ubuntu/Windows with Node20/22.
+
+## Safe first-run remediation guidance (M5-02)
+
+The top-level `guidance` field is an **additive**, maximum-three-entry array of reviewed literal descriptions. For a failing fictional report, only these recognized codes generate advice: `RETRY_PARAMS_CHANGED`, `DENIED_ACTION_HAD_EFFECT`, and `FLAGGED_SECRET_IN_AUDIT_LOG`. Entries follow sorted `summary.ruleCodes` order. A PASS or a FAIL containing only other codes yields `[]`—unknown strings are **never interpolated into `guidance`**. An `ERROR` report has one fixed template for its already-allowlisted `errorCode`.
+
+Each entry contains `code`, `explanation`, `nextStep`, and `exampleCommand`. A FAIL example command reproduces its **fictional category** with bundled data and is expected to exit 1. An ERROR example runs `demo` as a **known-valid baseline**, not a reproduction of the user's invalid input. No template launches a command, checks the user's local installation, reads credentials or contacts a target.
+
+For example, the `RETRY_PARAMS_CHANGED` entry is independent of the actual original/retried parameters:
+
+```json
+{
+  "code": "RETRY_PARAMS_CHANGED",
+  "explanation": "A fictional protocol-version retry changed other request parameters.",
+  "nextStep": "Keep the method and every parameter except the negotiated protocol version unchanged.",
+  "exampleCommand": "node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json"
+}
+```
+
+Reproducible fixed fixtures:
+
+```sh
+node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
+node src/cli.mjs trace fixtures/trace-unsafe.jsonl
+node src/cli.mjs trace fixtures/trace-unsafe-secret.jsonl
+```
+
+All three intentionally exit 1. Never use real logs, customer identifiers, secrets or production endpoints in fixture inputs. The **native** report fields are still forwarded unchanged as in schema v1 and may contain user-controlled fictional values; `guidance` safety must **not** be mistaken for redaction of the whole report or evidence of a secret scanner.
 
 ## Bounding, redaction and limitations
 

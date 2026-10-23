@@ -51,6 +51,20 @@ node src/cli.mjs stdio fixtures/stdio-mock-unsafe.json
 
 The latter is also a deliberately failing fictional control. The stdio worker is a fixed first-party batch test double, **not a real target**, an OS sandbox, or full MCP interoperability. See [stdio mock limits](STDIO_MOCK.md).
 
+## Diagnose a fictional failure without sharing private input (M5-02)
+
+An intentionally failing contract report contains an additive `guidance` array with approved rule descriptions, a next action and an offline reproduction command for three representative violations. Run:
+
+```sh
+node src/cli.mjs trace fixtures/trace-unsafe.jsonl
+node src/cli.mjs trace fixtures/trace-unsafe-secret.jsonl
+node src/cli.mjs negotiate fixtures/mcp-negotiate-unsafe-params.json
+```
+
+Each is an **expected FAIL** (exit 1). Check `summary.ruleCodes` and `guidance`, not raw payload text. When the input itself is invalid (exit 2), guidance recommends the safe `demo` baseline rather than guessing which confidential part of the input failed. Unknown rule strings do not produce improvised guidance.
+
+**Privacy boundary:** only `guidance` and the generic error report use these fixed templates; existing per-command/native result fields can still contain fictional caller-supplied values. Never paste real customer events or credentials into fixtures. See [CLI diagnostic format](CLI_REPORTS.md).
+
 ## CI example
 
 Use [examples/offline-contract-check.yml](../examples/offline-contract-check.yml) as a template for your own repository's `.github/workflows/offline-contract-check.yml`. The sample uses SHA-pinned GitHub Actions, `permissions: contents: read`, `persist-credentials: false`, Node.js 22, and a single safe command:
