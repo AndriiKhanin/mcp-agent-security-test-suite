@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **Next task:** [M2-01: Machine-readable CLI reports](../../issues/5)
+> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **Next task:** [M3-01: Fixed local stdio mock adapter](../../issues/6)
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -12,10 +12,10 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 288 synthetic tests | [PR #13](../../pull/13) and [post-merge CI](../../actions/runs/39915007747) — 4/4 jobs, 288/288 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 311 synthetic tests | [PR #15](../../pull/15) and [post-merge CI](../../actions/runs/39917058997) — 4/4 jobs, 311/311 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
-| Tracked near-term roadmap work | **3/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
+| Tracked near-term roadmap work | **4/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
 | Real external MCP-server interoperability/security testing | **Not yet implemented** | See **M4**; no live-scanner claim |
 | Deployment, hosted service, npm release, certification | **Not yet delivered** | Future milestones |
 
@@ -27,7 +27,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | --- | --- | --- | --- | --- |
 | **M0 — Foundation** | MIT public source, offline harness, version-retry protection, automated CI | **DONE** | [PR #1](../../pull/1); [post-merge CI](../../actions/runs/39910034366) | 4/4 OS/runtime jobs green, scoped public source |
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
-| **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **QUEUED — 0/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
+| **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **IN PROGRESS — 1/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **QUEUED — 0/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
 | **M4 — Authorized integration preview** | Opt-in interoperability against user-owned, isolated staging fixtures/targets | **FUTURE** | Issues to be written after M1–M3 review | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **FUTURE** | Issues to be scoped | Repeatable installation/use, versioned releases, triaged external feedback |
@@ -42,8 +42,8 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 1. **DONE — [M1-01 · Threat model and scope boundaries (#2)](../../issues/2)** — documented trust boundaries and future adapter gates in [THREAT_MODEL.md](docs/THREAT_MODEL.md); [merged PR #9](../../pull/9) and [post-merge CI](../../actions/runs/39912395585) verified 4/4.
 2. **DONE — [M1-02 · Fail-closed retry-state transitions (#3)](../../issues/3)** — added nine regression tests and strict fail-closed retry checks; [merged PR #11](../../pull/11) and [post-merge CI](../../actions/runs/39913669267) verified 4/4.
 3. **DONE — [M1-03 · Independent negative-control corpus (#4)](../../issues/4)** — 18 golden mutations and 25 security regressions in [NEGATIVE_CONTROLS.md](docs/NEGATIVE_CONTROLS.md); [merged PR #13](../../pull/13) and [main CI](../../actions/runs/39915007747) verified 4/4.
-4. **P1 — [M2-01 · Versioned machine-readable CLI reports (#5)](../../issues/5)** — deterministic reports, actionable codes, clear CLI exit behavior and redaction. **NEXT**.
-5. **P1 — [M3-01 · Fixed local stdio mock adapter (#6)](../../issues/6)** — reproducible MCP-shaped transport behavior, bounded execution and explicit limitations.
+4. **DONE — [M2-01 · Versioned machine-readable CLI reports (#5)](../../issues/5)** — additive schema v1, 23 regression tests, safe error summaries and [CLI report contract](docs/CLI_REPORTS.md); [merged PR #15](../../pull/15) and [post-merge CI](../../actions/runs/39917058997) verified 4/4.
+5. **P1 — [M3-01 · Fixed local stdio mock adapter (#6)](../../issues/6)** — reproducible MCP-shaped transport behavior, bounded execution and explicit limitations. **NEXT**.
 6. **P1 — [M2-02 · Developer tutorial and CI recipe (#7)](../../issues/7)** — clean-clone quickstart and fictional positive/negative examples.
 
 **Dependencies:** M1-01 informs the security invariants in M1-02 and M1-03; M2-01 and M3-01 support the complete developer example in M2-02. We may work on independent pieces in parallel, but must still satisfy those acceptance gates.
