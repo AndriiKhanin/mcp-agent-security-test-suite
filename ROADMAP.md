@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **Current work:** [M4-A fixed first-party loopback mock (#23)](../../issues/23), approved 2026-10-23; **M4-B external-target integration remains unauthorized**
+> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 330 synthetic tests | [PR #19](../../pull/19) and [post-merge CI](../../actions/runs/39921138853) — 4/4 jobs, 330/330 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 353 synthetic/loopback tests | [PR #24](../../pull/24) and [post-merge CI](../../actions/runs/39925449081) — 4/4 jobs, 353/353 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -29,7 +29,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
-| **M4 — Authorized integration preview** | Start with fixed first-party local loopback, external staging separate | **M4-A IN PROGRESS (OWNER APPROVED); M4-B BLOCKED** | [M4-A #23](../../issues/23), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
+| **M4 — Authorized integration preview** | Start with fixed first-party local loopback, external staging separate | **M4-A DONE (1/1); M4-B NOT AUTHORIZED** | [M4-A #23](../../issues/23), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **FUTURE** | Issues to be scoped | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
