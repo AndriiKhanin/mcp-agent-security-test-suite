@@ -27,6 +27,7 @@ This is candidate package metadata, **not evidence of registry publication**:
 | Dependencies | No runtime, optional, peer or development dependency installation required |
 | Lifecycle scripts | No automatic install, prepare, prepack, postpack or publish hooks |
 | Offline manifest evidence | `npm pack --dry-run --json --ignore-scripts --offline` via bundled npm CLI, verified by `test/release-package.test.mjs`; creates **no distributable tarball** and never publishes |
+| Local install smoke (R1) | `test/installed-cli-smoke.test.mjs` packs a disposable local `.tgz`, installs **only that local tarball** in an OS temp directory with offline mode and disabled lifecycle scripts, validates the installed CLI and deletes all temporary files; **no registry or release** |
 
 The `files` allowlist prevents accidental broad packing, but is **not** proof of absence of secrets in legitimate source/fixtures. Maintainers must still review every changed file and generated artifact before publication.
 
@@ -42,7 +43,7 @@ node --test
 node examples/offline-ci-check.mjs
 ```
 
-The preflight test itself invokes **local npm pack in dry-run and offline mode** using fixed, non-user-supplied flags and ignores lifecycle scripts; it validates the JSON manifest's allowlist, required files, executable shebang and package metadata. `npm test` includes this audit. It does not create or upload artifacts, contact registries, or connect to real MCP targets. `node --test` still executes the **fixed local loopback** test and therefore briefly opens 127.0.0.1 TCP sockets.
+The R0 manifest test invokes **npm pack in dry-run and offline mode**. The R1 smoke also packs an actual `.tgz` **only into a disposable OS temp directory** and uses offline npm install from that local file with all lifecycle scripts disabled; it validates that the installed CLI handles PASS/FAIL/ERROR correctly and deletes the temporary tarball, npm cache and installation. Neither publishes a package nor contacts an npm registry. `npm test` includes both tests. Separately, M4-A tests briefly open fixed 127.0.0.1 TCP sockets, never remote targets.
 
 ## Explicit release gates — NOT ALL COMPLETE
 
@@ -53,7 +54,7 @@ The preflight test itself invokes **local npm pack in dry-run and offline mode**
 - [x] **Verified post-merge main CI** [run 39928732232](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39928732232): **4/4, 356/356 per job, 0 failed/skipped**; main SHA `401df77d2e73d6c10e563f9b558b2abf480db587`. Package manifest is checked automatically by offline dry-run. Actual distribution artifact and install remain untested and require separate approval.
 - [ ] **Perform independent release/security review:** no secrets or private source, accurate threat claims, bounded local sockets, permissions/provenance, disclaimer and changelog.
 - [ ] **Choose publication destination and owner authorization:** GitHub signed/annotated tag + Release only, npm registry, or both. Registry account name, 2FA, provenance and any public package-name collision must be checked *before* attempting npm publication.
-- [ ] **Package installation smoke test** of an actual versioned, offline artifact after explicit release-artifact authorization (distinct from dry-run).
+- [x] **R1 disposable package installation smoke**: [automated test](../test/installed-cli-smoke.test.mjs) built an actual candidate tarball in OS temp, verified SHA256 and binary shim, installed from the tarball with `--offline --ignore-scripts`, exercised packaged CLI PASS/FAIL/ERROR and erased the artifact. [R1 branch CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39931081342) 4/4 PASS, **357/357 per job**; PR/main acceptance is tracked separately in [Issue #29](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/29). No distribution authorization granted.
 - [ ] **Stable version decision:** only a separate reviewed PR may change `0.0.10-rc.1` → `0.0.10`, finalize changelog/release notes, and obtain separate explicit permission to tag/publish.
 - [ ] **Post-publication verification:** check target tag/artifact hash, fresh installation, CLI exit codes and public documentation, after explicitly authorized publication.
 
