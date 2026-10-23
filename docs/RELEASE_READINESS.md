@@ -51,6 +51,10 @@ The R0 manifest test invokes **npm pack in dry-run and offline mode**. The R1 sm
 
 This check guards **package membership**, not the safety of bytes inside an already-approved file. It is **not** a secret scanner, independent security audit, protocol certification or release authorization. Acceptance evidence: [merged PR #33](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/33) (four reviewed files) and [post-merge main CI 39934465115](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39934465115) — **4/4 PASS, 358/358 tests per job**, 0 failures/skips. [Issue #32](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) is closed. Stable release remains gated.
 
+## R3 internal source/package review — release remains blocked
+
+[R3 Issue #35](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/35) records a [targeted internal review](R3_INTERNAL_RELEASE_REVIEW.md) of the synthetic source and its release surface. Its presence in `docs/` intentionally expands the exact package path inventory from the R2 historical baseline of **54** to **55** reviewed paths. The path lock does not attest package bytes, code provenance or secret absence. **This is not an independent review and does not satisfy the independent review, destination, version, authorization or post-publication gates below.** R3 delivery itself still requires PR and post-merge CI evidence.
+
 ## Explicit release gates — NOT ALL COMPLETE
 
 - [x] Current source/license/package metadata inspected. `package.json` retains release-candidate version.
