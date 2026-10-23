@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0 packaging preflight, R1 disposable offline installation and R2 exact package inventory ACCEPTED** by [PR #27](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/27), [PR #30](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/30) and [post-merge CI 39931897702](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39931897702) (**4/4 PASS; 357/357 per job**). Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0 packaging preflight, R1 disposable offline installation and R2 exact package inventory ACCEPTED** via [PR #27](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/27), [PR #30](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/30) and [R2 PR #33](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/33). Latest [post-merge CI 39934465115](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39934465115) **4/4 PASS, 358/358 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
