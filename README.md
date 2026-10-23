@@ -31,7 +31,7 @@ node examples/offline-ci-check.mjs
 
 ## Candidate packaging (not yet published)
 
-The prerelease package declares an executable `mcp-agent-security`, a reviewed `files` allowlist and zero dependencies. To inspect **only** the local archive manifest without creating/uploading a package, run `npm run release:preflight`. This invokes `npm pack --dry-run --json --ignore-scripts --offline` and is also exercised by `node --test`. Do not run `npm publish` or create stable tags without separate explicit release approval. See [release readiness](docs/RELEASE_READINESS.md).
+The prerelease package declares an executable `mcp-agent-security`, an audited `files` allowlist and zero dependencies. `npm run release:preflight` checks the archive manifest in offline dry-run mode; the full `node --test` suite also performs a **disposable offline local tarball installation smoke**, verifies the installed CLI and deletes all temp files. No registry access or publication occurs. Do not run `npm publish` or create stable tags without separate explicit approval. See [release readiness](docs/RELEASE_READINESS.md).
 
 ## Test
 
