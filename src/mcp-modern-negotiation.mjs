@@ -37,17 +37,28 @@ export function auditModernNegotiation(input) {
   let pendingParams = null; // frozen-by-convention read-only baseline, with version omitted
   let completed = 0;
   const seenIds = new Set();
+  // An invalid message cannot be skipped while preserving retry permission:
+  // that would let a later unrelated exchange appear to complete the retry.
+  const interruptPendingRetry = step => {
+    if (pendingRetry === null) return;
+    flag(step,'RETRY_INTERRUPTED_BY_INVALID_STEP');
+    pendingRetry=null; pendingMethod=null; pendingParams=null;
+  };
   for (let index=0;index<input.steps.length;index++) {
     const at=index+1, pair=input.steps[index];
     if (!record(pair) || !fields(pair,['request','response']) ||
         !record(pair.request) || !record(pair.response)) {
+      interruptPendingRetry(at);
       flag(at,'INVALID_EXCHANGE_STEP'); continue;
     }
     const req=pair.request,res=pair.response;
     if (req.jsonrpc!=='2.0' || !id(req.id) || !string(req.method) ||
         req.method==='initialize' || req.method==='notifications/initialized' ||
         !fields(req,['jsonrpc','id','method','params']) || !record(req.params) ||
-        !record(req.params._meta)) {flag(at,'INVALID_MODERN_REQUEST');continue;}
+        !record(req.params._meta)) {
+      interruptPendingRetry(at);
+      flag(at,'INVALID_MODERN_REQUEST');continue;
+    }
     const meta=req.params._meta;
     const requested=meta[VERSION_META_KEY];
     const capabilities=meta['io.modelcontextprotocol/clientCapabilities'];
@@ -60,7 +71,8 @@ export function auditModernNegotiation(input) {
     const key=typeof req.id+':'+String(req.id);
     if (seenIds.has(key)) flag(at,'REUSED_REQUEST_ID');
     seenIds.add(key);
-    if (pendingRetry !== null) {
+    const wasRetry = pendingRetry !== null;
+    if (wasRetry) {
       if (!pendingRetry.includes(requested)) flag(at,'RETRY_VERSION_NOT_MUTUALLY_SUPPORTED');
       if (req.method!==pendingMethod) flag(at,'RETRY_METHOD_CHANGED');
       if (!isDeepStrictEqual(withoutNegotiatedVersion(req.params), pendingParams)) {
@@ -81,12 +93,17 @@ export function auditModernNegotiation(input) {
       flag(at,'INVALID_PROTOCOL_ERROR');continue;
     }
     if (error.code===UNSUPPORTED_PROTOCOL_VERSION) {
+      // The strict synthetic profile permits one retry per unsupported-version
+      // error, not a chain of automatic renegotiations after a failed retry.
+      if (wasRetry) flag(at,'REPEATED_VERSION_NEGOTIATION');
       const data=error.data;
       if (!record(data) || !fields(data,['requested','supported']) ||
           !versions(data.supported) || data.requested!==requested ||
           data.supported.includes(requested)) {
         flag(at,'INVALID_UNSUPPORTED_VERSION_EVIDENCE');continue;
       }
+      // Do not arm another pending retry after a completed retry attempt.
+      if (wasRetry) continue;
       const overlap=data.supported.filter(v=>input.clientVersions.includes(v));
       if (overlap.length>0) {
         pendingRetry=overlap; pendingMethod=req.method;
