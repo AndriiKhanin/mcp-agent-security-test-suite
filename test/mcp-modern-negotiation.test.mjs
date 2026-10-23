@@ -130,3 +130,80 @@ test('safe retry fixture with a deliberate new argument fails CLI contract',()=>
   const report=JSON.parse(result.stdout);
   assert.ok(has(report,'RETRY_PARAMS_CHANGED'));
 });
+
+// M1-02: fail closed on interrupted/repeated unsupported-version negotiation.
+// These checks model an intentionally strict, single-retry offline profile.
+function boundedNegotiation() {
+  const f=clone(safe);
+  f.steps=f.steps.slice(0,2);
+  return f;
+}
+test('M1-02: ordinary single successful version retry remains valid',()=>{
+  assert.equal(audit(boundedNegotiation()).status,'PASS');
+});
+test('M1-02: malformed exchange cannot bridge an awaited version retry',()=>{
+  const f=boundedNegotiation();
+  f.steps.splice(1,0,{request:null,response:null});
+  const r=audit(f);
+  assert.equal(r.status,'FAIL');
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='INVALID_EXCHANGE_STEP'));
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='RETRY_INTERRUPTED_BY_INVALID_STEP'));
+});
+test('M1-02: malformed request interrupts pending version retry',()=>{
+  const f=boundedNegotiation();
+  f.steps.splice(1,0,{request:{jsonrpc:'1.0',id:'interloper',method:'tools/list',params:{}},
+    response:ok('interloper')});
+  const r=audit(f);
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='INVALID_MODERN_REQUEST'));
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='RETRY_INTERRUPTED_BY_INVALID_STEP'));
+});
+test('M1-02: repeated unsupported-version renegotiation is not accepted',()=>{
+  const f=boundedNegotiation();
+  f.clientVersions.push('2026-08-01');
+  f.steps[1].response=error('retry',UNSUPPORTED_PROTOCOL_VERSION,{
+    requested:'2026-07-28',supported:['2026-08-01']});
+  const third=clone(f.steps[1]);
+  third.request.id='third';
+  third.request.params._meta['io.modelcontextprotocol/protocolVersion']='2026-08-01';
+  third.response=ok('third');
+  f.steps.push(third);
+  const r=audit(f);
+  assert.equal(r.status,'FAIL');
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='REPEATED_VERSION_NEGOTIATION'));
+});
+test('M1-02: reuse of initial request ID during retry is reported',()=>{
+  const f=boundedNegotiation();
+  f.steps[1].request.id='first';
+  f.steps[1].response.id='first';
+  const r=audit(f);
+  assert.equal(r.status,'FAIL');
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='REUSED_REQUEST_ID'));
+});
+test('M1-02: mismatched retry response ID fails',()=>{
+  const f=boundedNegotiation();
+  f.steps[1].response.id='not-retry';
+  const r=audit(f);
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='INVALID_NEGOTIATION_RESPONSE'));
+});
+test('M1-02: missing retry response payload fails',()=>{
+  const f=boundedNegotiation();
+  f.steps[1].response={jsonrpc:'2.0',id:'retry'};
+  const r=audit(f);
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='INVALID_NEGOTIATION_RESPONSE'));
+});
+test('M1-02: unrelated interleaved request cannot satisfy pending retry',()=>{
+  const f=boundedNegotiation();
+  const stray=pair(req('unrelated'),ok('unrelated'));
+  stray.request.method='prompts/list';
+  f.steps.splice(1,0,stray);
+  const r=audit(f);
+  assert.equal(r.status,'FAIL');
+  assert.ok(r.findings.some(x=>x.step===2 && x.rule==='RETRY_METHOD_CHANGED'));
+});
+test('M1-02: pending-retry failure findings never echo request payload',()=>{
+  const f=boundedNegotiation();
+  f.steps.splice(1,0,{request:null,response:null,payload:'FICTIONAL_PRIVATE_CANARY_DO_NOT_ECHO'});
+  const r=audit(f);
+  assert.ok(r.findings.some(x=>x.rule==='RETRY_INTERRUPTED_BY_INVALID_STEP'));
+  assert.ok(!JSON.stringify(r).includes('FICTIONAL_PRIVATE_CANARY_DO_NOT_ECHO'));
+});
