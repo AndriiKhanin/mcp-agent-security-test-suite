@@ -1,6 +1,6 @@
 # R5 — Independent security review handoff (NOT completed)
 
-**Purpose:** provide a bounded source and package evidence pack to an assessor who is independent of the project's code author and can record their own conclusions. **Tracking:** [R5-A #41](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/41). No assessor has been engaged or approved by this document. This is not proof of a completed independent audit.
+**Purpose:** provide a bounded source and package evidence pack to an assessor who is independent of the project's code author and can record their own conclusions. **Engineering delivery:** [R5-A #41](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/41) DONE. **Independent release gate:** [R5-B #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) OPEN. No assessor has been engaged or approved by this document. This is not proof of a completed independent audit.
 
 ## Current candidate and trustworthy starting points
 
@@ -23,6 +23,12 @@
 `test/r5-content-preflight.test.mjs` adds limited pattern checks against all 57 current package source files: file-size limit, valid UTF-8, no embedded NUL and a few high-confidence private-key/token **signatures**. Synthetic positive/negative controls demonstrate rejects. Results contain only file paths and symbolic rule codes; no offending bytes. It runs with `node --test` and has no new runtime dependency, network request or install hook.
 
 **Limitations:** This is a heuristic, not an enterprise secret scanner or DLP guarantee. Unrecognized token formats, split/encoded material, ordinary passwords, unexpected copyrighted source, malicious code or unsafe behavior may pass. Benign strings may trigger false positives. A PASS does not attest source author, license rights, independent build provenance or readiness for live MCP target testing.
+
+## R5-A verified engineering evidence
+
+- [PR #42](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/42) merged at `34d07b2a2bf17bfea626b10524401c4aabaab0a9`.
+- [Post-merge main CI #39941412361](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39941412361): **4/4 PASS, 364/364 tests per Windows/Ubuntu Node20/22 job**, 0 failed/skipped.
+- This only attests that author-defined synthetic checks passed on the reviewed revision. It is NOT independent inspection of source, a signed release or publication consent.
 
 ## Outstanding release gates
 
