@@ -29,7 +29,33 @@ const reply = [
   {jsonrpc:'2.0',id:4,error:{code:-32001,message:'SYNTHETIC_WRITE_DENIED'}}
 ];
 
+/**
+ * Separate first-party initialize-only exchange: no tools/list or tools/call.
+ * Strictly one fixed fictional protocol request and a fixed reply.
+ */
+async function initializeOnly() {
+  if(process.argv.length!==3) return 2;
+  const request={jsonrpc:'2.0',id:1,method:'initialize',params:{
+    protocolVersion:'2026-07-28',capabilities:{},
+    clientInfo:{name:'fictional-client',version:'1'}}};
+  const response={jsonrpc:'2.0',id:1,result:{protocolVersion:'2026-07-28',
+    capabilities:{},serverInfo:{name:'fictional-init-only-mock',version:'1'}}};
+  const decoder=new TextDecoder('utf8',{fatal:true});
+  let source='',bytes=0;
+  for await (const chunk of process.stdin) {
+    bytes+=chunk.byteLength;
+    if(bytes>4096)return 2;
+    source+=decoder.decode(chunk,{stream:true});
+  }
+  source+=decoder.decode();
+  if(!source.endsWith('\n') || source.indexOf('\n')!==source.length-1)return 2;
+  if(!isDeepStrictEqual(parseStrictJson(source.slice(0,-1)),request))return 2;
+  process.stdout.write(JSON.stringify(response)+'\n');
+  return 0;
+}
+
 async function main() {
+  if(process.argv[2]==='init-only') return initializeOnly();
   const fault = process.argv[2] ?? 'none';
   const faults=new Set(['none','wrong-id','invalid-json','extra-line','missing-line',
     'oversized-output','changed-result','hang','stderr-canary','env-probe']);

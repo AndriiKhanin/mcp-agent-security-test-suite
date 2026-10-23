@@ -6,7 +6,7 @@
  * local mock harnesses with bounded resources and automatic cleanup.
  * Neither process isolation nor loopback means an OS security sandbox.
  */
-import { runLocalStdioMock } from './stdio-mcp-harness.mjs';
+import { runLocalStdioMock, runLocalStdioInitialization } from './stdio-mcp-harness.mjs';
 import { runLoopbackHttpMock } from './loopback-http-mock.mjs';
 
 const TRANSPORTS = Object.freeze(['stdio','streamable-http']);
@@ -26,16 +26,19 @@ function validate(transport, options) {
   if(!TRANSPORTS.includes(transport) || !options ||
      typeof options!=='object' || Array.isArray(options) ||
      Object.getPrototypeOf(options)!==Object.prototype ||
-     Object.keys(options).some(key=>!['fault','deadlineMs'].includes(key))) reject();
+     Object.keys(options).some(key=>!['fault','deadlineMs','mode'].includes(key))) reject();
+  const mode=options.mode??'legacy-batch';
+  if(!['legacy-batch','initialize-only'].includes(mode) ||
+     (mode==='initialize-only' && (transport!=='stdio' || options.fault!==undefined))) reject();
   const fault=options.fault??'none';
   const deadlineMs=options.deadlineMs??(transport==='stdio'?8000:5000);
   const max=transport==='stdio'?8000:5000;
   if(!FAULTS[transport].includes(fault) || !Number.isSafeInteger(deadlineMs) ||
      deadlineMs<250 || deadlineMs>max) reject();
-  return {fault,deadlineMs};
+  return {fault,deadlineMs,mode};
 }
-function report(transport, result) {
-  const checked=transport==='stdio'?4:1;
+function report(transport, result, mode='legacy-batch') {
+  const checked=transport==='stdio' && mode==='legacy-batch'?4:1;
   const success=result?.status==='PASS' &&
     result.checked===checked && result.failureCount===0 &&
     Array.isArray(result.findings) && result.findings.length===0 &&
@@ -58,7 +61,7 @@ function report(transport, result) {
 
 /** Only literal transport IDs + reviewed finite fault selectors, no user endpoints. */
 export function createFirstPartyDriver(transport, options={}) {
-  const {fault,deadlineMs}=validate(transport,options);
+  const {fault,deadlineMs,mode}=validate(transport,options);
   let state='new';
   return Object.freeze({
     async connect() {
@@ -71,11 +74,13 @@ export function createFirstPartyDriver(transport, options={}) {
       state='probed'; // single-shot; fail closed even on underlying rejection
       try {
         const native=transport==='stdio'
-          ? runLocalStdioMock({fault,timeoutMs:deadlineMs})
+          ? (mode==='initialize-only'
+            ? runLocalStdioInitialization({timeoutMs:deadlineMs})
+            : runLocalStdioMock({fault,timeoutMs:deadlineMs}))
           : await runLoopbackHttpMock({fault,deadlineMs});
-        return report(transport,native);
+        return report(transport,native,mode);
       } catch {
-        return report(transport,null);
+        return report(transport,null,mode);
       }
     },
     async close() {

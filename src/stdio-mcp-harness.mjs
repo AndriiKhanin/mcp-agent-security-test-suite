@@ -100,3 +100,47 @@ export function runStdioMockScenario(value) {
     throw new TypeError('INVALID_STDIO_MOCK_FIXTURE');
   return runLocalStdioMock({fault:value.fault});
 }
+
+
+/** M4-B3: distinct FIXED initialization-only child exchange.
+ * Never sends tools/list, tools/call, resources/read or external requests.
+ */
+export function runLocalStdioInitialization({timeoutMs=8000}={}) {
+  if(!Number.isSafeInteger(timeoutMs)||timeoutMs<250||timeoutMs>8000)
+    throw new TypeError('INVALID_SYNTHETIC_STDIO_TIMEOUT');
+  const request={jsonrpc:'2.0',id:1,method:'initialize',params:{
+    protocolVersion:'2026-07-28',capabilities:{},
+    clientInfo:{name:'fictional-client',version:'1'}}};
+  const expected={jsonrpc:'2.0',id:1,result:{protocolVersion:'2026-07-28',
+    capabilities:{},serverInfo:{name:'fictional-init-only-mock',version:'1'}}};
+  const findings=[];
+  const flag=rule=>findings.push({step:1,rule});
+  let received=0;
+  // Reviewed built-in worker only; do not inherit caller environment.
+  const run=spawnSync(process.execPath,[WORKER,'init-only'],{
+    shell:false,windowsHide:true,cwd:WORKDIR,env:{NODE_NO_WARNINGS:'1'},
+    input:Buffer.from(JSON.stringify(request)+'\n','utf8'),encoding:'buffer',
+    timeout:timeoutMs,maxBuffer:8192,killSignal:'SIGTERM'
+  });
+  if(run.error || run.status!==0 || run.signal) {
+    flag(run.error?.code==='ETIMEDOUT'?'STDIO_WORKER_TIMEOUT':
+      run.error?.code==='ENOBUFS'?'STDIO_OUTPUT_LIMIT':'STDIO_WORKER_FAILED');
+  } else if(run.stderr?.length) flag('STDIO_UNEXPECTED_STDERR');
+  else {
+    try {
+      const output=new TextDecoder('utf-8',{fatal:true}).decode(run.stdout);
+      if(!output.endsWith('\n') || output.indexOf('\n')!==output.length-1)
+        flag('STDIO_INVALID_FRAMING');
+      else if(output.length>4096)flag('STDIO_OUTPUT_LIMIT');
+      else {
+        received=1;
+        const message=parseStrictJson(output.slice(0,-1));
+        if(!isDeepStrictEqual(message,expected))
+          flag('STDIO_RESPONSE_CONTENT_MISMATCH');
+      }
+    } catch {flag('STDIO_INVALID_JSON_RESPONSE');}
+  }
+  return {status:findings.length?'FAIL':'PASS',
+    profile:'fixed-local-init-only-stdio-v1',checked:1,received,
+    failureCount:findings.length,findingsTruncated:false,findings};
+}
