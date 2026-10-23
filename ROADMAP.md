@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **Next task:** [M1-01: Threat model](../../issues/2)
+> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **Next task:** [M1-02: Harden retry-state transitions](../../issues/3)
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -14,7 +14,8 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
 | Latest candidate in `main` | **v0.0.10-rc.1**; 254 synthetic tests | [PR #1](../../pull/1) and [post-merge CI](../../actions/runs/39910034366) — 4/4 jobs, 254/254 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
-| Tracked near-term roadmap work | **0/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
+| Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
+| Tracked near-term roadmap work | **1/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
 | Real external MCP-server interoperability/security testing | **Not yet implemented** | See **M4**; no live-scanner claim |
 | Deployment, hosted service, npm release, certification | **Not yet delivered** | Future milestones |
 
@@ -25,7 +26,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | Milestone | Focus | Status | Tracking | Exit gate |
 | --- | --- | --- | --- | --- |
 | **M0 — Foundation** | MIT public source, offline harness, version-retry protection, automated CI | **DONE** | [PR #1](../../pull/1); [post-merge CI](../../actions/runs/39910034366) | 4/4 OS/runtime jobs green, scoped public source |
-| **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **NEXT — 0/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
+| **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **IN PROGRESS — 1/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **QUEUED — 0/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **QUEUED — 0/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
 | **M4 — Authorized integration preview** | Opt-in interoperability against user-owned, isolated staging fixtures/targets | **FUTURE** | Issues to be written after M1–M3 review | Allowlist + explicit target authorization + strict default deny; no production probes |
@@ -38,8 +39,8 @@ We will not claim a release is production-ready merely because a synthetic test 
 
 These are actual GitHub Issues, not aspirational checkmarks. **Close each only when its Definition of Done is evidenced by a merged PR and verified CI.**
 
-1. **P0 — [M1-01 · Threat model and scope boundaries (#2)](../../issues/2)** — document attacker capabilities, trust boundaries, non-goals and explicit target-authorization requirements. **NEXT**.
-2. **P0 — [M1-02 · Fail-closed retry-state transitions (#3)](../../issues/3)** — malformed/interleaved retry traces must not bypass protocol validation.
+1. **DONE — [M1-01 · Threat model and scope boundaries (#2)](../../issues/2)** — documented trust boundaries and future adapter gates in [THREAT_MODEL.md](docs/THREAT_MODEL.md); [merged PR #9](../../pull/9) and [post-merge CI](../../actions/runs/39912395585) verified 4/4.
+2. **P0 — [M1-02 · Fail-closed retry-state transitions (#3)](../../issues/3)** — malformed/interleaved retry traces must not bypass protocol validation. **NEXT**.
 3. **P0 — [M1-03 · Independent negative-control corpus (#4)](../../issues/4)** — prove contract checks detect known-invalid modifications without copying private payloads.
 4. **P1 — [M2-01 · Versioned machine-readable CLI reports (#5)](../../issues/5)** — deterministic reports, actionable codes, clear CLI exit behavior and redaction.
 5. **P1 — [M3-01 · Fixed local stdio mock adapter (#6)](../../issues/6)** — reproducible MCP-shaped transport behavior, bounded execution and explicit limitations.
