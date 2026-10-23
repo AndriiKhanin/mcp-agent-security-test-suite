@@ -29,7 +29,7 @@ const stalls=['response-sse-stall-before-event',
 test('M4-B6-F: baseline JSON discovery remains fixed and closes response',async()=>{
   const r=await runFirstPartyStagingSelftest();
   assert.equal(r.status,'PASS');
-  assert.deepEqual([r.received,r.accepted,r.responseClosedCount],[1,1,1]);
+  assert.deepEqual([r.received,r.accepted,r.socketClosedCount],[1,1,1]);
   assert.equal(r.externalTargetContacted,false);
 });
 
@@ -37,21 +37,21 @@ test('M4-B6-F: one final SSE event accepted without buffering entire body',async
   const {result,attempts}=await observeFirstPartyMockAttempts(
     ()=>runFirstPartyStagingSelftest({fault:'sse'}));
   assert.equal(result.status,'PASS');
-  assert.equal(result.responseClosedCount,1);
+  assert.equal(result.socketClosedCount,1);
   assert.deepEqual(attempts,['staging-bind','staging-request']);
 });
 
 test('M4-B6-F: LF and CRLF delimiters split across writes are reconstructed',async()=>{
   const r=await runFirstPartyStagingSelftest({fault:'sse-cross-chunk-crlf'});
   assert.equal(r.status,'PASS');
-  assert.equal(r.responseClosedCount,1);
+  assert.equal(r.socketClosedCount,1);
 });
 
 test('M4-B6-F: fixed first-party notification/keepalive variants still pass',async()=>{
   for(const fault of positive){
     const r=await runFirstPartyStagingSelftest({fault});
     assert.equal(r.status,'PASS',fault);
-    assert.deepEqual([r.received,r.accepted,r.responseClosedCount],[1,1,1],fault);
+    assert.deepEqual([r.received,r.accepted,r.socketClosedCount],[1,1,1],fault);
     assert.equal(r.externalTargetContacted,false);
   }
 });
@@ -61,7 +61,7 @@ test('M4-B6-F: oversized chunked SSE is rejected before stream completion',async
     fault:'response-sse-chunk-flood',deadlineMs:1000});
   assert.equal(r.status,'FAIL');
   assert.equal(r.findings[0].rule,'STAGING_RESPONSE_LIMIT');
-  assert.deepEqual([r.received,r.accepted,r.responseClosedCount],[1,1,1]);
+  assert.deepEqual([r.received,r.accepted,r.socketClosedCount],[1,1,1]);
 });
 
 test('M4-B6-F: deadline aborts after response headers but before first event',async()=>{
@@ -69,7 +69,7 @@ test('M4-B6-F: deadline aborts after response headers but before first event',as
     fault:'response-sse-stall-before-event',deadlineMs:370});
   assert.equal(r.status,'FAIL');
   assert.equal(r.findings[0].rule,'STAGING_TIMEOUT');
-  assert.deepEqual([r.received,r.accepted,r.responseClosedCount],[1,1,1]);
+  assert.deepEqual([r.received,r.accepted,r.socketClosedCount],[1,1,1]);
 });
 
 test('M4-B6-F: deadline cancels after first reviewed logging notice',async()=>{
@@ -77,7 +77,7 @@ test('M4-B6-F: deadline cancels after first reviewed logging notice',async()=>{
     fault:'response-sse-stall-after-notice',deadlineMs:370});
   assert.equal(r.status,'FAIL');
   assert.equal(r.findings[0].rule,'STAGING_TIMEOUT');
-  assert.deepEqual([r.received,r.accepted,r.responseClosedCount],[1,1,1]);
+  assert.deepEqual([r.received,r.accepted,r.socketClosedCount],[1,1,1]);
 });
 
 test('M4-B6-F: final SSE result cannot pass until network stream completes',async()=>{
@@ -85,7 +85,7 @@ test('M4-B6-F: final SSE result cannot pass until network stream completes',asyn
     fault:'response-sse-stall-after-final',deadlineMs:370});
   assert.equal(r.status,'FAIL');
   assert.equal(r.findings[0].rule,'STAGING_TIMEOUT');
-  assert.deepEqual([r.received,r.accepted,r.responseClosedCount],[1,1,1]);
+  assert.deepEqual([r.received,r.accepted,r.socketClosedCount],[1,1,1]);
 });
 
 test('M4-B6-F: pre-existing hangs, redirects and oversized fixtures fail closed',async()=>{
@@ -97,7 +97,7 @@ test('M4-B6-F: pre-existing hangs, redirects and oversized fixtures fail closed'
     const r=await runFirstPartyStagingSelftest({fault,deadlineMs:380});
     assert.equal(r.status,'FAIL',fault);
     assert.equal(r.findings[0].rule,rule,fault);
-    assert.equal(r.responseClosedCount,1,fault);
+    assert.equal(r.socketClosedCount,1,fault);
   }
 });
 
@@ -106,7 +106,7 @@ test('M4-B6-F: malformed and unsolicited SSE fixtures remain rejected',async()=>
     const r=await runFirstPartyStagingSelftest({fault});
     assert.equal(r.status,'FAIL',fault);
     assert.equal(r.findings[0].rule,'STAGING_RESPONSE_MISMATCH',fault);
-    assert.equal(r.responseClosedCount,1,fault);
+    assert.equal(r.socketClosedCount,1,fault);
     assert.equal(r.externalTargetContacted,false);
   }
 });
@@ -130,7 +130,7 @@ test('M4-B6-F: repeated short-lived aborted streams close all responses',async()
     const r=await runFirstPartyStagingSelftest({
       fault:'response-sse-stall-after-notice',deadlineMs:330});
     assert.equal(r.status,'FAIL');
-    assert.equal(r.responseClosedCount,1);
+    assert.equal(r.socketClosedCount,1);
   }
 });
 
@@ -142,7 +142,7 @@ test('M4-B6-F: bounded simultaneous own loopback fixtures are isolated',async()=
   assert.equal(a.status,'PASS');
   assert.equal(b.status,'FAIL');
   assert.equal(b.findings[0].rule,'STAGING_TIMEOUT');
-  assert.deepEqual([a.responseClosedCount,b.responseClosedCount],[1,1]);
+  assert.deepEqual([a.socketClosedCount,b.socketClosedCount],[1,1]);
 });
 
 test('M4-B6-F: fixed child-process staging still closes and passes',async()=>{

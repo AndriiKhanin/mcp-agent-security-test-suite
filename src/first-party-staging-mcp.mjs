@@ -392,6 +392,7 @@ function report(rule,counts) {
     externalTargetContacted:false,operatorVerified:false,
     checked:1,received:counts.received,accepted:counts.accepted,
     responseClosedCount:counts.responseClosed,
+    socketClosedCount:counts.socketClosed,
     failureCount:rule?1:0,findingsTruncated:false,
     findings:rule?[{step:1,rule}]:[]};
 }
@@ -411,7 +412,11 @@ export async function runFirstPartyStagingSelftest(options={}) {
     deadlineMs<250 || deadlineMs>DEFAULT_DEADLINE)
     throw new TypeError('INVALID_FIXED_STAGING_OPTIONS');
   const server=http.createServer(),controller=new AbortController();
-  const counts={received:0,accepted:0,responseClosed:0};
+  // Watch real TCP socket closure independently from HTTP response close.
+  server.on('connection',socket=>{
+    socket.once('close',()=>{counts.socketClosed++;});
+  });
+  const counts={received:0,accepted:0,responseClosed:0,socketClosed:0};
   let timer,rule='STAGING_BIND_OR_TRANSPORT_FAILED';
   try{
     await new Promise((resolve,reject)=>{
