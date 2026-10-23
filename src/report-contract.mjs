@@ -4,7 +4,7 @@
  */
 export const REPORT_SCHEMA_VERSION = 1;
 export const CLI_COMMANDS = Object.freeze([
-  'scenario','trace','mock','witness','process','jsonrpc','era','negotiate'
+  'scenario','trace','mock','witness','process','stdio','jsonrpc','era','negotiate'
 ]);
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);

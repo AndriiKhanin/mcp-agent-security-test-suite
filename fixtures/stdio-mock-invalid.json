@@ -1,0 +1,5 @@
+{
+  "profile": "fixed-local-stdio-mock-v1",
+  "fault": "none",
+  "command": "https://invalid.example"
+}
