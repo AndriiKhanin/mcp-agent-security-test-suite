@@ -191,6 +191,18 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.deepEqual([local.transportCount,local.passed,local.failed],[2,2,0]);
     assert.deepEqual(local.outcomes.map(o=>o.checked),[1,1]);
     assert.ok(local.outcomes.every(o=>o.gateStatus==='MOCK_ADMITTED' && o.mockProbeAttempted));
+    // M4-B6-A: fixed first-party staging MCP 2026 discovery, packaged, no URLs.
+    const staging=invokeNode(executable,['staging-selftest'],temp,env);
+    assert.equal(staging.status,0,'installed local staging selftest must pass');
+    const stagingReport=JSON.parse(staging.stdout);
+    assert.equal(stagingReport.reportSchemaVersion,1);
+    assert.equal(stagingReport.command,'staging-selftest');
+    assert.equal(stagingReport.status,'PASS');
+    assert.equal(stagingReport.allowedMethod,'server/discover');
+    assert.equal(stagingReport.protocolVersion,'2026-07-28');
+    assert.equal(stagingReport.externalTargetContacted,false);
+    assert.deepEqual([stagingReport.received,stagingReport.accepted],[1,1]);
+
     // Intentional expired self-assertion: validates the offline policy
     // report from the actual installed package without authorizing access.
     const expired=join(packageDir,'examples','adapter-profiles','consent-expired.json');

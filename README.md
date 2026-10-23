@@ -2,7 +2,7 @@
 
 **Release candidate for validation before the stable v0.0.10 release.** Synthetic contract tests only; not a vulnerability scanner or security certification.
 
-Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-first: no real MCP server, credentials, external connections, real tool execution, live vulnerability scanning, independent OAuth verification or security certification. The optional first-party `loopback` command opens a temporary **local-only IPv4 127.0.0.1 socket**; it never contacts an external target.
+Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-first: no **external/user-owned** MCP server, credentials, real tool execution, live vulnerability scanning, independent OAuth verification or security certification. M4-B6-A adds only a first-party ephemeral modern MCP-shaped staging listener on 127.0.0.1. The optional first-party `loopback` command opens a temporary **local-only IPv4 127.0.0.1 socket**; it never contacts an external target.
 
 ## Modules
 
@@ -39,6 +39,14 @@ The new `demo` mode runs two **bundled fictional fixtures**, validates both an e
 **M5-02 remediation preview:** FAIL reports also provide bounded, fixed-text `guidance` for three representative synthetic rule codes, with approved next steps and bundled offline reproduction commands. Generic usage/input errors have fixed guidance too. Unrecognized rules are never interpolated into advice; existing native result fields are **not** a DLP filter. See [CLI guidance contract](docs/CLI_REPORTS.md).
 
 **M4-B5 next-stage architecture (not activated):** a [reviewable future target-approval decision packet](docs/M4_B5_TARGET_APPROVAL.md) defines independent ownership verification, operator consent, exact-method scope and SSRF/TLS/egress gates. It adds offline denial regressions, not remote connectivity; live MCP targets remain prohibited without a separate owner-approved implementation.
+
+## First-party modern MCP staging selftest (M4-B6-A, local-only)
+
+```sh
+node src/cli.mjs staging-selftest
+```
+
+One temporary **127.0.0.1-only** staging MCP server and one fixed `server/discover` exchange using **MCP 2026-07-28** request metadata and mirrored HTTP headers, with JSON/SSE regression variants. [Safety boundaries and tests](docs/FIRST_PARTY_STAGING_MCP.md). No user server is contacted; no arbitrary URL, stdio program, credential, OAuth or remote deployment is supported.
 
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 

@@ -6,7 +6,8 @@
  */
 import { AsyncLocalStorage } from 'node:async_hooks';
 const scope=new AsyncLocalStorage();
-const EVENTS=new Set(['driver-probe','stdio-spawn','http-bind','http-request']);
+const EVENTS=new Set(['driver-probe','stdio-spawn','http-bind','http-request',
+  'staging-bind','staging-request']);
 
 /** Called beside the actual first-party side-effect invocation, never by a
  * policy result constructor. No paths, payloads, ports or identities recorded.
