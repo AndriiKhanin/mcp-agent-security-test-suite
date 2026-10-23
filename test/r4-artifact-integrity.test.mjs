@@ -37,6 +37,16 @@ function assertSourceBytes(source, installed, label = 'synthetic') {
     'R4_FILE_CONTENT_MISMATCH:' + label);
   assert.ok(source.equals(installed), 'R4_FILE_BYTES_MISMATCH:' + label);
 }
+// npm normalizes only the CRLF ending of a Node bin shebang to LF when
+// packing on Windows. Check that exact, known byte transformation and reject
+// all other changes, including changes to the remainder of the same file.
+function expectedInstalledBytes(path, source) {
+  if (path !== 'src/cli.mjs') return source;
+  const crlf = Buffer.from('#!/usr/bin/env node\\r\\n'.replaceAll('\\r','\r').replaceAll('\\n','\n'));
+  if (!source.subarray(0, crlf.length).equals(crlf)) return source;
+  const lf = Buffer.from('#!/usr/bin/env node\\n'.replaceAll('\\n','\n'));
+  return Buffer.concat([lf, source.subarray(crlf.length)]);
+}
 function runNpm(args, cwd, env) {
   const result = spawnSync(process.execPath, [npmCli, ...args], {
     cwd, env, shell: false, windowsHide: true, encoding: 'utf8',
@@ -102,6 +112,17 @@ test('R4: integrity guards reject synthetic archive/content/path mutations', () 
   assert.doesNotThrow(() => assertSourceBytes(original, Buffer.from(original)));
   assert.throws(() => assertSourceBytes(original, modified),
     /R4_FILE_CONTENT_MISMATCH/);
+  const crlfCli = Buffer.from('#!/usr/bin/env node\\r\\nfictional();\\r\\n'
+    .replaceAll('\\r','\r').replaceAll('\\n','\n'));
+  const expectedCli = Buffer.from('#!/usr/bin/env node\\nfictional();\\r\\n'
+    .replaceAll('\\r','\r').replaceAll('\\n','\n'));
+  assertSourceBytes(expectedCli, expectedInstalledBytes('src/cli.mjs', crlfCli));
+  assertSourceBytes(crlfCli, expectedInstalledBytes('docs/fictional.txt', crlfCli));
+  const unrelatedChange = Buffer.from('#!/usr/bin/env node\\nfictional();\\n'
+    .replaceAll('\\n','\n'));
+  assert.throws(() =>
+    assertSourceBytes(expectedInstalledBytes('src/cli.mjs', crlfCli), unrelatedChange),
+    /R4_FILE_CONTENT_MISMATCH/);
 });
 
 test('R4: two offline packs match and temporary installation matches all source bytes', {
@@ -137,7 +158,9 @@ test('R4: two offline packs match and temporary installation matches all source 
       const originalFile = join(root, path);
       const installedFile = join(installedRoot, path);
       assert.ok(statSync(installedFile).isFile(), 'R4_INSTALLED_FILE_MISSING');
-      assertSourceBytes(readFileSync(originalFile), readFileSync(installedFile), path);
+      const sourceBytes = readFileSync(originalFile);
+      assertSourceBytes(expectedInstalledBytes(path, sourceBytes),
+        readFileSync(installedFile), path);
     }
   } finally {
     // Delete both actual tgz archives, three npm homes/caches and installation.
