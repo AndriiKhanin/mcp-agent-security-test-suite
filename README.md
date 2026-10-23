@@ -66,7 +66,7 @@ Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a 
 
 ## Bounded request-scoped SSE on owned staging (M4-B6-E)
 
-[The finite SSE test scope](docs/M4_B6E_SSE_REQUEST_SCOPE.md) admits the first-party server's reviewed request-related logging notice and SSE keepalive comments **before** the single final response, within strict finite limits. Unsolicited server RPCs, duplicate/missing finals, malformed UTF-8, excess events and unsupported payloads fail closed. **No generic MCP transport client or external target contact.**
+[The finite SSE test scope](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) admits the first-party server's reviewed request-related logging notice and SSE keepalive comments **before** the single final response, within strict finite limits. Unsolicited server RPCs, duplicate/missing finals, malformed UTF-8, excess events and unsupported payloads fail closed. **No generic MCP transport client or external target contact.**
 
 ## Universal MCP project adapter (M4-B0: safe offline configuration preview)
 

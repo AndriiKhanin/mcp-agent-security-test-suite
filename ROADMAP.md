@@ -89,7 +89,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M4-B6-E — bounded first-party request-scoped SSE
 
-- **M4-B6-E — IN PROGRESS:** [Issue #91](../../issues/91) adds finite first-party request-scoped SSE logging notices, comments, multiline data and TCP-fragmented positive controls; strict rejects for unsolicited JSON-RPC, missing/extra final, events/comments over limits, unknown notices, malformed UTF-8, wrong event, and missing delimiter. [Scope](docs/M4_B6E_SSE_REQUEST_SCOPE.md). Owned literal `127.0.0.1` only; reviewed npm inventory **80→81**. No user-selected target, general MCP conformance, publication or security certification.
+- **M4-B6-E — IN PROGRESS:** [Issue #91](../../issues/91) adds finite first-party request-scoped SSE logging notices, comments, multiline data and TCP-fragmented positive controls; strict rejects for unsolicited JSON-RPC, missing/extra final, events/comments over limits, unknown notices, malformed UTF-8, wrong event, and missing delimiter. [Scope](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md). Owned literal `127.0.0.1` only; reviewed npm inventory **80 unchanged**. No user-selected target, general MCP conformance, publication or security certification.
 
 ## M4-B6-D — first-party modern protocol negative controls
 
