@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0–R4, R5-A engineering preflight and M5-01 local demo ACCEPTED** (R3 internal, R5-A heuristic; neither an independent audit). [M5-01 PR #46](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/46) and [latest post-merge main CI #39944760146](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39944760146): **4/4 PASS, 370/370 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0–R4, R5-A and M5-01/02/03 engineering acceptance recorded** (R3 internal, R5-A heuristic; neither independent audit). Latest [M5-03 PR #52](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/52) and [post-merge main CI #39955000316](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39955000316): **4/4 PASS, 379/379 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
@@ -66,6 +66,10 @@ This check guards **package membership**, not the safety of bytes inside an alre
 ## M5-01 — zero-argument bundled demo (accepted)
 
 [M5-01 #45](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/45) adds `node src/cli.mjs demo` as a no-input smoke demonstration from source or the disposable installed package. It checks only two bundled fictional fixtures; extra CLI arguments are rejected, and no real MCP endpoints are contacted. [Main CI #39944760146](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39944760146) confirms **4/4 PASS and 370/370 tests per job**. This neither certifies the product nor authorizes a stable release.
+
+## M5-02/03 — diagnostic guidance and OSS feedback (accepted engineering scope)
+
+[M5-02 #49](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/49) added strictly bounded symbolic remediation guidance, accepted via [main CI #39953093188](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39953093188) (**4/4, 374/374**). [M5-03 #48](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/48) added fictional-only public GitHub feedback forms, with five tests and required disclosure confirmation, accepted via [PR #52](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/52) and [main CI #39955000316](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39955000316) (**4/4, 379/379**). Public forms cannot sanitize submitted text and confidential vulnerability reports must use the private reporting procedure in SECURITY.md. Neither step constitutes external adoption, independent security review or authorization to publish.
 
 ## Explicit release gates — NOT ALL COMPLETE
 
