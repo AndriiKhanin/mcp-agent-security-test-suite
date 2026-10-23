@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0–R4 and R5-A engineering preflight steps ACCEPTED** (R3 internal, R5-A heuristic; neither an independent audit), via [R5-A PR #42](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/42) and [latest post-merge CI 39941412361](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39941412361): **4/4 PASS, 364/364 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0–R4, R5-A engineering preflight and M5-01 local demo ACCEPTED** (R3 internal, R5-A heuristic; neither an independent audit). [M5-01 PR #46](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/46) and [latest post-merge main CI #39944760146](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39944760146): **4/4 PASS, 370/370 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
@@ -62,6 +62,10 @@ This check guards **package membership**, not the safety of bytes inside an alre
 ## R5-A — content hygiene and assessor handoff (accepted)
 
 [R5-A Issue #41](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/41) adds a [bounded source-content preflight and independent reviewer checklist](R5_INDEPENDENT_REVIEW.md). New public documentation deliberately changes the expected package inventory to **57 paths**. The heuristic can detect only selected synthetic key/token signatures and invalid text; it is **not** a comprehensive private-source/secret audit, a third-party review or a provenance attestation. Engineering acceptance: [PR #42](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/42) merged; [main CI #39941412361](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39941412361) confirmed **4/4 PASS, 364/364 per job**, 0 failed/skipped. [R5-B independent review #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and the owner publication gates below remain **unchecked**.
+
+## M5-01 — zero-argument bundled demo (accepted)
+
+[M5-01 #45](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/45) adds `node src/cli.mjs demo` as a no-input smoke demonstration from source or the disposable installed package. It checks only two bundled fictional fixtures; extra CLI arguments are rejected, and no real MCP endpoints are contacted. [Main CI #39944760146](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39944760146) confirms **4/4 PASS and 370/370 tests per job**. This neither certifies the product nor authorizes a stable release.
 
 ## Explicit release gates — NOT ALL COMPLETE
 

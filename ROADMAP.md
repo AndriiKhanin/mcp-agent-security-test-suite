@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 364 synthetic/local/package-integrity and R5-A content hygiene tests | [R5-A PR #42](../../pull/42) and [post-merge CI](../../actions/runs/39941412361) — 4/4 jobs, 364/364 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 370 synthetic/local, packaging, content-hygiene and M5 first-run tests | [M5-01 PR #46](../../pull/46) and [post-merge CI](../../actions/runs/39944760146) — 4/4 jobs, 370/370 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -71,7 +71,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M5 beta onboarding (active)
 
-- **M5-01 — IN PROGRESS:** [Issue #45](../../issues/45) adds a zero-argument offline CLI `demo`, verifying a known synthetic PASS and expected negative control from the candidate's installed package; it does not scan any user's MCP environment. Reviewed PR and CI acceptance pending. Independent [R5-B #43](../../issues/43) and release authorization remain open.
+- **M5-01 — DONE:** [Issue #45](../../issues/45) delivered `node src/cli.mjs demo` with no arguments, verifying one bundled synthetic PASS and one expected negative control from both source and the candidate's temporarily installed package. [Merged PR #46](../../pull/46) and [post-merge main CI #39944760146](../../actions/runs/39944760146): **4/4 PASS, 370/370 tests per job**. This is not a live scanner; independent [R5-B #43](../../issues/43) and release authorization remain open.
 
 ## Release gates and boundaries
 
