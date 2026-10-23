@@ -30,3 +30,5 @@ Real external target [authorization RFC #21](https://github.com/AndriiKhanin/mcp
 ## Acceptance
 
 Completed through [merged PR #83](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/83), main commit `21b51d143cdd3716a21c0b6f75bfc7d8917fbbf0`. [PR CI #39991529128](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39991529128) and [post-merge main CI #39991717781](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39991717781): **4/4 PASS, 466/466 tests per Windows/Ubuntu Node 20/22 job, 0 failures/skips**, individual logs reviewed. Exact reviewed npm package manifest **75→78 paths**. This is first-party engineering acceptance only, **not** OS sandbox evidence, external MCP interoperability or approval to test real user targets.
+
+M4-B6-C follows with [test-only parent-observed process and TCP bind lifecycle evidence](STAGING_RESOURCE_WITNESS.md). This measures our fixed first-party child and ephemeral localhost port; it is not OS tracing or permission to run an arbitrary server.

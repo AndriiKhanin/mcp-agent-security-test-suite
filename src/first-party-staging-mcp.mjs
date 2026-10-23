@@ -191,7 +191,8 @@ function report(rule,counts) {
 export async function runFirstPartyStagingSelftest(options={}) {
   if(!options || typeof options!=='object' || Array.isArray(options) ||
     Object.getPrototypeOf(options)!==Object.prototype ||
-    Object.keys(options).some(k=>!['fault','deadlineMs'].includes(k))) {
+    Object.keys(options).some(k=>!['fault','deadlineMs','onBound'].includes(k)) ||
+    (Object.hasOwn(options,'onBound') && typeof options.onBound!=='function')) {
     throw new TypeError('INVALID_FIXED_STAGING_OPTIONS');
   }
   const fault=options.fault??'allowed',deadlineMs=options.deadlineMs??DEFAULT_DEADLINE;
@@ -213,6 +214,9 @@ export async function runFirstPartyStagingSelftest(options={}) {
     const port=server.address().port;
     server.on('request',serve(fault,counts,port));
     timer=setTimeout(()=>controller.abort(),deadlineMs);
+    // Test-only trusted callback: private bound port is never in a public
+    // report/CLI or caller-controlled JSON. Used for external witness probes.
+    if(options.onBound)await options.onBound(Object.freeze({host:HOST,port,pid:process.pid}));
     const rule=await probe(port,fault,controller.signal);
     return report(rule,counts);
   }catch{
