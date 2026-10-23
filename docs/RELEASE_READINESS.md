@@ -2,7 +2,7 @@
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
-**Disposition:** **R0–R4 engineering preflight steps ACCEPTED** (internal R3 review only, not independent audit), via [R4 PR #39](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/39) and [latest post-merge CI 39938436907](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39938436907): **4/4 PASS, 360/360 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
+**Disposition:** **R0–R4 and R5-A engineering preflight steps ACCEPTED** (R3 internal, R5-A heuristic; neither an independent audit), via [R5-A PR #42](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/42) and [latest post-merge CI 39941412361](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39941412361): **4/4 PASS, 364/364 tests per job**. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
 
 ## What is actually implemented
 
@@ -59,9 +59,9 @@ This check guards **package membership**, not the safety of bytes inside an alre
 
 [Issue #38](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/38) introduces a [two-pack local artifact test](R4_ARTIFACT_INTEGRITY.md) with per-job SHA-256/sha512 checks and source-to-installed-file byte comparisons. The new R4 document intentionally grows the exact package inventory from R3's **55** to **56** files. This is *not* an independently signed or uploaded artifact, a provenance attestation, or publication approval. The [six-file PR #39](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/39) merged after corrected 4/4 PR CI; [post-merge main CI 39938436907](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39938436907) passed **4/4, 360/360 per job**, 0 failed/skipped. The strict install-file comparison allows only npm's known first-line Windows bin-shebang CRLF→LF normalization for `src/cli.mjs`. R4 is accepted as **same-job** offline reproducibility evidence, not independent provenance. The release gates below remain open.
 
-## R5-A — content hygiene and assessor handoff (in progress)
+## R5-A — content hygiene and assessor handoff (accepted)
 
-[R5-A Issue #41](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/41) adds a [bounded source-content preflight and independent reviewer checklist](R5_INDEPENDENT_REVIEW.md). New public documentation deliberately changes the expected package inventory to **57 paths**. The heuristic can detect only selected synthetic key/token signatures and invalid text; it is **not** a comprehensive private-source/secret audit, a third-party review or a provenance attestation. This step requires its own reviewed PR and four-job post-merge CI. The independent auditor and owner release gates below remain unchecked.
+[R5-A Issue #41](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/41) adds a [bounded source-content preflight and independent reviewer checklist](R5_INDEPENDENT_REVIEW.md). New public documentation deliberately changes the expected package inventory to **57 paths**. The heuristic can detect only selected synthetic key/token signatures and invalid text; it is **not** a comprehensive private-source/secret audit, a third-party review or a provenance attestation. Engineering acceptance: [PR #42](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/42) merged; [main CI #39941412361](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39941412361) confirmed **4/4 PASS, 364/364 per job**, 0 failed/skipped. [R5-B independent review #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and the owner publication gates below remain **unchecked**.
 
 ## Explicit release gates — NOT ALL COMPLETE
 

@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 360 synthetic/loopback/offline package and artifact-integrity tests | [R4 PR #39](../../pull/39) and [post-merge CI](../../actions/runs/39938436907) — 4/4 jobs, 360/360 tests each |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 364 synthetic/local/package-integrity and R5-A content hygiene tests | [R5-A PR #42](../../pull/42) and [post-merge CI](../../actions/runs/39941412361) — 4/4 jobs, 364/364 tests each |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -71,7 +71,8 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## Release gates and boundaries
 
-- **R5-A content preflight and external assessor handoff — IN PROGRESS:** [Issue #41](../../issues/41) introduces bounded heuristic package-content checks and an [independent reviewer checklist](docs/R5_INDEPENDENT_REVIEW.md). Expected packaged paths rise to 57. Engineer-authored checks are not independent security review; release remains blocked.
+- **R5-A content preflight and auditor handoff — DONE:** [Issue #41](../../issues/41) accepted through [PR #42](../../pull/42) and [post-merge main CI](../../actions/runs/39941412361), **4/4 PASS, 364/364 per job**. The bounded heuristic scanned all 57 package-source paths; this does not demonstrate absence of secrets or malware.
+- **R5-B independent security/provenance review — OPEN RELEASE GATE:** [Issue #43](../../issues/43) requires review by an assessor independent of the author, an independently verified final artifact and explicit owner publication permission. R5-A does not satisfy R5-B.
 
 - **R4 offline artifact integrity — DONE:** [Issue #38](../../issues/38) accepted via [merged PR #39](../../pull/39) and [post-merge main CI](../../actions/runs/39938436907), **4/4 PASS, 360/360 tests per job**. Two isolated same-job offline packs match byte-for-byte, metadata digests are verified, and all 56 installed file bytes match checkout source except npm's exact Windows bin-shebang CRLF→LF normalization. This is **not** independent provenance, a security audit or release authorization.
 
