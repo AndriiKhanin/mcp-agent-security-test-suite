@@ -71,6 +71,8 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## Release gates and boundaries
 
+- **R5-A content preflight and external assessor handoff — IN PROGRESS:** [Issue #41](../../issues/41) introduces bounded heuristic package-content checks and an [independent reviewer checklist](docs/R5_INDEPENDENT_REVIEW.md). Expected packaged paths rise to 57. Engineer-authored checks are not independent security review; release remains blocked.
+
 - **R4 offline artifact integrity — DONE:** [Issue #38](../../issues/38) accepted via [merged PR #39](../../pull/39) and [post-merge main CI](../../actions/runs/39938436907), **4/4 PASS, 360/360 tests per job**. Two isolated same-job offline packs match byte-for-byte, metadata digests are verified, and all 56 installed file bytes match checkout source except npm's exact Windows bin-shebang CRLF→LF normalization. This is **not** independent provenance, a security audit or release authorization.
 
 - **R3 internal release review — DONE:** [Issue #35](../../issues/35) accepted via [merged PR #36](../../pull/36) and [post-merge main CI](../../actions/runs/39935969302), **4/4 PASS, 358/358 tests per job**. The reviewed [internal risk report](docs/R3_INTERNAL_RELEASE_REVIEW.md) records 55 packaged paths and explicitly leaves the **independent security review and publication gates OPEN**. No stable-release permission has been granted.
