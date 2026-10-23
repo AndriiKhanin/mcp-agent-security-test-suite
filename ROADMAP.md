@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **Next planning gate:** [M4 adapter authorization design](#decisions-pending-future-milestones) — owner approval required before external-target work
+> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **Next planning gate:** [M4-00 authorization RFC](docs/M4_AUTHORIZED_INTEGRATIONS_RFC.md) · [Issue #21](../../issues/21) — owner approval required before implementing any network-capable adapter
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -29,7 +29,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
-| **M4 — Authorized integration preview** | Opt-in interoperability against user-owned, isolated staging fixtures/targets | **FUTURE** | Issues to be written after M1–M3 review | Allowlist + explicit target authorization + strict default deny; no production probes |
+| **M4 — Authorized integration preview** | Opt-in interoperability against user-owned, isolated staging fixtures/targets | **DESIGN RFC — APPROVAL PENDING** | [M4-00 RFC](docs/M4_AUTHORIZED_INTEGRATIONS_RFC.md), [#21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **FUTURE** | Issues to be scoped | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
@@ -81,4 +81,4 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## Decisions pending future milestones
 
-Real integration adapter transport/API design, target authorization UX, trust model for untrusted third-party MCP servers, distribution channel, support policy and independent audit scope are intentionally left open until M1–M3 evidence exists. This keeps the public product extensible without pretending unfinished parts are already secure.
+M1–M3 acceptance evidence is complete. The [M4-00 architecture RFC](docs/M4_AUTHORIZED_INTEGRATIONS_RFC.md) now records the authorization, transport-version, risk and owner-decision gates for an optional future integration preview. It is **proposal-only**; no network adapter, real-target testing, credential handling or external scanning is approved or implemented. Distribution channel, support policy and independent audit scope remain future decisions.
