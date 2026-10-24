@@ -93,3 +93,68 @@ test('R5-A: benign fictional source and ordinary documentation remain accepted',
     '',
   ]) assert.equal(scanContent(Buffer.from(source, 'utf8')), null);
 });
+
+
+// R5-C: Handoff must track the actual manifest rather than historical R5-A.
+test('R5-C: assessor handoff uses current inventory and verified public snapshot', () => {
+  safePaths();
+  const guide=readFileSync(join(root,'docs','R5_INDEPENDENT_REVIEW.md'),'utf8')
+    .replace(/\r\n/g,'\n');
+  const count=expected.length;
+  assert.equal(count,80,'R5C_CURRENT_PACKAGE_COUNT_REQUIRES_REVIEW');
+  assert.ok(guide.includes('**Current reviewed npm inventory: '+count+' paths**'),
+    'R5C_HANDOFF_CURRENT_COUNT_MISMATCH');
+  assert.ok(guide.includes('all '+count+' currently distributable paths'),
+    'R5C_HANDOFF_SCOPE_STALE');
+  assert.ok(guide.includes('**'+count+'-path inventory on the documented snapshot**'),
+    'R5C_HANDOFF_ARCHIVE_COUNT_STALE');
+  const sha='8720c7d7892f222a8203addeeef6eed8d2d24390';
+  assert.match(sha,/^[0-9a-f]{40}$/);
+  assert.ok(guide.includes('git switch --detach '+sha));
+  assert.ok(guide.includes("$Expected = '"+sha+"'"));
+  assert.ok(guide.includes('main CI #40115925583'));
+  assert.ok(guide.includes('678/678 tests per Windows/Ubuntu Node 20/22 job'));
+  assert.ok(guide.toLowerCase().includes('historical'));
+  assert.ok(!/all 57 (?:current|distributable)|exact 57-path inventory/.test(guide),
+    'R5C_HISTORICAL_COUNT_AS_CURRENT');
+});
+
+test('R5-C: assessor commands are balanced and offline-only', () => {
+  const guide=readFileSync(join(root,'docs','R5_INDEPENDENT_REVIEW.md'),'utf8')
+    .replace(/\r\n/g,'\n');
+  const fence=String.fromCharCode(96).repeat(3);
+  const boundaries=guide.split('\n').map(s=>s.trim())
+    .filter(s=>s===fence||s===fence+'sh'||s===fence+'powershell');
+  assert.deepEqual(boundaries,[fence+'sh',fence,fence+'powershell',fence]);
+  assert.ok(guide.includes('test "$(git rev-parse HEAD)" = "8720c7d7892f222a8203addeeef6eed8d2d24390"'));
+  assert.ok(guide.includes('npm test'));
+  assert.ok(guide.includes('npm run release:preflight'));
+  assert.ok(guide.includes('npm_config_offline=true npm pack --offline --ignore-scripts --json'));
+  assert.ok(guide.includes("& npm pack --offline --ignore-scripts --json --pack-destination $ReviewDir"));
+  assert.ok(guide.includes('(Get-FileHash -LiteralPath $Archive -Algorithm SHA256).Hash'));
+  assert.ok(guide.includes('sha256sum "$review_dir/mcp-agent-security-test-suite-0.0.10-rc.1.tgz"'));
+  assert.ok(guide.includes("if ($Actual -ne $Expected) { throw 'Source SHA mismatch' }"));
+  assert.ok(guide.includes('} finally {'));
+  assert.ok(!guide.includes('npm publish --'));
+});
+
+test('R5-C: prepared audit document never closes independent gates', () => {
+  const guide=readFileSync(join(root,'docs','R5_INDEPENDENT_REVIEW.md'),'utf8')
+    .replace(/\r\n/g,'\n');
+  for(const phrase of [
+    'separately trusted',
+    'NOT VERIFIED',
+    'independent assessor',
+    'all packaged',
+    'Windows',
+    'GitHub Release vs npm',
+    'Release gate #43 remains OPEN',
+    'Independent beta usability #59',
+    'real-target testing authorization #21',
+    'not a signed release',
+    '80 paths'
+  ])assert.ok(guide.toLowerCase().includes(phrase.toLowerCase()),phrase);
+  assert.ok(guide.includes('no independent') || guide.includes('not an independent'));
+  assert.ok(guide.includes('not a production credential vault') ||
+            guide.includes('cannot prove a production credential vault'));
+});
