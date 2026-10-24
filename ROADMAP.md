@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-23 · **Current main:** `v0.0.10-rc.1` · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
+> **Last reviewed:** 2026-10-24 · **Current main:** `v0.0.10-rc.1` · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 539 synthetic/local, fixed modern adapter bridge, packaging, bounded SSE, consent and TCP cleanup evidence | [M4-B7-A PR #98](../../pull/98), [post-merge main CI #40007735850](../../actions/runs/40007735850): **4/4 PASS, 539/539 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 554 synthetic/local, pure project onboarding readiness, separate owned staging demo, packaging, bounded SSE and consent negatives | [M4-B7-B PR #101](../../pull/101), [post-merge main CI #40072318839](../../actions/runs/40072318839): **4/4 PASS, 554/554 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -29,7 +29,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M1 — Trustworthy security core** | Threat model, retry state-machine hardening, independent negative controls | **DONE — 3/3** | [#2](../../issues/2), [#3](../../issues/3), [#4](../../issues/4) | Deterministic deny cases, bounded/report-safe failures, CI 4/4 |
 | **M2 — Developer experience** | Machine-readable reports, usable quickstart and CI integration | **DONE — 2/2** | [#5](../../issues/5), [#7](../../issues/7) | External developer can run a fictional PASS and expected FAIL and understand the results |
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
-| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D/B6-E/B6-F/B7-A DONE; M4-B7-B OFFLINE ONBOARDING IN PROGRESS; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
+| **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D/B6-E/B6-F/B7-A/B7-B ENGINEERING DONE; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
 
@@ -89,7 +89,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M4-B7-B — offline project onboarding and first-party demo
 
-- **M4-B7-B — IN PROGRESS:** [Issue #100](../../issues/100). `adapter-onboard <file>` produces a strictly offline readiness schema v1 without even creating a first-party socket. Independently, no-argument `adapter-onboarding-demo` uses one in-code fictional descriptor plus one owned `127.0.0.1` MCP staging probe and reports **separate** `DESCRIPTOR_VALIDATED` and `FIRST_PARTY_STAGING_PASS`, while always reporting `REAL_TARGET_NOT_ATTEMPTED` and `OPERATOR_NOT_VERIFIED`. Synthetic consent previews remain unverified. [Guide](docs/UNIVERSAL_ADAPTER.md). Reviewed package inventory remains exactly **80** paths. Four-way CI acceptance pending; no user MCP contact or executable authority.
+- **M4-B7-B — DONE (offline onboarding + independent first-party demo):** [Issue #100](../../issues/100), [merged PR #101](../../pull/101), [post-merge main CI #40072318839](../../actions/runs/40072318839): **4/4 PASS, 554/554 tests/job, 0 failed/skipped**. `adapter-onboard <file>` stays pure with readiness-v1 categorical evidence and **no network/process effects**; no-arg `adapter-onboarding-demo` uses an in-code fictional descriptor and ONLY first-party `127.0.0.1` MCP staging. Staging PASS **cannot authenticate a customer project or operator**; outputs `REAL_TARGET_NOT_ATTEMPTED`, `OPERATOR_NOT_VERIFIED`, `REAL_TARGET_NOT_AUTHORIZED`. [Onboarding steps](docs/GETTING_STARTED.md). Exact **80-path npm package** and prior R2/R5 gates preserved. External-target RFC #21, independent security #43 and beta #59 stay OPEN.
 
 ## M4-B7-A — test-only universal driver lifecycle to owned staging
 
