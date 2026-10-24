@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BETA_CASES, matchesBetaCase, betaSummary, runBeta } from '../examples/beta-acceptance-check.mjs';
@@ -84,4 +85,115 @@ test('M5-05: fixed runner does not accept variable command inventory or user-sup
   ]);
   assert.ok(BETA_CASES.every(c=>Object.isFrozen(c) && Object.isFrozen(c.args)));
   assert.equal(runBeta(['arbitrary-private-fixture']).errorCode,'BETA_ARGUMENTS_NOT_ALLOWED');
+});
+
+
+/* M5-07 — protect the manual evaluator guide, not fake independent evidence. */
+const documented=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
+
+test('M5-07: evaluator pins an actual full public source SHA and remains fictional-only',()=>{
+  const d=documented('docs/BETA_TESTING.md');
+  const pin='65ded572c1720832ff3f59cb9cd0e3a6987edbdb';
+  assert.match(pin,/^[0-9a-f]{40}$/);
+  assert.ok(d.includes('git switch --detach '+pin));
+  assert.ok(d.includes('git rev-parse HEAD'));
+  assert.ok(d.includes('0.0.10-rc.1'));
+  assert.ok(d.includes('node --version'));
+  assert.ok(d.includes('node examples/beta-acceptance-check.mjs'));
+  assert.ok(d.includes('node examples/offline-ci-check.mjs'));
+  assert.ok(d.includes('No real MCP servers'));
+  assert.ok(d.includes('not a published npm release'));
+  assert.ok(d.includes('independent participant'));
+});
+
+test('M5-07: optional tarball check is offline, local and not represented as signed proof',()=>{
+  const d=documented('docs/BETA_TESTING.md');
+  for(const literal of [
+    'npm pack --offline --ignore-scripts --pack-destination',
+    'npm_config_cache',
+    'Get-FileHash -LiteralPath $Archive -Algorithm SHA256',
+    'sha256sum "$pack_dir/mcp-agent-security-test-suite-0.0.10-rc.1.tgz"',
+    'A digest computed from the archive',
+    '80-path',
+    'R1 package test'
+  ])assert.ok(d.includes(literal),literal);
+  assert.ok(!d.includes('npm publish'));
+  const src=documented('test/installed-cli-smoke.test.mjs');
+  for(const snippet of [
+    "'pack', '--json', '--offline', '--ignore-scripts'",
+    "'install', '--offline', '--ignore-scripts'",
+    "npm_config_offline: 'true'",
+    "rmSync(temp, { recursive: true, force: true })"
+  ])assert.ok(src.includes(snippet),snippet);
+  assert.match(documented('package.json'),/"version": "0\.0\.10-rc\.1"/);
+  assert.equal(JSON.parse(documented('test/expected-package-files.json')).length,80);
+});
+
+test('M5-07: public beta issue template collects limited fictional feedback only',()=>{
+  const form=documented('.github/ISSUE_TEMPLATE/beta_feedback.yml');
+  for(const id of [
+    'source_commit','version','os','node_major','runner_result',
+    'matched_count','evaluation_path','offline_archive','exit_codes',
+    'guide_clarity','install_friction','deviations','usability',
+    'safe_disclosure','actual_test'
+  ])assert.ok(form.includes('id: '+id),'missing form field '+id);
+  assert.ok(form.includes('I personally ran the fixed fictional beta protocol'));
+  assert.ok(form.includes('A green CI run is not independent beta-tester evidence.'));
+  assert.ok(form.includes('Local archive check not attempted'));
+  assert.ok(form.includes('Did not run enough exercises'));
+  assert.ok(form.includes('required: false'));
+  for(const suspicious of [
+    'id: token','id: target_url','id: oauth','id: private_logs',
+    'id: upload','id: raw_transcript','id: repository_secret'
+  ])assert.ok(!form.includes(suspicious),suspicious);
+});
+
+test('M5-07: instructions separate expected symbolic detection from safety PASS',()=>{
+  const d=documented('docs/BETA_TESTING.md');
+  assert.ok(d.includes('observedSafetyStatus:FAIL'));
+  assert.ok(d.includes('RETRY_PARAMS_CHANGED'));
+  assert.ok(d.includes('process exit **0**'));
+  assert.ok(d.includes('**1** on a control mismatch'));
+  assert.ok(d.includes('**2** for bad invocation'));
+  assert.ok(d.includes('independent usability gate'));
+  assert.ok(d.includes('manual'));
+  assert.ok(d.includes('#59'));
+  assert.ok(d.includes('#43'));
+  assert.ok(d.includes('#21'));
+  assert.ok(d.includes('No outreach, automatic upload, telemetry'));
+  const quick=documented('docs/GETTING_STARTED.md');
+  assert.ok(quick.includes('DEMO_PASS: all offline fictional contract checks behaved as expected'));
+  assert.ok(quick.includes('SYNTHETIC_EXPECTED_VIOLATION: observed FAIL, expectation MATCH'));
+  assert.ok(quick.includes('SYNTHETIC_UNEXPECTED_VIOLATION: observed FAIL, expectation MISMATCH'));
+});
+
+test('M5-07: independently operated beta acceptance cannot be inferred from CI',()=>{
+  const repoReadme=documented('README.md');
+  const roadmap=documented('ROADMAP.md');
+  assert.ok(repoReadme.includes('independently verified beta participant yet'));
+  assert.ok(roadmap.includes('not independent beta evidence'));
+  assert.ok(roadmap.includes('all three independent gates #21/#43/#59'));
+  const direct=run();
+  assert.equal(direct.status,0,direct.stderr);
+  const result=JSON.parse(direct.stdout);
+  assert.equal(result.total,5);
+  assert.equal(result.passed,5);
+  assert.equal(result.failed,0);
+  assert.ok(result.cases.every(row=>row.matched && row.rule==='NONE'));
+  assert.notEqual(result.profile,'independent-beta-evidence');
+});
+
+test('M5-07: bad evaluator runner arguments remain generic even with fake secrets',()=>{
+  for(const arg of [
+    '--target=https://customer.example.invalid/mcp',
+    '--token=fictional-private-secret',
+    '--log=private-customer-transcript.json'
+  ]) {
+    const outcome=run(arg);
+    assert.equal(outcome.status,2);
+    const result=JSON.parse(outcome.stdout);
+    assert.equal(result.status,'ERROR');
+    assert.equal(result.errorCode,'BETA_ARGUMENTS_NOT_ALLOWED');
+    assert.ok(!(outcome.stdout+outcome.stderr).includes(arg));
+  }
 });
