@@ -253,3 +253,294 @@ test('M4-B9-A: CLI help exposes offline-only audit command',()=>{
   assert.ok(r.syntax.some(s=>s.startsWith('node src/cli.mjs adapter-fixture-audit ')));
   assert.ok(!x.stdout.includes('https://'));
 });
+
+
+// M4-B9-B: opt-in user-authored symbolic traces; never ingest actual MCP data.
+import {
+  auditSymbolicProjectTrace,SYMBOLIC_PROJECT_TRACE_SCHEMA_VERSION,
+  SYMBOLIC_PROJECT_TRACE_MAX_EVENTS
+} from '../src/project-adapter.mjs';
+
+const symbolicEvent=(override={})=>({
+  decision:'DENY',effect:'NONE',ownerAuthorized:false,
+  scopeAuthorized:false,leaseFresh:false,secretLogged:false,
+  ...override
+});
+const symbolicTrace=(events=[symbolicEvent()])=>({
+  traceSchemaVersion:1,
+  mode:'user-authored-synthetic-only',
+  descriptor:createOfflineAdapterTemplate('streamable-http').template,
+  events
+});
+function symbolicBounds(v){
+  assert.equal(v.profile,'user-authored-symbolic-project-trace-v1');
+  assert.equal(v.traceSchemaVersion,SYMBOLIC_PROJECT_TRACE_SCHEMA_VERSION);
+  assert.equal(v.descriptorEvidence,'DESCRIPTOR_VALIDATED');
+  assert.equal(v.traceEvidence,'USER_AUTHORED_SYNTHETIC_TRACE_EVALUATED');
+  assert.equal(v.traceOrigin,'USER_AUTHORED_SYMBOLIC_ONLY');
+  assert.equal(v.fixedFixtureControls,'NOT_RUN');
+  assert.equal(v.stagingEvidence,'FIRST_PARTY_STAGING_NOT_ATTEMPTED');
+  assert.equal(v.targetEvidence,'REAL_TARGET_NOT_ATTEMPTED');
+  assert.equal(v.operatorEvidence,'OPERATOR_NOT_VERIFIED');
+  assert.equal(v.readinessStatus,'REAL_TARGET_NOT_AUTHORIZED');
+  assert.equal(v.authorizationStatus,'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
+  assert.equal(v.connectionStatus,'NOT_ATTEMPTED');
+  assert.equal(v.executionEnabled,false);
+  assert.equal(v.projectConnectionAuthorized,false);
+  assert.equal(v.externalTargetContacted,false);
+  assert.equal(v.operatorVerified,false);
+  assert.equal(v.recordsAreRealMcpObservations,false);
+  assert.equal(v.recordsChecked,v.checks.length);
+  assert.equal(v.failureCount,v.findings.length);
+  assert.equal(v.findingsTruncated,false);
+}
+const genericInvalid=input=>assert.throws(()=>auditSymbolicProjectTrace(input),
+  /INVALID_SYMBOLIC_PROJECT_TRACE/);
+
+test('M4-B9-B: strictly bounded symbolic mode exports stable schema',()=>{
+  assert.equal(SYMBOLIC_PROJECT_TRACE_SCHEMA_VERSION,1);
+  assert.equal(SYMBOLIC_PROJECT_TRACE_MAX_EVENTS,8);
+});
+
+test('M4-B9-B: explicitly symbolic denied no-effect and authorized read PASS',()=>{
+  const r=auditSymbolicProjectTrace(symbolicTrace([
+    symbolicEvent(),
+    symbolicEvent({decision:'ALLOW',effect:'READ',
+      ownerAuthorized:true,scopeAuthorized:true,leaseFresh:true})
+  ]));
+  symbolicBounds(r);
+  assert.equal(r.status,'PASS');
+  assert.deepEqual(r.findings,[]);
+  assert.deepEqual(r.checks.map(v=>[v.event,v.checkStatus,v.symbolicOutcome,v.ruleCodes]),[
+    [1,'PASS','DENIAL_WITHOUT_EFFECT',[]],
+    [2,'PASS','ALLOW_WITH_SYMBOLIC_EFFECT',[]]
+  ]);
+});
+
+test('M4-B9-B: symbolic denial with observed effect FAIL uses reviewed rule',()=>{
+  const r=auditSymbolicProjectTrace(symbolicTrace([
+    symbolicEvent({effect:'WRITE'})
+  ]));
+  symbolicBounds(r);
+  assert.equal(r.status,'FAIL');
+  assert.deepEqual(r.findings,[{event:1,rule:'DENIED_ACTION_HAD_EFFECT'}]);
+  assert.deepEqual(r.checks[0].ruleCodes,['DENIED_ACTION_HAD_EFFECT']);
+  assert.equal(r.checks[0].symbolicOutcome,'DENIED_EFFECT_OBSERVED');
+});
+
+test('M4-B9-B: unsigned effect and stale symbolic lease yield distinct findings',()=>{
+  const r=auditSymbolicProjectTrace(symbolicTrace([
+    symbolicEvent({decision:'ALLOW',effect:'WRITE'}),
+    symbolicEvent({decision:'ALLOW',effect:'READ',ownerAuthorized:true,
+      scopeAuthorized:true,leaseFresh:false})
+  ]));
+  symbolicBounds(r);
+  assert.equal(r.status,'FAIL');
+  assert.deepEqual(r.findings,[
+    {event:1,rule:'EFFECT_WITHOUT_AUTHORIZATION'},
+    {event:1,rule:'EFFECT_WITHOUT_FRESH_LEASE'},
+    {event:2,rule:'EFFECT_WITHOUT_FRESH_LEASE'}
+  ]);
+});
+
+test('M4-B9-B: flagged secret is only a boolean warning, no secret inspected',()=>{
+  const r=auditSymbolicProjectTrace(symbolicTrace([
+    symbolicEvent({secretLogged:true})
+  ]));
+  symbolicBounds(r);
+  assert.deepEqual(r.findings,[{event:1,rule:'FLAGGED_SECRET_IN_AUDIT_LOG'}]);
+});
+
+test('M4-B9-B: no claimed replay checking beyond the selected pure primitive',()=>{
+  const r=auditSymbolicProjectTrace(symbolicTrace([
+    symbolicEvent(),symbolicEvent()
+  ]));
+  symbolicBounds(r);
+  assert.equal(r.status,'PASS');
+  assert.deepEqual(r.findings,[]);
+  assert.equal(r.fixedFixtureControls,'NOT_RUN');
+  assert.ok(!JSON.stringify(r).includes('REPLAYED_NONCE'));
+});
+
+test('M4-B9-B: reject strings with tools, paths, endpoints, credentials and records',()=>{
+  for(const bad of [
+    {method:'tools/call'}, {tool:'execute-shell'},
+    {url:'https://private.example.org/mcp'},
+    {path:'../secret.log'},{headers:{Authorization:'token'}},
+    {params:{}},{command:'node'},{identity:'customer'},
+    {resource:'mcp://real-target'},{scope:'broad'},
+    {nonce:'fictional-nonce'}, {rawBody:'secret'},
+    {ownerAuthorized:'true'},{leaseFresh:1},
+    {secretLogged:null},{decision:'EXECUTE'},
+    {effect:'DELETE'}, {effect:'write'},
+  ])genericInvalid(symbolicTrace([symbolicEvent(bad)]));
+});
+
+test('M4-B9-B: reject new root keys and attempted execution policy flips',()=>{
+  const src=symbolicTrace();
+  for(const bad of [
+    {...src,allowNetwork:true},
+    {...src,allowToolCalls:true},
+    {...src,authenticated:true},
+    {...src,traceFile:'../secret.log'},
+    {...src,server:'https://private.example.org/mcp'},
+    {...src,mode:'live'},
+    {...src,mode:'offline-fictional-only'},
+    {...src,traceSchemaVersion:2},
+    {...src,traceSchemaVersion:'1'},
+    {...src,descriptor:{...src.descriptor,verified:true}},
+    {...src,descriptor:{...src.descriptor,policy:{
+      ...src.descriptor.policy,allowProcessSpawn:true}}},
+    {...src,descriptor:{...src.descriptor,transport:{
+      type:'streamable-http',endpoint:'https://127.0.0.1/mcp'}}}
+  ])genericInvalid(bad);
+});
+
+test('M4-B9-B: malformed event sets and too many records denied before audit',()=>{
+  const original=symbolicTrace();
+  for(const events of [[],Array(9).fill(symbolicEvent()),null,{},
+    'DENY',[null],[{}],[true],[['DENY']]])
+    genericInvalid({...original,events});
+  assert.equal(auditSymbolicProjectTrace(
+    symbolicTrace(Array.from({length:8},()=>symbolicEvent()))).recordsChecked,8);
+});
+
+test('M4-B9-B: getters, prototype, symbol and cyclic JS API inputs denied',()=>{
+  const x=symbolicTrace();
+  const getter=symbolicTrace();
+  Object.defineProperty(getter.events[0],'decision',{get(){throw Error('PRIVATE_CANARY')}});
+  const pollution=Object.assign(Object.create(null),symbolicTrace());
+  const sym=symbolicTrace();sym.events[0][Symbol('secret')]='PRIVATE_CANARY';
+  const cyclic=symbolicTrace();cyclic.events[0].cycle=cyclic.events;
+  for(const v of [getter,pollution,sym,cyclic])genericInvalid(v);
+  assert.equal(auditSymbolicProjectTrace(x).status,'PASS');
+});
+
+test('M4-B9-B: prototype pollution and JSON duplicate keys are not allowed by CLI',()=>{
+  for(const raw of [
+    '{"traceSchemaVersion":1,"traceSchemaVersion":1}',
+    '{"traceSchemaVersion":1,"mode":"user-authored-synthetic-only","descriptor":{"__proto__":{"verified":true}},"events":[]}',
+    '{"traceSchemaVersion":1,"mode":"user-authored-synthetic-only","descriptor":{},"events":[{"decision":"DENY","decision":"ALLOW"}]}',
+    '{"mode":"user-authored-synthetic-only","mode":"live"}'
+  ]){
+    withFixtureFile(raw,file=>{
+      const p=cli('adapter-synthetic-trace',file);
+      assert.equal(p.status,2);
+      assert.equal(JSON.parse(p.stdout).errorCode,'INVALID_OR_UNREADABLE_INPUT');
+      assert.ok(!(p.stdout+p.stderr).includes(file));
+    });
+  }
+});
+
+test('M4-B9-B: strict CLI reads 4KiB only and reports neutral errors',()=>{
+  withFixtureFile(JSON.stringify(symbolicTrace())+' '.repeat(4100),file=>{
+    const r=cli('adapter-synthetic-trace',file);
+    assert.equal(r.status,2);
+    assert.equal(JSON.parse(r.stdout).errorCode,'INVALID_OR_UNREADABLE_INPUT');
+  });
+  withFixtureFile('{"password":"PRIVATE_CANARY"}',file=>{
+    const p=cli('adapter-synthetic-trace',file);
+    assert.equal(p.status,2);
+    assert.equal(JSON.parse(p.stdout).errorCode,'INVALID_OR_UNREADABLE_INPUT');
+    assert.ok(!(p.stdout+p.stderr).includes('PRIVATE_CANARY'));
+  });
+});
+
+test('M4-B9-B: CLI PASS and FAIL reflect user-authored symbolic checks not fixtures',()=>{
+  for(const [events,exitCode,rule] of [
+    [[symbolicEvent()],0,null],
+    [[symbolicEvent({effect:'WRITE'})],1,'DENIED_ACTION_HAD_EFFECT'],
+    [[symbolicEvent({decision:'ALLOW',effect:'READ'})],1,
+      'EFFECT_WITHOUT_AUTHORIZATION']
+  ]){
+    withFixtureFile(JSON.stringify(symbolicTrace(events)),file=>{
+      const p=cli('adapter-synthetic-trace',file);
+      assert.equal(p.status,exitCode,p.stderr);
+      const report=JSON.parse(p.stdout);
+      symbolicBounds(report);
+      assert.equal(report.reportSchemaVersion,1);
+      assert.equal(report.command,'adapter-synthetic-trace');
+      assert.equal(report.exitCode,exitCode);
+      assert.ok(!p.stdout.includes(file));
+      assert.deepEqual(report.summary.ruleCodes,rule?[rule]:[]);
+      assert.equal(report.fixedFixtureControls,'NOT_RUN');
+    });
+  }
+});
+
+test('M4-B9-B: CLI refuses unknown arguments and escalation flags',()=>{
+  for(const args of [
+    ['adapter-synthetic-trace'],
+    ['adapter-synthetic-trace','fixture.json','--run'],
+    ['adapter-synthetic-trace','--url=https://private.example.org/mcp'],
+    ['adapter-synthetic-trace','fixture.json','--tools/call'],
+    ['adapter-synthetic-trace','fixture.json','--execute']
+  ]){
+    const v=cli(...args);
+    assert.equal(v.status,2);
+    assert.equal(JSON.parse(v.stdout).errorCode,'INVALID_CLI_ARGUMENTS');
+    assert.ok(!(v.stdout+v.stderr).includes('private.example.org'));
+  }
+});
+
+test('M4-B9-B: both stdio and HTTPS inert descriptors behave identically',()=>{
+  for(const transport of ['stdio','streamable-http']){
+    const input=symbolicTrace([symbolicEvent()]);
+    input.descriptor=createOfflineAdapterTemplate(transport).template;
+    const r=auditSymbolicProjectTrace(input);
+    symbolicBounds(r);
+    assert.equal(r.transport,transport);
+    assert.equal(r.status,'PASS');
+  }
+});
+
+test('M4-B9-B: all outputs are symbolic and privacy-safe',()=>{
+  const input=symbolicTrace([
+    symbolicEvent({effect:'WRITE',secretLogged:true})
+  ]);
+  input.descriptor.project.name='PRIVATE_CUSTOMER';
+  input.descriptor.transport.endpoint='https://private.example.org/mcp';
+  const report=auditSymbolicProjectTrace(input);
+  symbolicBounds(report);
+  const text=JSON.stringify(report);
+  for(const forbidden of [
+    'PRIVATE_CUSTOMER','private.example.org','mcp://','user','password',
+    'Authorization','execute-shell','PRIVATE_CANARY'
+  ].filter(x=>x!=='user')) assert.ok(!text.includes(forbidden),forbidden);
+  assert.deepEqual(report.findings,[
+    {event:1,rule:'FLAGGED_SECRET_IN_AUDIT_LOG'},
+    {event:1,rule:'DENIED_ACTION_HAD_EFFECT'}
+  ]);
+});
+
+test('M4-B9-B: no mock source-site effects on PASS or FAIL traces',async()=>{
+  for(const events of [[symbolicEvent()],[symbolicEvent({effect:'WRITE'})]]){
+    const observed=await observeFirstPartyMockAttempts(
+      ()=>auditSymbolicProjectTrace(symbolicTrace(events)));
+    symbolicBounds(observed.result);
+    assert.deepEqual(observed.attempts,[]);
+  }
+});
+
+test('M4-B9-B: existing fixed-control audit and onboarding remain separate',()=>{
+  const fixed=auditOfflineProjectFixtureBundle(bundle());
+  guarded(fixed);
+  assert.equal(fixed.status,'PASS');
+  const custom=auditSymbolicProjectTrace(symbolicTrace([
+    symbolicEvent({effect:'WRITE'})
+  ]));
+  symbolicBounds(custom);
+  assert.equal(custom.status,'FAIL');
+  assert.equal(previewProjectOnboarding(custom.descriptor??symbolicTrace().descriptor)
+    .readinessStatus,'REAL_TARGET_NOT_AUTHORIZED');
+});
+
+test('M4-B9-B: help lists trace command without executable target or URL',()=>{
+  const p=cli('help');
+  assert.equal(p.status,0);
+  const r=JSON.parse(p.stdout);
+  assert.equal(r.commands.length,24);
+  assert.ok(r.commands.includes('adapter-synthetic-trace'));
+  assert.ok(r.syntax.some(s=>s.startsWith('node src/cli.mjs adapter-synthetic-trace ')));
+  assert.ok(!p.stdout.includes('https://'));
+});
