@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 678 synthetic/local, fail-closed symbolic beta report claim preflight, SHA-pinned offline evaluator, installed fictional downstream package, CI smoke, first-party staging | [M5-08 PR #133](../../pull/133), [main CI #40114331305](../../actions/runs/40114331305): **4/4 PASS, 678/678 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 681 synthetic/local, R5-C current 80-path assessor handoff guard, fail-closed beta report claim preflight, offline evaluator, fictional downstream package, CI smoke, staging | [R5-C PR #136](../../pull/136), [main CI #40117457697](../../actions/runs/40117457697): **4/4 PASS, 681/681 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -236,7 +236,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 ## Release gates and boundaries
 
 - **R5-A content preflight and auditor handoff — DONE:** [Issue #41](../../issues/41) accepted through [PR #42](../../pull/42) and [post-merge main CI](../../actions/runs/39941412361), **4/4 PASS, 364/364 per job**. The bounded heuristic scanned all 57 package-source paths; this does not demonstrate absence of secrets or malware.
-- **R5-C independent assessor handoff refresh — IN DEVELOPMENT, PREPARATION ONLY:** [Issue #135](../../issues/135) updates the assessor guide to the actual **80-path** candidate archive, complete reviewed public SHA and cross-platform reproducibility instructions; it does **not** supply an assessor or fulfill R5-B. No npm publication, external target or security certification.
+- **R5-C independent assessor handoff refresh — DONE, PREPARATION ONLY:** [Issue #135](../../issues/135), [PR #136](../../pull/136) merged; [post-merge main CI #40117457697](../../actions/runs/40117457697) **4/4 PASS, 681/681 tests/job**, 0 failed/skipped. The guide describes the actual **80-path** candidate archive, reviewed public SHA, explicit offline reviewer commands and missing human sign-off. It does **not** fulfill R5-B #43; no release, external target or certification.
 - **R5-B independent security/provenance review — OPEN RELEASE GATE:** [Issue #43](../../issues/43) requires review by an assessor independent of the author, an independently verified final artifact and explicit owner publication permission. R5-A does not satisfy R5-B.
 
 - **R4 offline artifact integrity — DONE:** [Issue #38](../../issues/38) accepted via [merged PR #39](../../pull/39) and [post-merge main CI](../../actions/runs/39938436907), **4/4 PASS, 360/360 tests per job**. Two isolated same-job offline packs match byte-for-byte, metadata digests are verified, and all 56 installed file bytes match checkout source except npm's exact Windows bin-shebang CRLF→LF normalization. This is **not** independent provenance, a security audit or release authorization.
