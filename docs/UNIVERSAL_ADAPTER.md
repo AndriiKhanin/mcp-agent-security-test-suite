@@ -127,3 +127,29 @@ discovered in the named project. Output includes symbolic per-case detection,
 is **not** included in reports. This is not a security certification, a
 live scanner, operator verification, DLP or permission to execute user code.
 See [the exact copy/paste example](GETTING_STARTED.md).
+
+
+## M4-B9-B — developer-authored symbolic traces, not live transcripts
+
+The separate `adapter-synthetic-trace <symbolic-trace-file>` CLI is an
+opt-in offline profile, `user-authored-synthetic-only`, which reads a
+maximum 4096-byte local JSON object with a **validate-only descriptor**
+and 1–8 symbolic decision/effect event records. Each event contains only
+two small string enums (`ALLOW`/`DENY`, `NONE`/`READ`/`WRITE`)
+and four booleans. No command, host, URL, identity, scope name, tool name,
+payload, argument, header, token, raw transcript or external fixture
+reference is allowed in events.
+
+The existing pure `auditRecords` enforces denied-effect, unauthorized-effect,
+stale-lease and caller-flagged-secret invariants. Its symbolic PASS/FAIL is
+**separate** from the fixed-control `adapter-fixture-audit` PASS (which may
+include an intentionally broken native control that is correctly detected).
+Reports omit input record fields, free text and descriptor details. A
+`DENY` with `NONE` is a correct symbolic denial, whereas `DENY`
+with `WRITE` is a failed safety control. No replay correlation can be
+inferred from anonymous booleans. See [copy/paste instructions](GETTING_STARTED.md).
+
+The new API cannot read a real MCP transcript, invoke a tool, authenticate
+the operator, contact a user server or grant any network/process permission.
+`REAL_TARGET_EXECUTION_NOT_AUTHORIZED` and `executionEnabled:false`
+remain invariant even when synthetic tests pass.
