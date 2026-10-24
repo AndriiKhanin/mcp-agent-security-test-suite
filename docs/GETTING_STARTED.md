@@ -639,3 +639,57 @@ copy/paste extraction command shown above writes only three local fictional
 JSON objects at explicitly fixed filenames. This is not independent beta
 evidence, authorization or a security certificate. Gates #21, #43 and #59
 remain OPEN.
+
+
+## M6-C — verify a fictional exported starter kit with one CI command
+
+First export an inert, reviewed kit once (from the checked-out source root):
+
+```sh
+node src/cli.mjs adapter-kit streamable-http > fictional-kit.json
+node src/cli.mjs adapter-kit-verify fictional-kit.json
+```
+
+For Windows PowerShell 7, use the exact same local JSON file:
+
+```powershell
+& node '.\src\cli.mjs' adapter-kit streamable-http > fictional-kit.json
+if ($LASTEXITCODE -ne 0) { throw 'Offline kit export failed' }
+& node '.\src\cli.mjs' adapter-kit-verify fictional-kit.json
+if ($LASTEXITCODE -ne 0) { throw 'Offline fictional CI gate failed' }
+```
+
+In your trusted CI job, after the fictional kit JSON file is already
+present in the workspace, **only one command is required to verify it**:
+
+```sh
+node src/cli.mjs adapter-kit-verify fictional-kit.json
+```
+
+When called outside the source directory, use the **absolute path to the
+installed local npm package's** `src/cli.mjs`. No registry, real project
+server or target-connecting workflow is used. The command reads at most
+**16 KiB**, rejects direct symlinks, duplicate JSON keys, malformed
+UTF-8, extra fields and any modification to the code-owned fictional
+kit. It never imports customer logs, executes descriptor commands or
+contacts their placeholder endpoints.
+
+The verifier recalculates **three fixed symbolic controls**: descriptor
+shape and five internal fictional checks, clean symbolic CI, and the
+deliberately broken synthetic-denial case. A successful last check shows
+`observedSafetyStatus:FAIL` and `expectationStatus:MATCH`;
+this is **correct detection of an invented violation**, not a real-world
+safety PASS.
+
+CLI exit **0** = exact fictional kit structure and CI controls matched;
+exit **1** = a fixed internal control mismatch; exit **2** = invalid
+input, unreadable file or unsupported argument. The `status:PASS`
+report still contains `projectSafetyAssessed:false`,
+`independentOriginVerified:false`,
+`authorizationStatus:REAL_TARGET_EXECUTION_NOT_AUTHORIZED`, and
+`connectionStatus:NOT_ATTEMPTED`. The verifier does not establish who
+created the file, whether a real user ran any checks, or whether a
+target's credentials/permissions are valid.
+
+No external MCP targets are authorized, no npm stable release is
+published and independent security/beta gates #21/#43/#59 remain OPEN.
