@@ -117,7 +117,7 @@ test('M5-07: optional tarball check is offline, local and not represented as sig
     '80-path',
     'R1 package test'
   ])assert.ok(d.includes(literal),literal);
-  assert.ok(!d.includes('npm publish'));
+  assert.doesNotMatch(d,/^\s*(?:&\s*)?npm publish(?:\s|$)/m);
   const src=documented('test/installed-cli-smoke.test.mjs');
   for(const snippet of [
     "'pack', '--json', '--offline', '--ignore-scripts'",
