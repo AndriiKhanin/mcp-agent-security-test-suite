@@ -322,7 +322,9 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
 
     // M6-C: verify the *complete exported CLI report*, not an untrusted
     // status field, using the installed package and unrelated adopter cwd.
-    save(join(adopter,'fictional-kit.json'),kit);
+    const kitBytes=JSON.stringify(kit);
+    assert.ok(Buffer.byteLength(kitBytes,'utf8')<16384);
+    writeFileSync(join(adopter,'fictional-kit.json'),kitBytes,'utf8');
     const kitVerification=adopterRun('adapter-kit-verify','fictional-kit.json');
     assert.equal(kitVerification.status,0,'installed kit verification must pass');
     assert.equal(kitVerification.stderr,'');
@@ -341,7 +343,7 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
     const tampered=structuredClone(kit);
     tampered.expectedResults.expectedViolationCi.observedSafetyStatus='PASS';
-    save(join(adopter,'fictional-forged-kit.json'),tampered);
+    writeFileSync(join(adopter,'fictional-forged-kit.json'),JSON.stringify(tampered),'utf8');
     const rejected=adopterRun('adapter-kit-verify','fictional-forged-kit.json');
     assert.equal(rejected.status,2);
     const rejectedReport=JSON.parse(rejected.stdout);
