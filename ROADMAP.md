@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 703 synthetic/local, M6-B guided fictional starter kit, M6-A offline quickstart, expected-violation CI samples, R5-C assessor handoff and fictional downstream package | [M6-B PR #142](../../pull/142), [main CI #40126257281](../../actions/runs/40126257281): **4/4 PASS, 703/703 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 713 synthetic/local, M6-C one-command exported fictional-kit CI verification, M6-B starter kit, M6-A quickstart, fixed violation checks and auditor handoff | [M6-C PR #145](../../pull/145), [main CI #40127657693](../../actions/runs/40127657693): **4/4 PASS, 713/713 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,15 +91,15 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-C — one-command exported fictional kit CI verification
 
-- **IN DEVELOPMENT — fixed offline fixtures only:** [Issue #144](../../issues/144).
+- **DONE — fixed offline fixtures only:** [Issue #144](../../issues/144), [merged PR #145](../../pull/145), [post-merge main CI #40127657693](../../actions/runs/40127657693): **4/4 PASS, 713/713 tests/job**, 0 failed/skipped.
   Run `adapter-kit-verify <local-kit-json>` to verify an exported `adapter-kit` JSON file against the canonical
   complete reviewed CLI report, then rerun quickstart and two fictional
   symbolic expectations in one CLI command with strict local UTF-8
   file-size/shape limits, generic safe errors and clear 0/1/2 exit
   semantics. No user-owned MCP testing, arbitrary process/network calls,
   proof of independent authorship or permission to publish. Preserve
-  80-path npm inventory and require 4/4 PR/post-merge CI. External gates
-  #21, #43 and #59 remain OPEN.
+  80-path npm inventory preserved, zero new dependencies, PR and main
+  CI 4/4 verified. External gates #21, #43 and #59 remain OPEN.
 
 ## M6-B — guided fictional adopter kit and CI starter
 
