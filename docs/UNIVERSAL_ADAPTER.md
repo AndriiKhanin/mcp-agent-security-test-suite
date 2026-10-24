@@ -241,3 +241,23 @@ reports `MATCH`. The generator performs no filesystem writes, no network
 contact and no child-process launch. Project-specific user input, private
 URLs, tokens, command flags and arbitrary tool-call arguments are forbidden.
 [Copyable Node and PowerShell walkthrough](GETTING_STARTED.md#m6-b--guided-fictional-adopter-kit-one-selector-no-server-contact).
+
+
+## M6-C — single fixed offline gate for exported fictional kit
+
+`adapter-kit-verify <local-kit-file>` only accepts the complete,
+versioned, source-authored output of the existing
+`adapter-kit stdio|streamable-http` CLI command. It structurally compares
+the entire exported report against reviewed fixed inputs, then reruns
+the same pure five-control quickstart and two symbolic CI expectations.
+Any additional keys, changed claims, wrong transport, missing fixed
+cases, direct leaf symlink or input above **16 KiB** are rejected before
+returning a normal verification result. The verifier never trusts a
+`PASS` status from the input, runs custom commands, resolves endpoints,
+reads credentials or contacts user-owned MCP servers.
+
+`status:PASS` means **only fictional test fixtures matched**, not
+that a user ran the kit, not verified provenance, and never that a real
+project has been assessed. The deliberately negative synthetic test
+still reports `observedSafetyStatus:FAIL` and an exact
+`expectationStatus:MATCH`. See the [M6-C CLI/CI walkthrough](GETTING_STARTED.md#m6-c--verify-a-fictional-exported-starter-kit-with-one-ci-command).
