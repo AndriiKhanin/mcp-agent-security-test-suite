@@ -186,3 +186,141 @@ export function createOfflineAdapterTemplate(transport){
     findings:[]
   };
 }
+
+
+/**
+ * M4-B8-A: a PURE and non-authoritative simulation of future per-target gates.
+ *
+ * Both arguments are UNTRUSTED JSON-shaped data. The optional second argument
+ * is a test-only evidence snapshot, NOT a real verification provider. Even a
+ * synthetic PASS never grants a network/process capability. No connector,
+ * fetcher, credential provider, socket or executable dispatch exists here.
+ * Reuse/revocation state cannot be established durably by this pure function.
+ */
+export const TARGET_DECISION_SCHEMA_VERSION = 1;
+const DECISION_FIELDS=Object.freeze({
+  root:['decisionSchemaVersion','target','request','grant'],
+  target:['scheme','host','port','path','environment','protocolVersion'],
+  request:['method','maxRequests','maxResponseBytes','deadlineMs','maxRetries','followRedirects'],
+  grant:['status','state','nonce','issuedAtMs','expiresAtMs','scope'],
+  scope:['scheme','host','port','path','protocolVersion','method','maxRequests'],
+  evidence:['provenance','ownership','operator','egress','tls','dns','ssrf']
+});
+const TEST_EVIDENCE_STATES=['SIMULATED_PASS','UNKNOWN','SIMULATED_FAIL'];
+function isDataRecord(obj,fields){
+  if(!obj || typeof obj!=='object' || Array.isArray(obj) ||
+      Object.getPrototypeOf(obj)!==Object.prototype) return false;
+  const descriptors=Object.getOwnPropertyDescriptors(obj);
+  return Object.keys(descriptors).length===fields.length &&
+    fields.every(k=>own(descriptors,k) && own(descriptors[k],'value'));
+}
+function safeTargetTuple(target){
+  if(target.scheme!=='https' || target.port!==443 ||
+      target.environment!=='nonproduction' ||
+      target.protocolVersion!=='2026-07-28' ||
+      typeof target.host!=='string' || typeof target.path!=='string' ||
+      !/^[a-z0-9.-]{4,190}$/u.test(target.host) ||
+      !/^\/[A-Za-z0-9/_-]{1,128}$/u.test(target.path) ||
+      target.path.includes('//') || target.path.includes('..')) return false;
+  try {
+    // Reuse the already-reviewed *inert* canonical URL grammar; never resolve.
+    inspectProjectAdapter({
+      adapterSchemaVersion:ADAPTER_SCHEMA_VERSION,
+      project:{name:'fictional-target-decision'},
+      transport:{type:'streamable-http',endpoint:'https://'+target.host+target.path},
+      protocolVersion:'2026-07-28',
+      policy:{...DRY}
+    });
+    return true;
+  } catch { return false; }
+}
+function decisionReport(codes){
+  const findings=codes.slice(0,12).map(rule=>({rule}));
+  const passed=findings.length===0;
+  return {
+    status:passed?'PASS':'FAIL',
+    profile:'fictional-target-decision-preview-v1',
+    decisionSchemaVersion:TARGET_DECISION_SCHEMA_VERSION,
+    simulationStatus:passed?'SIMULATED_GATES_PASS':'SIMULATED_DENY',
+    evidenceTrust:'TEST_ONLY_NOT_INDEPENDENT',
+    authorizationStatus:'REAL_TARGET_EXECUTION_NOT_AUTHORIZED',
+    connectionStatus:'NOT_ATTEMPTED',
+    executionEnabled:false,
+    projectConnectionAuthorized:false,
+    externalTargetContacted:false,
+    operatorVerified:false,
+    nextAction:'INDEPENDENT_APPROVAL_AND_NETWORK_SECURITY_REVIEW_REQUIRED',
+    failureCount:findings.length,
+    findingsTruncated:false,
+    findings
+  };
+}
+/**
+ * Exact-target decision model, with no effects and no real authority.
+ *
+ * 'evidence' represents a snapshot emitted by a **fictional test provider**.
+ * A caller can forge it: the provenance marker is deliberately TEST_ONLY.
+ * Neither matching mock statuses nor profile/onboarding PASS authorize contact.
+ * Passing the same UNUSED grant twice will also simulate PASS twice; a future
+ * trusted replay ledger and atomic consume-before-effect gate are mandatory.
+ */
+export function simulateExactTargetAuthorization(packet,evidence,{nowMs}={}){
+  try {
+    if(!isDataRecord(packet,DECISION_FIELDS.root) ||
+       !isDataRecord(packet.target,DECISION_FIELDS.target) ||
+       !isDataRecord(packet.request,DECISION_FIELDS.request) ||
+       !isDataRecord(packet.grant,DECISION_FIELDS.grant) ||
+       !isDataRecord(packet.grant.scope,DECISION_FIELDS.scope))
+      return decisionReport(['INVALID_AUTHORIZATION_PACKET']);
+    const {target,request,grant}=packet;
+    const codes=[];
+    if(packet.decisionSchemaVersion!==TARGET_DECISION_SCHEMA_VERSION)
+      codes.push('INVALID_AUTHORIZATION_PACKET');
+    if(!safeTargetTuple(target)) codes.push('TARGET_NOT_CANONICAL');
+    if(request.method!=='server/discover' || request.maxRequests!==1 ||
+       !Number.isSafeInteger(request.maxResponseBytes) ||
+       request.maxResponseBytes<1 || request.maxResponseBytes>32768 ||
+       !Number.isSafeInteger(request.deadlineMs) ||
+       request.deadlineMs<1 || request.deadlineMs>5000 ||
+       request.maxRetries!==0 || request.followRedirects!==false)
+      codes.push('REQUEST_OUT_OF_SCOPE');
+    const scope=grant.scope;
+    if(!DECISION_FIELDS.scope.every(k=>
+        scope[k]===(k==='method'?request.method:
+                    k==='maxRequests'?request.maxRequests:target[k])))
+      codes.push('GRANT_SCOPE_MISMATCH');
+    if(grant.status!=='SIMULATED_APPROVED')
+      codes.push('GRANT_NOT_APPROVED');
+    if(grant.state==='REVOKED') codes.push('GRANT_REVOKED');
+    else if(grant.state==='CONSUMED') codes.push('GRANT_REPLAYED');
+    else if(grant.state!=='UNUSED') codes.push('GRANT_STATE_INVALID');
+    if(typeof grant.nonce!=='string' ||
+       !/^[a-zA-Z0-9_-]{16,64}$/u.test(grant.nonce) ||
+       !Number.isSafeInteger(nowMs) || nowMs<0 ||
+       !Number.isSafeInteger(grant.issuedAtMs) ||
+       !Number.isSafeInteger(grant.expiresAtMs) ||
+       grant.issuedAtMs<0 || grant.expiresAtMs<=grant.issuedAtMs ||
+       grant.expiresAtMs-grant.issuedAtMs>300000 ||
+       nowMs<grant.issuedAtMs || nowMs>=grant.expiresAtMs)
+      codes.push('GRANT_TIME_OR_NONCE_INVALID');
+    if(!isDataRecord(evidence,DECISION_FIELDS.evidence) ||
+       evidence.provenance!=='TEST_ONLY_NOT_INDEPENDENT' ||
+       !DECISION_FIELDS.evidence.slice(1).every(k=>
+         TEST_EVIDENCE_STATES.includes(evidence[k])))
+      codes.push('TEST_EVIDENCE_INVALID');
+    else {
+      for(const [key,rule] of [
+        ['ownership','OWNERSHIP_NOT_VERIFIED'],
+        ['operator','OPERATOR_NOT_VERIFIED'],
+        ['egress','EGRESS_PREFLIGHT_NOT_VERIFIED'],
+        ['tls','TLS_PREFLIGHT_NOT_VERIFIED'],
+        ['dns','DNS_PREFLIGHT_NOT_VERIFIED'],
+        ['ssrf','SSRF_PREFLIGHT_NOT_VERIFIED']
+      ]) if(evidence[key]!=='SIMULATED_PASS') codes.push(rule);
+    }
+    return decisionReport(codes);
+  } catch {
+    // No exception text, user-supplied hostname, nonce or grants in reports.
+    return decisionReport(['INVALID_AUTHORIZATION_PACKET']);
+  }
+}
