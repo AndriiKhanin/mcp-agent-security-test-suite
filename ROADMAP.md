@@ -88,6 +88,21 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 - **M4-B4 — DONE (test-only):** [Issue #72](../../issues/72), [merged PR #74](../../pull/74), [post-merge main CI #39983335810](../../actions/runs/39983335810): **4/4 PASS, 438/438 tests per job, 0 failures/skips**. Bounded test observer measures source-site attempts at fixed driver probe, stdio worker spawn and loopback bind/request independently of response flags, with denied and positive controls plus concurrent isolation. The checked package inventory is **72** paths; not kernel process/network tracing, real authorization or external server access.
 
 
+
+## M4-B8-B — offline provenance and single-use grant rehearsal
+
+- **IN DEVELOPMENT (simulation only):** [Issue #109](../../issues/109).
+  Add fictional independent-input evidence snapshots bound to exact packet,
+  operator and freshness, plus synchronous in-memory one-time state transitions.
+  Negative cases include spoofed evidence, malformed provenance, target/method
+  mismatch, replay, concurrent consume, revocation, expiry and safe report
+  boundaries. Two separate state cells can independently accept a copied test
+  grant: **this is not a durable replay ledger**. Every symbolic success still
+  returns `REAL_TARGET_EXECUTION_NOT_AUTHORIZED`. No real MCP contact,
+  DNS/TLS/SSRF enforcement, credentials or executable target method permitted.
+  Accept only with 4/4 PR and post-merge CI and unchanged release hygiene.
+
+
 ## M4-B8-A — exact-target offline authorization decision simulation
 
 - **DONE (simulation only; no external target authorization):** [Issue #106](../../issues/106), [merged PR #107](../../pull/107), [post-merge main CI #40075770866](../../actions/runs/40075770866): **4/4 PASS, 582/582 tests/job**, zero failed/skipped.

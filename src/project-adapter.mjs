@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 /**
  * Portable, *non-executing* MCP project connection descriptor.
  *
@@ -211,7 +212,7 @@ function isDataRecord(obj,fields){
   if(!obj || typeof obj!=='object' || Array.isArray(obj) ||
       Object.getPrototypeOf(obj)!==Object.prototype) return false;
   const descriptors=Object.getOwnPropertyDescriptors(obj);
-  return Object.keys(descriptors).length===fields.length &&
+  return Reflect.ownKeys(descriptors).length===fields.length &&
     fields.every(k=>own(descriptors,k) && own(descriptors[k],'value'));
 }
 function safeTargetTuple(target){
@@ -325,4 +326,211 @@ export function simulateExactTargetAuthorization(packet,evidence,options={}){
     // No exception text, user-supplied hostname, nonce or grants in reports.
     return decisionReport(['INVALID_AUTHORIZATION_PACKET']);
   }
+}
+
+
+/**
+ * M4-B8-B: DISPOSABLE, IN-MEMORY SECURITY MODEL ONLY.
+ *
+ * The caller can forge every synthetic evidence field and fingerprint. This
+ * models an API boundary but cannot establish real identity, authorization,
+ * durable replay protection or actual network isolation.
+ */
+export const FICTIONAL_EVIDENCE_SCHEMA_VERSION=1;
+export const FICTIONAL_REHEARSAL_SCHEMA_VERSION=1;
+const FICTIONAL_PROVIDER='OWNED_SYNTHETIC_PROVIDER_V1';
+const FICTIONAL_ISSUER='FICTIONAL_OFFLINE_ISSUER_V1';
+const SNAPSHOT_FIELDS=Object.freeze([
+  'evidenceSchemaVersion','provenance','providerId','issuer','operatorId',
+  'packetFingerprint','issuedAtMs','expiresAtMs','checks'
+]);
+const PROOF_CHECKS=Object.freeze(['ownership','operator','egress','tls','dns','ssrf']);
+const EXACT_TEST_PROOF=Object.freeze({
+  provenance:'TEST_ONLY_NOT_INDEPENDENT',
+  ownership:'SIMULATED_PASS',operator:'SIMULATED_PASS',
+  egress:'SIMULATED_PASS',tls:'SIMULATED_PASS',
+  dns:'SIMULATED_PASS',ssrf:'SIMULATED_PASS'
+});
+const isFictionalOperator=x=>typeof x==='string' &&
+  /^fictional-[a-z0-9-]{8,48}$/u.test(x);
+const isSafeClock=x=>Number.isSafeInteger(x) && x>=0;
+const snapshotCodes=(packet,operatorId,snapshot,nowMs)=>{
+  if(!isDataRecord(snapshot,SNAPSHOT_FIELDS) ||
+     !isDataRecord(snapshot?.checks,PROOF_CHECKS))
+    return ['TEST_PROVIDER_SNAPSHOT_INVALID'];
+  const errors=[];
+  if(snapshot.evidenceSchemaVersion!==FICTIONAL_EVIDENCE_SCHEMA_VERSION ||
+     snapshot.provenance!=='TEST_ONLY_NOT_INDEPENDENT' ||
+     snapshot.providerId!==FICTIONAL_PROVIDER ||
+     snapshot.issuer!==FICTIONAL_ISSUER)
+    errors.push('TEST_PROVIDER_PROVENANCE_INVALID');
+  if(snapshot.operatorId!==operatorId)
+    errors.push('TEST_PROVIDER_OPERATOR_MISMATCH');
+  if(snapshot.packetFingerprint!==fingerprintFictionalTargetPacket(packet,operatorId))
+    errors.push('TEST_PROVIDER_PACKET_MISMATCH');
+  if(!isSafeClock(nowMs) ||
+     !isSafeClock(snapshot.issuedAtMs) ||
+     !isSafeClock(snapshot.expiresAtMs) ||
+     snapshot.expiresAtMs<=snapshot.issuedAtMs ||
+     snapshot.expiresAtMs-snapshot.issuedAtMs>60000 ||
+     snapshot.issuedAtMs<packet.grant.issuedAtMs ||
+     snapshot.expiresAtMs>packet.grant.expiresAtMs ||
+     nowMs<snapshot.issuedAtMs || nowMs>=snapshot.expiresAtMs)
+    errors.push('TEST_PROVIDER_EVIDENCE_STALE');
+  if(!PROOF_CHECKS.every(key=>snapshot.checks[key]==='SIMULATED_PASS'))
+    errors.push('TEST_PROVIDER_GATE_DENIED');
+  return errors;
+};
+const rehearsalReport=(codes,state,operation)=>{
+  const base=decisionReport(codes);
+  return {
+    ...base,
+    profile:'fictional-one-time-permit-rehearsal-v1',
+    rehearsalSchemaVersion:FICTIONAL_REHEARSAL_SCHEMA_VERSION,
+    rehearsalState:state,
+    operation
+  };
+};
+
+/** Deterministic tuple digest. It is NOT a signature, authority or secret. */
+export function fingerprintFictionalTargetPacket(packet,operatorId){
+  if(!isFictionalOperator(operatorId) ||
+     !isDataRecord(packet,DECISION_FIELDS.root) ||
+     !isDataRecord(packet.target,DECISION_FIELDS.target) ||
+     !isDataRecord(packet.request,DECISION_FIELDS.request) ||
+     !isDataRecord(packet.grant,DECISION_FIELDS.grant) ||
+     !isDataRecord(packet.grant.scope,DECISION_FIELDS.scope) ||
+     simulateExactTargetAuthorization(packet,EXACT_TEST_PROOF,{
+       nowMs:packet.grant.issuedAtMs
+     }).status!=='PASS') throw new TypeError('INVALID_TEST_DECISION_PACKET');
+  // Arrays with fixed field order avoid object-key insertion-order drift.
+  const material=[
+    TARGET_DECISION_SCHEMA_VERSION,operatorId,
+    DECISION_FIELDS.target.map(k=>packet.target[k]),
+    DECISION_FIELDS.request.map(k=>packet.request[k]),
+    DECISION_FIELDS.grant.filter(k=>k!=='scope').map(k=>packet.grant[k]),
+    DECISION_FIELDS.scope.map(k=>packet.grant.scope[k])
+  ];
+  return createHash('sha256').update(JSON.stringify(material),'utf8').digest('hex');
+}
+
+/**
+ * Validate a fictional separately supplied provider snapshot. Every field is
+ * caller-forgeable; even PASS represents only consistency in a local example.
+ */
+export function inspectFictionalEvidenceSnapshot(packet,operatorId,snapshot,options={}){
+  try {
+    const nowMs=options?.nowMs;
+    fingerprintFictionalTargetPacket(packet,operatorId);
+    return rehearsalReport(snapshotCodes(packet,operatorId,snapshot,nowMs),
+      'NOT_ISSUED','INSPECT_TEST_EVIDENCE');
+  } catch {
+    return rehearsalReport(['TEST_PROVIDER_INPUT_INVALID'],
+      'NOT_ISSUED','INSPECT_TEST_EVIDENCE');
+  }
+}
+
+/**
+ * One deliberately local mutable state cell, with synchronous transitions.
+ * A consume check and transition happen in one JS turn (no await).
+ * This is NOT atomic across processes, machines or independently created cells.
+ */
+export function createFictionalPermitRehearsal(packet,operatorId){
+  let fingerprint;
+  try { fingerprint=fingerprintFictionalTargetPacket(packet,operatorId); }
+  catch { throw new TypeError('INVALID_TEST_REHEARSAL_INPUT'); }
+  const pinned=structuredClone(packet);
+  let state='REQUESTED',snapshotExpiry=null;
+  const clock=options=>{
+    if(!isDataRecord(options,['nowMs']) || !isSafeClock(options.nowMs))
+      return null;
+    return options.nowMs;
+  };
+  const expired=nowMs=>nowMs>=pinned.grant.expiresAtMs ||
+    (snapshotExpiry!==null && nowMs>=snapshotExpiry);
+  const stateDeny=()=>{
+    if(state==='ISSUED') return 'TEST_GRANT_ALREADY_ISSUED';
+    if(state==='CONSUMED') return 'TEST_GRANT_REPLAYED';
+    if(state==='REVOKED') return 'TEST_GRANT_REVOKED';
+    if(state==='EXPIRED') return 'TEST_GRANT_EXPIRED';
+    return 'TEST_GRANT_NOT_ISSUED';
+  };
+  const api=Object.freeze({
+    current(){
+      return rehearsalReport([],state,'INSPECT_REHEARSAL_STATE');
+    },
+    issue(snapshot,options){
+      try {
+        const nowMs=clock(options);
+        if(nowMs===null) return rehearsalReport(
+          ['TEST_CLOCK_INVALID'],state,'ISSUE');
+        if(state!=='REQUESTED') return rehearsalReport(
+          [stateDeny()],state,'ISSUE');
+        if(expired(nowMs)){
+          state='EXPIRED';
+          return rehearsalReport(['TEST_GRANT_EXPIRED'],state,'ISSUE');
+        }
+        const base=simulateExactTargetAuthorization(
+          pinned,EXACT_TEST_PROOF,{nowMs});
+        if(base.status!=='PASS') return rehearsalReport(
+          ['TEST_BASE_GATE_DENIED'],state,'ISSUE');
+        const reasons=snapshotCodes(pinned,operatorId,snapshot,nowMs);
+        if(reasons.length) return rehearsalReport(reasons,state,'ISSUE');
+        if(snapshot.packetFingerprint!==fingerprint) return rehearsalReport(
+          ['TEST_PROVIDER_PACKET_MISMATCH'],state,'ISSUE');
+        // Snapshot consists of primitive-only values. Keep expiration only.
+        snapshotExpiry=snapshot.expiresAtMs;
+        state='ISSUED';
+        return rehearsalReport([],state,'ISSUE');
+      } catch {
+        return rehearsalReport(['TEST_PROVIDER_INPUT_INVALID'],state,'ISSUE');
+      }
+    },
+    consume(candidatePacket,candidateOperator,options){
+      try {
+        const nowMs=clock(options);
+        if(nowMs===null) return rehearsalReport(
+          ['TEST_CLOCK_INVALID'],state,'CONSUME');
+        if(state!=='ISSUED') return rehearsalReport(
+          [stateDeny()],state,'CONSUME');
+        if(expired(nowMs)){
+          state='EXPIRED';
+          return rehearsalReport(['TEST_GRANT_EXPIRED'],state,'CONSUME');
+        }
+        if(candidateOperator!==operatorId) return rehearsalReport(
+          ['TEST_CONSUMER_OPERATOR_MISMATCH'],state,'CONSUME');
+        if(fingerprintFictionalTargetPacket(candidatePacket,candidateOperator)!==
+           fingerprint) return rehearsalReport(
+          ['TEST_CONSUMER_SCOPE_MISMATCH'],state,'CONSUME');
+        // Synchronous compare-then-set, no network or async callback.
+        state='CONSUMED';
+        return rehearsalReport([],state,'CONSUME');
+      } catch {
+        return rehearsalReport(['TEST_CONSUMER_SCOPE_MISMATCH'],state,'CONSUME');
+      }
+    },
+    revoke(options){
+      const nowMs=clock(options);
+      if(nowMs===null) return rehearsalReport(
+        ['TEST_CLOCK_INVALID'],state,'REVOKE');
+      if(state==='REQUESTED' || state==='ISSUED'){
+        state='REVOKED';
+        return rehearsalReport([],state,'REVOKE');
+      }
+      return rehearsalReport([stateDeny()],state,'REVOKE');
+    },
+    expire(options){
+      const nowMs=clock(options);
+      if(nowMs===null) return rehearsalReport(
+        ['TEST_CLOCK_INVALID'],state,'EXPIRE');
+      if(state==='REQUESTED' || state==='ISSUED'){
+        if(!expired(nowMs)) return rehearsalReport(
+          ['TEST_GRANT_NOT_EXPIRED'],state,'EXPIRE');
+        state='EXPIRED';
+        return rehearsalReport([],state,'EXPIRE');
+      }
+      return rehearsalReport([stateDeny()],state,'EXPIRE');
+    }
+  });
+  return api;
 }

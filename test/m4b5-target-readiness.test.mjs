@@ -381,3 +381,300 @@ test('M4-B8-A: no new CLI route can be injected through user-controlled input',(
     assert.ok(!out.stdout.includes('private.example.org'));
   }
 });
+
+
+// M4-B8-B: non-authoritative in-memory issue/consume/revoke rehearsal.
+// A matching synthetic hash is NOT proof of real source provenance.
+import {fingerprintFictionalTargetPacket,inspectFictionalEvidenceSnapshot,
+  createFictionalPermitRehearsal,FICTIONAL_EVIDENCE_SCHEMA_VERSION,
+  FICTIONAL_REHEARSAL_SCHEMA_VERSION} from '../src/project-adapter.mjs';
+const fakeOperator='fictional-operator-01';
+const rehearsalPacket=()=>inventedPacket();
+const fakeSnapshot=(p=rehearsalPacket(),operatorId=fakeOperator)=>({
+  evidenceSchemaVersion:1,
+  provenance:'TEST_ONLY_NOT_INDEPENDENT',
+  providerId:'OWNED_SYNTHETIC_PROVIDER_V1',
+  issuer:'FICTIONAL_OFFLINE_ISSUER_V1',
+  operatorId,
+  packetFingerprint:fingerprintFictionalTargetPacket(p,operatorId),
+  issuedAtMs:1020000,
+  expiresAtMs:1040000,
+  checks:{
+    ownership:'SIMULATED_PASS',operator:'SIMULATED_PASS',
+    egress:'SIMULATED_PASS',tls:'SIMULATED_PASS',
+    dns:'SIMULATED_PASS',ssrf:'SIMULATED_PASS'
+  }
+});
+function offlineRehearsalReport(r,state,pass){
+  assert.equal(r.authorizationStatus,'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
+  assert.equal(r.connectionStatus,'NOT_ATTEMPTED');
+  assert.equal(r.executionEnabled,false);
+  assert.equal(r.projectConnectionAuthorized,false);
+  assert.equal(r.externalTargetContacted,false);
+  assert.equal(r.operatorVerified,false);
+  assert.equal(r.evidenceTrust,'TEST_ONLY_NOT_INDEPENDENT');
+  assert.equal(r.profile,'fictional-one-time-permit-rehearsal-v1');
+  assert.equal(r.rehearsalSchemaVersion,FICTIONAL_REHEARSAL_SCHEMA_VERSION);
+  assert.equal(r.rehearsalState,state);
+  assert.equal(r.status,pass?'PASS':'FAIL');
+  assert.equal(r.failureCount,r.findings.length);
+  assert.ok(r.findings.every(f=>Object.keys(f).join(',')==='rule'));
+  return r;
+}
+const checkFailure=(r,state,rule)=>{
+  offlineRehearsalReport(r,state,false);
+  hasRule(r,rule);
+};
+
+test('M4-B8-B: strict synthetic evidence bound to packet and fictional operator',()=>{
+  const p=rehearsalPacket();
+  const s=fakeSnapshot(p);
+  const report=inspectFictionalEvidenceSnapshot(p,fakeOperator,s,{nowMs:1030000});
+  offlineRehearsalReport(report,'NOT_ISSUED',true);
+  assert.equal(report.operation,'INSPECT_TEST_EVIDENCE');
+  assert.equal(FICTIONAL_EVIDENCE_SCHEMA_VERSION,1);
+  assert.match(s.packetFingerprint,/^[a-f0-9]{64}$/u);
+  assert.equal(fingerprintFictionalTargetPacket(p,fakeOperator),s.packetFingerprint);
+});
+
+test('M4-B8-B: canonical digest stable across reordered own JSON properties',()=>{
+  const p=rehearsalPacket();
+  const reordered={grant:{scope:{...p.grant.scope},...Object.fromEntries(
+    Object.entries(p.grant).filter(([k])=>k!=='scope'))},
+    request:{...p.request},target:{...p.target},decisionSchemaVersion:1};
+  assert.equal(fingerprintFictionalTargetPacket(p,fakeOperator),
+    fingerprintFictionalTargetPacket(reordered,fakeOperator));
+});
+
+test('M4-B8-B: provider provenance absent, forged or malformed fails closed',()=>{
+  const p=rehearsalPacket();
+  for(const patch of [
+    {issuer:'trusted-CA'}, {providerId:'PRIVATE_FAKE_PROVIDER'},
+    {provenance:'INDEPENDENT_PROOF'}, {evidenceSchemaVersion:2},
+    {verified:true},{operatorVerified:true},
+    {targetUrl:'https://private.example.org/mcp'}
+  ]){
+    const s={...fakeSnapshot(p),...patch};
+    const report=inspectFictionalEvidenceSnapshot(p,fakeOperator,s,{nowMs:1030000});
+    assert.equal(report.status,'FAIL');
+    assert.equal(report.authorizationStatus,'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
+  }
+  for(const s of [null,undefined,{verified:true},{},'PASS']){
+    checkFailure(inspectFictionalEvidenceSnapshot(p,fakeOperator,s,{nowMs:1030000}),
+      'NOT_ISSUED','TEST_PROVIDER_SNAPSHOT_INVALID');
+  }
+});
+
+test('M4-B8-B: snapshot target and operator binding cannot be swapped',()=>{
+  const p=rehearsalPacket(),s=fakeSnapshot(p);
+  for(const [where,key,value] of [
+    ['target','host','different.example.org'],
+    ['target','path','/different'],
+    ['request','method','tools/call'],
+    ['grant','nonce','fictional-alternate-nonce-01'],
+    ['grant','issuedAtMs',1000001],
+    ['scope','maxRequests',2]
+  ]){
+    const changed=structuredClone(p);
+    (where==='scope'?changed.grant.scope:changed[where])[key]=value;
+    const report=inspectFictionalEvidenceSnapshot(
+      changed,fakeOperator,s,{nowMs:1030000});
+    assert.equal(report.status,'FAIL',where+':'+key);
+    assert.equal(report.executionEnabled,false);
+  }
+  checkFailure(inspectFictionalEvidenceSnapshot(p,'fictional-operator-02',s,
+    {nowMs:1030000}),'NOT_ISSUED','TEST_PROVIDER_OPERATOR_MISMATCH');
+});
+
+test('M4-B8-B: stale, future and oversized evidence window rejected',()=>{
+  const p=rehearsalPacket();
+  for(const patch of [
+    {issuedAtMs:1040000,expiresAtMs:1050000},
+    {issuedAtMs:1010000,expiresAtMs:1020000},
+    {issuedAtMs:1020000,expiresAtMs:1080001},
+    {issuedAtMs:999999,expiresAtMs:1040000},
+    {issuedAtMs:1020000,expiresAtMs:1060001},
+    {issuedAtMs:1030000,expiresAtMs:1030000},
+    {issuedAtMs:null},
+  ]){
+    const s={...fakeSnapshot(p),...patch};
+    checkFailure(inspectFictionalEvidenceSnapshot(p,fakeOperator,s,
+      {nowMs:1030000}),'NOT_ISSUED','TEST_PROVIDER_EVIDENCE_STALE');
+  }
+  checkFailure(inspectFictionalEvidenceSnapshot(p,fakeOperator,fakeSnapshot(p),
+    {}),'NOT_ISSUED','TEST_PROVIDER_EVIDENCE_STALE');
+});
+
+test('M4-B8-B: each synthetic provider check needs separate PASS',()=>{
+  const p=rehearsalPacket();
+  for(const key of ['ownership','operator','egress','tls','dns','ssrf']){
+    const s=fakeSnapshot(p);s.checks[key]='SIMULATED_FAIL';
+    checkFailure(inspectFictionalEvidenceSnapshot(p,fakeOperator,s,
+      {nowMs:1030000}),'NOT_ISSUED','TEST_PROVIDER_GATE_DENIED');
+  }
+});
+
+test('M4-B8-B: prototype manipulation, extra nested keys and accessors deny',()=>{
+  const p=rehearsalPacket();
+  for(const changed of [
+    {...fakeSnapshot(p),__proto__:null,verified:true},
+    {...fakeSnapshot(p),checks:{...fakeSnapshot(p).checks,verified:true}},
+    Object.assign(Object.create(null),fakeSnapshot(p)),
+  ]){
+    assert.equal(inspectFictionalEvidenceSnapshot(p,fakeOperator,changed,
+      {nowMs:1030000}).status,'FAIL');
+  }
+  const getter=fakeSnapshot(p);
+  Object.defineProperty(getter,'issuer',{enumerable:true,
+    get(){throw new Error('PRIVATE_GETTER_CANARY')}});
+  const report=inspectFictionalEvidenceSnapshot(p,fakeOperator,getter,
+    {nowMs:1030000});
+  checkFailure(report,'NOT_ISSUED','TEST_PROVIDER_SNAPSHOT_INVALID');
+  assert.ok(!JSON.stringify(report).includes('PRIVATE_GETTER_CANARY'));
+});
+
+test('M4-B8-B: request → issue → consume, second consume always denied',()=>{
+  const p=rehearsalPacket();
+  const session=createFictionalPermitRehearsal(p,fakeOperator);
+  offlineRehearsalReport(session.current(),'REQUESTED',true);
+  offlineRehearsalReport(session.issue(fakeSnapshot(p),{nowMs:1030000}),
+    'ISSUED',true);
+  offlineRehearsalReport(session.consume(p,fakeOperator,{nowMs:1030001}),
+    'CONSUMED',true);
+  checkFailure(session.consume(p,fakeOperator,{nowMs:1030002}),
+    'CONSUMED','TEST_GRANT_REPLAYED');
+  assert.equal(session.current().rehearsalState,'CONSUMED');
+  assert.equal(typeof session.connect,'undefined');
+  assert.equal(typeof session.run,'undefined');
+});
+
+test('M4-B8-B: concurrent consume attempts succeed once within one cell',async()=>{
+  const p=rehearsalPacket();
+  const s=createFictionalPermitRehearsal(p,fakeOperator);
+  offlineRehearsalReport(s.issue(fakeSnapshot(p),{nowMs:1030000}),'ISSUED',true);
+  const outcomes=await Promise.all(Array.from({length:24},async()=>
+    s.consume(structuredClone(p),fakeOperator,{nowMs:1030001})));
+  assert.equal(outcomes.filter(x=>x.status==='PASS').length,1);
+  assert.equal(outcomes.filter(x=>x.status==='FAIL').length,23);
+  for(const r of outcomes)offlineRehearsalReport(r,
+    r.status==='PASS'?'CONSUMED':'CONSUMED',r.status==='PASS');
+});
+
+test('M4-B8-B: consume wrong operator, target and method leaves grant unused',()=>{
+  const p=rehearsalPacket(),s=createFictionalPermitRehearsal(p,fakeOperator);
+  s.issue(fakeSnapshot(p),{nowMs:1030000});
+  checkFailure(s.consume(p,'fictional-operator-02',{nowMs:1030001}),
+    'ISSUED','TEST_CONSUMER_OPERATOR_MISMATCH');
+  for(const [where,key,value] of [
+    ['target','path','/other'],
+    ['target','host','other.example.org'],
+    ['request','method','tools/list'],
+  ]){
+    const changed=structuredClone(p);changed[where][key]=value;
+    checkFailure(s.consume(changed,fakeOperator,{nowMs:1030001}),
+      'ISSUED','TEST_CONSUMER_SCOPE_MISMATCH');
+  }
+  offlineRehearsalReport(s.consume(p,fakeOperator,{nowMs:1030001}),
+    'CONSUMED',true);
+});
+
+test('M4-B8-B: revoke before issue or between issue and consume denies',()=>{
+  const p=rehearsalPacket();
+  const before=createFictionalPermitRehearsal(p,fakeOperator);
+  offlineRehearsalReport(before.revoke({nowMs:1030000}),'REVOKED',true);
+  checkFailure(before.issue(fakeSnapshot(p),{nowMs:1030000}),
+    'REVOKED','TEST_GRANT_REVOKED');
+  const during=createFictionalPermitRehearsal(p,fakeOperator);
+  during.issue(fakeSnapshot(p),{nowMs:1030000});
+  offlineRehearsalReport(during.revoke({nowMs:1030001}),'REVOKED',true);
+  checkFailure(during.consume(p,fakeOperator,{nowMs:1030001}),
+    'REVOKED','TEST_GRANT_REVOKED');
+});
+
+test('M4-B8-B: test permit and evidence expiry precede all consumes',()=>{
+  const p=rehearsalPacket();
+  const cell=createFictionalPermitRehearsal(p,fakeOperator);
+  cell.issue(fakeSnapshot(p),{nowMs:1030000});
+  checkFailure(cell.consume(p,fakeOperator,{nowMs:1040000}),
+    'EXPIRED','TEST_GRANT_EXPIRED');
+  checkFailure(cell.consume(p,fakeOperator,{nowMs:1030000}),
+    'EXPIRED','TEST_GRANT_EXPIRED');
+  const raw=createFictionalPermitRehearsal(p,fakeOperator);
+  checkFailure(raw.expire({nowMs:1030000}),'REQUESTED','TEST_GRANT_NOT_EXPIRED');
+  offlineRehearsalReport(raw.expire({nowMs:1060000}),'EXPIRED',true);
+  checkFailure(raw.issue(fakeSnapshot(p),{nowMs:1060001}),
+    'EXPIRED','TEST_GRANT_EXPIRED');
+});
+
+test('M4-B8-B: unknown clock, invalid evidence and forged packet cannot issue',()=>{
+  const p=rehearsalPacket();
+  const cell=createFictionalPermitRehearsal(p,fakeOperator);
+  checkFailure(cell.issue(fakeSnapshot(p),{nowMs:-1}),
+    'REQUESTED','TEST_CLOCK_INVALID');
+  checkFailure(cell.issue({...fakeSnapshot(p),verified:true},{nowMs:1030000}),
+    'REQUESTED','TEST_PROVIDER_SNAPSHOT_INVALID');
+  checkFailure(cell.issue({...fakeSnapshot(p),issuer:'real-production-ca'},
+    {nowMs:1030000}),'REQUESTED','TEST_PROVIDER_PROVENANCE_INVALID');
+  checkFailure(cell.issue({...fakeSnapshot(p),packetFingerprint:'0'.repeat(64)},
+    {nowMs:1030000}),'REQUESTED','TEST_PROVIDER_PACKET_MISMATCH');
+  assert.equal(cell.current().rehearsalState,'REQUESTED');
+  offlineRehearsalReport(cell.issue(fakeSnapshot(p),{nowMs:1030000}),'ISSUED',true);
+});
+
+test('M4-B8-B: reports never expose target, nonce, digest, issuer or raw proof',()=>{
+  const p=rehearsalPacket(),snap=fakeSnapshot(p);
+  const cell=createFictionalPermitRehearsal(p,fakeOperator);
+  const reports=[
+    inspectFictionalEvidenceSnapshot(p,'fictional-operator-02',snap,{nowMs:1030000}),
+    cell.issue({...snap,issuer:'PRIVATE_FAKE_ISSUER'},{nowMs:1030000}),
+    cell.issue(snap,{nowMs:1030000}),
+    cell.consume(p,fakeOperator,{nowMs:1030001}),
+    cell.consume(p,fakeOperator,{nowMs:1030002})
+  ];
+  const serialized=JSON.stringify(reports);
+  for(const item of [
+    'mcp.example.org','fictional-operator-01','fictional-single-use-001',
+    snap.packetFingerprint,'PRIVATE_FAKE_ISSUER','/mcp','1020000'
+  ])assert.ok(!serialized.includes(item));
+  assert.ok(reports.every(x=>x.authorizationStatus==='REAL_TARGET_EXECUTION_NOT_AUTHORIZED'));
+});
+
+test('M4-B8-B: packet and snapshot copies do not cross an actual trust boundary',()=>{
+  const p=rehearsalPacket(),snap=fakeSnapshot(p);
+  const first=createFictionalPermitRehearsal(p,fakeOperator);
+  const second=createFictionalPermitRehearsal(p,fakeOperator);
+  // Two isolated memory cells cannot detect each other's consumption.
+  first.issue(snap,{nowMs:1030000});
+  second.issue(structuredClone(snap),{nowMs:1030000});
+  assert.equal(first.consume(p,fakeOperator,{nowMs:1030001}).status,'PASS');
+  assert.equal(second.consume(p,fakeOperator,{nowMs:1030001}).status,'PASS');
+  assert.equal(second.consume(p,fakeOperator,{nowMs:1030002}).status,'FAIL');
+  // Demonstrates why a durable atomic cross-process ledger is still required.
+});
+
+test('M4-B8-B: no first-party side effects for simulated state transitions',async()=>{
+  const p=rehearsalPacket();
+  const observed=await observeFirstPartyMockAttempts(()=>{
+    const cell=createFictionalPermitRehearsal(p,fakeOperator);
+    cell.issue(fakeSnapshot(p),{nowMs:1030000});
+    cell.consume(p,fakeOperator,{nowMs:1030001});
+    return cell.current();
+  });
+  assert.deepEqual(observed.attempts,[]);
+  assert.equal(observed.result.externalTargetContacted,false);
+});
+
+test('M4-B8-B: previously reviewed CLI modes still reject executable flags',()=>{
+  for(const args of [
+    ['adapter-template','stdio','--run'],
+    ['adapter-onboard','--connect'],
+    ['adapter-onboarding-demo','--target=https://private.example.org/mcp'],
+    ['adapter-authorization-preview','file.json'],
+    ['adapter-issue-grant','file.json']
+  ]){
+    const result=run(...args);
+    assert.equal(result.status,2);
+    assert.equal(JSON.parse(result.stdout).status,'ERROR');
+    assert.ok(!result.stdout.includes('private.example.org'));
+  }
+});
