@@ -539,7 +539,7 @@ test('M4-B9-B: help lists trace command without executable target or URL',()=>{
   const p=cli('help');
   assert.equal(p.status,0);
   const r=JSON.parse(p.stdout);
-  assert.equal(r.commands.length,24);
+  assert.equal(r.commands.length,25);
   assert.ok(r.commands.includes('adapter-synthetic-trace'));
   assert.ok(r.syntax.some(s=>s.startsWith('node src/cli.mjs adapter-synthetic-trace ')));
   assert.ok(!p.stdout.includes('https://'));
