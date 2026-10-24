@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BETA_CASES, matchesBetaCase, betaSummary, runBeta } from '../examples/beta-acceptance-check.mjs';
+import { BETA_CASES, matchesBetaCase, betaSummary, runBeta, reviewBetaEvidenceSummary, REVIEWED_FICTIONAL_BETA_SOURCE_SHA } from '../examples/beta-acceptance-check.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const run=(...args)=>spawnSync(process.execPath,['examples/beta-acceptance-check.mjs',...args],{
@@ -246,4 +246,186 @@ test('P1 M5-07: previous duplicate-heading and misplaced-insertion regression is
   assert.ok(first>=0&&first<second&&second<third&&third<fourth);
   assert.ok(!d.includes("if ($ArchiveDigest -notmatch '^[A-Fa-f0-9]{64}"));
   assert.ok(d.includes('No outreach, automatic upload, telemetry'));
+});
+
+
+/* M5-08: synthetically authored claims, NEVER a real participant result. */
+const fictionalBetaClaim=()=>({
+  evidenceSchemaVersion:1,
+  sourceSha:REVIEWED_FICTIONAL_BETA_SOURCE_SHA,
+  candidate:'0.0.10-rc.1',
+  os:'Ubuntu',nodeMajor:22,
+  runnerStatus:'PASS',matchedCount:5,
+  cases:BETA_CASES.map(c=>({id:c.id,matched:true,rule:'NONE'}))
+});
+const rejectsEvidence=x=>assert.throws(()=>reviewBetaEvidenceSummary(x),
+  /INVALID_FICTIONAL_BETA_EVIDENCE_CLAIM/);
+const assertNotAccepted=r=>{
+  assert.equal(r.preflightStatus,'CLAIM_CONSISTENT_ONLY');
+  assert.equal(r.independentOriginVerified,false);
+  assert.equal(r.actualExecutionVerified,false);
+  assert.equal(r.manualProvenanceReviewRequired,true);
+  assert.equal(r.betaGateSatisfied,false);
+  assert.equal(r.securityCertified,false);
+  assert.equal(r.realTargetAuthorized,false);
+  assert.equal(r.externalMcpContacted,false);
+  assert.equal(r.releaseAuthorized,false);
+  assert.equal(r.nextAction,'VERIFY_EXTERNAL_SOURCE_AND_TRIAGE_MANUALLY');
+};
+
+test('M5-08: fictional internally consistent PASS claim is NOT independent beta evidence',()=>{
+  const r=reviewBetaEvidenceSummary(fictionalBetaClaim());
+  assertNotAccepted(r);
+  assert.equal(r.claimedRunnerStatus,'PASS');
+  assert.equal(r.claimedMatchedCount,5);
+  assert.equal(r.total,5);
+  assert.equal(r.sourceSha,REVIEWED_FICTIONAL_BETA_SOURCE_SHA);
+  assert.deepEqual(r.cases.map(x=>x.claimStatus),Array(5).fill('MATCH_CLAIMED'));
+});
+
+test('M5-08: a consistent fictional failed beta claim still only needs manual review',()=>{
+  const claim=fictionalBetaClaim();
+  claim.runnerStatus='FAIL';
+  claim.matchedCount=4;
+  claim.cases[4]={id:'RETRY_MUTATION',matched:false,
+    rule:'BETA_EXPECTATION_MISMATCH'};
+  const r=reviewBetaEvidenceSummary(claim);
+  assertNotAccepted(r);
+  assert.equal(r.claimedRunnerStatus,'FAIL');
+  assert.equal(r.claimedMatchedCount,4);
+  assert.deepEqual(r.cases[4],{
+    caseId:'RETRY_MUTATION',
+    claimStatus:'MISMATCH_CLAIMED',
+    rule:'BETA_EXPECTATION_MISMATCH'
+  });
+});
+
+test('M5-08: exact reviewed public source identity is required',()=>{
+  const claim=fictionalBetaClaim();
+  assert.match(REVIEWED_FICTIONAL_BETA_SOURCE_SHA,/^[a-f0-9]{40}$/);
+  for(const candidate of [
+    '',null,'main','HEAD','a'.repeat(40),'../../private',123
+  ])rejectsEvidence({...claim,sourceSha:candidate});
+});
+
+test('M5-08: no flexible candidate or unsupported machine identity is accepted',()=>{
+  const c=fictionalBetaClaim();
+  for(const changed of [
+    {candidate:'0.0.11'},{os:'macOS'},{os:'ubuntu'},
+    {os:'PRIVATE_HOSTNAME'},{nodeMajor:24},{nodeMajor:'22'},
+    {runnerStatus:'ERROR'},{runnerStatus:'SAFE'},{matchedCount:'5'},
+    {matchedCount:-1},{matchedCount:6},{matchedCount:2.5},
+    {evidenceSchemaVersion:2},{evidenceSchemaVersion:'1'}
+  ])rejectsEvidence({...c,...changed});
+});
+
+test('M5-08: evidence never accepts free-text names, links, credentials or logs',()=>{
+  const c=fictionalBetaClaim();
+  for(const injected of [
+    {tester:'some-user'}, {email:'user@example.com'},
+    {issueUrl:'https://github.com/private'},
+    {endpoint:'https://customer.invalid/mcp'},
+    {notes:'PRIVATE_CANARY'}, {logs:['PRIVATE_CANARY']},
+    {token:'PRIVATE_CANARY'}, {path:'C:\\private\\logs'},
+    {verified:true}, {independent:true},
+    {approved:true},{securityCertified:true},{ownerApproved:true},
+    {networkEnabled:true}
+  ])rejectsEvidence({...c,...injected});
+  const privateCase=fictionalBetaClaim();
+  privateCase.cases[0]={...privateCase.cases[0],rawTranscript:'PRIVATE_CANARY'};
+  rejectsEvidence(privateCase);
+});
+
+test('M5-08: mismatched counts or contradictory overall PASS fail closed',()=>{
+  const c=fictionalBetaClaim();
+  rejectsEvidence({...c,matchedCount:4});
+  rejectsEvidence({...c,runnerStatus:'FAIL'});
+  const d=fictionalBetaClaim();d.cases[0].matched=false;
+  d.cases[0].rule='BETA_REPORT_INVALID';
+  rejectsEvidence(d);
+  rejectsEvidence({...d,matchedCount:4,runnerStatus:'PASS'});
+});
+
+test('M5-08: case order, missing and duplicated case IDs all fail closed',()=>{
+  const c=fictionalBetaClaim();
+  rejectsEvidence({...c,cases:c.cases.slice(0,4)});
+  rejectsEvidence({...c,cases:[...c.cases,c.cases[0]]});
+  rejectsEvidence({...c,cases:[...c.cases].reverse()});
+  rejectsEvidence({...c,cases:[...c.cases.slice(0,4),c.cases[0]]});
+  rejectsEvidence({...c,cases:[...c.cases.slice(0,4),{
+    id:'UNKNOWN',matched:true,rule:'NONE'}]});
+});
+
+test('M5-08: rule codes are strictly symbolic and consistent with booleans',()=>{
+  const c=fictionalBetaClaim();
+  for(const val of [
+    'RETRY_PARAMS_CHANGED','OWNER_APPROVED','*','PRIVATE_CANARY',
+    'BETA_AUDIT_COMPLETE','',null,2
+  ]){
+    const x=fictionalBetaClaim();x.cases[0].rule=val;
+    rejectsEvidence(x);
+  }
+  const x=fictionalBetaClaim();x.cases[0].rule='BETA_PROCESS_FAILURE';
+  rejectsEvidence(x);
+  const y=fictionalBetaClaim();y.cases[0].matched=false;
+  rejectsEvidence(y);
+  const z=fictionalBetaClaim();z.cases[0].matched='true';
+  rejectsEvidence(z);
+});
+
+test('M5-08: malformed objects, accessors, symbols, cyclic graphs cannot enter the verifier',()=>{
+  for(const v of [null,{},[],true,42,'claim'])rejectsEvidence(v);
+  const c=fictionalBetaClaim();
+  rejectsEvidence(Object.assign(Object.create(null),c));
+  const accessor=fictionalBetaClaim();
+  Object.defineProperty(accessor.cases[0],'rule',{
+    get(){throw Error('PRIVATE_CANARY');}
+  });
+  rejectsEvidence(accessor);
+  const symbol=fictionalBetaClaim();
+  symbol.cases[0][Symbol.for('secret')]='PRIVATE_CANARY';
+  rejectsEvidence(symbol);
+  const cycle=fictionalBetaClaim();cycle.extra=cycle;
+  rejectsEvidence(cycle);
+  const weird=fictionalBetaClaim();
+  weird.cases=Array.from(weird.cases);
+  delete weird.cases[0];
+  rejectsEvidence(weird);
+});
+
+test('M5-08: sanitized output cannot echo symbolic attacker fields',()=>{
+  const c=fictionalBetaClaim();
+  const result=reviewBetaEvidenceSummary(c);
+  const output=JSON.stringify(result);
+  for(const secret of [
+    'private','PRIVATE_CANARY','https://','username','token',
+    'OAuth','password','logs','externalEvidenceAccepted'
+  ])assert.equal(output.includes(secret),false);
+  assertNotAccepted(result);
+  assert.equal(Object.keys(result).includes('tester'),false);
+});
+
+test('M5-08: preflight requires no external actions and leaves fixed beta runner intact',()=>{
+  const observed=reviewBetaEvidenceSummary(fictionalBetaClaim());
+  assertNotAccepted(observed);
+  const actual=runBeta([]);
+  assert.equal(actual.betaSchemaVersion,1);
+  assert.equal(actual.total,5);
+  assert.equal(actual.passed,5);
+  assert.equal(actual.failed,0);
+  assert.equal(actual.status,'PASS');
+  assert.equal(runBeta(['--real-target']).errorCode,'BETA_ARGUMENTS_NOT_ALLOWED');
+});
+
+test('M5-08: public guide makes triage origin and security gates explicit',()=>{
+  const doc=documented('docs/BETA_TESTING.md');
+  assert.ok(doc.includes('M5-08'));
+  assert.ok(doc.includes('CLAIM_CONSISTENT_ONLY'));
+  assert.ok(doc.includes('manualProvenanceReviewRequired'));
+  assert.ok(doc.includes('betaGateSatisfied'));
+  assert.ok(doc.includes('No reviewer may treat'));
+  assert.ok(doc.includes('#59'));
+  assert.ok(doc.includes('#43'));
+  assert.ok(doc.includes('#21'));
+  assert.equal(JSON.parse(documented('test/expected-package-files.json')).length,80);
 });

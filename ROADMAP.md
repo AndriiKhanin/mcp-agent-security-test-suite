@@ -89,6 +89,17 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M5-08 — symbolic offline beta report consistency preflight
+
+- **IN DEVELOPMENT, engineering only:** [Issue #132](../../issues/132).
+  Add a strict pure check for *manually sanitized fictional beta-report
+  claims*, rejecting malformed/contradictory claims and returning
+  `CLAIM_CONSISTENT_ONLY`. Explicitly never prove identity, actual
+  execution, security certification or gate acceptance. No outreach,
+  real MCP contact, private issue ingestion, network or process
+  execution. Preserve reviewed 80-path package inventory and keep
+  external gates #59/#43/#21 OPEN. Require 4/4 PR and main CI.
+
 ## M5-07 — independent fictional beta evaluator preparation
 
 - **DONE — materials only, not independent beta evidence:** [Issue #127](../../issues/127), [merged PR #128](../../pull/128), [main CI #40105602737](../../actions/runs/40105602737): **4/4 PASS, 664/664 tests/job**, zero failed/skipped. Consolidate a full public-source SHA-pinned offline evaluator path, optional local npm tarball identity check and sanitized opt-in first-hand feedback fields in the existing beta materials. Keep the 80-path package inventory, 4/4 PR and post-merge CI, and all three independent gates #21/#43/#59 **OPEN**. Do not invent independent participants, report private logs, contact a customer MCP target, publish a stable artifact or treat an archive digest as a signed attestation.

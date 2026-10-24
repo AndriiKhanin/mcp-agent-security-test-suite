@@ -114,3 +114,108 @@ if (process.argv[1] && resolve(process.argv[1])===fileURLToPath(import.meta.url)
   process.stdout.write(JSON.stringify(result,null,2)+'\n');
   process.exitCode=result.exitCode;
 }
+
+
+/**
+ * M5-08: offline consistency preflight of a manually sanitized, symbolic
+ * CLAIM. This does not receive GitHub identities, URLs, raw logs or evidence
+ * sources; it NEVER establishes independent authorship, provenance or safety.
+ * The original fixed runner is not changed.
+ */
+export const REVIEWED_FICTIONAL_BETA_SOURCE_SHA=
+  '65ded572c1720832ff3f59cb9cd0e3a6987edbdb';
+const BETA_EVIDENCE_RULES=new Set([
+  'NONE','BETA_PROCESS_FAILURE','BETA_REPORT_INVALID',
+  'BETA_EXPECTATION_MISMATCH'
+]);
+function ownPlainRecord(x,required){
+  if(!x || typeof x!=='object' || Array.isArray(x) ||
+     Object.getPrototypeOf(x)!==Object.prototype) return false;
+  const descriptors=Object.getOwnPropertyDescriptors(x);
+  const keys=Reflect.ownKeys(descriptors);
+  return keys.length===required.length &&
+    keys.every(k=>typeof k==='string' &&
+      required.includes(k) &&
+      Object.hasOwn(descriptors[k],'value'));
+}
+function densePlainFive(a){
+  if(!Array.isArray(a)||a.length!==BETA_CASES.length||
+     Object.getPrototypeOf(a)!==Array.prototype) return false;
+  const props=Object.getOwnPropertyDescriptors(a);
+  return Reflect.ownKeys(props).length===BETA_CASES.length+1 &&
+    BETA_CASES.every((_,i)=>Object.hasOwn(props,String(i)) &&
+      Object.hasOwn(props[String(i)],'value'));
+}
+const invalidEvidence=()=>{
+  throw new TypeError('INVALID_FICTIONAL_BETA_EVIDENCE_CLAIM');
+};
+/**
+ * Input must be EXACTLY:
+ * { evidenceSchemaVersion:1, sourceSha:<reviewed SHA>,
+ *   candidate:'0.0.10-rc.1', os:'Windows'|'Ubuntu',
+ *   nodeMajor:20|22, runnerStatus:'PASS'|'FAIL', matchedCount:0..5,
+ *   cases:[{id:<fixed identifier>,matched:boolean,rule:<known BETA_* or NONE>}]
+ * }
+ *
+ * A structurally valid self-declared claim is NOT a beta participant,
+ * identity proof, verified executed test or independent assessment.
+ */
+export function reviewBetaEvidenceSummary(claim){
+  try {
+    if(!ownPlainRecord(claim,[
+      'evidenceSchemaVersion','sourceSha','candidate','os','nodeMajor',
+      'runnerStatus','matchedCount','cases'
+    ]) ||
+      claim.evidenceSchemaVersion!==1 ||
+      claim.sourceSha!==REVIEWED_FICTIONAL_BETA_SOURCE_SHA ||
+      claim.candidate!=='0.0.10-rc.1' ||
+      !['Windows','Ubuntu'].includes(claim.os) ||
+      ![20,22].includes(claim.nodeMajor) ||
+      !['PASS','FAIL'].includes(claim.runnerStatus) ||
+      !Number.isSafeInteger(claim.matchedCount) ||
+      claim.matchedCount<0 || claim.matchedCount>5 ||
+      !densePlainFive(claim.cases)) invalidEvidence();
+
+    let matched=0;
+    const rows=[];
+    for(let i=0;i<BETA_CASES.length;i++){
+      const c=claim.cases[i];
+      if(!ownPlainRecord(c,['id','matched','rule']) ||
+        c.id!==BETA_CASES[i].id ||
+        typeof c.matched!=='boolean' ||
+        !BETA_EVIDENCE_RULES.has(c.rule) ||
+        (c.matched && c.rule!=='NONE') ||
+        (!c.matched && c.rule==='NONE')) invalidEvidence();
+      if(c.matched)matched++;
+      rows.push({caseId:BETA_CASES[i].id,
+        claimStatus:c.matched?'MATCH_CLAIMED':'MISMATCH_CLAIMED',
+        rule:c.rule});
+    }
+    if(matched!==claim.matchedCount ||
+       (matched===BETA_CASES.length)!==(claim.runnerStatus==='PASS'))
+      invalidEvidence();
+    return {
+      evidenceSchemaVersion:1,
+      preflightStatus:'CLAIM_CONSISTENT_ONLY',
+      candidate:'0.0.10-rc.1',
+      sourceSha:REVIEWED_FICTIONAL_BETA_SOURCE_SHA,
+      claimedOs:claim.os,
+      claimedNodeMajor:claim.nodeMajor,
+      claimedRunnerStatus:claim.runnerStatus,
+      claimedMatchedCount:matched,
+      total:BETA_CASES.length,
+      cases:rows,
+      independentOriginVerified:false,
+      actualExecutionVerified:false,
+      manualProvenanceReviewRequired:true,
+      betaGateSatisfied:false,
+      securityCertified:false,
+      realTargetAuthorized:false,
+      externalMcpContacted:false,
+      releaseAuthorized:false,
+      nextAction:'VERIFY_EXTERNAL_SOURCE_AND_TRIAGE_MANUALLY'
+    };
+  } catch {
+    invalidEvidence();
+  }
+}
