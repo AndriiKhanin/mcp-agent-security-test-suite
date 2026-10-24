@@ -89,6 +89,10 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M5-07 — independent fictional beta evaluator preparation
+
+- **IN DEVELOPMENT — materials only, not independent beta evidence:** [Issue #127](../../issues/127). Consolidate a full public-source SHA-pinned offline evaluator path, optional local npm tarball identity check and sanitized opt-in first-hand feedback fields in the existing beta materials. Keep the 80-path package inventory, 4/4 PR and post-merge CI, and all three independent gates #21/#43/#59 **OPEN**. Do not invent independent participants, report private logs, contact a customer MCP target, publish a stable artifact or treat an archive digest as a signed attestation.
+
 ## M4-B10-A — isolated fictional downstream adopter
 
 - **DONE — installed offline fictional adopter only:** [Issue #124](../../issues/124), [merged PR #125](../../pull/125), [post-merge main CI #40103582818](../../actions/runs/40103582818): **4/4 PASS, 658/658 tests/job**, zero failed/skipped.
