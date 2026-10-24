@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M4-B10-A — isolated fictional downstream adopter
+
+- **IN DEVELOPMENT — offline package rehearsal only:** [Issue #124](../../issues/124).
+  Extend existing reviewed R1 offline tarball installation test to run
+  inert descriptor onboarding, anonymous synthetic trace validation,
+  exact CI expectations and SDK import from a separate temporary adopter
+  workspace. Verify success/failure/error 0/1/2, bounded and sanitized
+  report handling, invalid files and direct symbolic-link denial, and
+  automatic temp/cache cleanup. No new packaged paths, no new dependencies
+  or live customer MCP targets. Requires 4/4 PR and main CI, existing
+  80-path package integrity, and OPEN gates #21/#43/#59.
+
 ## M4-B9-D — portable offline CI smoke
 
 - **DONE — fictional CI example only:** [Issue #121](../../issues/121), [merged PR #122](../../pull/122), [post-merge main CI #40100711397](../../actions/runs/40100711397): **4/4 PASS, 658/658 tests/job**, zero failures/skips.

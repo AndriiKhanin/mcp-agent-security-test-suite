@@ -434,3 +434,82 @@ No secret/environment configuration is required. The example exercises
 the **reviewed built-in test assumptions**, not any real customer MCP
 server, its code, an actual authorization decision, or private transcripts.
 A successful CI job is evidence only that the offline example worked.
+
+
+## M4-B10-A — exercise an offline package from a separate fictional project
+
+This workflow verifies the **actual locally generated npm tarball**, not a
+published package and not an external MCP server. The repository's automated
+R1 installed-package test runs these same steps against a disposable sibling
+directory, covering **descriptor onboarding**, **synthetic trace rules**,
+**exact expectation matching**, **SDK import**, **invalid/oversized inputs**,
+and direct-symlink rejection where the operating system supports creating the
+link. It uses only source-defined fictional data and never connects to the
+descriptor's URL.
+
+A reviewer with a **previously checked-out** copy of this repository and
+Node.js 20+ can follow the portable shell outline (adapt the local paths):
+
+```sh
+# Run from the already checked-out source root, not a customer MCP directory.
+mkdir -p /tmp/mcp-fictional-package
+npm pack --offline --ignore-scripts --pack-destination /tmp/mcp-fictional-package
+# In a separate disposable directory:
+mkdir -p /tmp/mcp-fictional-adopter
+cd /tmp/mcp-fictional-adopter
+npm install --offline --ignore-scripts --no-audit --no-fund \
+  --no-save --package-lock=false \
+  /tmp/mcp-fictional-package/mcp-agent-security-test-suite-0.0.10-rc.1.tgz
+node ./node_modules/mcp-agent-security-test-suite/src/cli.mjs \
+  adapter-onboard ./node_modules/mcp-agent-security-test-suite/examples/adapter-profiles/streamable-http-project.json
+```
+
+For **Windows PowerShell 7**, the same offline-only package-adoption exercise
+can use a disposable directory beneath the local user's temporary folder:
+
+```powershell
+Set-Location -LiteralPath 'C:\path\to\already-checked-out-repository'
+$Pack = Join-Path $env:TEMP 'mcp-fictional-pack'
+$Adopter = Join-Path $env:TEMP 'mcp-fictional-adopter'
+New-Item -ItemType Directory -Force -Path $Pack, $Adopter | Out-Null
+& npm pack --offline --ignore-scripts --pack-destination $Pack
+if ($LASTEXITCODE -ne 0) { throw 'Offline package creation failed' }
+Set-Location -LiteralPath $Adopter
+$Tarball = Join-Path $Pack 'mcp-agent-security-test-suite-0.0.10-rc.1.tgz'
+& npm install --offline --ignore-scripts --no-audit --no-fund --no-save --package-lock=false $Tarball
+if ($LASTEXITCODE -ne 0) { throw 'Offline local tarball installation failed' }
+$Cli = Join-Path $Adopter 'node_modules\mcp-agent-security-test-suite\src\cli.mjs'
+$Descriptor = Join-Path $Adopter 'node_modules\mcp-agent-security-test-suite\examples\adapter-profiles\streamable-http-project.json'
+& node $Cli adapter-onboard $Descriptor
+if ($LASTEXITCODE -ne 0) { throw 'Offline descriptor preview failed' }
+```
+
+To exercise your **own fictional symbolic CI assertions**, create local
+`symbolic-trace.json` and `symbolic-expectation.json` inside the adopter
+directory using the complete strict JSON examples from
+[M4-B9-B](#m4-b9-b--author-a-tiny-symbolic-security-trace-no-mcp-contact)
+and [M4-B9-C](#m4-b9-c--exact-symbolic-trace-regression-expectations-in-ci).
+Invoke the installed binary **by explicit path** from that directory:
+
+```sh
+node ./node_modules/mcp-agent-security-test-suite/src/cli.mjs \
+  adapter-synthetic-trace symbolic-trace.json
+node ./node_modules/mcp-agent-security-test-suite/src/cli.mjs \
+  adapter-trace-expect symbolic-expectation.json
+```
+
+Expect **exit 0** for a clean observation or an exact CI expectation match,
+**exit 1** for a symbolic violation/expectation mismatch, and **exit 2**
+for malformed, inaccessible, symlinked-leaf (when detectable) or oversized
+input. The installed CLI's own report preserves
+`observedSafetyStatus` separately from `expectationStatus`.
+All files remain bounded, and the tests delete their temporary package,
+installation, cache, and fictional project even if an assertion fails.
+Any manual scratch directories created by the commands above should be
+removed after review.
+
+**Boundary:** packaging/installing locally from our reviewed source is not
+npm publishing or independently verified customer adoption. An offline PASS
+does not prove any real MCP project's safety, endpoint ownership, operator
+consent, or authorization. No DNS/TLS/SSRF checks, OAuth, credentials,
+arbitrary stdio, live MCP calls, or user-target contact are involved.

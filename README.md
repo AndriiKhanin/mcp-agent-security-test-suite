@@ -204,6 +204,18 @@ project trace is touched. The normal [GitHub Actions matrix](.github/workflows/c
 runs it as an explicit smoke step. [Windows PowerShell, exit semantics and
 portable CI instructions](docs/GETTING_STARTED.md).
 
+## Installed-package fictional downstream rehearsal (M4-B10-A)
+
+The offline R1 tarball test now goes beyond in-repository fixtures: it
+installs the reviewed package using only a disposable local npm cache,
+then checks **CLI usage and SDK import from a separate fictional project
+directory**. This covers validate-only descriptor onboarding, symbolic
+auditing, exact CI expectation matching and fail-closed bad inputs.
+The installed CLI is invoked explicitly, so it does not rely on the
+source repository's current working directory. No package publication,
+customer MCP connection or security certification is implied.
+[Portable Node and Windows PowerShell reproduction](docs/GETTING_STARTED.md).
+
 ## Candidate packaging (not yet published)
 
 The prerelease package declares an executable `mcp-agent-security`, an audited `files` allowlist and zero dependencies. `npm run release:preflight` checks the archive manifest in offline dry-run mode; the full `node --test` suite also performs a **disposable offline local tarball installation smoke**, verifies the installed CLI and deletes all temp files. The [R2 exact package inventory guard](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) fails on unreviewed new or missing packaged file paths; it does not inspect the safety of approved file contents. No registry access or publication occurs. Do not run `npm publish` or create stable tags without separate explicit approval. See [release readiness](docs/RELEASE_READINESS.md), the [R3 internal release review](docs/R3_INTERNAL_RELEASE_REVIEW.md), the [R4 offline artifact-integrity checks](docs/R4_ARTIFACT_INTEGRITY.md) and the [R5 independent-review handoff](docs/R5_INDEPENDENT_REVIEW.md). None substitutes for the still-open [R5-B independent reviewer release gate](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) or permission to publish.
