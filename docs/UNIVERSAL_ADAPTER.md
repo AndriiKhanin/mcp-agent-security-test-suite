@@ -153,3 +153,27 @@ The new API cannot read a real MCP transcript, invoke a tool, authenticate
 the operator, contact a user server or grant any network/process permission.
 `REAL_TARGET_EXECUTION_NOT_AUTHORIZED` and `executionEnabled:false`
 remain invariant even when synthetic tests pass.
+
+
+## M4-B9-C — exact synthetic expectation matching for CI
+
+Use `adapter-trace-expect <local-json-file>` to verify explicitly
+specified symbolic rule codes at every ordinal event of an inert
+`adapter-synthetic-trace` v1 input. Its wrapper has version 1, mode
+`synthetic-expectations-only`, nested `trace`, exact
+`expectedStatus` (`PASS` or `FAIL`), and a dense `expected`
+array of 1–8 `{event,ruleCodes}` entries. Every index is mandatory,
+and each rule must be a uniquely ordered member of the four reviewed
+symbolic safety rules. No wildcard, aliases, unexpected rule, sparse
+arrays, extra fields, real MCP identifiers or dynamic matcher predicates.
+
+`status` and shell exit code describe **expectation agreement**, not the
+underlying safety verdict. `observedSafetyStatus` and
+`observedFindings` always preserve the complete synthetic audit output;
+`expectationStatus` is `MATCH` or `MISMATCH`. An expected violation
+can satisfy CI but is still an observed safety FAIL, never a real
+security finding or target authorization. `fixedFixtureControls:NOT_RUN`
+prevents confusion with earlier baked-in negative controls.
+
+The command reads at most 4096 bytes and never executes/connects using
+the validated descriptor. See [reproducible examples](GETTING_STARTED.md).
