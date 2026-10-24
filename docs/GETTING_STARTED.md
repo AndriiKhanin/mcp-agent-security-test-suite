@@ -375,3 +375,62 @@ Important: **outer CI PASS means only exact agreement with a fictional
 assertion.** Even an expected synthetic violation remains an observed
 safety FAIL. No actual user MCP transcript is parsed; no credentials, real
 target probing, network calls or executable actions are enabled.
+
+
+## M4-B9-D — portable fictional regression smoke (Windows + CI)
+
+**From a clean clone, using only Node.js 20+ and checked-in code**, run one
+command to exercise the existing offline contract fixtures **and** three
+end-to-end synthetic trace assertions:
+
+```sh
+node examples/offline-ci-check.mjs
+```
+
+The script has no arguments, does not install dependencies, download content,
+connect to a server or run user-configurable executables. It uses a tightly
+bounded (max 4096-byte) JSON file in a disposable system temporary directory,
+populated exclusively from fixed fictional literals in the reviewed example
+source; that file is removed in a `finally` block. The temporary directory
+is not an MCP target or external resource.
+
+PowerShell 7 / Windows (replace the illustrative clone path):
+
+```powershell
+Set-Location -LiteralPath 'C:\path\to\mcp-agent-security-test-suite'
+& node '.\examples\offline-ci-check.mjs'
+if ($LASTEXITCODE -ne 0) { throw 'Offline synthetic CI smoke failed' }
+```
+
+The output contains only constant messages, including these three distinct
+assertions:
+
+```text
+SYNTHETIC_CLEAN_MATCH: observed PASS, expectation MATCH, exit code 0
+SYNTHETIC_EXPECTED_VIOLATION: observed FAIL, expectation MATCH, exit code 0
+SYNTHETIC_UNEXPECTED_VIOLATION: observed FAIL, expectation MISMATCH, exit code 1
+```
+
+**Exit code explanation:** for each nested `adapter-trace-expect` call,
+**0** means exact expectation match (including a precisely anticipated
+synthetic violation); **1** means expectation mismatch; **2** means invalid
+or unreadable input. The top-level smoke script succeeds with exit code
+**0 only when all three fixed assertions** have the specified results; it
+exits **1** if any assertion fails. In particular, the middle case's
+`observedSafetyStatus:FAIL` is checked explicitly, so no synthetic
+violation is silently called safe.
+
+GitHub Actions already executes the script explicitly in the standard
+Windows/Ubuntu and Node.js 20/22 test matrix. A repository that wishes to
+adopt this **fictional baseline** can add the following step after cloning or
+vendoring reviewed project source and configuring Node.js:
+
+```yaml
+- name: Run offline fictional security contract smoke
+  run: node examples/offline-ci-check.mjs
+```
+
+No secret/environment configuration is required. The example exercises
+the **reviewed built-in test assumptions**, not any real customer MCP
+server, its code, an actual authorization decision, or private transcripts.
+A successful CI job is evidence only that the offline example worked.
