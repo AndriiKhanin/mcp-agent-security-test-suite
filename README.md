@@ -23,6 +23,8 @@ Read the source-grounded [threat model](docs/THREAT_MODEL.md) for assets, attack
 
 ## Quickstart
 
+For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.
+
 Start from a clean clone using [Getting Started](docs/GETTING_STARTED.md). It gives one reproducible PASS, one intentionally detected FAIL and a [SHA-pinned offline CI example](examples/offline-contract-check.yml); no paid API or npm installation.
 
 ```sh

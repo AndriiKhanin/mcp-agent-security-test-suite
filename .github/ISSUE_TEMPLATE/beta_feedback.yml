@@ -64,6 +64,58 @@ body:
       placeholder: "5"
     validations:
       required: true
+  - type: dropdown
+    id: evaluation_path
+    attributes:
+      label: "Independent offline evaluation path"
+      description: "Report only which reviewed local exercise you actually ran."
+      options:
+        - "Source runner and portable smoke"
+        - "Source runner, smoke and local tarball verification"
+        - "Source runner only (other exercises not attempted)"
+        - "Attempted but unable to run the reviewed commands"
+    validations:
+      required: true
+  - type: dropdown
+    id: offline_archive
+    attributes:
+      label: "Local archive check (no upload or digest disclosure)"
+      description: "Optional offline npm pack only; a local hash is not a signed publisher attestation."
+      options:
+        - "Local archive generated and SHA-256 checked"
+        - "Local archive step failed"
+        - "Local archive check not attempted"
+    validations:
+      required: true
+  - type: dropdown
+    id: exit_codes
+    attributes:
+      label: "Symbolic exit-code behavior"
+      description: "Use fixed command outcomes only, never paste raw logs or local paths."
+      options:
+        - "Expected 0/1/2 contract matched for exercises I ran"
+        - "Observed symbolic exit-code mismatch"
+        - "Did not run enough exercises to check 0/1/2"
+    validations:
+      required: true
+  - type: dropdown
+    id: guide_clarity
+    attributes:
+      label: "Clarity of the offline evaluator guide"
+      options:
+        - "Clear without extra steps"
+        - "Usable but needed clarification"
+        - "Blocked or unclear"
+    validations:
+      required: true
+  - type: textarea
+    id: install_friction
+    attributes:
+      label: "Installation or setup friction (optional)"
+      description: "Fictional/public facts only; do not include local paths, logs, commands containing usernames, or host details."
+      placeholder: "On supported Node, the offline archive step was unclear because..."
+    validations:
+      required: false
   - type: textarea
     id: deviations
     attributes:
