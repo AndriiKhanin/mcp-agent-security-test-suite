@@ -264,6 +264,26 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(preview.readinessStatus,'REAL_TARGET_NOT_AUTHORIZED');
     assert.equal(preview.targetEvidence,'REAL_TARGET_NOT_ATTEMPTED');
 
+    // M6-A: installed CLI, invoked from an unrelated fictional adopter cwd.
+    const quick=adopterRun('adapter-quickstart','local-adopterDescriptor.json');
+    assert.equal(quick.status,0,'installed quickstart must run offline');
+    assert.equal(quick.stderr,'');
+    const dashboard=JSON.parse(quick.stdout);
+    assertInert(dashboard);
+    assert.equal(dashboard.command,'adapter-quickstart');
+    assert.equal(dashboard.status,'PASS');
+    assert.equal(dashboard.reportSchemaVersion,1);
+    assert.equal(dashboard.quickstartSchemaVersion,1);
+    assert.equal(dashboard.checked,5);
+    assert.equal(dashboard.projectSafetyAssessed,false);
+    assert.equal(dashboard.fixturesAreProjectSpecific,false);
+    assert.equal(dashboard.authorizationStatus,
+      'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
+    assert.equal(dashboard.controls[3].fictionalObservedStatus,'FAIL');
+    assert.equal(dashboard.controls[3].controlStatus,'PASS');
+    assert.ok(!quick.stdout.includes('PRIVATE'));
+
+
     const synthetic=effect=>({
       traceSchemaVersion:1,mode:'user-authored-synthetic-only',
       descriptor:adopterDescriptor,events:[{

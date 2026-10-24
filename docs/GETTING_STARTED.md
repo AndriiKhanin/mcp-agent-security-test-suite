@@ -520,3 +520,51 @@ npm publishing or independently verified customer adoption. An offline PASS
 does not prove any real MCP project's safety, endpoint ownership, operator
 consent, or authorization. No DNS/TLS/SSRF checks, OAuth, credentials,
 arbitrary stdio, live MCP calls, or user-target contact are involved.
+
+
+## M6-A — first-run project quickstart (inert descriptor only)
+
+Use **one command** to verify the *shape* of a local MCP project descriptor
+and run the suite's five **built-in fictional contract controls**. The
+descriptor is validated but **never executed**. The project hostname and
+stdio command are neither contacted nor started.
+
+From the source root (Node.js 20/22):
+
+```sh
+node src/cli.mjs adapter-quickstart examples/adapter-profiles/streamable-http-project.json
+```
+
+Or on Windows PowerShell 7, using the reviewed local checkout:
+
+```powershell
+& node '.\src\cli.mjs' adapter-quickstart '.\examples\adapter-profiles\streamable-http-project.json'
+if ($LASTEXITCODE -ne 0) { throw 'Offline descriptor quickstart failed' }
+```
+
+A **PASS** (exit 0) means the descriptor obeys validate-only syntax and
+each of the five code-owned *fictional* controls matched its expected
+outcome. It does **not** mean a server, token, project configuration,
+vulnerability or user authorization was checked. The intentional
+`denied-effect-negative` scenario has `fictionalObservedStatus:FAIL`
+and `controlStatus:PASS`: the tool correctly detects the seeded failure.
+A broken built-in control exits **1**. A malformed, missing, oversized
+(above 4096 bytes), unauthorized or direct-symlink descriptor exits
+**2** with a generic error. This command does not accept custom
+events, logs, URL flags or executable commands.
+
+The JSON-v1 report contains a `controls` table of **symbolic** case IDs,
+fixed explanations and ordered `nextActions`. It always shows
+`projectSafetyAssessed:false`, `executionEnabled:false`,
+`connectionStatus:NOT_ATTEMPTED`, and
+`authorizationStatus:REAL_TARGET_EXECUTION_NOT_AUTHORIZED`.
+The five controls are **not project-specific**. To test your own invented
+Boolean action assertions offline, use the separately bounded
+`adapter-synthetic-trace` and `adapter-trace-expect` modes.
+
+**No real MCP server is contacted.** Do not use the report as an audit
+certificate, a connection grant, or external-target permission; gates
+[#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
+[#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
+and [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+remain separate.

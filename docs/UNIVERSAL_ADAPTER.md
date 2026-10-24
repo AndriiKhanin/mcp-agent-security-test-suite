@@ -211,3 +211,19 @@ remote user server, secret or real MCP transcript is introduced. This is an
 **offline package consumption** acceptance test, not interoperability,
 operator authentication, security certification, or permission to connect.
 See the [portable Node/PowerShell walkthrough](GETTING_STARTED.md).
+
+
+## M6-A — one-file quickstart for a fictional first run
+
+`adapter-quickstart <local-descriptor-file>` composes the existing
+validate-only adapter onboarding preview with all five reviewed
+**fixed internal fictional** controls in one bounded JSON-v1 response.
+It does not scan project code, import transcripts, resolve external
+hosts or launch the descriptor's stdio process. It uses the normal
+strict local file reader (4096-byte ceiling and direct-symlink denial)
+and emits only allowlisted literal case codes, explanations and next
+actions; the developer's endpoint, command, name and path are never
+included in the output. Status PASS is only an internal check.
+`projectSafetyAssessed:false` and
+`REAL_TARGET_EXECUTION_NOT_AUTHORIZED` remain unconditional.
+See [first run](GETTING_STARTED.md#m6-a--first-run-project-quickstart-inert-descriptor-only).

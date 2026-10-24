@@ -33,6 +33,18 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## One-command offline project quickstart (M6-A)
+
+Run `node src/cli.mjs adapter-quickstart
+examples/adapter-profiles/streamable-http-project.json` to validate only
+the **local inert descriptor shape** and execute five fixed fictional
+security-contract controls. The report includes ordered symbolic results,
+static interpretation and next steps. A negative-control
+`fictionalObservedStatus:FAIL` may correctly correspond to
+`controlStatus:PASS`. **A PASS is not a real project security audit**;
+no MCP server, hostname, user code or credentials are contacted or run.
+[Instructions and output limits](docs/GETTING_STARTED.md#m6-a--first-run-project-quickstart-inert-descriptor-only).
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.

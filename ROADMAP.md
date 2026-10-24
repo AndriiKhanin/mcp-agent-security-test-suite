@@ -89,6 +89,17 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-A — one-command offline adapter quickstart
+
+- **IN DEVELOPMENT — fictional controls only:** [Issue #138](../../issues/138).
+  Introduce `adapter-quickstart <local-descriptor>` to combine inert
+  validate-only onboarding and five fixed built-in fictional security
+  controls with readable, redacted, structured next actions. No external
+  MCP contact, executable stdio, credentials or unapproved live testing.
+  A PASS means descriptor shape and fictional control behavior only,
+  **never actual project safety**. Preserve 80 packaged paths, no new
+  dependencies, CI 4/4 PR and post-merge main, and keep #21/#43/#59 open.
+
 ## M5-08 — symbolic offline beta report consistency preflight
 
 - **DONE, engineering-only claim consistency:** [Issue #132](../../issues/132), [merged PR #133](../../pull/133), [post-merge main CI #40114331305](../../actions/runs/40114331305): **4/4 PASS, 678/678 tests/job**, zero failed/skipped.
