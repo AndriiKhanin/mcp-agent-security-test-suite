@@ -568,3 +568,74 @@ certificate, a connection grant, or external-target permission; gates
 [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
 and [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
 remain separate.
+
+
+## M6-B — guided fictional adopter kit (one selector, no server contact)
+
+From a checked-out source tree using Node.js 20/22, **select only one of
+`stdio` or `streamable-http`**. This **single command produces a
+JSON-v1 starter plan**, not a script or executable integration:
+
+```sh
+node src/cli.mjs adapter-kit streamable-http > fictional-kit.json
+```
+
+For Windows PowerShell 7 use:
+
+```powershell
+& node '.\src\cli.mjs' adapter-kit streamable-http > fictional-kit.json
+if ($LASTEXITCODE -ne 0) { throw 'Offline kit generation failed' }
+```
+
+All data is reviewed **fictional example** data. Its `starterDescriptor`
+contains a literal placeholder HTTPS endpoint or stdio program name, but
+the generator never uses those fields to make a network/process call.
+The generated `plan` lists three fixed filenames and checks. The
+`humanSummary` is static text; no user input or private project settings
+are interpolated into it.
+
+To save the **three reviewed JSON objects** from the plan in a disposable,
+fictional working directory (Node 20/22; the same command runs in Bash and
+PowerShell 7), run this command while `fictional-kit.json` is in the
+current directory:
+
+```sh
+node --input-type=module -e "import {readFileSync,writeFileSync} from 'node:fs';const k=JSON.parse(readFileSync('fictional-kit.json','utf8'));for(const [n,v] of [['fictional-descriptor.json',k.starterDescriptor],['fictional-clean-ci.json',k.cleanExpectation],['fictional-negative-ci.json',k.expectedViolation]])writeFileSync(n,JSON.stringify(v));"
+```
+
+Run these **fixed offline commands** from that same directory, using an
+absolute path to your checkout's `src/cli.mjs` if not at the source root:
+
+```sh
+node src/cli.mjs adapter-quickstart fictional-descriptor.json
+node src/cli.mjs adapter-trace-expect fictional-clean-ci.json
+node src/cli.mjs adapter-trace-expect fictional-negative-ci.json
+```
+
+From a separate locally installed prerelease tarball, instead use
+`node <installed-package-path>/src/cli.mjs ...`, without any npm registry
+access. Run `node examples/offline-ci-check.mjs` **from the checked-out
+source root only** for the additional fixed portable CI smoke.
+For CI integration, run both `adapter-trace-expect` assertions in your
+trusted Node 20/22 CI job after placing these locally generated **fictional**
+files into that job's workspace. Both expected matches exit **0**; malformed
+input exits **2** and an unexpected symbolic mismatch exits **1**.
+
+The three safe distinctions are:
+- `adapter-quickstart` PASS = local descriptor shape and five fixed
+  fictional controls, **not the project's safety**.
+- `fictional-negative-ci.json` expects
+  `observedSafetyStatus:FAIL` together with
+  `expectationStatus:MATCH` and CLI exit 0. The seeded violation did
+  happen in invented records, and the test correctly recognized it.
+- Real MCP server execution/ownership/provenance remains
+  `REAL_TARGET_EXECUTION_NOT_AUTHORIZED`, `NOT_ATTEMPTED` and
+  `projectSafetyAssessed:false`, regardless of any green result.
+
+**No real MCP server, production code, credentials, shell scripts, private
+logs, network requests or external customer targets are processed by the
+kit generator.** It does not create or modify files; the optional
+copy/paste extraction command shown above writes only three local fictional
+JSON objects at explicitly fixed filenames. This is not independent beta
+evidence, authorization or a security certificate. Gates #21, #43 and #59
+remain OPEN.

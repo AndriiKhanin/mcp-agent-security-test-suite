@@ -303,6 +303,42 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       assert.ok(Buffer.byteLength(data,'utf8')<=4096);
       writeFileSync(path,data,'utf8');
     };
+
+    // M6-B: installed kit selector, from sibling cwd, has no target contact.
+    const kitCall=adopterRun('adapter-kit','streamable-http');
+    assert.equal(kitCall.status,0,'installed kit selector must pass');
+    assert.equal(kitCall.stderr,'');
+    const kit=JSON.parse(kitCall.stdout);
+    assert.equal(kit.command,'adapter-kit');
+    assert.equal(kit.kitSchemaVersion,1);
+    assert.equal(kit.transport,'streamable-http');
+    assert.equal(kit.status,'PASS');
+    assert.equal(kit.connectionStatus,'NOT_ATTEMPTED');
+    assert.equal(kit.externalTargetContacted,false);
+    assert.equal(kit.projectSafetyAssessed,false);
+    assert.equal(kit.releaseAuthorized,false);
+    assert.equal(kit.expectedResults.expectedViolationCi.observedSafetyStatus,'FAIL');
+    assert.equal(kit.expectedResults.expectedViolationCi.expectationStatus,'MATCH');
+    save(join(adopter,'fictional-descriptor.json'),kit.starterDescriptor);
+    save(join(adopter,'fictional-clean-ci.json'),kit.cleanExpectation);
+    save(join(adopter,'fictional-negative-ci.json'),kit.expectedViolation);
+    for(const [command,file,observedSafety] of [
+      ['adapter-quickstart','fictional-descriptor.json',null],
+      ['adapter-trace-expect','fictional-clean-ci.json','PASS'],
+      ['adapter-trace-expect','fictional-negative-ci.json','FAIL']
+    ]){
+      const run=adopterRun(command,file);
+      assert.equal(run.status,0,'installed kit source artifact must roundtrip');
+      const result=JSON.parse(run.stdout);
+      assert.equal(result.status,'PASS');
+      assert.equal(result.connectionStatus,'NOT_ATTEMPTED');
+      assert.equal(result.externalTargetContacted,false);
+      if(observedSafety!==null){
+        assert.equal(result.observedSafetyStatus,observedSafety);
+        assert.equal(result.expectationStatus,'MATCH');
+      }else assert.equal(result.projectSafetyAssessed,false);
+    }
+
     save(traceFile,synthetic('WRITE'));
     const unsafeTrace=adopterRun('adapter-synthetic-trace','local-synthetic.json');
     assert.equal(unsafeTrace.status,1);

@@ -1035,3 +1035,109 @@ export function previewOfflineAdapterQuickstart(config){
     findings
   };
 }
+
+
+/**
+ * M6-B: a portable, source-authored starter KIT, not a setup executor.
+ * The sole caller-controlled input is the fixed stdio|streamable-http enum.
+ * This returns inert JSON example data and literal command arguments only;
+ * it never writes a file, contacts a URL, starts a process or scans a project.
+ */
+export const OFFLINE_ADOPTER_KIT_SCHEMA_VERSION=1;
+const KIT_COMMANDS=Object.freeze([
+  Object.freeze({order:1,code:'SAVE_FICTIONAL_DESCRIPTOR',
+    filename:'fictional-descriptor.json',sourceField:'starterDescriptor'}),
+  Object.freeze({order:2,code:'REVIEW_DESCRIPTOR_AND_FICTIONAL_CONTROLS',
+    command:'adapter-quickstart',filename:'fictional-descriptor.json',
+    expectedExitCode:0}),
+  Object.freeze({order:3,code:'SAVE_CLEAN_SYMBOLIC_ASSERTION',
+    filename:'fictional-clean-ci.json',sourceField:'cleanExpectation'}),
+  Object.freeze({order:4,code:'RUN_CLEAN_SYMBOLIC_CI',
+    command:'adapter-trace-expect',filename:'fictional-clean-ci.json',
+    expectedExitCode:0}),
+  Object.freeze({order:5,code:'SAVE_EXPECTED_VIOLATION_ASSERTION',
+    filename:'fictional-negative-ci.json',sourceField:'expectedViolation'}),
+  Object.freeze({order:6,code:'RUN_EXPECTED_VIOLATION_CI',
+    command:'adapter-trace-expect',filename:'fictional-negative-ci.json',
+    expectedExitCode:0}),
+  Object.freeze({order:7,code:'RUN_PORTABLE_FIXED_SMOKE_SEPARATELY',
+    codeOnly:'node examples/offline-ci-check.mjs',
+    expectedExitCode:0})
+]);
+function fixedKitExpectation(descriptor,effect,expectedStatus,rules){
+  return {
+    expectationSchemaVersion:1,
+    mode:'synthetic-expectations-only',
+    trace:{
+      traceSchemaVersion:1,
+      mode:'user-authored-synthetic-only',
+      descriptor,
+      events:[{
+        decision:'DENY',effect,ownerAuthorized:false,
+        scopeAuthorized:false,leaseFresh:false,secretLogged:false
+      }]
+    },
+    expectedStatus,
+    expected:[{event:1,ruleCodes:[...rules]}]
+  };
+}
+export function createOfflineAdopterKit(transport){
+  const template=createOfflineAdapterTemplate(transport);
+  const descriptor=template.template;
+  const quickstart=previewOfflineAdapterQuickstart(descriptor);
+  const clean=fixedKitExpectation(descriptor,'NONE','PASS',[]);
+  const expectedViolation=fixedKitExpectation(descriptor,'WRITE','FAIL',
+    ['DENIED_ACTION_HAD_EFFECT']);
+  const cleanResult=auditSymbolicTraceExpectations(clean);
+  const negativeResult=auditSymbolicTraceExpectations(expectedViolation);
+  if(quickstart.status!=='PASS' || quickstart.checked!==5 ||
+     quickstart.projectSafetyAssessed!==false ||
+     cleanResult.status!=='PASS' || cleanResult.observedSafetyStatus!=='PASS' ||
+     cleanResult.expectationStatus!=='MATCH' ||
+     negativeResult.status!=='PASS' || negativeResult.observedSafetyStatus!=='FAIL' ||
+     negativeResult.expectationStatus!=='MATCH' ||
+     negativeResult.observedFailureCount!==1 ||
+     negativeResult.observedFindings[0]?.rule!=='DENIED_ACTION_HAD_EFFECT')
+    throw new TypeError('OFFLINE_KIT_INTERNAL_CONTROL_MISMATCH');
+  return {
+    status:'PASS',
+    profile:'guided-fictional-offline-adopter-kit-v1',
+    kitSchemaVersion:OFFLINE_ADOPTER_KIT_SCHEMA_VERSION,
+    transport,
+    descriptorEvidence:'FICTIONAL_TEMPLATE_AND_SHAPE_VALIDATED',
+    fictionalControlEvidence:'FIVE_CODE_OWNED_CONTROLS_MATCHED',
+    syntheticCiEvidence:'TWO_EXACT_FICTIONAL_MATCHES_ONLY',
+    starterDescriptor:descriptor,
+    cleanExpectation:clean,
+    expectedViolation,
+    expectedResults:{
+      quickstart:{exitCode:0,shapeStatus:'PASS',fictionalControlsMatched:5,
+        projectSafetyAssessed:false},
+      cleanCi:{exitCode:0,observedSafetyStatus:'PASS',expectationStatus:'MATCH'},
+      expectedViolationCi:{exitCode:0,observedSafetyStatus:'FAIL',
+        expectationStatus:'MATCH',observedRule:'DENIED_ACTION_HAD_EFFECT'}
+    },
+    plan:KIT_COMMANDS.map(step=>({...step})),
+    humanSummary:[
+      'This kit contains only fixed fictional examples, not your project configuration.',
+      'Quickstart PASS validates descriptor syntax and five built-in fictional controls only.',
+      'Expected violation CI exit 0 still means the fictional observed safety status is FAIL.',
+      'Save the three reviewed JSON fields locally before executing their fixed offline checks.',
+      'Live MCP connections, user processes, credentials and release permissions remain unavailable.'
+    ],
+    interpretation:'FICTIONAL_STARTER_KIT_NOT_PROJECT_ASSESSMENT',
+    targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+    operatorEvidence:'OPERATOR_NOT_VERIFIED',
+    authorizationStatus:'REAL_TARGET_EXECUTION_NOT_AUTHORIZED',
+    connectionStatus:'NOT_ATTEMPTED',
+    executionEnabled:false,
+    projectConnectionAuthorized:false,
+    externalTargetContacted:false,
+    operatorVerified:false,
+    projectSafetyAssessed:false,
+    fixturesAreProjectSpecific:false,
+    securityCertified:false,
+    releaseAuthorized:false,
+    failureCount:0,findingsTruncated:false,findings:[]
+  };
+}

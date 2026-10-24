@@ -45,6 +45,16 @@ static interpretation and next steps. A negative-control
 no MCP server, hostname, user code or credentials are contacted or run.
 [Instructions and output limits](docs/GETTING_STARTED.md#m6-a--first-run-project-quickstart-inert-descriptor-only).
 
+## Guided offline adopter kit (M6-B)
+
+For a reproducible fictional starter configuration plus two exact symbolic
+CI expectations, run `node src/cli.mjs adapter-kit stdio` or choose
+`streamable-http`. The command emits **JSON only**: a descriptor template,
+clean/expected-violation examples, a fixed plan and a plain-language summary.
+It does not write files, launch project processes, contact servers, or
+authorize a real-target assessment. Follow the [three-file setup and CI
+walkthrough](docs/GETTING_STARTED.md#m6-b--guided-fictional-adopter-kit-one-selector-no-server-contact).
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.
