@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 681 synthetic/local, R5-C current 80-path assessor handoff guard, fail-closed beta report claim preflight, offline evaluator, fictional downstream package, CI smoke, staging | [R5-C PR #136](../../pull/136), [main CI #40117457697](../../actions/runs/40117457697): **4/4 PASS, 681/681 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 693 synthetic/local, M6-A one-command offline descriptor quickstart, five fixed fictional controls, R5-C assessor handoff, beta claim preflight and fictional downstream package | [M6-A PR #139](../../pull/139), [main CI #40124135985](../../actions/runs/40124135985): **4/4 PASS, 693/693 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,14 +91,14 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-A — one-command offline adapter quickstart
 
-- **IN DEVELOPMENT — fictional controls only:** [Issue #138](../../issues/138).
+- **DONE — fictional controls only:** [Issue #138](../../issues/138), [merged PR #139](../../pull/139), [post-merge main CI #40124135985](../../actions/runs/40124135985): **4/4 PASS, 693/693 tests/job**, zero failed/skipped.
   Introduce `adapter-quickstart <local-descriptor>` to combine inert
   validate-only onboarding and five fixed built-in fictional security
   controls with readable, redacted, structured next actions. No external
   MCP contact, executable stdio, credentials or unapproved live testing.
   A PASS means descriptor shape and fictional control behavior only,
-  **never actual project safety**. Preserve 80 packaged paths, no new
-  dependencies, CI 4/4 PR and post-merge main, and keep #21/#43/#59 open.
+  **never actual project safety**. Existing 80 reviewed package paths remain
+  unchanged, with no new dependencies. External gates #21/#43/#59 remain OPEN.
 
 ## M5-08 — symbolic offline beta report consistency preflight
 
