@@ -212,7 +212,7 @@ function isDataRecord(obj,fields){
   if(!obj || typeof obj!=='object' || Array.isArray(obj) ||
       Object.getPrototypeOf(obj)!==Object.prototype) return false;
   const descriptors=Object.getOwnPropertyDescriptors(obj);
-  return Object.keys(descriptors).length===fields.length &&
+  return Reflect.ownKeys(descriptors).length===fields.length &&
     fields.every(k=>own(descriptors,k) && own(descriptors[k],'value'));
 }
 function safeTargetTuple(target){
@@ -449,6 +449,7 @@ export function createFictionalPermitRehearsal(packet,operatorId){
   const expired=nowMs=>nowMs>=pinned.grant.expiresAtMs ||
     (snapshotExpiry!==null && nowMs>=snapshotExpiry);
   const stateDeny=()=>{
+    if(state==='ISSUED') return 'TEST_GRANT_ALREADY_ISSUED';
     if(state==='CONSUMED') return 'TEST_GRANT_REPLAYED';
     if(state==='REVOKED') return 'TEST_GRANT_REVOKED';
     if(state==='EXPIRED') return 'TEST_GRANT_EXPIRED';
