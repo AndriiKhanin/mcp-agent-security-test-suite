@@ -9,6 +9,7 @@
 import { runLocalStdioMock, runLocalStdioInitialization } from './stdio-mcp-harness.mjs';
 import { runLoopbackHttpMock } from './loopback-http-mock.mjs';
 import { runFirstPartyStagingSelftest } from './first-party-staging-mcp.mjs';
+import { previewProjectOnboarding } from './project-adapter.mjs';
 import { noteFirstPartyMockAttempt } from './mock-attempt-observer.mjs';
 
 const TRANSPORTS = Object.freeze(['stdio','streamable-http']);
@@ -190,4 +191,57 @@ export async function runFixedModernStagingAdapterSelftest(){
     await driver.connect();
     return await driver.probe();
   }finally{await driver.close();}
+}
+
+
+// M4-B7-B: independent, internal fictional profile. This is never constructed
+// from user files, CLI flags, user endpoints, credentials or policy assertions.
+const FIXED_ONBOARDING_DESCRIPTOR=Object.freeze({
+  adapterSchemaVersion:1,
+  project:{name:'fictional-onboarding'},
+  transport:{type:'streamable-http',endpoint:'https://mcp.example.org/mcp'},
+  protocolVersion:'2026-07-28',
+  policy:{mode:'validate-only',allowNetwork:false,allowProcessSpawn:false,
+    allowToolCalls:false,allowCredentials:false}
+});
+/** No-argument, fixed first-party demo only. Does NOT connect the fictional
+ * descriptor (whose URL is never resolved). Separate evidence channels ensure
+ * a staging PASS is NEVER interpreted as customer ownership or authority.
+ */
+export async function runFixedOnboardingDemo(...args){
+  if(args.length)throw new TypeError('INVALID_FIXED_ONBOARDING_DEMO_OPTIONS');
+  const inspected=previewProjectOnboarding(FIXED_ONBOARDING_DESCRIPTOR);
+  const staged=await runFixedModernStagingAdapterSelftest();
+  const ok=staged.status==='PASS' &&
+    staged.socketCleanupConfirmed===true &&
+    staged.externalTargetContacted===false &&
+    staged.adapterDescriptorUsed===false &&
+    staged.projectConnectionAuthorized===false;
+  return {
+    status:ok?'PASS':'FAIL',
+    profile:'fictional-first-party-onboarding-demo-v1',
+    readinessSchemaVersion:1,
+    descriptorEvidence:inspected.descriptorEvidence,
+    stagingEvidence:ok?'FIRST_PARTY_STAGING_PASS':'FIRST_PARTY_STAGING_FAIL',
+    targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+    operatorEvidence:'OPERATOR_NOT_VERIFIED',
+    consentEvidence:'SELF_ASSERTED_CONSENT_NOT_EVALUATED',
+    readinessStatus:'REAL_TARGET_NOT_AUTHORIZED',
+    connectionStatus:'FIXED_FIRST_PARTY_STAGING_ONLY',
+    projectConnectionAuthorized:false,
+    executionEnabled:false,
+    externalTargetContacted:false,
+    operatorVerified:false,
+    adapterDescriptorUsed:false,
+    stagedFixtureOnly:true,
+    socketCleanupConfirmed:staged.socketCleanupConfirmed===true,
+    checks:2,
+    failureCount:ok?0:1,
+    findingsTruncated:false,
+    findings:ok?[]:[{step:2,rule:'FIRST_PARTY_STAGING_DEMO_FAILED'}],
+    nextActions:[
+      {step:1,code:'VALIDATE_OWN_PROJECT_OFFLINE',command:'node src/cli.mjs adapter-onboard examples/adapter-profiles/streamable-http-project.json'},
+      {step:2,code:'REAL_TARGET_REQUIRES_SEPARATE_AUTHORIZATION',command:null}
+    ]
+  };
 }

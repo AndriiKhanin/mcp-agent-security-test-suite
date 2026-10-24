@@ -104,3 +104,41 @@ export function inspectProjectAdapter(config) {
     scope:'configuration validation only; no MCP server contact or ownership verification'
   };
 }
+
+
+/**
+ * M4-B7-B: project-neutral readiness for a validated descriptor only.
+ * This is PURE; it does not read files, inspect env, run processes, connect
+ * or accept external proof of staging/operator authorization.
+ */
+export function previewProjectOnboarding(config){
+  const validated=inspectProjectAdapter(config); // throws before any output
+  return {
+    status:'PASS',
+    profile:'offline-project-onboarding-v1',
+    readinessSchemaVersion:1,
+    adapterSchemaVersion:validated.adapterSchemaVersion,
+    transport:validated.transport,
+    protocolVersion:validated.protocolVersion,
+    descriptorEvidence:'DESCRIPTOR_VALIDATED',
+    stagingEvidence:'FIRST_PARTY_STAGING_NOT_ATTEMPTED',
+    targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+    operatorEvidence:'OPERATOR_NOT_VERIFIED',
+    consentEvidence:'SELF_ASSERTED_CONSENT_NOT_EVALUATED',
+    readinessStatus:'REAL_TARGET_NOT_AUTHORIZED',
+    connectionStatus:'NOT_ATTEMPTED',
+    executionEnabled:false,
+    projectConnectionAuthorized:false,
+    externalTargetContacted:false,
+    operatorVerified:false,
+    nextActions:[
+      {step:1,code:'REVIEW_OFFLINE_DESCRIPTOR',command:'node src/cli.mjs adapter-check examples/adapter-profiles/streamable-http-project.json'},
+      {step:2,code:'REVIEW_FICTIONAL_CONSENT_ONLY',command:'node src/cli.mjs adapter-policy-check examples/adapter-profiles/consent-expired.json'},
+      {step:3,code:'OPTIONAL_SEPARATE_OWNED_STAGING_DEMO',command:'node src/cli.mjs adapter-staging-selftest'},
+      {step:4,code:'SEPARATE_VERIFIED_TARGET_APPROVAL_REQUIRED',command:null}
+    ],
+    failureCount:0,
+    findingsTruncated:false,
+    findings:[]
+  };
+}
