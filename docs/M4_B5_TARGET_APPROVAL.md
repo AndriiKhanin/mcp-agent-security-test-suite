@@ -94,26 +94,26 @@ This is **internal test and architecture acceptance only**, not approval by a re
 
 ## M4-B8-A — non-authoritative exact-target decision simulator
 
-The source API \`simulateExactTargetAuthorization(packet, evidenceSnapshot, {nowMs})\`
-in \`src/project-adapter.mjs\` is a **pure offline design probe**, not a
+The source API `simulateExactTargetAuthorization(packet, evidenceSnapshot, {nowMs})`
+in `src/project-adapter.mjs` is a **pure offline design probe**, not a
 target approval endpoint, identity provider, actual consent validator, or
 network security check. Its strictly shaped JSON packet binds:
 
-- \`target\`: lower-case canonical nonproduction HTTPS host, numeric port
-  **443**, exact path, and pinned protocol \`2026-07-28\`.
-- \`request\`: exactly one \`server/discover\` request, at most 32768 response
+- `target`: lower-case canonical nonproduction HTTPS host, numeric port
+  **443**, exact path, and pinned protocol `2026-07-28`.
+- `request`: exactly one `server/discover` request, at most 32768 response
   bytes, at most 5000 ms, no retries, no redirects, no tools, no credentials.
-- \`grant\`: simulated approved status, exact target/method/version/request
+- `grant`: simulated approved status, exact target/method/version/request
   scope, nonce, limited lifetime (at most five minutes), and a declared
-  \`UNUSED\` state; revoked or consumed states fail.
-- \`evidenceSnapshot\`: a **separate TEST-ONLY interface** with the literal
-  provenance \`TEST_ONLY_NOT_INDEPENDENT\` and six distinct symbolic statuses
-  for ownership, operator, egress, TLS, DNS and SSRF. No arbitrary \`verified:true\`
+  `UNUSED` state; revoked or consumed states fail.
+- `evidenceSnapshot`: a **separate TEST-ONLY interface** with the literal
+  provenance `TEST_ONLY_NOT_INDEPENDENT` and six distinct symbolic statuses
+  for ownership, operator, egress, TLS, DNS and SSRF. No arbitrary `verified:true`
   claim or descriptor value is accepted as a substitute for independent proof.
 
 Example (fictional, *does not* initiate contact):
 
-\`\`\`js
+```js
 import {simulateExactTargetAuthorization} from './src/project-adapter.mjs';
 const packet = {
   decisionSchemaVersion:1,
@@ -136,22 +136,22 @@ const result = simulateExactTargetAuthorization(
   packet,fictionalTestProviderSnapshot,{nowMs:1030000});
 console.log(result.simulationStatus, result.authorizationStatus);
 // SIMULATED_GATES_PASS REAL_TARGET_EXECUTION_NOT_AUTHORIZED
-\`\`\`
+```
 
 Only **symbolic fixed failure codes** and safe aggregate counts appear in
 reports. Real server URLs, operator identifiers, nonces, grant hashes and
-credentials never appear in output. Any nominal \`status:PASS\` represents
+credentials never appear in output. Any nominal `status:PASS` represents
 *fictional contract consistency only*. Its result **always** contains
-\`executionEnabled:false\`, \`connectionStatus:'NOT_ATTEMPTED'\`, and
-\`REAL_TARGET_EXECUTION_NOT_AUTHORIZED\`. The simulator cannot initiate sockets,
-DNS resolution, TLS, processes, or MCP requests. The old \`adapter-check\`,
-\`adapter-template\`, \`adapter-onboard\` and first-party staging commands are
+`executionEnabled:false`, `connectionStatus:'NOT_ATTEMPTED'`, and
+`REAL_TARGET_EXECUTION_NOT_AUTHORIZED`. The simulator cannot initiate sockets,
+DNS resolution, TLS, processes, or MCP requests. The old `adapter-check`,
+`adapter-template`, `adapter-onboard` and first-party staging commands are
 unchanged.
 
 **Unimplemented enforcement:** No trustworthy ownership or operator evidence
 provider is connected, no approval issuer/authentication exists, no durable
 atomic replay/revocation ledger exists (so repeated calls with a claimed
-\`UNUSED\` packet can simulate PASS repeatedly), and no real DNS rebinding,
+`UNUSED` packet can simulate PASS repeatedly), and no real DNS rebinding,
 private-address egress, certificate, proxy, redirect or OS confinement
 protections are present here. The current URL grammar is only a lexical guard.
 Even a fully green fictional snapshot is **not evidence that any real target
