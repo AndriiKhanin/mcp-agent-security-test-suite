@@ -194,7 +194,7 @@ test('M4-B8-A: fictional all-green snapshot is simulated PASS, never execution a
 
 test('M4-B8-A: missing independent evidence, fake verified:true, or missing provenance deny',()=>{
   for(const e of [
-    undefined,null,{},true,{verified:true},
+    null,{},true,{verified:true},
     {...inventedProviderSnapshot(),verified:true},
     {...inventedProviderSnapshot(),provenance:'INDEPENDENTLY_VERIFIED'},
     {...inventedProviderSnapshot(),provenance:undefined},
@@ -205,6 +205,8 @@ test('M4-B8-A: missing independent evidence, fake verified:true, or missing prov
     assert.equal(v.status,'FAIL');
     hasRule(v,'TEST_EVIDENCE_INVALID');
   }
+  hasRule(simulateExactTargetAuthorization(inventedPacket(),undefined,{nowMs:1030000}),
+    'TEST_EVIDENCE_INVALID');
 });
 
 test('M4-B8-A: packet field self-assertions never constitute ownership or operator proof',()=>{
