@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M4-B9-A — offline project fixture audit bundle
+
+- **IN DEVELOPMENT (inert descriptor + fixed synthetic controls only):**
+  [Issue #112](../../issues/112). `adapter-fixture-audit <local-file>`
+  validates a strict project descriptor, then runs selected fixed in-code
+  fictional permission, replay, escalation, negative denied-effect and clean
+  trace checks, with per-case symbolic results. No project target/contact,
+  process execution, arbitrary user trace, DNS, credential or authorization.
+  Built-in negative-control detection is an expected PASS condition, not an
+  actual vulnerability finding. Require 4/4 PR and post-merge main CI,
+  zero skipped/failed and unchanged 80-path npm inventory.
+
 ## M4-B8-B — offline provenance and single-use grant rehearsal
 
 - **DONE (offline simulation only):** [Issue #109](../../issues/109), [merged PR #110](../../pull/110), [post-merge main CI #40077863059](../../actions/runs/40077863059): **4/4 PASS, 599/599 tests/job**, zero failed/skipped.
