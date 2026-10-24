@@ -92,11 +92,11 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 - **IN DEVELOPMENT — no external target authorization:** [Issue #106](../../issues/106).
   A separate strict JSON packet and test-only evidence snapshot model exact
-  nonproduction HTTPS host/443/path, modern \`server/discover\`, one request,
+  nonproduction HTTPS host/443/path, modern `server/discover`, one request,
   five-minute maximum grant, synthetic consumed/revoked states, and distinct
   ownership/operator/egress/TLS/DNS/SSRF symbolic gates.
   Every simulated verdict, including a fictional PASS, explicitly preserves
-  \`REAL_TARGET_EXECUTION_NOT_AUTHORIZED\` and zero transport execution.
+  `REAL_TARGET_EXECUTION_NOT_AUTHORIZED` and zero transport execution.
   No independent provider, atomic replay ledger, remote DNS/TLS/SSRF controls,
   user MCP contact, generic stdio execution, or external staging permission.
   Engineering acceptance requires reviewed PR, 4/4 PR CI, 4/4 post-merge
