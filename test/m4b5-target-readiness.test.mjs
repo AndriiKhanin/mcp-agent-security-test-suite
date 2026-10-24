@@ -268,10 +268,12 @@ test('M4-B8-A: stale, future, missing and overlong grants fail closed',()=>{
     const p=inventedPacket();p.grant[key]=value;
     const v=verdict(p);neverAuthorized(v);hasRule(v,'GRANT_TIME_OR_NONCE_INVALID');
   }
-  for(const nowMs of [999999,1060000,-1,1.5,undefined]){
+  for(const nowMs of [999999,1060000,-1,1.5]){
     const v=verdict(inventedPacket(),inventedProviderSnapshot(),nowMs);
     neverAuthorized(v);hasRule(v,'GRANT_TIME_OR_NONCE_INVALID');
   }
+  hasRule(simulateExactTargetAuthorization(inventedPacket(),inventedProviderSnapshot()),
+    'GRANT_TIME_OR_NONCE_INVALID');
 });
 
 test('M4-B8-A: revoked, consumed, pending and forged grant state are denied',()=>{
