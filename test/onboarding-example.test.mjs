@@ -39,3 +39,47 @@ test('M2-02: canonical quickstart documentation includes the runnable smoke',()=
   assert.match(text,/EXPECTED_FAIL_DETECTED/);
   assert.match(text,/node --test/);
 });
+
+test('M4-B9-D: portable offline CI smoke validates three distinct matcher outcomes',()=>{
+  const runResult=run();
+  assert.equal(runResult.status,0,runResult.stderr);
+  assert.match(runResult.stdout,/SYNTHETIC_CLEAN_MATCH: observed PASS, expectation MATCH, exit code 0/);
+  assert.match(runResult.stdout,/SYNTHETIC_EXPECTED_VIOLATION: observed FAIL, expectation MATCH, exit code 0/);
+  assert.match(runResult.stdout,/SYNTHETIC_UNEXPECTED_VIOLATION: observed FAIL, expectation MISMATCH, exit code 1/);
+  assert.match(runResult.stdout,/DEMO_PASS/);
+  assert.doesNotMatch(runResult.stdout,/mcp\.example\.org|fictional-ci-project|mcp-fictional-ci-/);
+});
+test('M4-B9-D: smoke is non-parameterized and redacts hostile CLI input',()=>{
+  for(const args of [
+    ['--command','tools/call'],
+    ['--endpoint','https://private.example.org/mcp'],
+    ['--run','node dangerous.mjs']
+  ]){
+    const p=run(...args);
+    assert.equal(p.status,1);
+    assert.match(p.stderr,/DEMO_FAIL: offline example did not meet its fixed assertions/);
+    assert.equal(p.stdout,'');
+    assert.ok(!(p.stdout+p.stderr).includes(args[1]));
+  }
+});
+test('M4-B9-D: portable CI workflow explicitly exercises the full fixed smoke',()=>{
+  const local=readFileSync(new URL('../.github/workflows/ci.yml',import.meta.url),'utf8');
+  const sample=readFileSync(new URL('../examples/offline-contract-check.yml',import.meta.url),'utf8');
+  for(const ci of [local,sample]){
+    assert.match(ci,/run: node examples\/offline-ci-check\.mjs/);
+    assert.doesNotMatch(ci,/secrets\.|npm install|curl |wget |http:\/\//);
+  }
+  assert.match(local,/persist-credentials: false/);
+});
+test('M4-B9-D: fixed fixture writer uses bounded local temp only, with cleanup',()=>{
+  const source=readFileSync(new URL('../examples/offline-ci-check.mjs',import.meta.url),'utf8');
+  assert.match(source,/mkdtempSync\(join\(tmpdir\(\),/);
+  assert.match(source,/rmSync\(dir,\{force:true,recursive:true\}\)/);
+  assert.match(source,/Buffer\.byteLength\(body,'utf8'\)>4096/);
+  assert.match(source,/spawnSync\(process\.execPath/);
+  assert.match(source,/shell:false/);
+  assert.match(source,/process\.argv\.length!==2/);
+  assert.match(source,/requireSymbolic\(expectedBad,0,'FAIL','MATCH','FAIL'/);
+  assert.match(source,/requireSymbolic\(unexpectedBad,1,'FAIL','MISMATCH','PASS'/);
+  assert.doesNotMatch(source,/fetch\(|https\.request\(|child_process\.exec\(|shell:true/);
+});

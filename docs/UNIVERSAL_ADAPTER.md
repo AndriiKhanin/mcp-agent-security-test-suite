@@ -177,3 +177,19 @@ prevents confusion with earlier baked-in negative controls.
 
 The command reads at most 4096 bytes and never executes/connects using
 the validated descriptor. See [reproducible examples](GETTING_STARTED.md).
+
+
+## M4-B9-D — fixed portable CI regression example
+
+`node examples/offline-ci-check.mjs` executes three **fixed, fictional**
+`adapter-trace-expect` CLI cases from a temporary bounded JSON file:
+clean PASS/MATCH, deliberately broken effect FAIL/MATCH, and unexpected
+broken effect FAIL/MISMATCH with inner exit 1. It checks both
+`observedSafetyStatus` and `expectationStatus` before declaring its
+own smoke success. The local file is created from code constants, never
+from external target data, and removed after the checks.
+
+The GitHub Actions Windows/Ubuntu Node20/22 matrix runs the existing
+example directly. A positive smoke result neither contacts nor certifies
+the project described by any adapter descriptor, and cannot grant MCP
+execution authority. See [portable Windows and CI steps](GETTING_STARTED.md).
