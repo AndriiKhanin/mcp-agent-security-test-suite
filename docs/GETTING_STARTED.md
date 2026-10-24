@@ -279,3 +279,99 @@ verify target ownership. Replay-specific analysis is **not** provided by
 these anonymous events; the separately invoked fixed
 `adapter-fixture-audit` contains a replay-denial demonstration. No
 network, DNS, child-process, credential or real MCP tool interaction occurs.
+
+
+## M4-B9-C — exact symbolic trace regression expectations in CI
+
+`adapter-trace-expect` is an **opt-in local-only assertion** tool, separate
+from `adapter-synthetic-trace`. It compares a complete, explicitly declared
+set of symbolic rule codes for **every** event with the existing anonymous
+synthetic trace audit. It never runs a real MCP server or authenticates the
+descriptor. A successful expected negative-control detection can yield an
+outer **CI PASS**, while `observedSafetyStatus` remains **FAIL**.
+
+Save the following as `symbolic-expectation.json` in your own test
+workspace. The example descriptor is inert: its URL is never contacted.
+
+```json
+{
+  "expectationSchemaVersion": 1,
+  "mode": "synthetic-expectations-only",
+  "trace": {
+    "traceSchemaVersion": 1,
+    "mode": "user-authored-synthetic-only",
+    "descriptor": {
+      "adapterSchemaVersion": 1,
+      "project": { "name": "fictional-http-project" },
+      "transport": {
+        "type": "streamable-http",
+        "endpoint": "https://mcp.example.org/mcp"
+      },
+      "protocolVersion": "2026-07-28",
+      "policy": {
+        "mode": "validate-only",
+        "allowNetwork": false,
+        "allowProcessSpawn": false,
+        "allowToolCalls": false,
+        "allowCredentials": false
+      }
+    },
+    "events": [
+      {
+        "decision": "DENY",
+        "effect": "NONE",
+        "ownerAuthorized": false,
+        "scopeAuthorized": false,
+        "leaseFresh": false,
+        "secretLogged": false
+      }
+    ]
+  },
+  "expectedStatus": "PASS",
+  "expected": [{ "event": 1, "ruleCodes": [] }]
+}
+```
+
+Run: `node src/cli.mjs adapter-trace-expect symbolic-expectation.json`.
+The outer `status:PASS`, `expectationStatus:MATCH` and
+`observedSafetyStatus:PASS` produce exit code **0**, suitable for a
+local or CI step with normal nonzero-exit-code failure behavior.
+
+For an **expected synthetic violation**, change the event
+`"effect": "NONE"` to `"effect": "WRITE"`, change
+`"expectedStatus": "PASS"` to `"expectedStatus": "FAIL"`, and
+change the expectation to:
+
+```json
+"expected": [
+  { "event": 1, "ruleCodes": ["DENIED_ACTION_HAD_EFFECT"] }
+]
+```
+
+Now the command still exits **0** if the exact violation was detected.
+Its output makes the distinction explicit:
+`status:PASS`, `expectationStatus:MATCH`,
+`expectationOutcome:VIOLATION_DETECTED_AS_EXPECTED`,
+`observedSafetyStatus:FAIL`, `observedFailureCount:1`.
+
+For a deliberately **failing CI regression**, keep the original clean
+expectation (`expectedStatus:PASS`, empty `ruleCodes`) while changing the
+event effect to `WRITE`. The observed synthetic violation is unexpected:
+`status:FAIL`, `expectationStatus:MISMATCH`,
+`observedSafetyStatus:FAIL`, exit code **1**. Malformed expectation JSON,
+duplicate keys or forbidden fields instead exit **2** with a generic
+sanitized error.
+
+The strict schema permits 1–8 dense event entries, exactly one
+`expected` entry per ordinal event, and canonical, uniquely ordered
+rule-code arrays containing only:
+`FLAGGED_SECRET_IN_AUDIT_LOG`, `DENIED_ACTION_HAD_EFFECT`,
+`EFFECT_WITHOUT_AUTHORIZATION`, and
+`EFFECT_WITHOUT_FRESH_LEASE`. Wildcards, partial matching, unknown or
+duplicate codes, missing event indices and status contradictions are
+rejected. Files are limited to **4096 bytes**.
+
+Important: **outer CI PASS means only exact agreement with a fictional
+assertion.** Even an expected synthetic violation remains an observed
+safety FAIL. No actual user MCP transcript is parsed; no credentials, real
+target probing, network calls or executable actions are enabled.

@@ -174,6 +174,19 @@ fixture paths. [Complete fictional sample](docs/GETTING_STARTED.md).
 The mode returns symbolic event ordinals, fixed rule codes and permanent
 `REAL_TARGET_EXECUTION_NOT_AUTHORIZED`; no external target contact.
 
+## Exact synthetic CI expectations (M4-B9-C)
+
+`node src/cli.mjs adapter-trace-expect <fictional-expectation-file>`
+compares every anonymous symbolic trace event with an explicit canonical
+expected-rule list and an expected overall safety status. It returns
+`observedSafetyStatus`, `expectationStatus`, and separate observed
+findings: CI may pass for a correctly predicted fictional violation without
+ever claiming the observed safety status passed. No wildcards, unknown
+rules, missing event indices or partial matches. The JSON input has a
+4096-byte cap and the original `adapter-synthetic-trace` behavior remains
+unchanged. [Complete copy/paste example](docs/GETTING_STARTED.md).
+**Still offline-only; no MCP target execution or authorization.**
+
 ## Candidate packaging (not yet published)
 
 The prerelease package declares an executable `mcp-agent-security`, an audited `files` allowlist and zero dependencies. `npm run release:preflight` checks the archive manifest in offline dry-run mode; the full `node --test` suite also performs a **disposable offline local tarball installation smoke**, verifies the installed CLI and deletes all temp files. The [R2 exact package inventory guard](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) fails on unreviewed new or missing packaged file paths; it does not inspect the safety of approved file contents. No registry access or publication occurs. Do not run `npm publish` or create stable tags without separate explicit approval. See [release readiness](docs/RELEASE_READINESS.md), the [R3 internal release review](docs/R3_INTERNAL_RELEASE_REVIEW.md), the [R4 offline artifact-integrity checks](docs/R4_ARTIFACT_INTEGRITY.md) and the [R5 independent-review handoff](docs/R5_INDEPENDENT_REVIEW.md). None substitutes for the still-open [R5-B independent reviewer release gate](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) or permission to publish.

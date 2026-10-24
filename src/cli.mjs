@@ -10,7 +10,7 @@ import { runLoopbackHttpScenario } from './loopback-http-mock.mjs';
 import { runFirstPartyStagingSelftest } from './first-party-staging-mcp.mjs';
 import { runFirstPartyStagingProcessSelftest } from './staging-process-harness.mjs';
 import { parseStrictJson } from './strict-json.mjs';
-import { inspectProjectAdapter, previewProjectOnboarding, createOfflineAdapterTemplate, auditOfflineProjectFixtureBundle, auditSymbolicProjectTrace } from './project-adapter.mjs';
+import { inspectProjectAdapter, previewProjectOnboarding, createOfflineAdapterTemplate, auditOfflineProjectFixtureBundle, auditSymbolicProjectTrace, auditSymbolicTraceExpectations } from './project-adapter.mjs';
 import { evaluateAdapterConsent } from './adapter-consent.mjs';
 import { runFirstPartyAdapterSelftest, runFixedModernStagingAdapterSelftest, runFixedOnboardingDemo } from './local-adapter-drivers.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
@@ -65,7 +65,7 @@ async function main() {
     : noFile ? args.length===1
       : args.length===2 && !args[1].startsWith('-');
   if (!CLI_COMMANDS.includes(command) || !validArgs) {
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template stdio|streamable-http OR adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template stdio|streamable-http OR adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -118,8 +118,9 @@ async function main() {
       emit(report);
       return report.exitCode;
     }
-    const source = await readBoundedFile(args[1],command==='adapter-synthetic-trace'?4096:command==='adapter-fixture-audit'?16384:1024*1024);
-    const result = command === 'adapter-synthetic-trace' ? auditSymbolicProjectTrace(parseStrictJson(source)) :
+    const source = await readBoundedFile(args[1],command==='adapter-trace-expect'?4096:command==='adapter-synthetic-trace'?4096:command==='adapter-fixture-audit'?16384:1024*1024);
+    const result = command === 'adapter-trace-expect' ? auditSymbolicTraceExpectations(parseStrictJson(source)) :
+      command === 'adapter-synthetic-trace' ? auditSymbolicProjectTrace(parseStrictJson(source)) :
       command === 'adapter-fixture-audit' ? auditOfflineProjectFixtureBundle(parseStrictJson(source)) :
       args[0] === 'adapter-onboard' ? previewProjectOnboarding(parseStrictJson(source)) :
       args[0] === 'adapter-policy-check' ? evaluateAdapterConsent(parseStrictJson(source)) :
