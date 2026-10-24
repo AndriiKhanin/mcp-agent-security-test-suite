@@ -699,3 +699,110 @@ export function auditOfflineProjectFixtureBundle(bundle){
     invalid();
   }
 }
+
+
+/**
+ * M4-B9-B: explicitly opt-in, entirely symbolic developer-authored trace.
+ *
+ * The schema is a tiny language of six enum/boolean fields, not a transport
+ * transcript. No identifiers, tool names, arguments, credentials, response
+ * bodies or addresses are accepted. Only the existing inert adapter descriptor
+ * may contain a textual endpoint/command, which is NEVER used for execution.
+ */
+export const SYMBOLIC_PROJECT_TRACE_SCHEMA_VERSION=1;
+export const SYMBOLIC_PROJECT_TRACE_MAX_EVENTS=8;
+const SYMBOLIC_TRACE_EVENT_KEYS=Object.freeze([
+  'decision','effect','ownerAuthorized','scopeAuthorized','leaseFresh',
+  'secretLogged'
+]);
+const SYMBOLIC_TRACE_ALLOWED_RULES=new Set([
+  'FLAGGED_SECRET_IN_AUDIT_LOG',
+  'DENIED_ACTION_HAD_EFFECT',
+  'EFFECT_WITHOUT_AUTHORIZATION',
+  'EFFECT_WITHOUT_FRESH_LEASE'
+]);
+const symbolicShapeError=()=>{throw new TypeError('INVALID_SYMBOLIC_PROJECT_TRACE');};
+
+/**
+ * A result of PASS evaluates only caller-authored symbolic assumptions; it
+ * is NOT an authorized real target, observation of host effects or safe grant.
+ */
+export function auditSymbolicProjectTrace(input){
+  try{
+    if(!plainFiniteTree(input) ||
+       !isDataRecord(input,['traceSchemaVersion','mode','descriptor','events']) ||
+       input.traceSchemaVersion!==SYMBOLIC_PROJECT_TRACE_SCHEMA_VERSION ||
+       input.mode!=='user-authored-synthetic-only' ||
+       !Array.isArray(input.events) ||
+       input.events.length<1 ||
+       input.events.length>SYMBOLIC_PROJECT_TRACE_MAX_EVENTS ||
+       !input.events.every(e=>
+         isDataRecord(e,SYMBOLIC_TRACE_EVENT_KEYS) &&
+         (e.decision==='ALLOW'||e.decision==='DENY') &&
+         (e.effect==='NONE'||e.effect==='READ'||e.effect==='WRITE') &&
+         ['ownerAuthorized','scopeAuthorized','leaseFresh','secretLogged']
+           .every(k=>typeof e[k]==='boolean')))
+      symbolicShapeError();
+    const descriptor=inspectProjectAdapter(input.descriptor);
+    // Recreate primitive-only records before reusing the pure existing trace
+    // audit. Do not pass user-defined prototypes or original mutable objects.
+    const records=input.events.map(e=>({
+      decision:e.decision,effect:e.effect,
+      ownerAuthorized:e.ownerAuthorized,scopeAuthorized:e.scopeAuthorized,
+      leaseFresh:e.leaseFresh,secretLogged:e.secretLogged
+    }));
+    const native=auditRecords(records);
+    if(!['PASS','FAIL'].includes(native.status) ||
+       native.checked!==records.length ||
+       !Array.isArray(native.failures) ||
+       native.failureCount!==native.failures.length ||
+       native.failures.some(f=>
+         !Number.isSafeInteger(f.event) || f.event<1 ||
+         f.event>records.length || !SYMBOLIC_TRACE_ALLOWED_RULES.has(f.rule)))
+      symbolicShapeError();
+    const findings=native.failures.map(({event,rule})=>({event,rule}));
+    const checks=records.map((event,i)=>{
+      const at=i+1;
+      const ruleCodes=findings.filter(f=>f.event===at).map(f=>f.rule);
+      const symbolicOutcome=event.decision==='DENY'
+        ? event.effect==='NONE'
+          ? 'DENIAL_WITHOUT_EFFECT'
+          : 'DENIED_EFFECT_OBSERVED'
+        : event.effect==='NONE'
+          ? 'NO_EFFECT_OBSERVED'
+          : 'ALLOW_WITH_SYMBOLIC_EFFECT';
+      return {event:at,checkStatus:ruleCodes.length?'FAIL':'PASS',
+        symbolicOutcome,ruleCodes};
+    });
+    return {
+      status:native.status,
+      profile:'user-authored-symbolic-project-trace-v1',
+      traceSchemaVersion:SYMBOLIC_PROJECT_TRACE_SCHEMA_VERSION,
+      adapterSchemaVersion:descriptor.adapterSchemaVersion,
+      transport:descriptor.transport,
+      protocolVersion:descriptor.protocolVersion,
+      descriptorEvidence:'DESCRIPTOR_VALIDATED',
+      traceEvidence:'USER_AUTHORED_SYNTHETIC_TRACE_EVALUATED',
+      traceOrigin:'USER_AUTHORED_SYMBOLIC_ONLY',
+      fixedFixtureControls:'NOT_RUN',
+      stagingEvidence:'FIRST_PARTY_STAGING_NOT_ATTEMPTED',
+      targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+      operatorEvidence:'OPERATOR_NOT_VERIFIED',
+      readinessStatus:'REAL_TARGET_NOT_AUTHORIZED',
+      authorizationStatus:'REAL_TARGET_EXECUTION_NOT_AUTHORIZED',
+      connectionStatus:'NOT_ATTEMPTED',
+      executionEnabled:false,
+      projectConnectionAuthorized:false,
+      externalTargetContacted:false,
+      operatorVerified:false,
+      recordsAreRealMcpObservations:false,
+      recordsChecked:records.length,
+      checks,
+      failureCount:findings.length,
+      findingsTruncated:false,
+      findings
+    };
+  }catch{
+    symbolicShapeError();
+  }
+}
