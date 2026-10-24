@@ -87,6 +87,21 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 - **M4-B3 — DONE (first-party mock only):** [Issue #69](../../issues/69), [merged PR #71](../../pull/71), [post-merge main CI #39979727977](../../actions/runs/39979727977): **4/4 PASS, 428/428 tests per job**, zero failed/skipped. First-party fictional admission precedes driver construction; denied requests return before running the mock. Guarded stdio transmits **only one `initialize`**, never `tools/call`; HTTP transmits only fixed loopback `ping`. Two reviewed packaged paths advance **69→71**. The direct low-level legacy mock is a separate test utility, not real authorization.
 - **M4-B4 — DONE (test-only):** [Issue #72](../../issues/72), [merged PR #74](../../pull/74), [post-merge main CI #39983335810](../../actions/runs/39983335810): **4/4 PASS, 438/438 tests per job, 0 failures/skips**. Bounded test observer measures source-site attempts at fixed driver probe, stdio worker spawn and loopback bind/request independently of response flags, with denied and positive controls plus concurrent isolation. The checked package inventory is **72** paths; not kernel process/network tracing, real authorization or external server access.
 
+
+## M4-B8-A — exact-target offline authorization decision simulation
+
+- **IN DEVELOPMENT — no external target authorization:** [Issue #106](../../issues/106).
+  A separate strict JSON packet and test-only evidence snapshot model exact
+  nonproduction HTTPS host/443/path, modern \`server/discover\`, one request,
+  five-minute maximum grant, synthetic consumed/revoked states, and distinct
+  ownership/operator/egress/TLS/DNS/SSRF symbolic gates.
+  Every simulated verdict, including a fictional PASS, explicitly preserves
+  \`REAL_TARGET_EXECUTION_NOT_AUTHORIZED\` and zero transport execution.
+  No independent provider, atomic replay ledger, remote DNS/TLS/SSRF controls,
+  user MCP contact, generic stdio execution, or external staging permission.
+  Engineering acceptance requires reviewed PR, 4/4 PR CI, 4/4 post-merge
+  main CI, and an independent authorization gate before any external contact.
+
 ## M4-B7-C — finite offline project descriptor templates
 
 - **M4-B7-C — DONE (safe offline template generator only):** [Issue #103](../../issues/103), [merged PR #104](../../pull/104), [post-merge main CI #40073451813](../../actions/runs/40073451813): **4/4 PASS, 566/566 tests/job, 0 failed/skipped**. `adapter-template stdio|streamable-http` emits exactly two literal fictional profile objects, all execution/network allowances **false**, under a versioned JSON report. Template selection never reads/writes a file, resolves an address, spawns a process or accesses a user MCP server. [Copy/paste and offline validator instructions](docs/GETTING_STARTED.md). The exact **80-path packaged file inventory** and R2/R5 security gates are unchanged. External target approval RFC #21, audit #43 and beta #59 stay OPEN.
