@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M4-B9-C — exact symbolic trace CI expectations
+
+- **IN DEVELOPMENT (offline only):** [Issue #118](../../issues/118).
+  Versioned `adapter-trace-expect` compares the exact complete ordinal
+  synthetic trace rule set with explicitly authored expectations; it separates
+  observed safety FAIL from CI expectation-match PASS and denies wildcards,
+  partial matches, missing indices and status contradictions. The existing
+  `adapter-synthetic-trace` remains unchanged. No real target contact,
+  user process execution, credentials, runtime dependency or certification.
+  Require 4/4 PR and post-merge main CI, reviewed 80-path package inventory,
+  and open external gates #21, #43 and #59.
+
 ## M4-B9-B — strict user-authored symbolic traces
 
 - **DONE (offline symbolic trace only):** [Issue #115](../../issues/115), [merged PR #116](../../pull/116), [post-merge main CI #40095371602](../../actions/runs/40095371602): **4/4 PASS, 633/633 tests/job**, zero failed/skipped.
