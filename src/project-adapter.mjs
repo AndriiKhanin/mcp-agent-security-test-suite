@@ -221,7 +221,8 @@ function safeTargetTuple(target){
       typeof target.host!=='string' || typeof target.path!=='string' ||
       !/^[a-z0-9.-]{4,190}$/u.test(target.host) ||
       !/^\/[A-Za-z0-9/_-]{1,128}$/u.test(target.path) ||
-      target.path.includes('//') || target.path.includes('..')) return false;
+      target.path.includes('//') || target.path.includes('..') ||
+      target.path.endsWith('/')) return false;
   try {
     // Reuse the already-reviewed *inert* canonical URL grammar; never resolve.
     inspectProjectAdapter({
@@ -250,8 +251,8 @@ function decisionReport(codes){
     externalTargetContacted:false,
     operatorVerified:false,
     nextAction:'INDEPENDENT_APPROVAL_AND_NETWORK_SECURITY_REVIEW_REQUIRED',
-    failureCount:findings.length,
-    findingsTruncated:false,
+    failureCount:codes.length,
+    findingsTruncated:codes.length>findings.length,
     findings
   };
 }
@@ -264,8 +265,9 @@ function decisionReport(codes){
  * Passing the same UNUSED grant twice will also simulate PASS twice; a future
  * trusted replay ledger and atomic consume-before-effect gate are mandatory.
  */
-export function simulateExactTargetAuthorization(packet,evidence,{nowMs}={}){
+export function simulateExactTargetAuthorization(packet,evidence,options={}){
   try {
+    const nowMs=options?.nowMs;
     if(!isDataRecord(packet,DECISION_FIELDS.root) ||
        !isDataRecord(packet.target,DECISION_FIELDS.target) ||
        !isDataRecord(packet.request,DECISION_FIELDS.request) ||
