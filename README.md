@@ -55,6 +55,18 @@ It does not write files, launch project processes, contact servers, or
 authorize a real-target assessment. Follow the [three-file setup and CI
 walkthrough](docs/GETTING_STARTED.md#m6-b--guided-fictional-adopter-kit-one-selector-no-server-contact).
 
+## One-command exported kit CI check (M6-C)
+
+After exporting `node src/cli.mjs adapter-kit stdio > fictional-kit.json`,
+run `node src/cli.mjs adapter-kit-verify fictional-kit.json` to
+verify its exact **source-owned fictional** JSON structure and the
+three built-in offline CI checks with a single exit-code gate. Invalid
+or modified files are rejected without raw input echo; an expected
+invented violation retains `observedSafetyStatus:FAIL` even when
+`expectationStatus:MATCH`. It never connects to your MCP server,
+establishes independent provenance or certifies your project.
+[Portable Windows/Linux workflow and limits](docs/GETTING_STARTED.md#m6-c--verify-a-fictional-exported-starter-kit-with-one-ci-command).
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.

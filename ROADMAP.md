@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-C — one-command exported fictional kit CI verification
+
+- **IN DEVELOPMENT — fixed offline fixtures only:** [Issue #144](../../issues/144).
+  Run `adapter-kit-verify <local-kit-json>` to verify an exported `adapter-kit` JSON file against the canonical
+  complete reviewed CLI report, then rerun quickstart and two fictional
+  symbolic expectations in one CLI command with strict local UTF-8
+  file-size/shape limits, generic safe errors and clear 0/1/2 exit
+  semantics. No user-owned MCP testing, arbitrary process/network calls,
+  proof of independent authorship or permission to publish. Preserve
+  80-path npm inventory and require 4/4 PR/post-merge CI. External gates
+  #21, #43 and #59 remain OPEN.
+
 ## M6-B — guided fictional adopter kit and CI starter
 
 - **DONE — reviewed fictional examples only:** [Issue #141](../../issues/141), [merged PR #142](../../pull/142), [code post-merge CI #40126257281](../../actions/runs/40126257281): **4/4 PASS, 703/703 tests/job**, 0 failed/skipped.

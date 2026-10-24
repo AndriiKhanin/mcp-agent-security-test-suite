@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
 import {runScenario} from './scenario.mjs';
 import {auditRecords} from './trace.mjs';
+import {buildCliReport} from './report-contract.mjs';
 /**
  * Portable, *non-executing* MCP project connection descriptor.
  *
@@ -1140,4 +1141,126 @@ export function createOfflineAdopterKit(transport){
     releaseAuthorized:false,
     failureCount:0,findingsTruncated:false,findings:[]
   };
+}
+
+
+/**
+ * M6-C: comparison of a locally exported, wholly FICTIONAL kit to the
+ * immutable two-selector source-owned schema, including the CLI wrapper.
+ * This code does NOT validate report provenance or any real MCP system.
+ */
+export const OFFLINE_KIT_VERIFIER_SCHEMA_VERSION=1;
+function exactCanonicalKitTree(actual,reference,budget={left:1200},depth=0,path=new WeakSet()){
+  if(--budget.left<0 || depth>16) return false;
+  if(reference===null || typeof reference!=='object')
+    return Object.is(actual,reference);
+  if(!actual || typeof actual!=='object' ||
+     Array.isArray(actual)!==Array.isArray(reference) ||
+     Object.getPrototypeOf(actual)!==
+       (Array.isArray(reference)?Array.prototype:Object.prototype) ||
+     path.has(actual)) return false;
+  const actualProps=Object.getOwnPropertyDescriptors(actual);
+  const referenceProps=Object.getOwnPropertyDescriptors(reference);
+  const actualKeys=Reflect.ownKeys(actualProps);
+  const referenceKeys=Reflect.ownKeys(referenceProps);
+  if(actualKeys.length!==referenceKeys.length) return false;
+  for(const key of actualKeys){
+    if(typeof key!=='string' || !Object.hasOwn(referenceProps,key) ||
+       !Object.hasOwn(actualProps[key],'value')) return false;
+  }
+  path.add(actual);
+  for(const key of referenceKeys){
+    if(!exactCanonicalKitTree(actualProps[key].value,referenceProps[key].value,
+      budget,depth+1,path)){
+      path.delete(actual);
+      return false;
+    }
+  }
+  path.delete(actual);
+  return true;
+}
+function invalidExportedKit(){
+  throw new TypeError('INVALID_OFFLINE_EXPORTED_KIT');
+}
+export function verifyOfflineAdopterKit(input){
+  // Do not read a caller-controlled getter, URL, command, identity or key.
+  try{
+    if(!input || Array.isArray(input) ||
+       Object.getPrototypeOf(input)!==Object.prototype)
+      invalidExportedKit();
+    const descriptor=Object.getOwnPropertyDescriptor(input,'transport');
+    if(!descriptor || !Object.hasOwn(descriptor,'value') ||
+       !ADAPTER_TRANSPORTS.includes(descriptor.value)) invalidExportedKit();
+    const baseline=buildCliReport('adapter-kit',
+      createOfflineAdopterKit(descriptor.value));
+    // Strictly accept the complete, serialized CLI JSON-v1 report, not a
+    // trust-me PASS flag, trimmed config, arbitrary trace or copied logs.
+    if(!exactCanonicalKitTree(input,baseline)) invalidExportedKit();
+
+    const quick=previewOfflineAdapterQuickstart(baseline.starterDescriptor);
+    const clean=auditSymbolicTraceExpectations(baseline.cleanExpectation);
+    const negative=auditSymbolicTraceExpectations(baseline.expectedViolation);
+    const checks=[
+      {
+        code:'FICTIONAL_DESCRIPTOR_AND_FIXED_CONTROLS',
+        matched:quick.status==='PASS' && quick.checked===5 &&
+          quick.controls.length===5 &&
+          quick.controls[3].fictionalObservedStatus==='FAIL' &&
+          quick.controls[3].controlStatus==='PASS' &&
+          quick.projectSafetyAssessed===false,
+        observedSafetyStatus:'REAL_PROJECT_NOT_ASSESSED',
+        fictionalControlsMatched:quick.controls.filter(
+          c=>c.controlStatus==='PASS').length
+      },
+      {
+        code:'CLEAN_SYMBOLIC_EXPECTATION',
+        matched:clean.status==='PASS' &&
+          clean.observedSafetyStatus==='PASS' &&
+          clean.expectationStatus==='MATCH' &&
+          clean.observedFailureCount===0,
+        observedSafetyStatus:clean.observedSafetyStatus,
+        expectationStatus:clean.expectationStatus
+      },
+      {
+        code:'EXPECTED_SYMBOLIC_VIOLATION_DETECTED',
+        matched:negative.status==='PASS' &&
+          negative.observedSafetyStatus==='FAIL' &&
+          negative.expectationStatus==='MATCH' &&
+          negative.observedFailureCount===1 &&
+          negative.observedFindings.length===1 &&
+          negative.observedFindings[0].rule==='DENIED_ACTION_HAD_EFFECT',
+        observedSafetyStatus:negative.observedSafetyStatus,
+        expectationStatus:negative.expectationStatus,
+        observedRule:'DENIED_ACTION_HAD_EFFECT'
+      }
+    ];
+    const findings=checks.filter(c=>!c.matched)
+      .map(c=>({rule:'OFFLINE_KIT_INTERNAL_CONTROL_MISMATCH',
+        check:c.code}));
+    return {
+      status:findings.length===0?'PASS':'FAIL',
+      profile:'offline-exported-fictional-kit-verification-v1',
+      verificationSchemaVersion:OFFLINE_KIT_VERIFIER_SCHEMA_VERSION,
+      kitSchemaVersion:OFFLINE_ADOPTER_KIT_SCHEMA_VERSION,
+      transport:descriptor.value,
+      sourceEvidence:'SOURCE_OWNED_KIT_SHAPE_AND_FIXED_CONTROLS_ONLY',
+      interpretation:'CI_MATCH_NOT_INDEPENDENT_PROVENANCE_OR_PROJECT_SECURITY',
+      checked:checks.length,checks,
+      targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+      operatorEvidence:'OPERATOR_NOT_VERIFIED',
+      authorizationStatus:'REAL_TARGET_EXECUTION_NOT_AUTHORIZED',
+      connectionStatus:'NOT_ATTEMPTED',
+      executionEnabled:false,
+      externalTargetContacted:false,
+      projectConnectionAuthorized:false,
+      operatorVerified:false,
+      projectSafetyAssessed:false,
+      fixturesAreProjectSpecific:false,
+      independentOriginVerified:false,
+      securityCertified:false,
+      releaseAuthorized:false,
+      failureCount:findings.length,
+      findingsTruncated:false,findings
+    };
+  }catch{invalidExportedKit();}
 }
