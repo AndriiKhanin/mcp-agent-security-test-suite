@@ -101,9 +101,9 @@ test('M5-07: evaluator pins an actual full public source SHA and remains fiction
   assert.ok(d.includes('node --version'));
   assert.ok(d.includes('node examples/beta-acceptance-check.mjs'));
   assert.ok(d.includes('node examples/offline-ci-check.mjs'));
-  assert.ok(d.includes('No real MCP servers'));
-  assert.ok(d.includes('not a published npm release'));
-  assert.ok(d.includes('independent participant'));
+  assert.ok(d.includes('No real MCP servers') || d.includes('No real\nMCP endpoints'));
+  assert.ok(d.includes('not a published npm release') || d.includes('not independently operated'));
+  assert.ok(d.includes('independently operated tester'));
 });
 
 test('M5-07: optional tarball check is offline, local and not represented as signed proof',()=>{
@@ -113,7 +113,7 @@ test('M5-07: optional tarball check is offline, local and not represented as sig
     'npm_config_cache',
     'Get-FileHash -LiteralPath $Archive -Algorithm SHA256',
     'sha256sum "$pack_dir/mcp-agent-security-test-suite-0.0.10-rc.1.tgz"',
-    'A digest computed from the archive',
+    'An archive digest computed by the author',
     '80-path',
     'R1 package test'
   ])assert.ok(d.includes(literal),literal);
@@ -153,8 +153,8 @@ test('M5-07: instructions separate expected symbolic detection from safety PASS'
   assert.ok(d.includes('observedSafetyStatus:FAIL'));
   assert.ok(d.includes('RETRY_PARAMS_CHANGED'));
   assert.ok(d.includes('process exit **0**'));
-  assert.ok(d.includes('**1** on a control mismatch'));
-  assert.ok(d.includes('**2** for bad invocation'));
+  assert.ok(d.includes('exit **1**'));
+  assert.ok(d.includes('exit **2**'));
   assert.ok(d.includes('independent usability gate'));
   assert.ok(d.includes('manual'));
   assert.ok(d.includes('#59'));
@@ -196,4 +196,53 @@ test('M5-07: bad evaluator runner arguments remain generic even with fake secret
     assert.equal(result.errorCode,'BETA_ARGUMENTS_NOT_ALLOWED');
     assert.ok(!(outcome.stdout+outcome.stderr).includes(arg));
   }
+});
+
+
+test('P1 M5-07: Markdown fences are balanced and shell snippets cannot consume later sections',()=>{
+  const d=documented('docs/BETA_TESTING.md');
+  const fences=d.split('\n').filter(line=>/^\\`\\`\\`(?:sh|powershell)?\\s*$/.test(line));
+  assert.equal(fences.length,8,'4 complete code blocks are expected');
+  let open=null,blocks=[];
+  for(const line of d.split('\n')){
+    const match=line.match(/^\\`\\`\\`(sh|powershell)?\\s*$/);
+    if(match){
+      if(open===null)open={lang:match[1]??'',lines:[]};
+      else {blocks.push(open);open=null;}
+    }else if(open!==null)open.lines.push(line);
+  }
+  assert.equal(open,null,'unterminated fenced block');
+  assert.deepEqual(blocks.map(b=>b.lang),['sh','sh','powershell','sh']);
+  for(const block of blocks){
+    assert.ok(block.lines.length>=4,'empty/truncated fenced block');
+    assert.ok(block.lines.every(line=>!/^#{1,4} |^\\| Case identifier/.test(line)),
+      'a Markdown section/table was swallowed inside a shell block');
+  }
+  const ps=blocks.find(block=>block.lang==='powershell').lines.join('\n');
+  assert.ok(ps.includes("if ($ArchiveDigest.Length -ne 64) { throw 'Digest invalid' }"));
+  assert.ok(ps.includes('Get-FileHash -LiteralPath $Archive -Algorithm SHA256'));
+  assert.ok(ps.includes('npm pack --offline --ignore-scripts --pack-destination $Pack'));
+  assert.ok(ps.includes("if ($LASTEXITCODE -ne 0) { throw 'Offline beta contract failed' }"));
+  const shell=blocks.at(-1).lines.join('\n');
+  assert.ok(shell.includes('sha256sum "$pack_dir/mcp-agent-security-test-suite-0.0.10-rc.1.tgz"'));
+});
+
+test('P1 M5-07: previous duplicate-heading and misplaced-insertion regression is rejected',()=>{
+  const d=documented('docs/BETA_TESTING.md');
+  const headings=[
+    '## Expected fixed controls',
+    '## What a real beta tester should report',
+    '## Engineering acceptance evidence (2026-10-23)',
+    '## Independent evaluator quick path (M5-07, no live targets)'
+  ];
+  for(const h of headings){
+    assert.equal(d.split('\n').filter(l=>l===h).length,1,h+' repeated');
+  }
+  const first=d.indexOf('## Expected fixed controls');
+  const second=d.indexOf('## What a real beta tester should report');
+  const third=d.indexOf('## Engineering acceptance evidence');
+  const fourth=d.indexOf('## Independent evaluator quick path');
+  assert.ok(first>=0&&first<second&&second<third&&third<fourth);
+  assert.ok(!d.includes("if ($ArchiveDigest -notmatch '^[A-Fa-f0-9]{64}"));
+  assert.ok(d.includes('No outreach, automatic upload, telemetry'));
 });
