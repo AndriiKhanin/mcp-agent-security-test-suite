@@ -33,7 +33,13 @@ function checkForm(source, ids) {
       ids.some(id => !actual.includes(id)))
     errors.push('M5_FORM_REQUIRED_FIELD_MISSING');
   for (const field of fields.filter(f => f.type !== 'checkboxes')) {
-    if (!/^\s+validations:\n\s+required: true$/m.test(field.raw))
+    // Only the M5-07 beta installation-friction narrative may be optional.
+    // Every identity, outcome and consent-control field stays mandatory.
+    const required=/^\s+validations:\n\s+required: true$/m.test(field.raw);
+    const optionalBetaFriction=field.id==='install_friction' &&
+      fields.some(f => f.id==='actual_test') &&
+      /^\s+validations:\n\s+required: false$/m.test(field.raw);
+    if (!required && !optionalBetaFriction)
       errors.push('M5_FORM_REQUIRED_VALIDATION_MISSING');
   }
   const confirmation = fields.find(field => field.id === 'safe_disclosure');
@@ -125,7 +131,9 @@ test('M5-03: issue forms stay outside npm archive; contributor documentation is 
 test('M5-05: independent beta intake requires fixed public revision and fictional-only consent',()=>{
   const raw=read('beta_feedback.yml');
   const betaIds=['source_commit','version','os','node_major','runner_result',
-    'matched_count','deviations','usability','safe_disclosure','actual_test'];
+    'matched_count','evaluation_path','offline_archive','exit_codes',
+    'guide_clarity','install_friction','deviations','usability',
+    'safe_disclosure','actual_test'];
   assert.deepEqual(checkForm(raw,betaIds),[]);
   assert.match(raw,/docs\/BETA_TESTING\.md/);
   assert.match(raw,/not independent beta-tester evidence/);
@@ -135,6 +143,15 @@ test('M5-05: independent beta intake requires fixed public revision and fictiona
   const statement=sections(raw).find(x=>x.id==='actual_test');
   assert.equal(statement?.type,'checkboxes');
   assert.match(statement.raw,/^\s+required: true$/m);
+  const optional=sections(raw).find(x=>x.id==='install_friction');
+  assert.match(optional.raw,/^\s+validations:\n\s+required: false$/m);
+  const forcedOptional=raw.replace(
+    /(id: runner_result[\s\S]*?required: )true/,
+    '$1false'
+  );
+  assert.ok(checkForm(forcedOptional,betaIds).includes(
+    'M5_FORM_REQUIRED_VALIDATION_MISSING'
+  ));
   const missing=raw.replace(/^    id: source_commit$/m,'    id: missing_commit');
   assert.ok(checkForm(missing,betaIds).includes('M5_FORM_REQUIRED_FIELD_MISSING'));
   const noConsent=raw.replace(
