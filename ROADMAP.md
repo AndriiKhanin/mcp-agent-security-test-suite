@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M4-B9-B — strict user-authored symbolic traces
+
+- **IN DEVELOPMENT (synthetic only):** [Issue #115](../../issues/115).
+  A separate `adapter-synthetic-trace <local-file>` profile accepts
+  1–8 developer-authored enum/boolean-only events and an unchanged inert
+  project descriptor, reusing the pure synthetic `auditRecords` checker.
+  Clear difference between symbolic denial-without-effect and violated
+  controls, fixed symbolic reports and no user content echoed. No arbitrary
+  RPC, real MCP transcripts, credentials, DNS/network, stdio launch or
+  target approval. Preserve 80 reviewed npm paths, zero new dependencies,
+  4/4 PR and post-merge main CI, and pending #21/#43/#59 gates.
+
 ## M4-B9-A — offline project fixture audit bundle
 
 - **DONE (offline fixture audit only):** [Issue #112](../../issues/112),

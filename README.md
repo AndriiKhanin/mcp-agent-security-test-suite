@@ -158,6 +158,20 @@ ever dispatched by this command; the input is limited to 16 KiB.
 `REAL_TARGET_NOT_AUTHORIZED`, and `executionEnabled:false` are
 unconditional, regardless of fixture status.
 
+## User-authored symbolic project traces (M4-B9-B)
+
+`node src/cli.mjs adapter-synthetic-trace <symbolic-trace-file>`
+allows a developer to audit **up to eight explicitly fictional, enum/boolean
+only decision/effect assertions** with a previously reviewed inert adapter
+descriptor. This is separate from `adapter-fixture-audit` and retains
+the reviewed offline `auditRecords` invariants. A trace `PASS` is
+not a fixed negative-control PASS, a real MCP scan or actual security
+attestation. The strict 4096-byte input cannot contain user tool names,
+raw MCP messages, endpoint requests, commands, credentials or arbitrary
+fixture paths. [Complete fictional sample](docs/GETTING_STARTED.md).
+The mode returns symbolic event ordinals, fixed rule codes and permanent
+`REAL_TARGET_EXECUTION_NOT_AUTHORIZED`; no external target contact.
+
 ## Candidate packaging (not yet published)
 
 The prerelease package declares an executable `mcp-agent-security`, an audited `files` allowlist and zero dependencies. `npm run release:preflight` checks the archive manifest in offline dry-run mode; the full `node --test` suite also performs a **disposable offline local tarball installation smoke**, verifies the installed CLI and deletes all temp files. The [R2 exact package inventory guard](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) fails on unreviewed new or missing packaged file paths; it does not inspect the safety of approved file contents. No registry access or publication occurs. Do not run `npm publish` or create stable tags without separate explicit approval. See [release readiness](docs/RELEASE_READINESS.md), the [R3 internal release review](docs/R3_INTERNAL_RELEASE_REVIEW.md), the [R4 offline artifact-integrity checks](docs/R4_ARTIFACT_INTEGRITY.md) and the [R5 independent-review handoff](docs/R5_INDEPENDENT_REVIEW.md). None substitutes for the still-open [R5-B independent reviewer release gate](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) or permission to publish.
