@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-B — guided fictional adopter kit and CI starter
+
+- **IN DEVELOPMENT — reviewed fictional examples only:** [Issue #141](../../issues/141).
+  Add selector-only `adapter-kit stdio|streamable-http` to emit a
+  deterministic version-1 JSON plan, inert descriptor, clean and
+  expected-negative symbolic CI examples, and literal human-readable
+  interpretation. No scripts/files written or target services contacted by
+  the kit generator. Prove three artifact roundtrips both in source and
+  installed offline tarball from a separate fictional adopter workspace.
+  Preserve 80 packaged paths and 4/4 PR/main CI; live server #21,
+  independent audit #43 and independent beta #59 remain OPEN.
+
 ## M6-A — one-command offline adapter quickstart
 
 - **DONE — fictional controls only:** [Issue #138](../../issues/138), [merged PR #139](../../pull/139), [post-merge main CI #40124135985](../../actions/runs/40124135985): **4/4 PASS, 693/693 tests/job**, zero failed/skipped.
