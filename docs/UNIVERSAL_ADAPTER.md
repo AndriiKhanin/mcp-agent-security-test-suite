@@ -227,3 +227,17 @@ included in the output. Status PASS is only an internal check.
 `projectSafetyAssessed:false` and
 `REAL_TARGET_EXECUTION_NOT_AUTHORIZED` remain unconditional.
 See [first run](GETTING_STARTED.md#m6-a--first-run-project-quickstart-inert-descriptor-only).
+
+
+## M6-B — guided zero-contact adapter starter kit
+
+`adapter-kit stdio|streamable-http` now emits a versioned, data-only
+onboarding plan from two hardcoded reviewed selector values. It reuses
+the existing inert `adapter-template`, fixed-five-control
+`adapter-quickstart` and `adapter-trace-expect` contracts, including
+a clean symbolic trace and a deliberately violated trace whose
+`observedSafetyStatus:FAIL` must remain visible even though the CI matcher
+reports `MATCH`. The generator performs no filesystem writes, no network
+contact and no child-process launch. Project-specific user input, private
+URLs, tokens, command flags and arbitrary tool-call arguments are forbidden.
+[Copyable Node and PowerShell walkthrough](GETTING_STARTED.md#m6-b--guided-fictional-adopter-kit-one-selector-no-server-contact).
