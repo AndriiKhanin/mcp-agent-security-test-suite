@@ -201,11 +201,12 @@ test('M5-07: bad evaluator runner arguments remain generic even with fake secret
 
 test('P1 M5-07: Markdown fences are balanced and shell snippets cannot consume later sections',()=>{
   const d=documented('docs/BETA_TESTING.md');
-  const fences=d.split('\n').filter(line=>/^\\`\\`\\`(?:sh|powershell)?\\s*$/.test(line));
+  const codeMarker=line=>['```','```sh','```powershell'].includes(line.trim());
+  const fences=d.split('\n').filter(codeMarker);
   assert.equal(fences.length,8,'4 complete code blocks are expected');
   let open=null,blocks=[];
   for(const line of d.split('\n')){
-    const match=line.match(/^\\`\\`\\`(sh|powershell)?\\s*$/);
+    const match=codeMarker(line) ? [line.trim(),line.trim().slice(3)] : null;
     if(match){
       if(open===null)open={lang:match[1]??'',lines:[]};
       else {blocks.push(open);open=null;}
@@ -215,7 +216,7 @@ test('P1 M5-07: Markdown fences are balanced and shell snippets cannot consume l
   assert.deepEqual(blocks.map(b=>b.lang),['sh','sh','powershell','sh']);
   for(const block of blocks){
     assert.ok(block.lines.length>=4,'empty/truncated fenced block');
-    assert.ok(block.lines.every(line=>!/^#{1,4} |^\\| Case identifier/.test(line)),
+    assert.ok(block.lines.every(line=>!/^#{1,4} /.test(line) && !line.startsWith('| Case identifier')),
       'a Markdown section/table was swallowed inside a shell block');
   }
   const ps=blocks.find(block=>block.lang==='powershell').lines.join('\n');
