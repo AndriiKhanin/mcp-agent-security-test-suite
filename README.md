@@ -138,6 +138,24 @@ It checks five **bundled fictional** cases, including one intentionally detected
 
 [Merged PR #110](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/110) adds a test-only versioned evidence snapshot boundary and a disposable synchronous one-time permit state machine. An exact SHA-256 digest binds the fictional target and operator to a claimed proof but **does not authenticate either one**. Within one isolated memory cell, a single consume succeeds; duplicates, revoked, expired and mismatched requests are rejected. Separate cells **can each consume a copied grant**, so there is **no real durable or cross-process replay protection**. All reports permanently deny real-target execution. No customer MCP contact, credentials, DNS/TLS/SSRF network controls or executable grant APIs were added. [M4-B5 decision record](docs/M4_B5_TARGET_APPROVAL.md) describes the design and missing gates. [Main CI #40077863059](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40077863059): **4/4 PASS, 599/599 tests per job**, 0 failed/skipped; reviewed npm inventory unchanged at 80 paths.
 
+## Offline project fixture audit (M4-B9-A)
+
+`node src/cli.mjs adapter-fixture-audit <fictional-bundle-file>` combines a
+portable **inert** stdio or HTTPS project descriptor with up to five
+pre-reviewed fictional security controls: permission denial, replay denial,
+unknown tool denial, an intentionally failing denied-write negative control
+and a passing clean trace. The command returns bounded JSON-v1 per-check
+evidence. A whole-bundle `PASS` means our synthetic fixture expectations
+were satisfied; it **does not** measure the real project/server. No untrusted
+trace, executable code, dynamic fixture path or user-controlled endpoint is
+ever dispatched by this command; the input is limited to 16 KiB.
+[Copy/paste quickstart](docs/GETTING_STARTED.md).
+
+**External/user MCP servers remain uncontacted and unauthorized.**
+`REAL_TARGET_NOT_ATTEMPTED`, `OPERATOR_NOT_VERIFIED`,
+`REAL_TARGET_NOT_AUTHORIZED`, and `executionEnabled:false` are
+unconditional, regardless of fixture status.
+
 ## Candidate packaging (not yet published)
 
 The prerelease package declares an executable `mcp-agent-security`, an audited `files` allowlist and zero dependencies. `npm run release:preflight` checks the archive manifest in offline dry-run mode; the full `node --test` suite also performs a **disposable offline local tarball installation smoke**, verifies the installed CLI and deletes all temp files. The [R2 exact package inventory guard](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/32) fails on unreviewed new or missing packaged file paths; it does not inspect the safety of approved file contents. No registry access or publication occurs. Do not run `npm publish` or create stable tags without separate explicit approval. See [release readiness](docs/RELEASE_READINESS.md), the [R3 internal release review](docs/R3_INTERNAL_RELEASE_REVIEW.md), the [R4 offline artifact-integrity checks](docs/R4_ARTIFACT_INTEGRITY.md) and the [R5 independent-review handoff](docs/R5_INDEPENDENT_REVIEW.md). None substitutes for the still-open [R5-B independent reviewer release gate](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) or permission to publish.

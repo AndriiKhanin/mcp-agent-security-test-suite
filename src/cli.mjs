@@ -10,7 +10,7 @@ import { runLoopbackHttpScenario } from './loopback-http-mock.mjs';
 import { runFirstPartyStagingSelftest } from './first-party-staging-mcp.mjs';
 import { runFirstPartyStagingProcessSelftest } from './staging-process-harness.mjs';
 import { parseStrictJson } from './strict-json.mjs';
-import { inspectProjectAdapter, previewProjectOnboarding, createOfflineAdapterTemplate } from './project-adapter.mjs';
+import { inspectProjectAdapter, previewProjectOnboarding, createOfflineAdapterTemplate, auditOfflineProjectFixtureBundle } from './project-adapter.mjs';
 import { evaluateAdapterConsent } from './adapter-consent.mjs';
 import { runFirstPartyAdapterSelftest, runFixedModernStagingAdapterSelftest, runFixedOnboardingDemo } from './local-adapter-drivers.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
@@ -19,17 +19,17 @@ import { auditMcpEraTranscript } from './mcp-era-contract.mjs';
 import { auditModernNegotiation } from './mcp-modern-negotiation.mjs';
 import { CLI_COMMANDS, buildCliReport, buildCliErrorReport, buildOfflineDemoResult, buildCliHelpResult, buildCliVersionResult } from './report-contract.mjs';
 
-async function readBoundedFile(path) {
+async function readBoundedFile(path,maxBytes=1024*1024) {
   // Open a single handle with O_NOFOLLOW where available; reject non-regular file.
   const fs = await import('node:fs');
   const flags = fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0);
   const h = await open(path, flags);
   try {
     const stat = await h.stat();
-    if (!stat.isFile() || stat.size > 1024*1024) throw new Error('INVALID_FILE');
-    const buff = Buffer.alloc(1024*1024 + 1);
+    if (!stat.isFile() || stat.size > maxBytes) throw new Error('INVALID_FILE');
+    const buff = Buffer.alloc(maxBytes + 1);
     const { bytesRead } = await h.read(buff, 0, buff.length, 0);
-    if (bytesRead > 1024*1024) throw new Error('OVERSIZED_FILE');
+    if (bytesRead > maxBytes) throw new Error('OVERSIZED_FILE');
     // strict UTF-8 decoding prevents silent malformed input replacement.
     return new TextDecoder('utf-8', {fatal: true}).decode(buff.subarray(0, bytesRead));
   } finally { await h.close(); }
@@ -65,7 +65,7 @@ async function main() {
     : noFile ? args.length===1
       : args.length===2 && !args[1].startsWith('-');
   if (!CLI_COMMANDS.includes(command) || !validArgs) {
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template stdio|streamable-http OR adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template stdio|streamable-http OR adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -118,8 +118,9 @@ async function main() {
       emit(report);
       return report.exitCode;
     }
-    const source = await readBoundedFile(args[1]);
-    const result = args[0] === 'adapter-onboard' ? previewProjectOnboarding(parseStrictJson(source)) :
+    const source = await readBoundedFile(args[1],command==='adapter-fixture-audit'?16384:1024*1024);
+    const result = command === 'adapter-fixture-audit' ? auditOfflineProjectFixtureBundle(parseStrictJson(source)) :
+      args[0] === 'adapter-onboard' ? previewProjectOnboarding(parseStrictJson(source)) :
       args[0] === 'adapter-policy-check' ? evaluateAdapterConsent(parseStrictJson(source)) :
       args[0] === 'adapter-check' ? inspectProjectAdapter(parseStrictJson(source)) :
       args[0] === 'negotiate' ? auditModernNegotiation(parseStrictJson(source)) :

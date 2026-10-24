@@ -1,4 +1,6 @@
 import {createHash} from 'node:crypto';
+import {runScenario} from './scenario.mjs';
+import {auditRecords} from './trace.mjs';
 /**
  * Portable, *non-executing* MCP project connection descriptor.
  *
@@ -533,4 +535,167 @@ export function createFictionalPermitRehearsal(packet,operatorId){
     }
   });
   return api;
+}
+
+
+/**
+ * M4-B9-A: A selected subset of *reviewed in-code fictional fixtures*, joined
+ * to an otherwise inert descriptor for convenient offline project onboarding.
+ * User JSON can choose fixed case IDs only; no arbitrary interactions, target
+ * URLs, commands, source paths, tool calls, or network transports are executed.
+ * Every result describes OUR fixtures, never the user's real MCP installation.
+ */
+export const OFFLINE_FIXTURE_BUNDLE_SCHEMA_VERSION=1;
+export const OFFLINE_FIXTURE_CASES=Object.freeze([
+  'permission-denial','replay-denial','tool-escalation-denial',
+  'denied-effect-negative','clean-trace'
+]);
+const OFFLINE_CASE_SET=new Set(OFFLINE_FIXTURE_CASES);
+
+// Defence in depth for the exported JS API (CLI input is strict JSON).
+// Reject getters, non-JSON prototypes, cyclic graphs, symbols and huge trees.
+function plainFiniteTree(value,seen=new WeakSet(),budget={remaining:160},depth=0){
+  if(--budget.remaining<0 || depth>8) return false;
+  if(value===null || typeof value==='boolean') return true;
+  if(typeof value==='string') return value.length<=512;
+  if(typeof value==='number') return Number.isSafeInteger(value);
+  if(!value || typeof value!=='object' || seen.has(value)) return false;
+  seen.add(value);
+  const array=Array.isArray(value);
+  if(Object.getPrototypeOf(value)!==(array?Array.prototype:Object.prototype))
+    return false;
+  const descriptors=Object.getOwnPropertyDescriptors(value);
+  const keys=Reflect.ownKeys(descriptors);
+  if(keys.length>160 || (array && value.length>12)) return false;
+  return keys.every(k=>{
+    if(typeof k!=='string') return false;
+    if(array && k==='length') return true;
+    const descriptor=descriptors[k];
+    if(!Object.hasOwn(descriptor,'value')) return false;
+    return plainFiniteTree(descriptor.value,seen,budget,depth+1);
+  });
+}
+const fixturePolicy=()=>({
+  owner:'fictional-owner',resource:'mcp://fictional-resource',
+  scopes:['note:read','note:write'],generation:2
+});
+const fixtureGrant=nonce=>({
+  owner:'fictional-owner',resource:'mcp://fictional-resource',
+  scopes:['note:read','note:write'],generation:2,
+  notBefore:0,expiresAt:999,nonce
+});
+const fixtureAction=(tool,expected,nonce='synthetic-grant-01')=>({
+  tool,owner:'fictional-owner',resource:'mcp://fictional-resource',
+  origin:'owner',grant:fixtureGrant(nonce),expected
+});
+function fixtureScenario(caseId){
+  let actions;
+  if(caseId==='permission-denial'){
+    actions=[{...fixtureAction('write-note',{
+      decision:'DENY',reason:'OWNER_MISMATCH',effect:'NONE'
+    }),owner:'fictional-other'}];
+  } else if(caseId==='replay-denial'){
+    actions=[
+      fixtureAction('write-note',{decision:'ALLOW',reason:'AUTHORIZED',effect:'WRITE'}),
+      fixtureAction('write-note',{decision:'DENY',reason:'REPLAYED_NONCE',effect:'NONE'})
+    ];
+  } else {
+    actions=[fixtureAction('execute-shell',{
+      decision:'DENY',reason:'UNKNOWN_TOOL',effect:'NONE'
+    })];
+  }
+  return {
+    version:1,id:'fictional-offline-'+caseId,clock:100,
+    policy:fixturePolicy(),actions
+  };
+}
+function runReviewedCase(caseId){
+  if(caseId==='clean-trace'){
+    const outcome=auditRecords([
+      {decision:'ALLOW',effect:'READ',ownerAuthorized:true,
+        scopeAuthorized:true,leaseFresh:true,secretLogged:false},
+      {decision:'DENY',effect:'NONE',secretLogged:false}
+    ]);
+    return {observedStatus:outcome.status,matched:outcome.status==='PASS' &&
+      outcome.checked===2 && outcome.failureCount===0,
+      expectedRule:'CLEAN_SYNTHETIC_TRACE'};
+  }
+  if(caseId==='denied-effect-negative'){
+    const outcome=auditRecords([
+      {decision:'DENY',effect:'WRITE',secretLogged:false}
+    ]);
+    return {observedStatus:outcome.status,matched:outcome.status==='FAIL' &&
+      outcome.failureCount===1 &&
+      outcome.failures[0]?.rule==='DENIED_ACTION_HAD_EFFECT',
+      expectedRule:'DENIED_ACTION_HAD_EFFECT'};
+  }
+  const outcome=runScenario(fixtureScenario(caseId));
+  const expected=caseId==='permission-denial'
+    ? ['OWNER_MISMATCH']
+    : caseId==='replay-denial'
+      ? ['AUTHORIZED','REPLAYED_NONCE']
+      : ['UNKNOWN_TOOL'];
+  const matched=outcome.status==='PASS' && outcome.checks===expected.length &&
+    outcome.mismatches.length===0 &&
+    outcome.steps.every((step,index)=>step.reason===expected[index]) &&
+    outcome.steps.at(-1).decision==='DENY' &&
+    outcome.steps.at(-1).effect==='NONE';
+  return {observedStatus:outcome.status,matched,
+    expectedRule:expected.at(-1)};
+}
+export function auditOfflineProjectFixtureBundle(bundle){
+  const invalid=()=>{throw new TypeError('INVALID_OFFLINE_PROJECT_FIXTURE_BUNDLE');};
+  try{
+    if(!plainFiniteTree(bundle) ||
+       !isDataRecord(bundle,['bundleSchemaVersion','mode','descriptor','checks']) ||
+       bundle.bundleSchemaVersion!==OFFLINE_FIXTURE_BUNDLE_SCHEMA_VERSION ||
+       bundle.mode!=='offline-fictional-only' ||
+       !Array.isArray(bundle.checks) || bundle.checks.length<1 ||
+       bundle.checks.length>OFFLINE_FIXTURE_CASES.length ||
+       !bundle.checks.every(check=>isDataRecord(check,['caseId']) &&
+         OFFLINE_CASE_SET.has(check.caseId)) ||
+       new Set(bundle.checks.map(check=>check.caseId)).size!==bundle.checks.length)
+      invalid();
+    // Strict existing descriptor validation: no allowNetwork/process/tools flags.
+    const descriptor=inspectProjectAdapter(bundle.descriptor);
+    const checks=bundle.checks.map(({caseId})=>{
+      try{
+        const verdict=runReviewedCase(caseId);
+        return {caseId,expectedControl:verdict.expectedRule,
+          observedStatus:verdict.observedStatus,
+          checkStatus:verdict.matched?'PASS':'FAIL',
+          expectationMet:verdict.matched};
+      } catch {
+        return {caseId,expectedControl:'REVIEWED_SYNTHETIC_CONTROL',
+          observedStatus:'ERROR',checkStatus:'FAIL',expectationMet:false};
+      }
+    });
+    const findings=checks.filter(c=>c.checkStatus==='FAIL')
+      .map(c=>({rule:'OFFLINE_CONTROL_MISMATCH',caseId:c.caseId}));
+    return {
+      status:findings.length?'FAIL':'PASS',
+      profile:'fictional-project-fixture-audit-v1',
+      bundleSchemaVersion:OFFLINE_FIXTURE_BUNDLE_SCHEMA_VERSION,
+      adapterSchemaVersion:descriptor.adapterSchemaVersion,
+      transport:descriptor.transport,
+      protocolVersion:descriptor.protocolVersion,
+      descriptorEvidence:'DESCRIPTOR_VALIDATED',
+      fixtureEvidence:'OFFLINE_FIXTURE_EVALUATED',
+      stagingEvidence:'FIRST_PARTY_STAGING_NOT_ATTEMPTED',
+      targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+      operatorEvidence:'OPERATOR_NOT_VERIFIED',
+      readinessStatus:'REAL_TARGET_NOT_AUTHORIZED',
+      authorizationStatus:'REAL_TARGET_EXECUTION_NOT_AUTHORIZED',
+      connectionStatus:'NOT_ATTEMPTED',
+      executionEnabled:false,
+      projectConnectionAuthorized:false,
+      externalTargetContacted:false,
+      operatorVerified:false,
+      fixturesAreProjectSpecific:false,
+      checks,
+      failureCount:findings.length,findingsTruncated:false,findings
+    };
+  }catch{
+    invalid();
+  }
 }
