@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 693 synthetic/local, M6-A one-command offline descriptor quickstart, five fixed fictional controls, R5-C assessor handoff, beta claim preflight and fictional downstream package | [M6-A PR #139](../../pull/139), [main CI #40124135985](../../actions/runs/40124135985): **4/4 PASS, 693/693 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 703 synthetic/local, M6-B guided fictional starter kit, M6-A offline quickstart, expected-violation CI samples, R5-C assessor handoff and fictional downstream package | [M6-B PR #142](../../pull/142), [main CI #40126257281](../../actions/runs/40126257281): **4/4 PASS, 703/703 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,15 +91,15 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-B — guided fictional adopter kit and CI starter
 
-- **IN DEVELOPMENT — reviewed fictional examples only:** [Issue #141](../../issues/141).
+- **DONE — reviewed fictional examples only:** [Issue #141](../../issues/141), [merged PR #142](../../pull/142), [code post-merge CI #40126257281](../../actions/runs/40126257281): **4/4 PASS, 703/703 tests/job**, 0 failed/skipped.
   Add selector-only `adapter-kit stdio|streamable-http` to emit a
   deterministic version-1 JSON plan, inert descriptor, clean and
   expected-negative symbolic CI examples, and literal human-readable
   interpretation. No scripts/files written or target services contacted by
   the kit generator. Prove three artifact roundtrips both in source and
   installed offline tarball from a separate fictional adopter workspace.
-  Preserve 80 packaged paths and 4/4 PR/main CI; live server #21,
-  independent audit #43 and independent beta #59 remain OPEN.
+  Existing 80 reviewed packaged paths remain intact, with 4/4 CI verified;
+  live server #21, independent audit #43 and independent beta #59 remain OPEN.
 
 ## M6-A — one-command offline adapter quickstart
 
