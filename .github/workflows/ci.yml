@@ -29,3 +29,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Run synthetic regression suite
         run: npm test
+      - name: Run portable fictional CI smoke
+        run: node examples/offline-ci-check.mjs
