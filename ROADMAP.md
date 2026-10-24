@@ -92,7 +92,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 ## M6-C — one-command exported fictional kit CI verification
 
 - **IN DEVELOPMENT — fixed offline fixtures only:** [Issue #144](../../issues/144).
-  Verify an exported `adapter-kit` JSON file against the canonical
+  Run `adapter-kit-verify <local-kit-json>` to verify an exported `adapter-kit` JSON file against the canonical
   complete reviewed CLI report, then rerun quickstart and two fictional
   symbolic expectations in one CLI command with strict local UTF-8
   file-size/shape limits, generic safe errors and clear 0/1/2 exit
