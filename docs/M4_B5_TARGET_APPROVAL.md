@@ -157,3 +157,42 @@ protections are present here. The current URL grammar is only a lexical guard.
 Even a fully green fictional snapshot is **not evidence that any real target
 is safe or authorized**. Real MCP contact stays blocked pending fresh owner
 approval under RFC #21 and independent verification/security review.
+
+
+## M4-B8-B — test-only evidence provenance and one-time rehearsal
+
+**Scope: entirely offline and fictional.** The new library functions in
+`src/project-adapter.mjs` are `fingerprintFictionalTargetPacket(packet,operatorId)`,
+`inspectFictionalEvidenceSnapshot(packet,operatorId,snapshot,{nowMs})` and
+`createFictionalPermitRehearsal(packet,operatorId)`. They are **not** CLI
+commands, API endpoints, authorization grants or signed attestations.
+
+The SHA-256 packet fingerprint binds a pinned, schema-checked nonproduction
+HTTPS tuple, method, request bounds, grant properties/nonce and a fictional
+operator label. The digest is only an **equality check**, not a digital
+signature or authorization. Test evidence uses version 1 and an exact
+`TEST_ONLY_NOT_INDEPENDENT` provenance marker, fictional provider and issuer
+labels, matching operator and packet fingerprint, a finite evidence window,
+and six distinct synthetic gate states (ownership, operator, egress, TLS,
+DNS and SSRF). All inputs are caller-controlled. An attacker can copy or
+forge a matching synthetic snapshot. There are **no actual trusted issuers,
+independent providers, credentials, remote checks or real verified operators**.
+
+`createFictionalPermitRehearsal` returns a disposable synchronous in-memory
+state cell with reviewed `current/issue/consume/revoke/expire` transitions.
+An issued permit may be consumed **once within one isolated cell**. Duplicate
+or concurrent calls in that cell are denied after its first consume; wrong
+target or operator leaves it unconsumed; revocation and expiry fail closed.
+**Two independent cells can each consume a copy of the same fictional grant.**
+This intentionally documents the missing cross-process durable atomic replay
+ledger. Synchronous JavaScript state transitions do not provide a trusted
+authorization service or an OS-level atomic transaction.
+
+Even successful issuance/consumption always produces
+`REAL_TARGET_EXECUTION_NOT_AUTHORIZED`, `executionEnabled:false`,
+`externalTargetContacted:false`, and `connectionStatus:NOT_ATTEMPTED`.
+Public reports contain only fixed symbolic rule codes and state labels,
+never raw URLs, fingerprints, operator IDs, nonces or credentials. Existing
+adapter CLI, first-party staging, offline templates and package inventory
+are unaffected. Real target testing still requires owner approval, independent
+proof, durable revoke/replay authority and review of network confinement.
