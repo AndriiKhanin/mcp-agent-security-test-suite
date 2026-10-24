@@ -193,3 +193,21 @@ The GitHub Actions Windows/Ubuntu Node20/22 matrix runs the existing
 example directly. A positive smoke result neither contacts nor certifies
 the project described by any adapter descriptor, and cannot grant MCP
 execution authority. See [portable Windows and CI steps](GETTING_STARTED.md).
+
+
+## M4-B10-A — standalone fictional downstream consumption
+
+The R1 offline package-install smoke also builds and installs the actual
+reviewed `0.0.10-rc.1` tarball with lifecycle hooks/registry disabled, then
+creates a *separate temporary fictional adopter* next to the isolated npm
+installation. The adopter invokes the packaged CLI by explicit absolute
+path, validates its own inert descriptor, runs anonymous synthetic traces
+and strict exact expectations, and checks an SDK import from the packaged
+source. It tests exit codes 0/1/2, input bounds, hostile symbolic fields,
+missing file, direct symlink, and sanitized responses.
+
+No runtime dependency, arbitrary transport connector, package publish,
+remote user server, secret or real MCP transcript is introduced. This is an
+**offline package consumption** acceptance test, not interoperability,
+operator authentication, security certification, or permission to connect.
+See the [portable Node/PowerShell walkthrough](GETTING_STARTED.md).
