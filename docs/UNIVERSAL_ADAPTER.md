@@ -106,3 +106,24 @@ Next steps: review a fictional profile, optionally review the deliberately expir
 For a safe customer onboarding step, copy only the nested `template` JSON object to a local file and run `adapter-onboard <file>`. The locally generated profile is still **inert**, and `adapter-onboarding-demo` remains an **unrelated** first-party mock. Specific `stdio` / `streamable-http` selectors are the only values accepted; arbitrary user-supplied templates, URLs, commands, file paths and flags fail before reading any input. This leaves the exact 80-path npm release inventory unchanged. [Step-by-step setup](GETTING_STARTED.md).
 
 **M4-B7-C acceptance, 2026-10-24:** [Issue #103](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/103) accepted via [PR #104](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/104), source main `c6076f5533e7590336039f4f8ab588734933d905`. [PR CI #40073341292](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40073341292) and [post-merge main CI #40073451813](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40073451813): **4/4 PASS, 566/566 tests/job on Windows/Ubuntu Node20/22, 0 failures/skips**. Twelve developer-only negative/positive tests, exact **80-path** npm inventory and strict R2/R5 gates retained. No real target, process execution, operator ownership verification, complete MCP conformance, independent review or release is implied.
+
+
+## M4-B9-A — optional fictional project fixture bundle
+
+`adapter-fixture-audit <local-json-file>` combines an unchanged,
+**validate-only** portable descriptor with selection of 1–5 reviewed,
+**in-code synthetic** cases: `permission-denial`, `replay-denial`,
+`tool-escalation-denial`, `denied-effect-negative`, and `clean-trace`.
+The operator can reorder or select those five IDs, not inject raw records,
+URLs, commands or execution flags. The CLI reads at most 16 KiB from the
+specified local JSON file; it never opens a project MCP socket.
+
+The audit's `PASS` means each fictional positive/negative control produced
+its built-in expected outcome. An expected broken case detected as FAIL is
+a correctly functioning **negative control**, not a real vulnerability
+discovered in the named project. Output includes symbolic per-case detection,
+`DESCRIPTOR_VALIDATED`, `OFFLINE_FIXTURE_EVALUATED`, and permanent
+`REAL_TARGET_EXECUTION_NOT_AUTHORIZED`. The name/URL/process descriptor
+is **not** included in reports. This is not a security certification, a
+live scanner, operator verification, DLP or permission to execute user code.
+See [the exact copy/paste example](GETTING_STARTED.md).
