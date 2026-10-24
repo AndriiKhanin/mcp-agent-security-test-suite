@@ -139,3 +139,61 @@ This validates **only JSON syntax and the fixed descriptor rules**. It neither r
 The optional `adapter-onboarding-demo` command remains a **separate** test against our own fixed first-party localhost mock, and does not use your template or saved project file. A real MCP server connection requires independent exact-target ownership verification and new owner-approved safety controls under [RFC #21](M4_AUTHORIZED_INTEGRATIONS_RFC.md).
 
 **Template engineering acceptance (2026-10-24):** [M4-B7-C #103](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/103), [PR #104](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/104), [post-merge main CI #40073451813](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40073451813) — **4/4 PASS, 566/566 tests/job**, zero failures/skips, including safe copy/paste round-trip tests. This is fictional local-only tooling, not real user MCP connectivity.
+
+
+## M4-B9-A — audit a fictional project bundle without contacting its server
+
+1. Choose a descriptor: `node src/cli.mjs adapter-template streamable-http`
+   emits a JSON report. Copy **only** the `template` object as the
+   `descriptor` value below. The hostname is an inert documentation string.
+2. Create your own local file `offline-project-bundle.json` with this
+   **entirely fictional** example:
+
+```json
+{
+  "bundleSchemaVersion": 1,
+  "mode": "offline-fictional-only",
+  "descriptor": {
+    "adapterSchemaVersion": 1,
+    "project": { "name": "fictional-http-project" },
+    "transport": {
+      "type": "streamable-http",
+      "endpoint": "https://mcp.example.org/mcp"
+    },
+    "protocolVersion": "2026-07-28",
+    "policy": {
+      "mode": "validate-only",
+      "allowNetwork": false,
+      "allowProcessSpawn": false,
+      "allowToolCalls": false,
+      "allowCredentials": false
+    }
+  },
+  "checks": [
+    { "caseId": "permission-denial" },
+    { "caseId": "replay-denial" },
+    { "caseId": "tool-escalation-denial" },
+    { "caseId": "denied-effect-negative" },
+    { "caseId": "clean-trace" }
+  ]
+}
+```
+
+3. Run `node src/cli.mjs adapter-fixture-audit offline-project-bundle.json`.
+   JSON v1 reports descriptor readiness and five **bundled in-code synthetic**
+   security controls independently. The deliberately broken
+   `denied-effect-negative` control is expected to produce a native
+   detection; detecting it correctly makes the overall fixture audit PASS.
+   All case IDs and their expected outcomes are fixed, not caller-configurable.
+   A nonmatching control makes the audit FAIL (exit 1); malformed input returns
+   a generic error (exit 2). Bundle file size is limited to **16 KiB**.
+
+**Security boundary:** This does NOT run checks on the MCP installation or
+the endpoint supplied in the descriptor. It performs local read-only descriptor
+validation and our own fictional comparisons, with **no new socket, child
+process, credentials, target DNS, or real tool calls**. The results always
+contain `REAL_TARGET_NOT_ATTEMPTED`, `OPERATOR_NOT_VERIFIED`,
+`REAL_TARGET_NOT_AUTHORIZED`, `REAL_TARGET_EXECUTION_NOT_AUTHORIZED`,
+and `executionEnabled:false`. No user-provided trace or external fixture
+file path is accepted inside the bundle. Never submit a real credential,
+private MCP transcript, private URL or actual customer data as a fixture.
