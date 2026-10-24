@@ -26,12 +26,13 @@ test('M5-04: canonical and aliased help enumerate only reviewed fictional modes'
   assert.equal(data.command,'help');
   assert.equal(data.status,'PASS');
   assert.deepEqual(data.commands,CLI_COMMANDS);
-  assert.equal(data.commands.length,23);
+  assert.equal(data.commands.length,24);
   assert.ok(data.commands.includes('adapter-staging-selftest'));
   assert.ok(data.commands.includes('adapter-onboard'));
   assert.ok(data.commands.includes('adapter-onboarding-demo'));
   assert.ok(data.commands.includes('adapter-template'));
   assert.ok(data.commands.includes('adapter-fixture-audit'));
+  assert.ok(data.commands.includes('adapter-synthetic-trace'));
   assert.ok(data.syntax.includes('node src/cli.mjs adapter-template stdio'));
   assert.ok(data.syntax.includes('node src/cli.mjs adapter-template streamable-http'));
   assert.equal(data.commands.every(x=>/^[a-z]+(?:-[a-z]+)*$/.test(x)),true);
