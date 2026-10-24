@@ -89,7 +89,7 @@ test('M5-05: fixed runner does not accept variable command inventory or user-sup
 
 
 /* M5-07 — protect the manual evaluator guide, not fake independent evidence. */
-const documented=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8');
+const documented=relative=>readFileSync(new URL('../'+relative,import.meta.url),'utf8').replace(/\r\n/g,'\n');
 
 test('M5-07: evaluator pins an actual full public source SHA and remains fictional-only',()=>{
   const d=documented('docs/BETA_TESTING.md');
