@@ -955,3 +955,80 @@ export function auditSymbolicTraceExpectations(input){
     expectationInvalid();
   }
 }
+
+
+/**
+ * M6-A: one local-file developer workflow. It validates only the static,
+ * validate-only descriptor and evaluates code-owned FICTIONAL controls.
+ * It never dispatches any MCP request, launches the supplied command or
+ * resolves/connects to the supplied endpoint. PASS ≠ a safe real project.
+ */
+export const OFFLINE_ADAPTER_QUICKSTART_VERSION=1;
+const QUICKSTART_CASE_EXPLANATIONS=Object.freeze({
+  'permission-denial':'Fictional owner mismatch is denied without an effect.',
+  'replay-denial':'Fictional repeated grant is denied without an effect.',
+  'tool-escalation-denial':'Fictional unknown tool is denied without an effect.',
+  'denied-effect-negative':'An intentionally broken fictional denial is detected by the control.',
+  'clean-trace':'A fictional clean trace passes the selected contract checks.'
+});
+const QUICKSTART_NEXT_ACTIONS=Object.freeze([
+  Object.freeze({order:1,code:'DESCRIPTOR_SHAPE_REVIEWED',
+    explanation:'Review the inert local descriptor. No project server was contacted.'}),
+  Object.freeze({order:2,code:'FICTIONAL_CONTROLS_ONLY',
+    explanation:'Read the five fictional case results. They are not findings about your project.'}),
+  Object.freeze({order:3,code:'OPTIONAL_SYMBOLIC_TRACE',
+    explanation:'Use adapter-synthetic-trace with fabricated boolean-only events for offline assertions.'}),
+  Object.freeze({order:4,code:'REAL_TARGET_APPROVAL_NOT_GRANTED',
+    explanation:'Real MCP testing requires separate verified ownership, independent review and explicit approval.'})
+]);
+export function previewOfflineAdapterQuickstart(config){
+  const descriptor=previewProjectOnboarding(config);
+  // This object is code-authored, never user-selected or retrieved.
+  const fictional=auditOfflineProjectFixtureBundle({
+    bundleSchemaVersion:OFFLINE_FIXTURE_BUNDLE_SCHEMA_VERSION,
+    mode:'offline-fictional-only',
+    descriptor:config,
+    checks:OFFLINE_FIXTURE_CASES.map(caseId=>({caseId}))
+  });
+  const valid=descriptor.status==='PASS' &&
+    fictional.status==='PASS' &&
+    fictional.checks.length===OFFLINE_FIXTURE_CASES.length &&
+    fictional.checks.every((c,i)=>c.caseId===OFFLINE_FIXTURE_CASES[i] &&
+      c.expectationMet===true && c.checkStatus==='PASS');
+  const findings=valid?[]:[{rule:'OFFLINE_QUICKSTART_CONTROL_MISMATCH'}];
+  return {
+    status:valid?'PASS':'FAIL',
+    profile:'offline-adapter-quickstart-v1',
+    quickstartSchemaVersion:OFFLINE_ADAPTER_QUICKSTART_VERSION,
+    adapterSchemaVersion:descriptor.adapterSchemaVersion,
+    transport:descriptor.transport,
+    protocolVersion:descriptor.protocolVersion,
+    descriptorEvidence:'DESCRIPTOR_SHAPE_ONLY',
+    fictionalControlEvidence:'BUILTIN_FICTIONAL_CASES_ONLY',
+    targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+    operatorEvidence:'OPERATOR_NOT_VERIFIED',
+    readinessStatus:'REAL_TARGET_NOT_AUTHORIZED',
+    authorizationStatus:'REAL_TARGET_EXECUTION_NOT_AUTHORIZED',
+    connectionStatus:'NOT_ATTEMPTED',
+    executionEnabled:false,
+    projectConnectionAuthorized:false,
+    externalTargetContacted:false,
+    operatorVerified:false,
+    fixturesAreProjectSpecific:false,
+    projectSafetyAssessed:false,
+    securityCertified:false,
+    checked:fictional.checks.length,
+    controls:fictional.checks.map(c=>({
+      caseId:c.caseId,
+      controlStatus:c.checkStatus,
+      expectedRule:c.expectedControl,
+      fictionalObservedStatus:c.observedStatus,
+      explanation:QUICKSTART_CASE_EXPLANATIONS[c.caseId]
+    })),
+    interpretation:'PASS_MEANS_DESCRIPTOR_AND_FIXED_FICTIONAL_CONTROLS_ONLY',
+    nextActions:QUICKSTART_NEXT_ACTIONS.map(v=>({...v})),
+    failureCount:findings.length,
+    findingsTruncated:false,
+    findings
+  };
+}
