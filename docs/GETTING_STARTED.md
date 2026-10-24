@@ -197,3 +197,85 @@ contain `REAL_TARGET_NOT_ATTEMPTED`, `OPERATOR_NOT_VERIFIED`,
 and `executionEnabled:false`. No user-provided trace or external fixture
 file path is accepted inside the bundle. Never submit a real credential,
 private MCP transcript, private URL or actual customer data as a fixture.
+
+
+## M4-B9-B — author a tiny symbolic security trace (no MCP contact)
+
+`adapter-fixture-audit` uses five built-in fictional cases, while the
+separate `adapter-synthetic-trace` command evaluates **your explicitly
+authored symbolic event assumptions**. This is NOT an import of MCP logs and
+cannot inspect a live server.
+
+1. Save the JSON below in a local file named `symbolic-trace.json`.
+   The descriptor is inert and validates only the shape of the configuration;
+   the example HTTPS hostname is never resolved or contacted.
+2. Run `node src/cli.mjs adapter-synthetic-trace symbolic-trace.json`.
+
+```json
+{
+  "traceSchemaVersion": 1,
+  "mode": "user-authored-synthetic-only",
+  "descriptor": {
+    "adapterSchemaVersion": 1,
+    "project": { "name": "fictional-http-project" },
+    "transport": {
+      "type": "streamable-http",
+      "endpoint": "https://mcp.example.org/mcp"
+    },
+    "protocolVersion": "2026-07-28",
+    "policy": {
+      "mode": "validate-only",
+      "allowNetwork": false,
+      "allowProcessSpawn": false,
+      "allowToolCalls": false,
+      "allowCredentials": false
+    }
+  },
+  "events": [
+    {
+      "decision": "DENY",
+      "effect": "NONE",
+      "ownerAuthorized": false,
+      "scopeAuthorized": false,
+      "leaseFresh": false,
+      "secretLogged": false
+    },
+    {
+      "decision": "ALLOW",
+      "effect": "READ",
+      "ownerAuthorized": true,
+      "scopeAuthorized": true,
+      "leaseFresh": true,
+      "secretLogged": false
+    }
+  ]
+}
+```
+
+This example produces an offline symbolic `PASS`: a denied action had no
+effect, and a declared allowed read met the chosen model's conditions.
+
+To deliberately test the negative control, change the first event's
+`effect` to `WRITE`. The command will exit `1` with the fixed symbolic
+`DENIED_ACTION_HAD_EFFECT` rule. An `ALLOW`/`READ` or `ALLOW`/`WRITE`
+without `ownerAuthorized` or `scopeAuthorized` yields
+`EFFECT_WITHOUT_AUTHORIZATION`; without `leaseFresh` it yields
+`EFFECT_WITHOUT_FRESH_LEASE`. `secretLogged:true` reports only the
+caller-supplied flag, not any inspected secret bytes.
+
+The schema permits **1–8** event records and exactly **six**
+enum/boolean-only event fields: `decision` (`ALLOW`/`DENY`),
+`effect` (`NONE`/`READ`/`WRITE`), and four boolean flags
+(`ownerAuthorized`, `scopeAuthorized`, `leaseFresh`, `secretLogged`).
+The CLI reads a maximum of **4096 bytes**; duplicate JSON keys, unexpected
+fields and user-supplied tool names, URLs, HTTP bodies, credentials,
+resource identifiers and execution flags are rejected.
+
+Output distinguishes `USER_AUTHORED_SYNTHETIC_TRACE_EVALUATED` from
+`fixedFixtureControls:NOT_RUN`, and includes only fixed rule codes,
+counts and ordinal event numbers. A passing symbolic assertion **does not**
+prove any real project action was safe, detect actual secret exposure or
+verify target ownership. Replay-specific analysis is **not** provided by
+these anonymous events; the separately invoked fixed
+`adapter-fixture-audit` contains a replay-denial demonstration. No
+network, DNS, child-process, credential or real MCP tool interaction occurs.
