@@ -10,7 +10,7 @@ import { runLoopbackHttpScenario } from './loopback-http-mock.mjs';
 import { runFirstPartyStagingSelftest } from './first-party-staging-mcp.mjs';
 import { runFirstPartyStagingProcessSelftest } from './staging-process-harness.mjs';
 import { parseStrictJson } from './strict-json.mjs';
-import { inspectProjectAdapter, previewProjectOnboarding } from './project-adapter.mjs';
+import { inspectProjectAdapter, previewProjectOnboarding, createOfflineAdapterTemplate } from './project-adapter.mjs';
 import { evaluateAdapterConsent } from './adapter-consent.mjs';
 import { runFirstPartyAdapterSelftest, runFixedModernStagingAdapterSelftest, runFixedOnboardingDemo } from './local-adapter-drivers.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
@@ -58,9 +58,14 @@ async function main() {
   });
   const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
   const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest' || command === 'adapter-onboarding-demo';
-  if (!CLI_COMMANDS.includes(command) ||
-      (noFile ? args.length !== 1 : args.length !== 2 || args[1].startsWith('-'))) {
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-onboard| adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+  // Only two reviewed selectors are legal. Never treat template selection as
+  // a file path, process command, URL, flag or caller-provided descriptor.
+  const validArgs=command==='adapter-template'
+    ? args.length===2 && ['stdio','streamable-http'].includes(args[1])
+    : noFile ? args.length===1
+      : args.length===2 && !args[1].startsWith('-');
+  if (!CLI_COMMANDS.includes(command) || !validArgs) {
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template stdio|streamable-http OR adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -85,6 +90,11 @@ async function main() {
     }
     if (command === 'staging-selftest') {
       const report=buildCliReport('staging-selftest',await runFirstPartyStagingSelftest());
+      emit(report);
+      return report.exitCode;
+    }
+    if (command === 'adapter-template') {
+      const report=buildCliReport('adapter-template',createOfflineAdapterTemplate(args[1]));
       emit(report);
       return report.exitCode;
     }

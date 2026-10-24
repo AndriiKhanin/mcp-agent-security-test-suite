@@ -142,3 +142,47 @@ export function previewProjectOnboarding(config){
     findings:[]
   };
 }
+
+
+/**
+ * M4-B7-C: two literal, non-executing descriptor templates. The example
+ * command and hostname are inert strings, NOT an instruction to launch/connect.
+ * No caller-supplied values or environment can enter the returned descriptor.
+ */
+export function createOfflineAdapterTemplate(transport){
+  if(transport!=='stdio' && transport!=='streamable-http')
+    throw new TypeError('INVALID_ADAPTER_TEMPLATE_TYPE');
+  const descriptor={
+    adapterSchemaVersion:ADAPTER_SCHEMA_VERSION,
+    project:{name:transport==='stdio'?'fictional-stdio-project':'fictional-http-project'},
+    transport:transport==='stdio'
+      ?{type:'stdio',command:'node',args:['server.mjs']}
+      :{type:'streamable-http',endpoint:'https://mcp.example.org/mcp'},
+    protocolVersion:'2026-07-28',
+    policy:{...DRY}
+  };
+  // Assert our own reviewed emitted example can roundtrip through the
+  // existing inert schema validator without extending any execution boundary.
+  const checked=inspectProjectAdapter(descriptor);
+  return {
+    status:'PASS',
+    profile:'offline-adapter-template-v1',
+    templateSchemaVersion:1,
+    template:descriptor,
+    transport:checked.transport,
+    descriptorEvidence:'FICTIONAL_TEMPLATE_VALIDATED',
+    stagingEvidence:'FIRST_PARTY_STAGING_NOT_ATTEMPTED',
+    targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+    operatorEvidence:'OPERATOR_NOT_VERIFIED',
+    readinessStatus:'REAL_TARGET_NOT_AUTHORIZED',
+    connectionStatus:'NOT_ATTEMPTED',
+    executionEnabled:false,
+    projectConnectionAuthorized:false,
+    externalTargetContacted:false,
+    operatorVerified:false,
+    nextAction:'COPY_TEMPLATE_OBJECT_TO_LOCAL_FILE_THEN_RUN_ADAPTER_ONBOARD',
+    failureCount:0,
+    findingsTruncated:false,
+    findings:[]
+  };
+}
