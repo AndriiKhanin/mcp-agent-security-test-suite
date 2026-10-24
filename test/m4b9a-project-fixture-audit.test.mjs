@@ -450,7 +450,7 @@ test('M4-B9-B: CLI PASS and FAIL reflect user-authored symbolic checks not fixtu
   for(const [events,exitCode,rule] of [
     [[symbolicEvent()],0,null],
     [[symbolicEvent({effect:'WRITE'})],1,'DENIED_ACTION_HAD_EFFECT'],
-    [[symbolicEvent({decision:'ALLOW',effect:'READ'})],1,
+    [[symbolicEvent({decision:'ALLOW',effect:'READ',leaseFresh:true})],1,
       'EFFECT_WITHOUT_AUTHORIZATION']
   ]){
     withFixtureFile(JSON.stringify(symbolicTrace(events)),file=>{
