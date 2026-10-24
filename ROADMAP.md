@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M4-B9-D — portable offline CI smoke
+
+- **IN DEVELOPMENT — purely fictional:** [Issue #121](../../issues/121).
+  Extend the existing reviewed `examples/offline-ci-check.mjs` with
+  clean symbolic expectation MATCH, expected synthetic violation MATCH
+  with observed safety FAIL, and unexpected violation MISMATCH / exit 1;
+  execute it explicitly in the existing cross-platform CI workflow.
+  No new npm packaged paths, no new runtime dependencies, no external
+  MCP target/process/credential/network privileges. Acceptance requires
+  4/4 PR and post-merge main CI, zero fail/skipped, plus clarity that this
+  is an offline demo rather than an independent security audit.
+
 ## M4-B9-C — exact symbolic trace CI expectations
 
 - **DONE (offline CI expectations only):** [Issue #118](../../issues/118), [merged PR #119](../../pull/119), [post-merge main CI #40098854001](../../actions/runs/40098854001): **4/4 PASS, 654/654 tests/job**, zero failed/skipped.
