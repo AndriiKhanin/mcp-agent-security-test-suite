@@ -24,10 +24,13 @@ Expected demonstration (the exact messages are fixed and intentionally contain n
 ```text
 SAFE_FIXTURE_PASS: expected synthetic denials caused no unauthorized effects
 EXPECTED_FAIL_DETECTED: RETRY_PARAMS_CHANGED, exit code 1
-DEMO_PASS: both offline contract checks behaved as expected
+SYNTHETIC_CLEAN_MATCH: observed PASS, expectation MATCH, exit code 0
+SYNTHETIC_EXPECTED_VIOLATION: observed FAIL, expectation MATCH, exit code 0
+SYNTHETIC_UNEXPECTED_VIOLATION: observed FAIL, expectation MISMATCH, exit code 1
+DEMO_PASS: all offline fictional contract checks behaved as expected
 ```
 
-The script succeeds with process exit **0 only if both cases behaved exactly as expected**. It does **not** accept custom target/executable options, connect to the network, invoke paid services, or run arbitrary files. It calls the bundled CLI with two hard-coded fictional fixture paths.
+The script succeeds with process exit **0 only if all five fixed assertions behave exactly as expected** (two bundled fixture controls and three synthetic CI expectation comparisons). An **expected** inner symbolic violation is still an observed safety FAIL, never a claim that real target execution is safe. It accepts no target/executable arguments, makes no external network connection, and runs only the bundled first-party CLI with reviewed synthetic data.
 
 ## Understand PASS versus a security denial
 
@@ -76,6 +79,10 @@ node examples/offline-ci-check.mjs
 ```
 
 The example workflow assumes the **same repository files** (the script and fictional fixtures) are checked out. If adapting it for a different repository, vendor the reviewed test files and script deliberately; do not add production credentials, network targets or shell-driven scans. The example lives in `examples/` so it is not a duplicate active GitHub workflow; the repository's existing four-job `.github/workflows/ci.yml` remains the acceptance gate.
+
+## Optional independent fictional beta evaluation (M5-07)
+
+The [SHA-pinned evaluator checklist](BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets) describes a clean public clone, fixed beta runner, portable smoke, optional offline local archive hash and safe opt-in feedback fields. **Independent usability evidence has not yet been received or accepted**; see [open beta gate #59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59). Never report a green author CI job as an independent tester result. No real MCP connectivity is approved.
 
 ## Report reproducible synthetic feedback (M5-03)
 
