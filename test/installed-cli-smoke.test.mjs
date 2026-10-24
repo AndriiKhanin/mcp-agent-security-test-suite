@@ -247,14 +247,14 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     };
     const adopterRun=(mode,filepath)=>
       invokeNode(executable,[mode,filepath],adopter,env);
-    const descriptor=JSON.parse(readFileSync(
+    const adopterDescriptor=JSON.parse(readFileSync(
       join(packageDir,'examples','adapter-profiles',
         'streamable-http-project.json'),'utf8'));
-    descriptor.project.name='fictional-private-adopter';
-    const descriptorFile=join(adopter,'local-descriptor.json');
-    writeFileSync(descriptorFile,JSON.stringify(descriptor),'utf8');
-    const onboard=adopterRun('adapter-onboard','local-descriptor.json');
-    assert.equal(onboard.status,0,'downstream descriptor preview must pass');
+    adopterDescriptor.project.name='fictional-private-adopter';
+    const descriptorFile=join(adopter,'local-adopterDescriptor.json');
+    writeFileSync(descriptorFile,JSON.stringify(adopterDescriptor),'utf8');
+    const onboard=adopterRun('adapter-onboard','local-adopterDescriptor.json');
+    assert.equal(onboard.status,0,'downstream adopterDescriptor preview must pass');
     assert.equal(onboard.stderr,'');
     const preview=JSON.parse(onboard.stdout);
     assertInert(preview);
@@ -266,7 +266,7 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
 
     const synthetic=effect=>({
       traceSchemaVersion:1,mode:'user-authored-synthetic-only',
-      descriptor,events:[{
+      descriptor:adopterDescriptor,events:[{
         decision:'DENY',effect,ownerAuthorized:false,
         scopeAuthorized:false,leaseFresh:false,secretLogged:false
       }]
@@ -343,7 +343,7 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       ['adapter-onboard','not-a-file.json'],
       ['adapter-onboard','missing-package-fixture.json']
     ];
-    const extra={...descriptor,execute:true};
+    const extra={...adopterDescriptor,execute:true};
     writeFileSync(join(adopter,'extra.json'),JSON.stringify(extra),'utf8');
     errors.push(['adapter-onboard','extra.json']);
     const injection=synthetic('NONE');
