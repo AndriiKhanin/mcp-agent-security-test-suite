@@ -26,8 +26,10 @@ test('M5-04: canonical and aliased help enumerate only reviewed fictional modes'
   assert.equal(data.command,'help');
   assert.equal(data.status,'PASS');
   assert.deepEqual(data.commands,CLI_COMMANDS);
-  assert.equal(data.commands.length,19);
+  assert.equal(data.commands.length,21);
   assert.ok(data.commands.includes('adapter-staging-selftest'));
+  assert.ok(data.commands.includes('adapter-onboard'));
+  assert.ok(data.commands.includes('adapter-onboarding-demo'));
   assert.equal(data.commands.every(x=>/^[a-z]+(?:-[a-z]+)*$/.test(x)),true);
   assert.deepEqual(data.summary,{failureCount:0,reportedFindings:0,
     findingsTruncated:false,ruleCodes:[]});

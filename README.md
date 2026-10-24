@@ -72,6 +72,10 @@ Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a 
 
 [Transport and cleanup limits](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) now cover finite incremental SSE decoding, split CRLF across chunks, cancel-after-headers/notice/final and oversized chunked streams. The ephemeral owned `127.0.0.1` response must close even on rejected or aborted tests. This remains a **test-only fixed first-party mock**, not generic MCP interoperability, real target scanning or an OS sandbox.
 
+## Offline onboarding preview (M4-B7-B)
+
+`node src/cli.mjs adapter-onboard examples/adapter-profiles/streamable-http-project.json` validates one descriptor and reports **no real connection or verified operator**. A separate `node src/cli.mjs adapter-onboarding-demo` combines an **in-code fictional descriptor** with a fixed first-party localhost staging check; it does **not** connect a user project. Both reports keep descriptor evidence, owned-mock evidence and unverified real-target authority clearly distinct. See the [onboarding instructions](docs/GETTING_STARTED.md).
+
 ## Owned-only adapter staging bridge (M4-B7-A)
 
 `node src/cli.mjs adapter-staging-selftest` tests the separate **fixed** modern Streamable HTTP adapter lifecycle against our own ephemeral `127.0.0.1` discovery fixture only. It uses no project descriptor, arbitrary URL or command. This is **not** project connectivity: `adapter-check <file>` remains validate-only, `connectionStatus: "NOT_ATTEMPTED"`, and cannot be used to enable this bridge. [Boundary and limitations](docs/UNIVERSAL_ADAPTER.md).

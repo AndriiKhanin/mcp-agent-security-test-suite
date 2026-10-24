@@ -101,3 +101,18 @@ Run `node examples/beta-acceptance-check.mjs` from the public checkout, with **n
 4. A change can be considered accepted only after the four-job Windows/Ubuntu × Node20/22 CI matrix passes in PR and again on merged `main`.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md), [THREAT_MODEL.md](THREAT_MODEL.md), [NEGATIVE_CONTROLS.md](NEGATIVE_CONTROLS.md), and [ROADMAP.md](../ROADMAP.md). The design of live target integration is future, separate, and requires explicit authorization.
+
+## Offline universal MCP project onboarding (M4-B7-B)
+
+This workflow **does not connect to your MCP project**. The two checked-in project examples are **fictional**, contain no real credentials and are used only to demonstrate the read-only configuration grammar.
+
+```sh
+node src/cli.mjs adapter-onboard examples/adapter-profiles/stdio-project.json
+node src/cli.mjs adapter-onboard examples/adapter-profiles/streamable-http-project.json
+node src/cli.mjs adapter-policy-check examples/adapter-profiles/consent-expired.json
+node src/cli.mjs adapter-onboarding-demo
+```
+
+The first two commands are **pure offline** and return `DESCRIPTOR_VALIDATED` with `REAL_TARGET_NOT_ATTEMPTED`, `FIRST_PARTY_STAGING_NOT_ATTEMPTED` and `OPERATOR_NOT_VERIFIED`. The third deliberately uses an **expired, self-asserted fictional consent** claim and should produce a **FAIL** exit status 1; it does not use signed ownership verification. The fourth takes **no arguments**, tests a different in-code fictional descriptor against the project's *own temporary localhost fixture* and returns `FIRST_PARTY_STAGING_PASS` separately from `REAL_TARGET_NOT_ATTEMPTED`. It does **not** connect to the profile you just validated. Neither a `PASS` profile nor a green local demo authorizes target access.
+
+Actual deployment, operator and target verification, OAuth, network/SSRF controls, arbitrary stdio executables and real MCP server connections are **not implemented**. Only non-sensitive fictional test data should be put into the supplied example commands. See [Universal Adapter](UNIVERSAL_ADAPTER.md) and [M4 real-target approval](M4_AUTHORIZED_INTEGRATIONS_RFC.md).

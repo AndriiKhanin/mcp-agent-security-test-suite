@@ -10,9 +10,9 @@ import { runLoopbackHttpScenario } from './loopback-http-mock.mjs';
 import { runFirstPartyStagingSelftest } from './first-party-staging-mcp.mjs';
 import { runFirstPartyStagingProcessSelftest } from './staging-process-harness.mjs';
 import { parseStrictJson } from './strict-json.mjs';
-import { inspectProjectAdapter } from './project-adapter.mjs';
+import { inspectProjectAdapter, previewProjectOnboarding } from './project-adapter.mjs';
 import { evaluateAdapterConsent } from './adapter-consent.mjs';
-import { runFirstPartyAdapterSelftest, runFixedModernStagingAdapterSelftest } from './local-adapter-drivers.mjs';
+import { runFirstPartyAdapterSelftest, runFixedModernStagingAdapterSelftest, runFixedOnboardingDemo } from './local-adapter-drivers.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
 import { auditJsonRpcExchange } from './jsonrpc-contract.mjs';
 import { auditMcpEraTranscript } from './mcp-era-contract.mjs';
@@ -57,10 +57,10 @@ async function main() {
     '--help':'help', '-h':'help', '--version':'version', '-V':'version'
   });
   const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
-  const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest';
+  const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest' || command === 'adapter-onboarding-demo';
   if (!CLI_COMMANDS.includes(command) ||
       (noFile ? args.length !== 1 : args.length !== 2 || args[1].startsWith('-'))) {
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest OR adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-onboard| adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -88,6 +88,11 @@ async function main() {
       emit(report);
       return report.exitCode;
     }
+    if (command === 'adapter-onboarding-demo') {
+      const report=buildCliReport('adapter-onboarding-demo',await runFixedOnboardingDemo());
+      emit(report);
+      return report.exitCode;
+    }
     if (command === 'adapter-staging-selftest') {
       const report=buildCliReport('adapter-staging-selftest',await runFixedModernStagingAdapterSelftest());
       emit(report);
@@ -104,7 +109,8 @@ async function main() {
       return report.exitCode;
     }
     const source = await readBoundedFile(args[1]);
-    const result = args[0] === 'adapter-policy-check' ? evaluateAdapterConsent(parseStrictJson(source)) :
+    const result = args[0] === 'adapter-onboard' ? previewProjectOnboarding(parseStrictJson(source)) :
+      args[0] === 'adapter-policy-check' ? evaluateAdapterConsent(parseStrictJson(source)) :
       args[0] === 'adapter-check' ? inspectProjectAdapter(parseStrictJson(source)) :
       args[0] === 'negotiate' ? auditModernNegotiation(parseStrictJson(source)) :
       args[0] === 'era' ? auditMcpEraTranscript(parseStrictJson(source)) :
