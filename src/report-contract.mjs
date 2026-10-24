@@ -4,7 +4,7 @@
  */
 export const REPORT_SCHEMA_VERSION = 1;
 export const CLI_COMMANDS = Object.freeze([
-  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check','adapter-selftest','adapter-policy-check','staging-selftest','staging-process-selftest','adapter-staging-selftest','adapter-onboard','adapter-onboarding-demo','adapter-template','adapter-fixture-audit','adapter-synthetic-trace'
+  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check','adapter-selftest','adapter-policy-check','staging-selftest','staging-process-selftest','adapter-staging-selftest','adapter-onboard','adapter-onboarding-demo','adapter-template','adapter-fixture-audit','adapter-synthetic-trace','adapter-trace-expect'
 ]);
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);
@@ -163,6 +163,7 @@ export function buildCliHelpResult() {
       'node src/cli.mjs adapter-template streamable-http',
       'node src/cli.mjs adapter-fixture-audit <fictional-bundle-file>',
       'node src/cli.mjs adapter-synthetic-trace <symbolic-trace-file>',
+      'node src/cli.mjs adapter-trace-expect <fictional-expectation-file>',
       'node src/cli.mjs adapter-policy-check examples/adapter-profiles/consent-expired.json',
       'node src/cli.mjs <fixture-command> <bundled-fictional-file>'
     ],
