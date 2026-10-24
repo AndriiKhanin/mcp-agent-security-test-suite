@@ -982,6 +982,9 @@ const QUICKSTART_NEXT_ACTIONS=Object.freeze([
     explanation:'Real MCP testing requires separate verified ownership, independent review and explicit approval.'})
 ]);
 export function previewOfflineAdapterQuickstart(config){
+  // The legacy descriptor checker validates named fields, whereas this new
+  // entrypoint also rejects symbols, accessors, cycles and foreign prototypes.
+  if(!plainFiniteTree(config)) throw new TypeError('INVALID_OFFLINE_QUICKSTART_DESCRIPTOR');
   const descriptor=previewProjectOnboarding(config);
   // This object is code-authored, never user-selected or retrieved.
   const fictional=auditOfflineProjectFixtureBundle({
