@@ -150,6 +150,7 @@ The **independent usability gate** [#59](../../issues/59) remains OPEN
 until a consenting independently operated tester provides a sanitized
 first-hand report, a reviewer verifies provenance, triages findings,
 reproduces results, fresh 4/4 CI passes, and the owner accepts the evidence.
+A **manual provenance review** is mandatory; no author-run simulation is independent evidence.
 The independent security audit [#43](../../issues/43) and real-target
 authorization [#21](../../issues/21) also remain OPEN. A report template,
 local pack, or successful author CI does not satisfy any of these gates.
