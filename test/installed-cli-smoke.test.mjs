@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -229,6 +229,167 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(policyResult.authorizationStatus,'UNVERIFIED_SELF_ASSERTION');
     assert.equal(policyResult.executionEnabled,false);
     assert.equal(policyResult.connectionStatus,'NOT_ATTEMPTED');
+
+    // M4-B10-A: a realistic fictional adopter in an ISOLATED sibling cwd,
+    // using the reviewed package installed from our offline npm tarball.
+    // Nothing below imports modules or opens fixtures from the repository root.
+    const adopter = join(temp,'fictional-downstream-project');
+    mkdirSync(adopter);
+    const assertInert = report => {
+      assert.equal(report.reportSchemaVersion,1);
+      assert.equal(report.connectionStatus,'NOT_ATTEMPTED');
+      assert.equal(report.executionEnabled,false);
+      assert.equal(report.externalTargetContacted,false);
+      assert.equal(report.projectConnectionAuthorized,false);
+      assert.equal(report.operatorVerified,false);
+      assert.ok(!JSON.stringify(report).includes('fictional-private-adopter'));
+      assert.ok(!JSON.stringify(report).includes('mcp.example.org'));
+    };
+    const adopterRun=(mode,filepath)=>
+      invokeNode(executable,[mode,filepath],adopter,env);
+    const descriptor=JSON.parse(readFileSync(
+      join(packageDir,'examples','adapter-profiles',
+        'streamable-http-project.json'),'utf8'));
+    descriptor.project.name='fictional-private-adopter';
+    const descriptorFile=join(adopter,'local-descriptor.json');
+    writeFileSync(descriptorFile,JSON.stringify(descriptor),'utf8');
+    const onboard=adopterRun('adapter-onboard','local-descriptor.json');
+    assert.equal(onboard.status,0,'downstream descriptor preview must pass');
+    assert.equal(onboard.stderr,'');
+    const preview=JSON.parse(onboard.stdout);
+    assertInert(preview);
+    assert.equal(preview.command,'adapter-onboard');
+    assert.equal(preview.status,'PASS');
+    assert.equal(preview.descriptorEvidence,'DESCRIPTOR_VALIDATED');
+    assert.equal(preview.readinessStatus,'REAL_TARGET_NOT_AUTHORIZED');
+    assert.equal(preview.targetEvidence,'REAL_TARGET_NOT_ATTEMPTED');
+
+    const synthetic=effect=>({
+      traceSchemaVersion:1,mode:'user-authored-synthetic-only',
+      descriptor,events:[{
+        decision:'DENY',effect,ownerAuthorized:false,
+        scopeAuthorized:false,leaseFresh:false,secretLogged:false
+      }]
+    });
+    const expected=(effect,status,codes)=>({
+      expectationSchemaVersion:1,mode:'synthetic-expectations-only',
+      trace:synthetic(effect),expectedStatus:status,
+      expected:[{event:1,ruleCodes:codes}]
+    });
+    const traceFile=join(adopter,'local-synthetic.json');
+    const assertionFile=join(adopter,'local-expectation.json');
+    const save=(path,fixture)=>{
+      const data=JSON.stringify(fixture);
+      assert.ok(Buffer.byteLength(data,'utf8')<=4096);
+      writeFileSync(path,data,'utf8');
+    };
+    save(traceFile,synthetic('WRITE'));
+    const unsafeTrace=adopterRun('adapter-synthetic-trace','local-synthetic.json');
+    assert.equal(unsafeTrace.status,1);
+    const observed=JSON.parse(unsafeTrace.stdout);
+    assertInert(observed);
+    assert.equal(observed.status,'FAIL');
+    assert.deepEqual(observed.findings,[
+      {event:1,rule:'DENIED_ACTION_HAD_EFFECT'}
+    ]);
+
+    const expectationCases=[
+      ['NONE','PASS',[],0,'PASS','MATCH',[]],
+      ['WRITE','FAIL',['DENIED_ACTION_HAD_EFFECT'],0,'FAIL','MATCH',
+        ['DENIED_ACTION_HAD_EFFECT']],
+      ['WRITE','PASS',[],1,'FAIL','MISMATCH',
+        ['DENIED_ACTION_HAD_EFFECT']]
+    ];
+    for(const [effect,status,codes,exit,observedSafety,match,findings] of
+      expectationCases) {
+      save(assertionFile,expected(effect,status,codes));
+      const out=adopterRun('adapter-trace-expect','local-expectation.json');
+      assert.equal(out.status,exit,'adopter matcher exit contract');
+      assert.equal(out.stderr,'');
+      const result=JSON.parse(out.stdout);
+      assertInert(result);
+      assert.equal(result.command,'adapter-trace-expect');
+      assert.equal(result.status,exit===0?'PASS':'FAIL');
+      assert.equal(result.exitCode,exit);
+      assert.equal(result.expectationStatus,match);
+      assert.equal(result.observedSafetyStatus,observedSafety);
+      assert.deepEqual(result.observedFindings.map(x=>x.rule),findings);
+      assert.equal(result.reportMeaning,'EXACT_SYNTHETIC_EXPECTATION_MATCH_ONLY');
+      assert.equal(result.authorizationStatus,'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
+    }
+
+    // Import the installed SDK module from a *different* working directory.
+    // Relative resolution is pinned to the installed artifact, not src/ in
+    // the repository or an implicit shell/current-directory assumption.
+    const sdkFile=join(adopter,'sdk-smoke.mjs');
+    writeFileSync(sdkFile, [
+      "import {readFileSync} from 'node:fs';",
+      "import {auditSymbolicTraceExpectations} from '../installed/node_modules/mcp-agent-security-test-suite/src/project-adapter.mjs';",
+      "const x=JSON.parse(readFileSync(new URL('./local-expectation.json',import.meta.url),'utf8'));",
+      "const r=auditSymbolicTraceExpectations(x);",
+      "if(r.status!=='FAIL' || r.observedSafetyStatus!=='FAIL' ||",
+      "   r.expectationStatus!=='MISMATCH' ||",
+      "   r.authorizationStatus!=='REAL_TARGET_EXECUTION_NOT_AUTHORIZED')",
+      "  throw Error('FICTIONAL_SDK_CONTRACT_FAILED');",
+      "process.stdout.write('FICTIONAL_DOWNSTREAM_SDK_PASS\\n');"
+    ].join('\n')+'\n','utf8');
+    const sdk=invokeNode(sdkFile,[],adopter,env);
+    assert.equal(sdk.status,0,'downstream SDK import must run from installed package');
+    assert.equal(sdk.stdout,'FICTIONAL_DOWNSTREAM_SDK_PASS\n');
+    assert.equal(sdk.stderr,'');
+
+    // Negative cases must fail closed and never echo input paths, URLs, data.
+    const errors=[
+      ['adapter-onboard','not-a-file.json'],
+      ['adapter-onboard','missing-package-fixture.json']
+    ];
+    const extra={...descriptor,execute:true};
+    writeFileSync(join(adopter,'extra.json'),JSON.stringify(extra),'utf8');
+    errors.push(['adapter-onboard','extra.json']);
+    const injection=synthetic('NONE');
+    injection.events[0].method='tools/call';
+    save(traceFile,injection);
+    errors.push(['adapter-synthetic-trace','local-synthetic.json']);
+    const forged=expected('WRITE','FAIL',['REPLAYED_NONCE']);
+    save(assertionFile,forged);
+    errors.push(['adapter-trace-expect','local-expectation.json']);
+    writeFileSync(join(adopter,'too-large.json'),
+      JSON.stringify(expected('NONE','PASS',[]))+' '.repeat(5000),'utf8');
+    errors.push(['adapter-trace-expect','too-large.json']);
+    for(const [mode,filename] of errors){
+      const bad=adopterRun(mode,filename);
+      assert.equal(bad.status,2,'invalid downstream input must return exit 2');
+      const report=JSON.parse(bad.stdout);
+      assert.equal(report.status,'ERROR');
+      assert.equal(report.errorCode,'INVALID_OR_UNREADABLE_INPUT');
+      assert.equal(report.exitCode,2);
+      for(const secret of [
+        'fictional-private-adopter','mcp.example.org',
+        adopter,filename,'REPLAYED_NONCE'
+      ])assert.ok(!(bad.stdout+bad.stderr).includes(secret),
+        'no downstream raw input/path in error output');
+    }
+
+    // Direct leaf symlinks are invalid inputs; on Windows creating symlinks
+    // itself can require permissions. In that case, validate the portable
+    // direct-symlink guard separately without creating a privileged link.
+    const link=join(adopter,'local-symlink.json');
+    let linked=false;
+    try {
+      symlinkSync(descriptorFile,link,'file');
+      linked=true;
+    } catch(e) {
+      assert.ok(process.platform==='win32' &&
+        ['EPERM','EACCES'].includes(e.code),'unexpected link failure');
+    }
+    if(linked) {
+      const denied=adopterRun('adapter-onboard','local-symlink.json');
+      assert.equal(denied.status,2,'direct symlink must be denied');
+      assert.equal(JSON.parse(denied.stdout).errorCode,
+        'INVALID_OR_UNREADABLE_INPUT');
+    }
+    assert.ok(!existsSync(join(adopter,'src','cli.mjs')),
+      'downstream project must not shadow the installed CLI');
 
     const fakePath = join(temp, 'FICTIONAL_MISSING_INPUT_DO_NOT_ECHO.json');
     const invalid = invokeNode(executable, ['scenario', fakePath], temp, env);
