@@ -806,3 +806,152 @@ export function auditSymbolicProjectTrace(input){
     symbolicShapeError();
   }
 }
+
+
+/**
+ * M4-B9-C: exact expectations for a *fictional* symbolic trace. This does not
+ * alter the older adapter-synthetic-trace v1 semantics. CI may PASS when an
+ * expected, explicitly enumerated synthetic violation is detected, but the
+ * observed safety status remains FAIL and no real target is authorized.
+ */
+export const SYMBOLIC_TRACE_EXPECTATION_SCHEMA_VERSION=1;
+const EXPECTATION_RULE_ORDER=Object.freeze([
+  'FLAGGED_SECRET_IN_AUDIT_LOG',
+  'DENIED_ACTION_HAD_EFFECT',
+  'EFFECT_WITHOUT_AUTHORIZATION',
+  'EFFECT_WITHOUT_FRESH_LEASE'
+]);
+const EXPECTATION_RULE_INDEX=new Map(EXPECTATION_RULE_ORDER.map((rule,i)=>[rule,i]));
+const expectationInvalid=()=>{throw new TypeError('INVALID_SYMBOLIC_TRACE_EXPECTATIONS');};
+function exactDenseArray(a,max){
+  if(!Array.isArray(a) || a.length<1 || a.length>max ||
+     Object.getPrototypeOf(a)!==Array.prototype) return false;
+  const d=Object.getOwnPropertyDescriptors(a);
+  if(Reflect.ownKeys(d).length!==a.length+1) return false;
+  return Array.from({length:a.length},(_,i)=>
+    Object.hasOwn(d,String(i)) && Object.hasOwn(d[String(i)],'value'))
+    .every(Boolean);
+}
+const orderedRuleCodes=codes=>{
+  if(!Array.isArray(codes) || codes.length>EXPECTATION_RULE_ORDER.length ||
+     Object.getPrototypeOf(codes)!==Array.prototype) return false;
+  const desc=Object.getOwnPropertyDescriptors(codes);
+  if(Reflect.ownKeys(desc).length!==codes.length+1) return false;
+  let last=-1;
+  for(let i=0;i<codes.length;i++){
+    if(!Object.hasOwn(desc,String(i)) ||
+       !Object.hasOwn(desc[String(i)],'value')) return false;
+    const rule=desc[String(i)].value;
+    const index=EXPECTATION_RULE_INDEX.get(rule);
+    if(index===undefined || index<=last) return false;
+    last=index;
+  }
+  return true;
+};
+
+/**
+ * Input shape:
+ * {expectationSchemaVersion:1,mode:'synthetic-expectations-only',
+ *  trace:<exact existing symbolic v1 trace>,
+ *  expectedStatus:'PASS'|'FAIL',
+ *  expected:[{event:1,ruleCodes:[...fixed codes]}, ... one per event]}
+ *
+ * Exact expectation equality applies to every ordinal event and every rule;
+ * no partial matches, wildcards, sets, duplicate rule labels, or default
+ * expectations. The output deliberately keeps OBSERVATION and CI MATCH apart.
+ */
+export function auditSymbolicTraceExpectations(input){
+  try{
+    if(!plainFiniteTree(input) ||
+       !isDataRecord(input,[
+         'expectationSchemaVersion','mode','trace','expectedStatus','expected'
+       ]) ||
+       input.expectationSchemaVersion!==SYMBOLIC_TRACE_EXPECTATION_SCHEMA_VERSION ||
+       input.mode!=='synthetic-expectations-only' ||
+       !['PASS','FAIL'].includes(input.expectedStatus) ||
+       !isDataRecord(input.trace,[
+         'traceSchemaVersion','mode','descriptor','events'
+       ]) ||
+       !exactDenseArray(input.trace.events,SYMBOLIC_PROJECT_TRACE_MAX_EVENTS) ||
+       !exactDenseArray(input.expected,SYMBOLIC_PROJECT_TRACE_MAX_EVENTS) ||
+       input.expected.length!==input.trace.events.length ||
+       !input.expected.every((e,i)=>
+         isDataRecord(e,['event','ruleCodes']) &&
+         e.event===i+1 && orderedRuleCodes(e.ruleCodes)))
+      expectationInvalid();
+
+    const expectedFailureCount=input.expected.reduce(
+      (n,e)=>n+e.ruleCodes.length,0
+    );
+    // An intentional expected violation must name one or more exact rules,
+    // while an expected safety PASS cannot silently accept a violation.
+    if((input.expectedStatus==='PASS') !== (expectedFailureCount===0))
+      expectationInvalid();
+
+    const observed=auditSymbolicProjectTrace(input.trace);
+    if(observed.checks.length!==input.expected.length ||
+       observed.failureCount!==observed.findings.length ||
+       observed.findingsTruncated) expectationInvalid();
+
+    const mismatches=[];
+    for(let i=0;i<input.expected.length;i++){
+      const actual=observed.checks[i].ruleCodes;
+      const expected=input.expected[i].ruleCodes;
+      // Order fixed by the reviewed checker, but equality must be exact.
+      if(actual.length!==expected.length ||
+         actual.some((code,j)=>code!==expected[j]))
+        mismatches.push({event:i+1,rule:'SYMBOLIC_EXPECTATION_MISMATCH'});
+    }
+    if(observed.status!==input.expectedStatus)
+      mismatches.push({event:0,rule:'SYMBOLIC_STATUS_EXPECTATION_MISMATCH'});
+
+    const match=mismatches.length===0;
+    return {
+      status:match?'PASS':'FAIL', // this is only a CI EXPECTATION verdict
+      profile:'offline-symbolic-trace-expectations-v1',
+      expectationSchemaVersion:SYMBOLIC_TRACE_EXPECTATION_SCHEMA_VERSION,
+      reportMeaning:'EXACT_SYNTHETIC_EXPECTATION_MATCH_ONLY',
+      expectedSafetyStatus:input.expectedStatus,
+      observedSafetyStatus:observed.status,
+      expectationStatus:match?'MATCH':'MISMATCH',
+      expectationOutcome:input.expectedStatus==='FAIL'
+        ? 'VIOLATION_DETECTED_AS_EXPECTED'
+        : 'NO_VIOLATIONS_EXPECTED',
+      // Preserve the fact that the observed synthetic violations occurred
+      // even if the outer CI matcher returns PASS.
+      observedFailureCount:observed.failureCount,
+      observedFindings:observed.findings.map(f=>({
+        event:f.event,rule:f.rule
+      })),
+      checked:observed.recordsChecked,
+      checks:observed.checks.map(c=>({
+        event:c.event,
+        observedSafetyStatus:c.checkStatus,
+        symbolicOutcome:c.symbolicOutcome,
+        observedRuleCodes:[...c.ruleCodes],
+        expectationStatus:mismatches.some(m=>m.event===c.event)
+          ? 'MISMATCH':'MATCH'
+      })),
+      failureCount:mismatches.length,
+      findingsTruncated:false,
+      findings:mismatches,
+      // Explicitly inherit the non-authority boundary from the inert trace.
+      descriptorEvidence:observed.descriptorEvidence,
+      traceEvidence:observed.traceEvidence,
+      traceOrigin:observed.traceOrigin,
+      fixedFixtureControls:'NOT_RUN',
+      targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
+      operatorEvidence:'OPERATOR_NOT_VERIFIED',
+      readinessStatus:'REAL_TARGET_NOT_AUTHORIZED',
+      authorizationStatus:'REAL_TARGET_EXECUTION_NOT_AUTHORIZED',
+      connectionStatus:'NOT_ATTEMPTED',
+      executionEnabled:false,
+      projectConnectionAuthorized:false,
+      externalTargetContacted:false,
+      operatorVerified:false,
+      recordsAreRealMcpObservations:false
+    };
+  }catch{
+    expectationInvalid();
+  }
+}
