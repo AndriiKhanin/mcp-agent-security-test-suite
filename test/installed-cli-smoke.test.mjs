@@ -319,6 +319,35 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(kit.releaseAuthorized,false);
     assert.equal(kit.expectedResults.expectedViolationCi.observedSafetyStatus,'FAIL');
     assert.equal(kit.expectedResults.expectedViolationCi.expectationStatus,'MATCH');
+
+    // M6-C: verify the *complete exported CLI report*, not an untrusted
+    // status field, using the installed package and unrelated adopter cwd.
+    save(join(adopter,'fictional-kit.json'),kit);
+    const kitVerification=adopterRun('adapter-kit-verify','fictional-kit.json');
+    assert.equal(kitVerification.status,0,'installed kit verification must pass');
+    assert.equal(kitVerification.stderr,'');
+    const kitVerdict=JSON.parse(kitVerification.stdout);
+    assert.equal(kitVerdict.command,'adapter-kit-verify');
+    assert.equal(kitVerdict.reportSchemaVersion,1);
+    assert.equal(kitVerdict.verificationSchemaVersion,1);
+    assert.equal(kitVerdict.status,'PASS');
+    assert.equal(kitVerdict.checked,3);
+    assert.deepEqual(kitVerdict.checks.map(x=>x.matched),[true,true,true]);
+    assert.equal(kitVerdict.checks[2].observedSafetyStatus,'FAIL');
+    assert.equal(kitVerdict.checks[2].expectationStatus,'MATCH');
+    assert.equal(kitVerdict.independentOriginVerified,false);
+    assert.equal(kitVerdict.projectSafetyAssessed,false);
+    assert.equal(kitVerdict.authorizationStatus,
+      'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
+    const tampered=structuredClone(kit);
+    tampered.expectedResults.expectedViolationCi.observedSafetyStatus='PASS';
+    save(join(adopter,'fictional-forged-kit.json'),tampered);
+    const rejected=adopterRun('adapter-kit-verify','fictional-forged-kit.json');
+    assert.equal(rejected.status,2);
+    const rejectedReport=JSON.parse(rejected.stdout);
+    assert.equal(rejectedReport.errorCode,'INVALID_OR_UNREADABLE_INPUT');
+    assert.ok(!rejected.stdout.includes('fictional-forged-kit.json'));
+
     save(join(adopter,'fictional-descriptor.json'),kit.starterDescriptor);
     save(join(adopter,'fictional-clean-ci.json'),kit.cleanExpectation);
     save(join(adopter,'fictional-negative-ci.json'),kit.expectedViolation);
