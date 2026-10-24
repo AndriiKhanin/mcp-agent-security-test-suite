@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { open } from 'node:fs/promises';
+import { open, lstat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { runScenario } from './scenario.mjs';
 import { runMockMcpScenario } from './adapter-harness.mjs';
@@ -22,11 +22,18 @@ import { CLI_COMMANDS, buildCliReport, buildCliErrorReport, buildOfflineDemoResu
 async function readBoundedFile(path,maxBytes=1024*1024) {
   // Open a single handle with O_NOFOLLOW where available; reject non-regular file.
   const fs = await import('node:fs');
+  // Reject a direct symlink even on platforms without O_NOFOLLOW (Windows).
+  // O_NOFOLLOW adds a race-resistant leaf check where supported by the OS.
+  const before = await lstat(path);
+  if (!before.isFile() || before.isSymbolicLink()) throw new Error('INVALID_FILE');
   const flags = fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0);
   const h = await open(path, flags);
   try {
     const stat = await h.stat();
-    if (!stat.isFile() || stat.size > maxBytes) throw new Error('INVALID_FILE');
+    // Fail closed if the entry changed between lstat and open. This does not
+    // claim secure resolution of every symlink in the ancestor directory tree.
+    if (!stat.isFile() || stat.dev !== before.dev || stat.ino !== before.ino ||
+        stat.size > maxBytes) throw new Error('INVALID_FILE');
     const buff = Buffer.alloc(maxBytes + 1);
     const { bytesRead } = await h.read(buff, 0, buff.length, 0);
     if (bytesRead > maxBytes) throw new Error('OVERSIZED_FILE');
