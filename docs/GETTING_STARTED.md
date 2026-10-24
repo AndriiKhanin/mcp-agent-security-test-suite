@@ -118,3 +118,22 @@ The first two commands are **pure offline** and return `DESCRIPTOR_VALIDATED` wi
 Actual deployment, operator and target verification, OAuth, network/SSRF controls, arbitrary stdio executables and real MCP server connections are **not implemented**. Only non-sensitive fictional test data should be put into the supplied example commands. See [Universal Adapter](UNIVERSAL_ADAPTER.md) and [M4 real-target approval](M4_AUTHORIZED_INTEGRATIONS_RFC.md).
 
 **Engineering acceptance:** [M4-B7-B #100](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/100), [PR #101](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/101), [post-merge main CI #40072318839](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40072318839): **4/4 PASS, 554/554 tests/job** on Windows/Ubuntu and Node20/22 with zero failures/skips. This is first-party/offline acceptance only; not third-party pilot evidence.
+
+## Generate a fixed fictional adapter profile without executing it (M4-B7-C)
+
+Run either command:
+
+```sh
+node src/cli.mjs adapter-template stdio
+node src/cli.mjs adapter-template streamable-http
+```
+
+The JSON-v1 CLI response has a `template` object that matches the current `adapterSchemaVersion: 1` descriptor grammar. **Copy only `template`** (not the surrounding CLI report) into a local file, for example `my-local-project.json`. For guidance, the checked-in fictional examples in `examples/adapter-profiles/stdio-project.json` and `examples/adapter-profiles/streamable-http-project.json` use the same safety defaults.
+
+```sh
+node src/cli.mjs adapter-onboard my-local-project.json
+```
+
+This validates **only JSON syntax and the fixed descriptor rules**. It neither resolves nor contacts the sample hostname `mcp.example.org`; likewise, it never starts the template's fictional `node server.mjs`. The `PASS` report is **not proof of operator identity, ownership, readiness to execute, protocol compatibility or server safety**. Template generation never writes a file. Changing the template for your own project still cannot enable real execution; permissions must remain `validate-only` and all `allow*` false. Do not insert real credentials, private log data or secret URLs. There is no option to supply an arbitrary endpoint, command or template type for execution.
+
+The optional `adapter-onboarding-demo` command remains a **separate** test against our own fixed first-party localhost mock, and does not use your template or saved project file. A real MCP server connection requires independent exact-target ownership verification and new owner-approved safety controls under [RFC #21](M4_AUTHORIZED_INTEGRATIONS_RFC.md).

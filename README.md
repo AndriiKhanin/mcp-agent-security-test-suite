@@ -72,6 +72,10 @@ Executes only the reviewed first-party 127.0.0.1 discovery staging fixture in a 
 
 [Transport and cleanup limits](docs/M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) now cover finite incremental SSE decoding, split CRLF across chunks, cancel-after-headers/notice/final and oversized chunked streams. The ephemeral owned `127.0.0.1` response must close even on rejected or aborted tests. This remains a **test-only fixed first-party mock**, not generic MCP interoperability, real target scanning or an OS sandbox.
 
+## Reviewable project profile templates (M4-B7-C)
+
+`node src/cli.mjs adapter-template stdio` and `node src/cli.mjs adapter-template streamable-http` print **literal fictional JSON descriptor templates** nested under `template`. Copy only that object to your own local JSON file, then run `adapter-onboard <file>` to validate its shape without any networking or execution. All permissions in each emitted template are false; its fictional `node` command and `https://mcp.example.org/mcp` URL **are never run or contacted**. This is not a target-ownership or production readiness signal. [Instructions](docs/GETTING_STARTED.md).
+
 ## Offline onboarding preview (M4-B7-B)
 
 `node src/cli.mjs adapter-onboard examples/adapter-profiles/streamable-http-project.json` validates one descriptor and reports **no real connection or verified operator**. A separate `node src/cli.mjs adapter-onboarding-demo` combines an **in-code fictional descriptor** with a fixed first-party localhost staging check; it does **not** connect a user project. Both reports keep descriptor evidence, owned-mock evidence and unverified real-target authority clearly distinct. See the [onboarding instructions](docs/GETTING_STARTED.md).
