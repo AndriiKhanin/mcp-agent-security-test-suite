@@ -144,6 +144,48 @@ proprietary source. For security vulnerabilities use
 No outreach, automatic upload, telemetry, private data collection or
 live target access is part of this protocol.
 
+### M5-08 — offline consistency preflight for a future beta report
+
+Reviewers may use the pure
+`reviewBetaEvidenceSummary` export from
+`examples/beta-acceptance-check.mjs` to check the **logical consistency of
+a manually sanitized, symbolic CLAIM** before independent manual triage.
+This helper reads no GitHub issues, never calls a real MCP target, and
+never collects participant identities. It does not inspect or authenticate
+the original environment. Do **not** paste real user reports or private
+transcripts into it.
+
+A valid input is exactly one version-1 plain record consisting of the
+public fixed beta source SHA, candidate version, OS family (Windows or
+Ubuntu), Node major (20 or 22), claimed runner PASS/FAIL, claimed number
+of matches (0–5), and **all five** exact reviewed case identifiers in
+canonical order, each with a boolean match and either `NONE` or one of
+the fixed `BETA_PROCESS_FAILURE`, `BETA_REPORT_INVALID`,
+`BETA_EXPECTATION_MISMATCH` symbolic codes. The helper rejects
+unrecognized keys, URLs, names, private paths, arbitrary free-form text,
+malformed fields, incoherent counts and false PASS statuses.
+
+Successful structural checks return
+`preflightStatus:CLAIM_CONSISTENT_ONLY`, never an accepted independent
+evaluation. In every successful result,
+`independentOriginVerified:false`, `actualExecutionVerified:false`,
+`manualProvenanceReviewRequired:true`, `betaGateSatisfied:false`,
+`securityCertified:false`, and `releaseAuthorized:false`.
+Malformed claims produce the fixed
+`INVALID_FICTIONAL_BETA_EVIDENCE_CLAIM` error, without reflecting the
+input. This is **not** DLP: public reports must be reviewed by a human
+before copying any information.
+
+**No reviewer may treat** a self-declared consistent claim, author CI,
+tool output, or a template as evidence that a consenting independent
+developer actually ran the beta. The manual steps in
+[#59](../../issues/59) remain necessary: establish an attributable
+external source, check the reported public revision, reproduce fixed
+fictional behavior, triage meaningful findings, verify fresh CI and
+obtain explicit owner acceptance. Security audit [#43](../../issues/43)
+and real-target authorization [#21](../../issues/21) stay separate.
+No invitations or report retrieval occur automatically.
+
 ### 4. Independent acceptance remains a separate gate
 
 The **independent usability gate** [#59](../../issues/59) remains OPEN
