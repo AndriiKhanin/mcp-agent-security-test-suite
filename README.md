@@ -21,6 +21,18 @@ This is an **offline synthetic contract-testing tool**, not a live scanner, auth
 
 Read the source-grounded [threat model](docs/THREAT_MODEL.md) for assets, attacker capabilities, trust boundaries, residual risks and the mandatory authorization checklist for any future adapter. The [independent negative-control corpus](docs/NEGATIVE_CONTROLS.md) documents literal failure expectations, fault-injected examples and their limitations. All real-network integrations remain **unimplemented** and require separately approved, explicitly allowlisted user-owned test environments. See [Security Policy](SECURITY.md) for responsible disclosure.
 
+## External-beta evidence consistency boundary (M5-08)
+
+A pure offline `reviewBetaEvidenceSummary` helper checks only whether
+a **manually sanitized, symbolic beta-report claim** is internally
+consistent with the five fixed fictional controls. Its result
+`CLAIM_CONSISTENT_ONLY` is not independent tester provenance,
+actual execution, security certification or authorization. User names,
+URLs, commands, logs and credentials are not accepted. Genuine
+independent usability evidence remains an open manual acceptance gate
+[#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
+[Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.
