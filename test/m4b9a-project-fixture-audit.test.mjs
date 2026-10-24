@@ -248,7 +248,7 @@ test('M4-B9-A: CLI help exposes offline-only audit command',()=>{
   const x=cli('help');
   assert.equal(x.status,0);
   const r=JSON.parse(x.stdout);
-  assert.equal(r.commands.length,24);
+  assert.equal(r.commands.length,25);
   assert.ok(r.commands.includes('adapter-fixture-audit'));
   assert.ok(r.syntax.some(s=>s.startsWith('node src/cli.mjs adapter-fixture-audit ')));
   assert.ok(!x.stdout.includes('https://'));
