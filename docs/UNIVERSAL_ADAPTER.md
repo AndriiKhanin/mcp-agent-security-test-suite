@@ -261,3 +261,17 @@ that a user ran the kit, not verified provenance, and never that a real
 project has been assessed. The deliberately negative synthetic test
 still reports `observedSafetyStatus:FAIL` and an exact
 `expectationStatus:MATCH`. See the [M6-C CLI/CI walkthrough](GETTING_STARTED.md#m6-c--verify-a-fictional-exported-starter-kit-with-one-ci-command).
+
+
+## M6-D — optional CI integration in another repository
+
+The **inactive copy-only** [GitHub Actions recipe](../.github/examples/fictional-adopter-ci.yml)
+illustrates how a different repository can check out the tested source
+at an immutable public SHA and run `adapter-kit`,
+`adapter-kit-verify` and `adapter-trace-expect` under Node.js
+20/22 without installing from npm. All actual checks are fixed,
+local and fictional; source checkout and Node toolchain setup may use
+public network services. Optional custom symbolic assertions must
+remain fabricated enum/Boolean records and require separate human
+review. No real MCP service or customer repository contents are
+scanned. [M6-D details](GETTING_STARTED.md#m6-d--portable-copy-only-github-actions-recipe-fictional-controls).
