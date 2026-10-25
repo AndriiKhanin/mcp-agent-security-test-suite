@@ -181,10 +181,7 @@ The project has a **nonpackaged, opt-in** utility,
 `tools/reviewer-receipt.mjs`. From an already obtained and **independently
 anchored** public source checkout, using Node 20/22 with bundled npm:
 
-```sh
-node tools/reviewer-receipt.mjs snapshot > reviewer-source-receipt.json
-node tools/reviewer-receipt.mjs verify reviewer-source-receipt.json
-```
+Generate the receipt using `node tools/reviewer-receipt.mjs snapshot > reviewer-source-receipt.json`; then check it using `node tools/reviewer-receipt.mjs verify reviewer-source-receipt.json`. Both commands are first-party local operations.
 
 The first command compares the checked-in **80-path** expected manifest
 against npm's actual `pack --dry-run --json --ignore-scripts --offline`
