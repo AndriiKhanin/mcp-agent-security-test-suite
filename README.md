@@ -105,6 +105,18 @@ rejects arbitrary saved reports and never prints paths, customer logs,
 tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
 exit codes are unchanged. No real project, operator or target was verified.
 
+## Public CLI compatibility guard (M6-G)
+
+A dedicated **test-only** regression suite pins literal expected fields for
+the existing machine-readable JSON-v1 offline commands, clean and deliberately
+broken fictional CI assertions, plus the separately opt-in M6-F terminal
+view. It checks the installed local npm tarball from an unrelated fictional
+workspace and rejects input/authority spoofing. Run the full local test set
+with `node --test`. These are compatibility checks for selected public
+contract invariants, not a promise that every JSON detail is frozen or that
+real MCP security, protocol conformance or independent review has occurred.
+[Contract limits](docs/CLI_REPORTS.md#m6-g-public-v1-compatibility-regression-guard).
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.
