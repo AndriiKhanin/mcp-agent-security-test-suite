@@ -14,9 +14,43 @@ const deny=()=>{throw new TypeError(ERROR);};
 const own=(x,k)=>Object.prototype.hasOwnProperty.call(x,k);
 function keys(value,names) {
   if(!value || typeof value!=='object' || Array.isArray(value) ||
-     Object.getPrototypeOf(value)!==Object.prototype ||
-     Object.keys(value).length!==names.length ||
-     !names.every(k=>own(value,k))) deny();
+     Object.getPrototypeOf(value)!==Object.prototype) deny();
+  const desc=Object.getOwnPropertyDescriptors(value);
+  if(Reflect.ownKeys(desc).length!==names.length ||
+     !names.every(k=>own(desc,k) && own(desc[k],'value') && desc[k].enumerable)) deny();
+}
+/** M6-AJ/AK/AL: inert descriptor subtrees before hashing or access.
+ * Direct JavaScript input integrity only, not an adversarial Proxy sandbox. */
+function descriptorData(value,budget={nodes:10000,bytes:1024*1024},depth=0) {
+  if(--budget.nodes<0 || depth>32) return false;
+  if(value===null || typeof value==='boolean') return true;
+  if(typeof value==='string'){
+    budget.bytes-=Buffer.byteLength(value,'utf8');
+    return budget.bytes>=0;
+  }
+  if(typeof value==='number') return Number.isFinite(value) &&
+    (!Number.isInteger(value) || Number.isSafeInteger(value));
+  if(!value || typeof value!=='object') return false;
+  if(Array.isArray(value)){
+    if(Object.getPrototypeOf(value)!==Array.prototype || value.length>10000) return false;
+    const desc=Object.getOwnPropertyDescriptors(value);
+    if(Reflect.ownKeys(desc).length!==value.length+1) return false;
+    for(let i=0;i<value.length;i++){
+      const slot=desc[String(i)];
+      if(!slot || !own(slot,'value') || !slot.enumerable ||
+         !descriptorData(slot.value,budget,depth+1)) return false;
+    }
+    return true;
+  }
+  if(Object.getPrototypeOf(value)!==Object.prototype) return false;
+  const desc=Object.getOwnPropertyDescriptors(value);
+  for(const key of Reflect.ownKeys(desc)){
+    if(typeof key!=='string' || !own(desc[key],'value') ||
+       !desc[key].enumerable) return false;
+    budget.bytes-=Buffer.byteLength(key,'utf8');
+    if(budget.bytes<0 || !descriptorData(desc[key].value,budget,depth+1)) return false;
+  }
+  return true;
 }
 function id(value,max=64) {
   return typeof value==='string' && value.length>0 &&
@@ -26,6 +60,7 @@ const isTime=x=>Number.isSafeInteger(x) && x>=0;
 function descriptorPayload(descriptor) {
   // Validates *all* transport/policy fields first, then hashes only the known
   // ordered values; JSON key order cannot silently change its identity.
+  if(!descriptorData(descriptor)) deny();
   try { inspectProjectAdapter(descriptor); } catch { deny(); }
   const transport=descriptor.transport.type==='stdio'
     ? ['stdio',descriptor.transport.command,...descriptor.transport.args]
@@ -60,6 +95,7 @@ function validateEnvelope(e) {
      !isTime(e.claim.expiresAt) || typeof e.claim.revoked!=='boolean' ||
      !Array.isArray(e.claim.methods) || e.claim.methods.length<1 ||
      e.claim.methods.length>2 ||
+     !descriptorData(e.claim.methods) ||
      e.claim.methods.some(m=>!REVIEWABLE_METHODS.includes(m)) ||
      new Set(e.claim.methods).size!==e.claim.methods.length ||
      !REVIEWABLE_METHODS.includes(e.request.method)) deny();
