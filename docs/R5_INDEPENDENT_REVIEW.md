@@ -174,3 +174,43 @@ real-target testing authorization #21 also remain OPEN.
 - [ ] Explicit owner approval for the exact release version, destination, tag/registry action and post-publication verification
 
 **Status: NOT RELEASED.** No signing keys, release tags, registry logins, npm publication, external targets, paid APIs or private project files may be used merely because this handoff exists.
+
+## M6-H — deterministic local source-byte receipt (engineering preview)
+
+The project has a **nonpackaged, opt-in** utility,
+`tools/reviewer-receipt.mjs`. From an already obtained and **independently
+anchored** public source checkout, using Node 20/22 with bundled npm:
+
+```sh
+node tools/reviewer-receipt.mjs snapshot > reviewer-source-receipt.json
+node tools/reviewer-receipt.mjs verify reviewer-source-receipt.json
+```
+
+The first command compares the checked-in **80-path** expected manifest
+against npm's actual `pack --dry-run --json --ignore-scripts --offline`
+inventory, then emits a deterministic canonical JSON list of each
+distributable source file's relative path, exact raw byte length and SHA-256.
+The index SHA-256 covers the ordered file records. No timestamps, absolute
+paths or personal input should appear in successful output. This utility
+does not produce or publish a .tgz archive and the `tools/` and `test/`
+files are deliberately excluded from the npm package.
+
+The second command rejects noncanonical, forged, malformed, oversized,
+invalid UTF-8 and symlinked receipt files, changed manifest/bytes and
+additional purported permissions. It returns a static `MATCH` (exit 0),
+`MISMATCH` (exit 1) or `INVALID` (exit 2) envelope without echoing receipt
+contents, paths or private data. Repeat this in a fresh, disposable
+checkout on the exact commit to be assessed.
+
+**Essential independent steps remain manual:** independently verify the
+full source Git SHA from a trusted origin, confirm the integrity of the
+receipt via a separately trusted channel, review excluded `.github/` and
+`test/` source, independently rebuild and hash the *actual* npm archive,
+handle first-line shebang CRLF normalization as described under R4, and
+perform a genuine independent assessment with documented signed/attributable
+conclusions. A malicious actor who can rewrite source and receipt can
+generate mutually consistent hashes; **the receipt is not signed**, and
+a self-computed MATCH cannot attest source provenance, artifact bytes,
+operator identity, real MCP security, completed audit, or release approval.
+The independent security gate [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
+remains OPEN.
