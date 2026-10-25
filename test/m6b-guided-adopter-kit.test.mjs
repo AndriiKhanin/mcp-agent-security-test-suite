@@ -196,7 +196,7 @@ test('M6-B: copy-and-run local artifacts in disposable unrelated working directo
 test('M6-B: help and docs disclose kit without claiming real MCP test',()=>{
   const help=JSON.parse(run('help').stdout);
   assert.ok(help.commands.includes('adapter-kit'));
-  assert.equal(help.commands.length,28);
+  assert.equal(help.commands.length,29);
   assert.ok(help.syntax.includes('node src/cli.mjs adapter-kit stdio'));
   assert.ok(help.syntax.includes('node src/cli.mjs adapter-kit streamable-http'));
   for(const file of ['README.md','docs/GETTING_STARTED.md','ROADMAP.md']){
