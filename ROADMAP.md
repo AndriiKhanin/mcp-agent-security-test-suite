@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 779 synthetic/local, M6-K strict JSON number/depth hardening, M6-J offline auditor handoff, M6-I local archive verification and prior fictional adopter controls | [M6-K PR #169](../../pull/169), [post-merge main CI #40179073042](../../actions/runs/40179073042): **4/4 PASS, 779/779 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 787 synthetic/local, M6-L direct policy plain-data authorization validation, M6-K strict JSON number/depth hardening, M6-J offline auditor handoff, M6-I local npm archive verification and earlier fictional adopter controls | [M6-L PR #172](../../pull/172), [post-merge main CI #40180428936](../../actions/runs/40180428936): **4/4 PASS, 787/787 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,16 +91,21 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-L — direct fictional policy data boundary
 
-- **IN PROGRESS — regression and implementation verification:**
-  [Issue #171](../../issues/171). The direct JS module entrypoint for
-  fictional offline note-policy scenarios now requires plain records
-  with own data fields and dense plain data arrays; inherited owner/grant
-  values, accessors/getters, sparse lists, extra symbols and unexpected
-  nonenumerable keys are rejected before being treated as authorization
-  evidence. This does NOT sandbox hostile JavaScript Proxy traps and adds
-  no external user MCP contact, credentials, process/network authority or
-  release permission. Fixed 80-file npm package inventory and existing
-  synthetic JSON fixtures remain unchanged. Gates #21/#43/#59 OPEN.
+- **DONE — first-party offline policy API validation hardening:**
+  [Issue #171](../../issues/171), [implementation PR #172](../../pull/172),
+  [PR CI #40180123223](../../actions/runs/40180123223) and
+  [post-merge main CI #40180428936](../../actions/runs/40180428936):
+  **4/4 PASS, 787/787 tests/job**, zero failures/skips on Windows/Ubuntu
+  Node20/22. The direct JS `src/policy.mjs` module now accepts only
+  ordinary own-data records and dense own-data scope/action arrays,
+  rejecting inherited owner/grant fields, getters/accessors, sparse
+  arrays, unexpected symbols/hidden properties and foreign prototypes
+  before such fields can influence synthetic decisions. Eight independent
+  tests cover failures without invoking ordinary getters and preservation
+  of existing first-party fixture PASS behavior. Explicit limitation:
+  this is NOT an OS/JS Proxy sandbox or real-world operator proof.
+  npm package stays **80 paths**, zero new dependencies or runtime
+  privileges. Independent gates #21/#43/#59 still OPEN.
 
 ## M6-K — strict JSON numeric and depth fail-closed hardening
 
