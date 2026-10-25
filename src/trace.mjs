@@ -15,7 +15,7 @@ function denseEvents(records) {
   if(Reflect.ownKeys(desc).length!==records.length+1) return false;
   for(let i=0;i<records.length;i++) {
     const field=desc[String(i)];
-    if(!field || !Object.hasOwn(field,'value')) return false;
+    if(!field || !Object.hasOwn(field,'value') || !field.enumerable) return false;
   }
   return true;
 }
