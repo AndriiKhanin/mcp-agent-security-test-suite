@@ -82,7 +82,8 @@ export function auditJsonRpcExchange(exchange) {
         own(res,'result') === own(res,'error') ||
         (own(res,'error') && (!record(res.error) || !Number.isSafeInteger(res.error.code) ||
           typeof res.error.message !== 'string' || res.error.message.length < 1 ||
-          res.error.message.length > 256))) {
+          res.error.message.length > 256 ||
+          Object.keys(res.error).some(k => k !== 'code' && k !== 'message' && k !== 'data')))) {
       flag('response', at, 'INVALID_RESPONSE');
       continue;
     }
