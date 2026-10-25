@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 787 synthetic/local, M6-L direct policy plain-data authorization validation, M6-K strict JSON number/depth hardening, M6-J offline auditor handoff, M6-I local npm archive verification and earlier fictional adopter controls | [M6-L PR #172](../../pull/172), [post-merge main CI #40180428936](../../actions/runs/40180428936): **4/4 PASS, 787/787 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 797 synthetic/local, M6-M sparse synthetic trace fail-closed, M6-L plain-data policy validation, M6-K strict JSON number/depth hardening and prior offline adopter/reviewer controls | [M6-M PR #175](../../pull/175), [post-merge main CI #40184294598](../../actions/runs/40184294598): **4/4 PASS, 797/797 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,18 +91,24 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-M — sparse synthetic trace fail-closed boundary
 
-- **IN PROGRESS — test/CI qualification:** [Issue #174](../../issues/174).
-  `src/trace.mjs` previously used `Array.forEach` to audit events, which
-  silently skips sparse array holes and could report **PASS, checked=1**
-  for a nonexistent event. The direct JS trace audit now refuses sparse,
-  accessor-backed, extra-key and foreign-prototype arrays *before*
-  enumeration; individual event records must be plain own-data objects,
-  rejecting inherited authorization fields, unexpected symbols/hidden
-  data and event getters without calling ordinary getters. Normal fictional
-  JSONL data, 200-finding truncation, public JSON-v1 PASS/FAIL contracts
-  and offline-only authority boundaries remain unchanged. This neither
-  runs nor authorizes real customer MCP targets, signs provenance, or grants
-  release approval; #21/#43/#59 remain OPEN.
+- **DONE — direct offline synthetic trace audit fix:** [Issue #174](../../issues/174),
+  [merged implementation PR #175](../../pull/175),
+  [PR CI #40184100043](../../actions/runs/40184100043) and
+  [post-merge main CI #40184294598](../../actions/runs/40184294598):
+  **4/4 PASS, 797/797 tests/job**, zero failed/skipped on Windows/Ubuntu
+  Node20/22. Corrected a real validation bug: `Array.forEach` skipped
+  sparse holes, allowing `auditRecords(new Array(1))` to report
+  `PASS` without checking an event. Direct `auditRecords` now refuses
+  sparse/accessor-backed/hidden-index event arrays before traversal.
+  Records must contain ordinary own-data fields, denying inherited
+  authorization flags, getters, hidden/symbol fields and foreign
+  prototypes without executing ordinary getters. Ten new literal
+  tests cover the bypass, symbolic errors, legacy fictional JSONL,
+  200-finding truncation and CLI JSON-v1 PASS/FAIL/no echo.
+  The package remains **80 files**, zero new runtime dependencies,
+  credentials, real target execution or npm publication. This is not
+  an independent audit or malicious JS Proxy sandbox. Gates #21/#43/#59
+  remain OPEN.
 
 ## M6-L — direct fictional policy data boundary
 
