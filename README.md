@@ -33,6 +33,25 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Start here: built-in fictional adapter guide (M7-A/B/C)
+
+For an ordered, **non-executing** first-run plan, run:
+
+```sh
+node src/cli.mjs adapter-guide
+```
+
+This returns a JSON-v1 report with four fixed steps: choose a `stdio` or
+`streamable-http` fictional kit, export it to a local file, verify that
+exported kit, and optionally review the inert descriptor with
+`adapter-quickstart`. The commands are static examples, not instructions
+to execute user-supplied binaries, connect endpoints or scan MCP servers.
+The guide accepts **no input path, endpoint, configuration, or flags**.
+Its `limits` explicitly state that external target contact, ownership
+verification, independent beta/audit evidence and stable release
+authorization have **not** occurred. It requires Node.js 20+ and no
+runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
+
 ## One-command offline project quickstart (M6-A)
 
 Run `node src/cli.mjs adapter-quickstart
