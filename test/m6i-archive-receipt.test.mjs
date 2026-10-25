@@ -110,8 +110,9 @@ test('M6-I: first-party actual .tgz byte receipt has safe deterministic schema',
   assert.equal(receipt.candidateVersion,pkg.version);
   assert.equal(receipt.packagePathCount,80);
   assert.ok(receipt.archiveBytes>2000&&receipt.archiveBytes<2000000);
-  for(const key of ['archiveSha256','archiveSha512','installedIndexSha256'])
+  for(const key of ['archiveSha256','installedIndexSha256'])
     assert.match(receipt[key],/^[a-f0-9]{64}$/);
+  assert.match(receipt.archiveSha512,/^[a-f0-9]{128}$/);
   assert.equal(receipt.npmIntegrity,
     'sha512-'+Buffer.from(receipt.archiveSha512,'hex').toString('base64'));
   assert.deepEqual(receipt.scope,{
