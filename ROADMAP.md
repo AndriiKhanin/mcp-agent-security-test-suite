@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 747 synthetic/local, M6-G CLI compatibility regression guard, M6-F opt-in fictional terminal guidance, M6-E safe JSON reader guide, M6-D pinned adopter CI example, M6-C exported kit verification and negative controls | [M6-G PR #157](../../pull/157), [main CI #40169200481](../../actions/runs/40169200481): **4/4 PASS, 747/747 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 755 synthetic/local, M6-H nonpackaged offline reviewer receipt, M6-G CLI compatibility guard, M6-F opt-in fictional terminal view, M6-E reader guide, M6-D pinned adopter CI and M6-C exported kit verification | [M6-H PR #160](../../pull/160), [post-merge main CI #40173346649](../../actions/runs/40173346649): **4/4 PASS, 755/755 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,15 +91,22 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-H — nonpackaged reviewer source-byte receipt
 
-- **IN PROGRESS — engineering qualification pending:** [Issue #159](../../issues/159)
-  adds an opt-in nonpackaged local `snapshot`/`verify` tool for the
-  locked 80-path candidate npm inventory, with offline npm dry-run identity
-  comparison, deterministic per-file SHA-256/byte-length receipt, and strict
-  synthetic receipt tampering, UTF-8, symlink, schema and path controls.
-  Local self-consistent hashes cannot replace an independently trusted
-  source SHA, signed artifact, actual archive inspection or genuine
-  independent assessor. No new published file/runtime dependency, no
-  arbitrary user process/MCP target access; gates #21/#43/#59 remain OPEN.
+- **DONE — engineering-only local source-byte preflight:** [Issue #159](../../issues/159),
+  [merged PR #160](../../pull/160),
+  [PR CI #40173187361](../../actions/runs/40173187361) and
+  [post-merge main CI #40173346649](../../actions/runs/40173346649):
+  **4/4 PASS, 755/755 tests/job**, zero failures/skips on Windows/Ubuntu
+  Node 20/22. Eight new tests cover deterministic `snapshot`/
+  `verify` receipts against the exact **80-file** offline npm dry-run
+  inventory, SHA-256 of each raw source file and canonical ordered index,
+  malformed/duplicate JSON, invalid UTF-8, oversize/symlink/path
+  rejection, simulated source mutations and forged approval claims.
+  The opt-in tool lives in nonpackaged `tools/`, zero new runtime
+  dependencies or executable install/publish hooks. **Caveat:** a local
+  self-consistent receipt can be forged, is not a signed source identity,
+  does not hash the produced tarball, and does not satisfy independent
+  assessor/security/provenance gate #43. Real-target authorization #21,
+  external independent beta #59 and publication consent remain OPEN.
 
 ## M6-G — backward-compatibility/authorization regression guard
 
