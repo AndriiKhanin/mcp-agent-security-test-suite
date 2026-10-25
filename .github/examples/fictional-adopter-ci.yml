@@ -1,0 +1,103 @@
+# COPY-ONLY example; this file is under .github/examples/, NOT an active workflow.
+# Copy after review to a separate repository's .github/workflows/fictional-mcp-check.yml.
+# Only PUBLIC source checkout/setup-node may use network. No customer MCP contact.
+name: Fictional MCP contract check (not a security audit)
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fictional-contract:
+    name: Fixed offline checks / Node ${{ matrix.node-version }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node-version: [20, 22]
+    steps:
+      - name: Check out adopter repository (no credentials persisted)
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          persist-credentials: false
+          path: adopter
+      - name: Check out reviewed public suite at immutable SHA
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        with:
+          repository: AndriiKhanin/mcp-agent-security-test-suite
+          ref: e05288d854aef3604fd014ea94ed72503bc13104
+          persist-credentials: false
+          path: reviewed-suite
+      - name: Configure supported Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Verify full public source SHA and candidate version
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C reviewed-suite rev-parse HEAD)" = "e05288d854aef3604fd014ea94ed72503bc13104"
+          node -e "if (require('./reviewed-suite/package.json').version !== '0.0.10-rc.1') process.exit(2)"
+      - name: Run pure fictional kit and expectation checks (no npm install)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export FICTIONAL_KIT_DIR="$(node -e 'const f=require("node:fs"),o=require("node:os"),p=require("node:path");process.stdout.write(f.mkdtempSync(p.join(o.tmpdir(),"fictional-adopter-ci-")))')"
+          trap 'node -e '\''require("node:fs").rmSync(process.env.FICTIONAL_KIT_DIR,{recursive:true,force:true})'\''' EXIT
+          node reviewed-suite/src/cli.mjs adapter-kit stdio > "$FICTIONAL_KIT_DIR/kit.json"
+          node reviewed-suite/src/cli.mjs adapter-kit-verify "$FICTIONAL_KIT_DIR/kit.json" > "$FICTIONAL_KIT_DIR/verified.json"
+          node --input-type=module -e '
+            import {readFileSync,writeFileSync} from "node:fs";
+            import {join} from "node:path";
+            const dir=process.env.FICTIONAL_KIT_DIR;
+            const verified=JSON.parse(readFileSync(join(dir,"verified.json"),"utf8"));
+            if (verified.status!=="PASS" ||
+                verified.checked!==3 ||
+                verified.projectSafetyAssessed!==false ||
+                verified.independentOriginVerified!==false ||
+                verified.authorizationStatus!=="REAL_TARGET_EXECUTION_NOT_AUTHORIZED" ||
+                verified.checks[2]?.observedSafetyStatus!=="FAIL" ||
+                verified.checks[2]?.expectationStatus!=="MATCH") process.exit(1);
+            const kit=JSON.parse(readFileSync(join(dir,"kit.json"),"utf8"));
+            writeFileSync(join(dir,"clean.json"),JSON.stringify(kit.cleanExpectation));
+            writeFileSync(join(dir,"negative.json"),JSON.stringify(kit.expectedViolation));
+            const mismatch=structuredClone(kit.expectedViolation);
+            mismatch.expectedStatus="PASS";
+            mismatch.expected[0].ruleCodes=[];
+            writeFileSync(join(dir,"mismatch.json"),JSON.stringify(mismatch));
+          '
+          node reviewed-suite/src/cli.mjs adapter-trace-expect "$FICTIONAL_KIT_DIR/clean.json" > "$FICTIONAL_KIT_DIR/clean-result.json"
+          node reviewed-suite/src/cli.mjs adapter-trace-expect "$FICTIONAL_KIT_DIR/negative.json" > "$FICTIONAL_KIT_DIR/negative-result.json"
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            import {join} from "node:path";
+            const dir=process.env.FICTIONAL_KIT_DIR;
+            const clean=JSON.parse(readFileSync(join(dir,"clean-result.json"),"utf8"));
+            const negative=JSON.parse(readFileSync(join(dir,"negative-result.json"),"utf8"));
+            if(clean.status!=="PASS" || clean.observedSafetyStatus!=="PASS" ||
+               clean.expectationStatus!=="MATCH" ||
+               negative.status!=="PASS" || negative.observedSafetyStatus!=="FAIL" ||
+               negative.expectationStatus!=="MATCH" ||
+               negative.observedFindings?.[0]?.rule!=="DENIED_ACTION_HAD_EFFECT")
+              process.exit(1);
+          '
+          if node reviewed-suite/src/cli.mjs adapter-trace-expect "$FICTIONAL_KIT_DIR/mismatch.json" > "$FICTIONAL_KIT_DIR/mismatch-result.json"; then
+            echo "EXPECTED_SYMBOLIC_MISMATCH_NOT_DETECTED" >&2
+            exit 1
+          else
+            test "$?" -eq 1
+          fi
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            import {join} from "node:path";
+            const x=JSON.parse(readFileSync(join(process.env.FICTIONAL_KIT_DIR,"mismatch-result.json"),"utf8"));
+            if(x.status!=="FAIL" || x.exitCode!==1 ||
+               x.observedSafetyStatus!=="FAIL" ||
+               x.expectationStatus!=="MISMATCH") process.exit(1);
+          '
+          node reviewed-suite/examples/offline-ci-check.mjs

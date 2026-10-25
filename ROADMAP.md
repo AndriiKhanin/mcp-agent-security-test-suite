@@ -89,6 +89,19 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-D — portable fictional adopter GitHub Actions example
+
+- **IN DEVELOPMENT — no live targets:** [Issue #147](../../issues/147).
+  Add an inactive copy-only adopter CI recipe outside the packaged source
+  that checks out a **fixed full Git SHA**, runs the source-owned kit
+  verifier and clean/negative/mismatch symbolic expectations on
+  Windows/Ubuntu Node20/22 with no npm install, credentials or user MCP
+  contact. Verify the literal shell commands in a separate temporary
+  adopter directory, reject tampered controls and clean up temp files.
+  Preserve the existing 80 packaged paths, no runtime dependencies,
+  paid APIs or npm publication. Real-target #21, independent audit #43,
+  independent beta #59 remain OPEN.
+
 ## M6-C — one-command exported fictional kit CI verification
 
 - **DONE — fixed offline fixtures only:** [Issue #144](../../issues/144), [merged PR #145](../../pull/145), [post-merge main CI #40127657693](../../actions/runs/40127657693): **4/4 PASS, 713/713 tests/job**, 0 failed/skipped.
