@@ -245,3 +245,45 @@ with independently chosen tooling before delivering a scoped sign-off.
 Do not claim byte-identical cross-OS tarballs or a public npm release from
 the local two-pack check. Gates #21 (external targets), #43 (independent
 security and provenance review), and #59 (real independent beta) remain OPEN.
+
+## M6-J — deterministic first-party assessor handoff (not an audit)
+
+The **nonpackaged**, **opt-in** `tools/reviewer-handoff.mjs` creates a
+bounded canonical local JSON packet combining M6-H's 80 shipped source-file
+hash index, M6-I's actual **temporary** npm archive SHA-256/SHA-512 and
+installed-byte index, and an **additional sorted per-file SHA-256 inventory**
+for all regular files under `.github/`, `test/`, and `tools/`. These
+excluded security-relevant inputs do **not** become npm package members.
+
+From an already obtained public source checkout that you have separately
+verified against a trusted full Git commit SHA, execute the optional local
+command `node tools/reviewer-handoff.mjs snapshot > local-review-handoff.json`.
+To re-evaluate the packet against the current local checkout, execute
+`node tools/reviewer-handoff.mjs verify local-review-handoff.json`.
+A verified local MATCH has exit 0; changed self-consistent but different
+local inputs produce MISMATCH exit 1; unsafe/noncanonical, symlinked,
+malformed, oversized, duplicate-key or permission-forged receipts produce
+INVALID exit 2. These commands invoke only the public project's offline
+npm pack/install flows against temporary local archives. They do not
+persist a tarball, contact a user MCP server, or upload anything.
+
+The packet intentionally records all nine independent gate fields as
+`NOT_VERIFIED`: assessor identity, source SHA authentication,
+separately trusted source-receipt provenance, independently anchored
+archive digest, assessor source/security audit, signed assessor decision,
+external independent beta, external MCP target authorization, and
+publication approval. It contains **no** inferred signer, source revision,
+timestamp, target permission, qualified reviewer, or stability claim.
+
+**Independent assessor instructions:** obtain the fixed public checkout
+and full Git revision through a trusted channel; independently review
+and hash the packed source **and** excluded test/CI/reviewer tool code;
+evaluate raw archive bytes and independently anchor a reference artifact
+digest; report actual environment/toolchain, findings, security boundary
+observations, residual risk, attribution and a signed/attributable scoped
+decision. The maintainer must separately authorize scope and all
+publication steps. These first-party tools are themselves review surfaces:
+self-generated matching receipts can be forged along with their checkout;
+local two-pack agreement is NOT a cross-OS or third-party provenance proof.
+R5-B independent security gate #43, real-target approval #21 and
+independent external beta #59 remain **OPEN**.

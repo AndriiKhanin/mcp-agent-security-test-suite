@@ -105,6 +105,21 @@ rejects arbitrary saved reports and never prints paths, customer logs,
 tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
 exit codes are unchanged. No real project, operator or target was verified.
 
+## Offline independent-assessor handoff preparation (M6-J)
+
+The optional nonpackaged `node tools/reviewer-handoff.mjs snapshot`
+creates a **local-first handoff packet** combining the shipped 80-file
+source inventory, disposable npm archive and installed-byte hashes, and
+hashes of security-relevant code excluded from the npm package under
+`.github/`, `test/`, and `tools/`. Save its JSON in a trusted local file,
+then check it using `node tools/reviewer-handoff.mjs verify
+<local-packet.json>`. It does **not** verify a separately trusted Git
+revision, sign any artifact, engage a qualified independent reviewer,
+contact real MCP targets, or grant stable-release permission. All genuine
+external gates are deliberately `NOT_VERIFIED`. Consult the
+[R5 review handoff](docs/R5_INDEPENDENT_REVIEW.md) and obtain
+independent assessor evidence before claiming a release gate is satisfied.
+
 ## Offline actual archive review (M6-I)
 
 The optional **nonpackaged** `tools/reviewer-archive.mjs` can produce
