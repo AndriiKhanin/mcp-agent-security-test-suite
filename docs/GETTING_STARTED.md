@@ -693,3 +693,75 @@ target's credentials/permissions are valid.
 
 No external MCP targets are authorized, no npm stable release is
 published and independent security/beta gates #21/#43/#59 remain OPEN.
+
+
+## M6-D — portable copy-only GitHub Actions recipe (fictional controls)
+
+The public sample
+[`.github/examples/fictional-adopter-ci.yml`](../.github/examples/fictional-adopter-ci.yml)
+is **INACTIVE** inside this repository. It is stored under
+`.github/examples/`, not `.github/workflows/`, and is excluded from
+the reviewed **80-path npm archive**. After reading and approving it,
+copy it into your own repository as
+`.github/workflows/fictional-mcp-check.yml`. The sample does not
+modify this repository, publish a package or require an npm registry
+install.
+
+It uses GitHub-hosted **Ubuntu and Windows, Node.js 20 and 22**, with
+read-only repository permissions. It separately checks out your adopter
+repository and the **public testing-suite source pinned to exact SHA
+`e05288d854aef3604fd014ea94ed72503bc13104`**, verifies
+`git rev-parse HEAD` and the `0.0.10-rc.1` candidate version.
+The two GitHub Actions are individually pinned to reviewed full commit
+SHAs, not moving version tags. **GitHub checkout, setup-node, and
+CI infrastructure may use the internet** to fetch publicly available
+source/toolchain bytes; once those are ready, the scripted contract
+checks only local first-party fictional files and never connects to
+**any user MCP target**. The source pin is a *historical code identity*,
+not a signed, independently audited supply-chain attestation. Changing
+the pinned source requires a fresh security and CI review.
+
+The sample's fixed job generates `fictional-kit.json` in a disposable
+runner directory, runs `adapter-kit-verify`, and evaluates its three
+source-owned checks. It also evaluates fixed clean and intentionally
+violated symbolic expectations using `adapter-trace-expect`, and
+deliberately submits an *incorrect* expectation to confirm exit code
+**1**. A simulated denied write triggers
+`observedSafetyStatus:FAIL` with `expectationStatus:MATCH` and exit
+**0** when the violation is detected **as expected**. This does not
+mean the action would be safe or permitted against a live MCP server.
+Invalid or unreadable JSON exits **2**; fixed CI checks that unexpectedly
+change must fail the job. Only fixed, nonsensitive messages are printed;
+temporary output JSON is deleted with an exit trap. The workflow never
+calls `npm install`, `npm ci`, `npm publish`, a real MCP server or a
+user-supplied executable.
+
+**Optional fictional developer-authored assertions (separate from the
+fixed template).** In a disposable development workspace, you can
+author your own *synthetic-only* `adapter-trace-expect` JSON with exactly
+the reviewed enum/Boolean event fields. The M6-B exported
+`cleanExpectation` is a useful schema example. Start with its copy
+and change only the symbolic event `decision`, `effect`,
+`ownerAuthorized`, `scopeAuthorized`, `leaseFresh`,
+`secretLogged` and matching `expectedStatus`/
+`expected[].ruleCodes` values. Do not use private project logs,
+actual tool arguments, customer endpoints, tokens, commands, headers
+or identifiers. Check it locally with
+`node reviewed-suite/src/cli.mjs adapter-trace-expect fictional-contract.json`
+from a workspace containing the separately checked-out suite. The
+strict CLI reports `MISMATCH` with exit **1** if an otherwise valid
+synthetic expectation disagrees with an observed symbolic violation.
+The copy-only example does **not** automatically load or collect your
+repository's files: adding such an opt-in CI assertion is a separate
+reviewed workflow change.
+
+**NOT a security audit.** A green workflow demonstrates only reproducible
+**fictional** contract checks; it does not verify your server, your
+credentials, independently establish source provenance or make a
+certification. Do not use it as a release gate for real MCP effects.
+Actual user-target authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
+independent security review [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
+and real independently submitted beta evidence
+[#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+remain OPEN. Do not invite, authenticate or impersonate a real
+participant based on these local examples.
