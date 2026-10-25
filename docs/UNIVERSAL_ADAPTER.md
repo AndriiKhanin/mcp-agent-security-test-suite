@@ -275,3 +275,18 @@ public network services. Optional custom symbolic assertions must
 remain fabricated enum/Boolean records and require separate human
 review. No real MCP service or customer repository contents are
 scanned. [M6-D details](GETTING_STARTED.md#m6-d--portable-copy-only-github-actions-recipe-fictional-controls).
+
+
+## M6-E — human interpretation of fictional reports
+
+The existing four onboarding commands — `adapter-kit`,
+`adapter-quickstart`, `adapter-kit-verify` and
+`adapter-trace-expect` — now add a `readerGuide` to their JSON-v1
+reports without altering the exit code or old machine-readable fields.
+The explanation and recommended next actions are **fixed source-owned
+strings**, not untrusted project data. An expected invented denial
+retains `observedSafetyStatus:FAIL` even if the CI expectation matches
+and the process exits 0. An unexpected symbolic mismatch still exits 1,
+and invalid files exit 2 without echoing raw data. No external MCP target
+is contacted and real-project assessment remains unauthorized.
+[Full M6-E result interpretation](GETTING_STARTED.md#m6-e--readable-explanations-alongside-existing-json-reports).
