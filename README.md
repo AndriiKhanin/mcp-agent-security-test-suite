@@ -67,6 +67,18 @@ invented violation retains `observedSafetyStatus:FAIL` even when
 establishes independent provenance or certifies your project.
 [Portable Windows/Linux workflow and limits](docs/GETTING_STARTED.md#m6-c--verify-a-fictional-exported-starter-kit-with-one-ci-command).
 
+## Copy-only GitHub Actions example for fictional CI (M6-D)
+
+The [inactive portable adopter workflow](.github/examples/fictional-adopter-ci.yml)
+can be inspected and copied into a separate repo. It pins the public
+test-suite source to a full commit SHA and runs local
+`adapter-kit`, `adapter-kit-verify` and
+`adapter-trace-expect` checks on Ubuntu/Windows Node 20/22
+without an npm registry install. GitHub public source/toolchain
+fetches may require network; **no user MCP target is contacted**.
+[Safety limits and optional fabricated assertions](docs/GETTING_STARTED.md#m6-d--portable-copy-only-github-actions-recipe-fictional-controls).
+A green job is **not a security audit or independent beta evidence**.
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.
