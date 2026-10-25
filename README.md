@@ -105,6 +105,17 @@ rejects arbitrary saved reports and never prints paths, customer logs,
 tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
 exit codes are unchanged. No real project, operator or target was verified.
 
+## Offline policy API input safety (M6-L)
+
+The direct JavaScript offline note-policy validator in `src/policy.mjs`
+now refuses authorization-shaped objects with inherited fields, getter
+properties or sparse/action accessor arrays. Its accepted structures
+must be ordinary own-data records and dense arrays, preserving the
+same first-party fictional scenario results and public CLI JSON shape.
+This is an API-level input consistency check only, **not** isolation
+from executable user-supplied JavaScript Proxies, real MCP server
+execution, a credential or authorization authority.
+
 ## Strict fictional JSON inputs (M6-K)
 
 All CLI JSON-v1 fictional-input commands share `src/strict-json.mjs`.

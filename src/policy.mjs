@@ -22,16 +22,37 @@ function error(code) {
   err.code = code;
   return err;
 }
+/**
+ * Direct JS APIs must not use inherited fields or invoke accessor getters
+ * while validating fictional permission data. CLI JSON is already plain, but
+ * this closes an API-level trust gap. This is not an adversarial Proxy sandbox.
+ */
 function object(value, allowed) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value) &&
-    Object.keys(value).every(k => allowed.has(k));
+  if(value===null || typeof value!=='object' || Array.isArray(value) ||
+     Object.getPrototypeOf(value)!==Object.prototype) return false;
+  const descriptors=Object.getOwnPropertyDescriptors(value);
+  return Reflect.ownKeys(descriptors).every(key=>
+    typeof key==='string' && allowed.has(key) &&
+    Object.hasOwn(descriptors[key],'value'));
+}
+/** Reject arrays with holes, symbols, extra keys, getters or prototypes. */
+function denseDataArray(value,max,min=0) {
+  if(!Array.isArray(value) || Object.getPrototypeOf(value)!==Array.prototype ||
+     value.length<min || value.length>max) return false;
+  const descriptors=Object.getOwnPropertyDescriptors(value);
+  if(Reflect.ownKeys(descriptors).length!==value.length+1) return false;
+  for(let i=0;i<value.length;i++) {
+    const slot=descriptors[String(i)];
+    if(!slot || !Object.hasOwn(slot,'value')) return false;
+  }
+  return true;
 }
 function label(value) {
   return typeof value === 'string' && NAME.test(value);
 }
 function scopeList(value) {
-  return Array.isArray(value) && value.length <= 20 &&
-    value.every(label) && new Set(value).size === value.length;
+  return denseDataArray(value,20) && value.every(label) &&
+    new Set(value).size === value.length;
 }
 function integer(value) {
   return Number.isSafeInteger(value) && value >= 0;
@@ -47,7 +68,7 @@ export function validateScenario(s) {
   if (!object(s.policy, POLICY_KEYS) || !label(s.policy.owner) ||
       !label(s.policy.resource) || !scopeList(s.policy.scopes) ||
       !integer(s.policy.generation)) throw error('INVALID_POLICY');
-  if (!Array.isArray(s.actions) || s.actions.length < 1 || s.actions.length > RUNTIME_MAX_ACTIONS)
+  if (!denseDataArray(s.actions,RUNTIME_MAX_ACTIONS,1))
     throw error('INVALID_ACTION_COUNT');
   for (const step of s.actions) {
     if (!object(step, ACTION_KEYS) || !label(step.tool) || !label(step.owner) ||
