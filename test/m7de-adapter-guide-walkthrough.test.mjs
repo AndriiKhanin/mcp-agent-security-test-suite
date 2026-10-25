@@ -58,7 +58,7 @@ for(const transport of ['stdio','streamable-http']){
 test('M7-E: exported kit modification is denied rather than treated as verified',()=>{
  useTemp(file=>{
   const kit=parse(cli('adapter-kit','stdio'),0);
-  kit.template.project.name='forged-fictional-project';
+  kit.starterDescriptor.project.name='forged-fictional-project';
   writeFileSync(file,JSON.stringify(kit),{mode:0o600});
   const result=cli('adapter-kit-verify',file);
   assert.equal(result.status,2);
