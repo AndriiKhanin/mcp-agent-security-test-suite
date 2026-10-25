@@ -32,7 +32,9 @@ test('M6-K: top-level positive and negative floating overflow is rejected',()=>{
     assert.throws(()=>parseStrictJson(literal),/JSON_NUMBER_OUT_OF_RANGE/,
       literal);
   }
-  assert.equal(parseStrictJson('1e308'),1e308);
+  // Finite huge exponent is still an unsafe integer for JS Number.
+  assert.throws(()=>parseStrictJson('1e308'),/JSON_NUMBER_OUT_OF_RANGE/);
+  assert.equal(parseStrictJson('1e10'),10000000000);
 });
 test('M6-K: nested numeric overflow never turns into a JSON-v1 PASS',()=>{
   for(const value of ['1e309','-1E400','999e999']){
