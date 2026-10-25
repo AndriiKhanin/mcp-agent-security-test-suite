@@ -290,3 +290,16 @@ and the process exits 0. An unexpected symbolic mismatch still exits 1,
 and invalid files exit 2 without echoing raw data. No external MCP target
 is contacted and real-project assessment remains unauthorized.
 [Full M6-E result interpretation](GETTING_STARTED.md#m6-e--readable-explanations-alongside-existing-json-reports).
+
+
+## M6-F — optional terminal view for offline fictional symbolic assertions
+
+The new `adapter-report-view <local-expectation-json>` command accepts only
+strict 4 KiB, Boolean/enum-only fictional expectation input; it recomputes
+`adapter-trace-expect`'s result and prints fixed, safe human guidance, two
+next steps and explicit unverified/unauthorized boundaries. It does not
+accept or display arbitrary saved reports or private MCP logs. Exit codes
+remain 0 for a fictional expectation match (including detected invented
+safety FAIL), 1 for mismatch, 2 for invalid input. Existing JSON-v1 CLI
+commands remain untouched, and no real target authorization is granted.
+[Runnable cross-platform example](GETTING_STARTED.md#m6-f--opt-in-terminal-only-view-of-fictional-symbolic-expectations).

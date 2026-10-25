@@ -92,6 +92,19 @@ input exits 2. The guide is strictly fictional-only and does not
 establish any MCP server's real security or provenance.
 [Results and boundaries](docs/GETTING_STARTED.md#m6-e--readable-explanations-alongside-existing-json-reports).
 
+## Opt-in human terminal view for fictional checks (M6-F)
+
+`node src/cli.mjs adapter-report-view fictional-clean.json` prints a
+**terminal-only**, static explanation of a validated local *fictional
+symbolic expectation*. See the [runnable M6-F walkthrough](docs/GETTING_STARTED.md#m6-f--opt-in-terminal-only-view-of-fictional-symbolic-expectations)
+to generate both `stdio`/`streamable-http` examples and see
+clean MATCH/observed PASS, expected violation MATCH/observed **FAIL**,
+unexpected MISMATCH (exit 1), and invalid data (exit 2). This opt-in
+command **recomputes** the result from strict enum/Boolean inputs; it
+rejects arbitrary saved reports and never prints paths, customer logs,
+tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
+exit codes are unchanged. No real project, operator or target was verified.
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.

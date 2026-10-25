@@ -89,6 +89,19 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-F — strictly opt-in fictional terminal report interpretation
+
+- **IMPLEMENTATION / CI QUALIFICATION PENDING:** [Issue #153](../../issues/153), branch
+  `feat/m6-f-offline-terminal-view`. Add `adapter-report-view
+  <local-expectation-json>` to recompute **only bounded fictional Boolean/enum
+  symbolic assertions** and render safe static human-readable status,
+  two concrete next steps and explicit zero-authorization limits. Preserve
+  existing JSON-v1 commands, reject untrusted report claims/ANSI/private
+  data, exercise both transports in source and installed npm tarball.
+  Await 4/4 PR and post-merge CI before engineering acceptance. Preserve
+  reviewed 80 packaged paths and keep real-target #21, independent audit
+  #43 and independent beta #59 OPEN. No stable npm publication.
+
 ## M6-E — readable, non-authorizing offline results
 
 - **DONE — fictional report interpretation only:** [Issue #150](../../issues/150), [merged PR #151](../../pull/151), [post-merge main CI #40164911500](../../actions/runs/40164911500): **4/4 PASS, 732/732 tests/job**, zero failed/skipped.

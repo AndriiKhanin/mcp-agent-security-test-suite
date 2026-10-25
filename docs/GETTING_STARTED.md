@@ -824,8 +824,8 @@ remain nonzero and the guidance tells developers to review only the
 allowed symbolic rule codes. Invalid input never becomes a security
 finding. Legacy CLI commands and established report fields remain
 unchanged; `readerGuide` is an additive convenience field. JSON-v1
-output remains suitable for CI automation; no separate text-rendering
-mode or user-controlled formatting is enabled.
+output remains suitable for CI automation; the separate opt-in M6-F text view is never emitted by JSON commands;
+no user-controlled formatting is enabled.
 
 **This is NOT a real-project audit, privacy/DLP filter or operator
 authorization.** It cannot verify that the caller owns an MCP server,
@@ -834,3 +834,71 @@ safe. Separate gates [#21](https://github.com/AndriiKhanin/mcp-agent-security-te
 [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
 and [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
 remain open.
+
+## M6-F — opt-in terminal-only view of fictional symbolic expectations
+
+`adapter-report-view <local-expectation-json>` reads **only** a 4 KiB-or-smaller
+strict UTF-8 local **fictional symbolic expectation input** (the same
+Boolean/enum-only schema as `adapter-trace-expect`). It recalculates the
+result from the input using the source-owned offline checker and prints
+only fixed `readerGuide` words, verified PASS/FAIL enums, two next steps,
+and prominent **FICTIONAL ONLY** / **NOT AUTHORIZED** disclaimers.
+It does **not** read arbitrary saved CLI reports, unknown logs, customer
+traces or certificates. In particular, a self-declared `status:PASS` or
+`readerGuide` in a JSON file is rejected as invalid rather than displayed.
+
+From an already checked-out copy, with Node.js 20+ and no npm install,
+prepare source-authored fictional inputs (Bash and PowerShell 7 both accept
+these lines; no shell execution occurs inside the output):
+
+```sh
+node src/cli.mjs adapter-kit stdio > fictional-kit.json
+node -e "const f=require('node:fs');const k=JSON.parse(f.readFileSync('fictional-kit.json','utf8'));f.writeFileSync('fictional-clean.json',JSON.stringify(k.cleanExpectation));f.writeFileSync('fictional-negative.json',JSON.stringify(k.expectedViolation));const m=structuredClone(k.expectedViolation);m.expectedStatus='PASS';m.expected[0].ruleCodes=[];f.writeFileSync('fictional-mismatch.json',JSON.stringify(m));"
+node src/cli.mjs adapter-report-view fictional-clean.json
+node src/cli.mjs adapter-report-view fictional-negative.json
+```
+
+The first human view exits **0** with `CI expectation: MATCH` and
+`Observed fictional safety: PASS`. The second also exits **0**, but
+explicitly prints `Observed fictional safety: FAIL`: the invented
+denied-write violation was **detected as expected, not deemed safe**.
+The next command is an intentionally failing demonstration:
+
+```sh
+node src/cli.mjs adapter-report-view fictional-mismatch.json
+```
+
+It prints `CI expectation: MISMATCH`, `Observed fictional safety: FAIL`
+and exits **1**. Missing, malformed, duplicated-key, oversized, unsafe,
+direct-symlink or forged report inputs exit **2** with generic fixed
+instructions and `Observed fictional safety: NOT EVALUATED`.
+Run these from a disposable fictional workspace; do not include actual
+private endpoints, project logs, personal identifiers or credentials.
+
+PowerShell 7 from a checked-out repository on Windows:
+
+```powershell
+Set-Location -LiteralPath 'C:\path\to\mcp-agent-security-test-suite'
+& node '.\src\cli.mjs' adapter-report-view '.\fictional-clean.json'
+if ($LASTEXITCODE -ne 0) { throw 'Fictional clean check failed' }
+& node '.\src\cli.mjs' adapter-report-view '.\fictional-negative.json'
+if ($LASTEXITCODE -ne 0) { throw 'Expected fictional violation check failed' }
+```
+
+For **CI and machine consumers**, keep the original JSON contract:
+`node src/cli.mjs adapter-trace-expect fictional-clean.json` and check
+its JSON-v1 `status`, `readerGuide`, `observedSafetyStatus` and exit
+code. The new view is strictly opt-in and outputs **human text only**, never
+JSON or ANSI terminal control codes. Existing JSON commands and their
+exit codes are unchanged. The installed offline npm-tarball smoke and
+source tests exercise both `stdio` and `streamable-http` examples
+under Windows/Ubuntu Node20/22.
+
+**FICTIONAL ONLY:** a green result is NOT an assessment of any real
+MCP target, project, code, network, or owner. Operator approval was NOT
+verified; independent security review and genuine beta were NOT completed;
+external MCP contact, arbitrary process execution and stable npm publication
+remain unauthorized. Gates [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
+[#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43),
+and [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+remain OPEN.

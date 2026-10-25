@@ -43,6 +43,60 @@ async function readBoundedFile(path,maxBytes=1024*1024) {
 }
 const emit = payload => process.stdout.write(JSON.stringify(payload,null,2)+'\n');
 
+/**
+ * M6-F: this view consumes ONLY a report just computed locally from a strictly
+ * validated fictional expectation. Never parse arbitrary saved reports or
+ * print any caller-controlled field. JSON CI outputs remain the default.
+ */
+const TERMINAL_STATES=Object.freeze({
+  CLEAN_FICTIONAL_TRACE_MATCH:Object.freeze({status:'PASS',exit:0,expectation:'MATCH'}),
+  FICTIONAL_VIOLATION_DETECTED_AS_EXPECTED:Object.freeze({status:'PASS',exit:0,expectation:'MATCH'}),
+  FICTIONAL_EXPECTATION_MISMATCH:Object.freeze({status:'FAIL',exit:1,expectation:'MISMATCH'}),
+  INVALID_OFFLINE_INPUT:Object.freeze({status:'ERROR',exit:2,expectation:'NOT EVALUATED'})
+});
+function emitFictionalTerminalView(report){
+  const guide=report.readerGuide;
+  const state=guide && Object.hasOwn(TERMINAL_STATES,guide.code)
+    ? TERMINAL_STATES[guide.code] : null;
+  if(!state || report.status!==state.status ||
+     report.exitCode!==state.exit ||
+     guide.reportScope!=='FICTIONAL_OFFLINE_ASSERTIONS_ONLY' ||
+     guide.realProjectAssessed!==false ||
+     guide.externalMcpContactAuthorized!==false ||
+     guide.independentAuditCompleted!==false ||
+     guide.independentBetaVerified!==false ||
+     guide.ownerOperatorVerified!==false ||
+     guide.stableReleaseAuthorized!==false ||
+     !Array.isArray(guide.nextSteps) || guide.nextSteps.length!==2)
+    throw new TypeError('UNSUPPORTED_FICTIONAL_TERMINAL_RESULT');
+  const observed=state.exit===2?'NOT EVALUATED':
+    report.observedSafetyStatus==='PASS'?'PASS':
+    report.observedSafetyStatus==='FAIL'?'FAIL':null;
+  if(observed===null || (state.exit===0 &&
+      ((guide.code==='CLEAN_FICTIONAL_TRACE_MATCH' && observed!=='PASS') ||
+       (guide.code==='FICTIONAL_VIOLATION_DETECTED_AS_EXPECTED' && observed!=='FAIL'))) ||
+     (state.exit!==2 && report.expectationStatus!==state.expectation))
+    throw new TypeError('UNSUPPORTED_FICTIONAL_TERMINAL_RESULT');
+  // The guide is made from reviewed source literals by buildCliReport only.
+  process.stdout.write([
+    'FICTIONAL ONLY - offline symbolic expectation, not a real MCP assessment',
+    'CI expectation: '+state.expectation,
+    'Observed fictional safety: '+observed,
+    'Exit code: '+state.exit,
+    'Result: '+guide.title,
+    'Meaning: '+guide.meaning,
+    'Next steps:',
+    '1. '+guide.nextSteps[0],
+    '2. '+guide.nextSteps[1],
+    'Real project assessed: NO',
+    'Real MCP target execution: NOT AUTHORIZED',
+    'Operator ownership: NOT VERIFIED',
+    'Independent security audit: NOT COMPLETED',
+    'Independent external beta: NOT VERIFIED',
+    'Stable publication: NOT AUTHORIZED'
+  ].join('\n')+'\n');
+}
+
 async function runOfflineDemo() {
   // No caller-controlled paths: these two fictional fixtures are shipped in
   // the reviewed npm package and opened via the same bounded input helper.
@@ -72,7 +126,11 @@ async function main() {
     : noFile ? args.length===1
       : args.length===2 && !args[1].startsWith('-');
   if (!CLI_COMMANDS.includes(command) || !validArgs) {
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    if(command==='adapter-report-view'){
+      emitFictionalTerminalView(buildCliErrorReport('adapter-trace-expect','INVALID_CLI_ARGUMENTS'));
+      return 2;
+    }
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -130,6 +188,15 @@ async function main() {
       emit(report);
       return report.exitCode;
     }
+    if(command==='adapter-report-view'){
+      // Strict <=4KiB direct-symlink-rejecting UTF-8 reader; only the same
+      // enum/Boolean expectation grammar as adapter-trace-expect is accepted.
+      const fictional=parseStrictJson(await readBoundedFile(args[1],4096));
+      const result=auditSymbolicTraceExpectations(fictional);
+      const report=buildCliReport('adapter-trace-expect',result);
+      emitFictionalTerminalView(report);
+      return report.exitCode;
+    }
     const source = await readBoundedFile(args[1],command==='adapter-kit-verify'?16384:command==='adapter-quickstart'?4096:command==='adapter-trace-expect'?4096:command==='adapter-synthetic-trace'?4096:command==='adapter-fixture-audit'?16384:1024*1024);
     const result = command === 'adapter-kit-verify' ? verifyOfflineAdopterKit(parseStrictJson(source)) :
       command === 'adapter-quickstart' ? previewOfflineAdapterQuickstart(parseStrictJson(source)) :
@@ -152,6 +219,10 @@ async function main() {
     emit(report);
     return report.exitCode;
   } catch {
+    if(command==='adapter-report-view'){
+      emitFictionalTerminalView(buildCliErrorReport('adapter-trace-expect','INVALID_OR_UNREADABLE_INPUT'));
+      return 2;
+    }
     // Fail closed; never echo paths, input or parser messages.
     process.stderr.write('ERROR: INVALID_OR_UNREADABLE_INPUT\n');
     emit(buildCliErrorReport(args[0],'INVALID_OR_UNREADABLE_INPUT'));
