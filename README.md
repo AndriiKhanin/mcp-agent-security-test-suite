@@ -105,6 +105,16 @@ rejects arbitrary saved reports and never prints paths, customer logs,
 tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
 exit codes are unchanged. No real project, operator or target was verified.
 
+## Fictional trace event admission hardening (M6-M)
+
+The direct `auditRecords` API now rejects sparse arrays that would
+otherwise skip unaudited entries during `forEach`, and refuses inherited
+authorization fields or getter properties in synthetic event objects.
+Valid JSONL trace inputs and JSON-v1 CLI success/failure meanings remain
+unchanged. A local `PASS` is only a verdict about fabricated events, not
+an independent audit or authorization to connect to any real MCP server.
+These checks are **not** a sandbox for caller-supplied malicious JS Proxies.
+
 ## Offline policy API input safety (M6-L)
 
 The direct JavaScript offline note-policy validator in `src/policy.mjs`
