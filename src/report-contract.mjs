@@ -186,15 +186,38 @@ function checkCommand(command,nullable=false) {
   if (!COMMANDS.has(command)) throw new TypeError('INVALID_REPORT_COMMAND');
 }
 
+/** M6-S/T: no accessor invocation during report construction. Not a Proxy sandbox. */
+function ownDataRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value) ||
+      Object.getPrototypeOf(value) !== Object.prototype) return false;
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  return Reflect.ownKeys(descriptors).every(key =>
+    typeof key === 'string' && Object.hasOwn(descriptors[key], 'value') &&
+    descriptors[key].enumerable);
+}
+function reportRowsValid(rows) {
+  if (!Array.isArray(rows) || Object.getPrototypeOf(rows) !== Array.prototype ||
+      rows.length > 10000) return false;
+  const descriptors = Object.getOwnPropertyDescriptors(rows);
+  if (Reflect.ownKeys(descriptors).length !== rows.length + 1) return false;
+  for (let i = 0; i < rows.length; i++) {
+    const slot = descriptors[String(i)];
+    if (!slot || !Object.hasOwn(slot, 'value') || !slot.enumerable ||
+        !ownDataRecord(slot.value)) return false;
+  }
+  return true;
+}
+
 /** Add stable public fields but preserve all legacy command-specific fields. */
 export function buildCliReport(command,result) {
   checkCommand(command);
-  if (!result || typeof result!=='object' ||
+  if (!ownDataRecord(result) ||
       (result.status!=='PASS' && result.status!=='FAIL')) {
     throw new TypeError('INVALID_REPORT_STATUS');
   }
   const rows = ['findings','failures','mismatches']
     .map(key=>result[key]).find(Array.isArray) ?? [];
+  if (!reportRowsValid(rows)) throw new TypeError('INVALID_REPORT_FINDINGS');
   const failureCount = Number.isSafeInteger(result.failureCount) && result.failureCount>=0
     ? result.failureCount : rows.length;
   const ruleCodes = [...new Set(rows.map(row=>
