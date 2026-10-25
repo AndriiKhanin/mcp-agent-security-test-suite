@@ -105,6 +105,17 @@ rejects arbitrary saved reports and never prints paths, customer logs,
 tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
 exit codes are unchanged. No real project, operator or target was verified.
 
+## Strict fictional JSON inputs (M6-K)
+
+All CLI JSON-v1 fictional-input commands share `src/strict-json.mjs`.
+The bounded parser rejects duplicate object keys, excessively deep
+nesting, and numeric values that would be silently converted by JavaScript
+to infinite values, zero via nonzero underflow, or unsafe rounded integers.
+Invalid files return exit code **2** with a static error report, without
+echoing private input or path. This does not certify a live MCP
+implementation, parse arbitrary customer data, or authorize external
+network/process access.
+
 ## Offline independent-assessor handoff preparation (M6-J)
 
 The optional nonpackaged `node tools/reviewer-handoff.mjs snapshot`
