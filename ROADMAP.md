@@ -89,6 +89,19 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-J — bounded first-party independent assessor handoff
+
+- **IN PROGRESS — local engineering scope only:** [Issue #165](../../issues/165)
+  adds the nonpackaged opt-in `tools/reviewer-handoff.mjs` to pair M6-H
+  shipped 80-file source receipts with M6-I temporary npm archive and installed
+  byte digests, plus independent *source-surface inventory* of excluded
+  `.github/`, `test/`, `tools/` code. Bounded canonical packet; 0/1/2
+  MATCH/MISMATCH/INVALID; malicious/duplicate keys, forged approval, changed
+  excluded files and symlink denial regressions. All nine true independent
+  gates remain explicitly NOT_VERIFIED. No stable release, signatures,
+  authenticated source Git identity, external MCP contact or owner approval
+  inferred from an internal self-matching receipt. #21/#43/#59 stay OPEN.
+
 ## M6-I — offline archive custody and installed byte-receipt
 
 - **DONE — strictly local engineering preflight:** [Issue #162](../../issues/162),
