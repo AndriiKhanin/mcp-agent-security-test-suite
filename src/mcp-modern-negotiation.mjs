@@ -22,7 +22,49 @@ function withoutNegotiatedVersion(params) {
 }
 const fields = (v,names) => Object.keys(v).every(x=>names.includes(x));
 
+/**
+ * M6-AG/AI: Direct-JS inputs must be bounded plain JSON data before the
+ * symbolic negotiation evaluator reads fields or serializes capability data.
+ * Not a sandbox for adversarial Proxy objects.
+ */
+function isPlainJsonTree(root) {
+  const budget={nodes:10000,bytes:1024*1024};
+  function visit(value,depth) {
+    if (--budget.nodes < 0 || depth > 32) return false;
+    if (value === null || typeof value === 'boolean') return true;
+    if (typeof value === 'number')
+      return Number.isFinite(value) && (!Number.isInteger(value) || Number.isSafeInteger(value));
+    if (typeof value === 'string') {
+      budget.bytes-=Buffer.byteLength(value,'utf8');
+      return budget.bytes>=0;
+    }
+    if (!value || typeof value !== 'object') return false;
+    if (Array.isArray(value)) {
+      if (Object.getPrototypeOf(value)!==Array.prototype || value.length>10000) return false;
+      const d=Object.getOwnPropertyDescriptors(value);
+      if (Reflect.ownKeys(d).length!==value.length+1) return false;
+      for(let i=0;i<value.length;i++) {
+        const slot=d[String(i)];
+        if(!slot || !Object.hasOwn(slot,'value') || !slot.enumerable ||
+           !visit(slot.value,depth+1)) return false;
+      }
+      return true;
+    }
+    if(Object.getPrototypeOf(value)!==Object.prototype) return false;
+    const d=Object.getOwnPropertyDescriptors(value);
+    for(const key of Reflect.ownKeys(d)) {
+      if(typeof key!=='string' || !Object.hasOwn(d[key],'value') ||
+         !d[key].enumerable) return false;
+      budget.bytes-=Buffer.byteLength(key,'utf8');
+      if(budget.bytes<0 || !visit(d[key].value,depth+1)) return false;
+    }
+    return true;
+  }
+  return visit(root,0);
+}
+
 export function auditModernNegotiation(input) {
+  if(!isPlainJsonTree(input)) throw new TypeError('INVALID_NEGOTIATION_FIXTURE');
   if (!record(input) || input.profile !== 'modern-2026-offline-negotiation' ||
       !fields(input,['profile','clientVersions','grantedCapabilities','steps']) ||
       !versions(input.clientVersions) || !capabilitySet(input.grantedCapabilities) ||
