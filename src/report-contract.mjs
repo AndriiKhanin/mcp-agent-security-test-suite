@@ -54,6 +54,129 @@ function safeGuidance(codes) {
     .slice(0,GUIDE_LIMIT).map(code=>({...GUIDES[code]}));
 }
 
+
+/**
+ * M6-E: fixed public-language interpretation for four offline onboarding
+ * commands. No user-provided report fields, paths, endpoints, rule labels,
+ * tokens, errors or trace contents are interpolated into prose. All messages
+ * concern fictional controls ONLY, never customer MCP security.
+ */
+const READER_COMMANDS=new Set([
+  'adapter-kit','adapter-quickstart',
+  'adapter-kit-verify','adapter-trace-expect'
+]);
+const READER_KINDS=Object.freeze({
+  KIT_READY:Object.freeze({
+    code:'FICTIONAL_KIT_GENERATED',
+    title:'Fictional starter kit generated',
+    meaning:'The example kit is inert JSON. No project was connected or inspected.',
+    nextSteps:Object.freeze([
+      'Save the fictional kit JSON in a disposable workspace.',
+      'Run adapter-kit-verify against that local example before editing CI.'
+    ])
+  }),
+  QUICKSTART_READY:Object.freeze({
+    code:'DESCRIPTOR_SHAPE_AND_FICTIONAL_CONTROLS_MATCH',
+    title:'Descriptor syntax and fictional controls matched',
+    meaning:'This is not a scan of a real project or proof that its MCP server is safe.',
+    nextSteps:Object.freeze([
+      'Review the inert descriptor fields without running its server.',
+      'Use adapter-kit for fixed fictional CI examples.'
+    ])
+  }),
+  KIT_VERIFIED:Object.freeze({
+    code:'FICTIONAL_KIT_CONTRACT_MATCH',
+    title:'Exported fictional kit checks matched',
+    meaning:'The report describes fixed local assertions only; it does not establish who ran them.',
+    nextSteps:Object.freeze([
+      'Inspect the three fictional check results before enabling the copied CI example.',
+      'Seek separate authorization and independent review before any real MCP testing.'
+    ])
+  }),
+  CLEAN_MATCH:Object.freeze({
+    code:'CLEAN_FICTIONAL_TRACE_MATCH',
+    title:'Clean fictional trace matches the expected rules',
+    meaning:'The fabricated events show no observed violation. No real MCP activity was evaluated.',
+    nextSteps:Object.freeze([
+      'Keep the synthetic expectation and event rules explicitly fictional.',
+      'Test a separate expected-denial violation control.'
+    ])
+  }),
+  DETECTED_MATCH:Object.freeze({
+    code:'FICTIONAL_VIOLATION_DETECTED_AS_EXPECTED',
+    title:'Expected violation detected in fabricated events',
+    meaning:'Observed safety is FAIL even though the CI expectation is MATCH. This is NOT a safe action.',
+    nextSteps:Object.freeze([
+      'Preserve observedSafetyStatus FAIL when recording the result.',
+      'Fix any corresponding real-world design only after authorized review; do not run this fixture against a live server.'
+    ])
+  }),
+  MISMATCH:Object.freeze({
+    code:'FICTIONAL_EXPECTATION_MISMATCH',
+    title:'Symbolic CI expectation did not match',
+    meaning:'The fabricated events did not produce the expected contract result; the CI gate failed.',
+    nextSteps:Object.freeze([
+      'Review only the expected symbolic rule codes and Boolean event fields.',
+      'Fix the expected contract or fictional fixture, then rerun the offline check.'
+    ])
+  }),
+  CONTROL_FAILED:Object.freeze({
+    code:'OFFLINE_CONTROL_CHECK_FAILED',
+    title:'An internal fictional check did not match',
+    meaning:'The offline CI contract failed; this is not a finding from a real MCP server.',
+    nextSteps:Object.freeze([
+      'Review the fixed fictional control expectations without connecting a server.',
+      'Use the local offline test suite to reproduce the mismatch.'
+    ])
+  }),
+  INVALID_INPUT:Object.freeze({
+    code:'INVALID_OFFLINE_INPUT',
+    title:'Input or command arguments were rejected',
+    meaning:'The request was not evaluated. No claim about any project or server can be made.',
+    nextSteps:Object.freeze([
+      'Check the documented command name and local fictional JSON schema.',
+      'Verify UTF-8, exact allowed fields, file permissions and command-specific size limits.'
+    ])
+  })
+});
+function fixedReaderGuide(command, result, error=false){
+  if(!READER_COMMANDS.has(command)) return undefined;
+  let key='CONTROL_FAILED';
+  if(error) key='INVALID_INPUT';
+  else if(result.status==='PASS'){
+    if(command==='adapter-kit') key='KIT_READY';
+    else if(command==='adapter-quickstart') key='QUICKSTART_READY';
+    else if(command==='adapter-kit-verify') key='KIT_VERIFIED';
+    else if(command==='adapter-trace-expect'){
+      key=result.reportMeaning==='EXACT_SYNTHETIC_EXPECTATION_MATCH_ONLY' &&
+        result.expectationStatus==='MATCH' &&
+        result.observedSafetyStatus==='PASS' &&
+        result.observedFailureCount===0
+        ?'CLEAN_MATCH':
+        result.reportMeaning==='EXACT_SYNTHETIC_EXPECTATION_MATCH_ONLY' &&
+        result.expectationStatus==='MATCH' &&
+        result.observedSafetyStatus==='FAIL' &&
+        Number.isSafeInteger(result.observedFailureCount) &&
+        result.observedFailureCount>0
+        ?'DETECTED_MATCH':'CONTROL_FAILED';
+    }
+  }else if(command==='adapter-trace-expect' &&
+           result.expectationStatus==='MISMATCH')key='MISMATCH';
+  const fixed=READER_KINDS[key];
+  return {
+    readerGuideSchemaVersion:1,
+    ...{code:fixed.code,title:fixed.title,meaning:fixed.meaning,
+      nextSteps:[...fixed.nextSteps]},
+    reportScope:'FICTIONAL_OFFLINE_ASSERTIONS_ONLY',
+    realProjectAssessed:false,
+    externalMcpContactAuthorized:false,
+    independentAuditCompleted:false,
+    independentBetaVerified:false,
+    ownerOperatorVerified:false,
+    stableReleaseAuthorized:false
+  };
+}
+
 const EMPTY_SUMMARY = () => ({
   failureCount:0, reportedFindings:0, findingsTruncated:false, ruleCodes:[]
 });
@@ -89,7 +212,8 @@ export function buildCliReport(command,result) {
       findingsTruncated:result.findingsTruncated===true,
       ruleCodes
     },
-    guidance: result.status==='FAIL' ? safeGuidance(ruleCodes) : []
+    guidance: result.status==='FAIL' ? safeGuidance(ruleCodes) : [],
+    ...(fixedReaderGuide(command,result) ? {readerGuide:fixedReaderGuide(command,result)} : {})
   };
 }
 
@@ -104,7 +228,8 @@ export function buildCliErrorReport(command,errorCode) {
     status:'ERROR',
     errorCode,
     summary:EMPTY_SUMMARY(),
-    guidance:[{...ERROR_GUIDES[errorCode]}]
+    guidance:[{...ERROR_GUIDES[errorCode]}],
+    ...(fixedReaderGuide(command,null,true) ? {readerGuide:fixedReaderGuide(command,null,true)} : {})
   };
 }
 

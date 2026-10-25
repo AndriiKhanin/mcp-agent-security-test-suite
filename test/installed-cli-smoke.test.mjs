@@ -334,6 +334,13 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(kitVerdict.verificationSchemaVersion,1);
     assert.equal(kitVerdict.status,'PASS');
     assert.equal(kitVerdict.checked,3);
+    // M6-E: installer-delivered JSON exposes source-authored human reading
+    // without changing exit semantics or authorizing real MCP testing.
+    assert.equal(kitVerdict.readerGuide.code,'FICTIONAL_KIT_CONTRACT_MATCH');
+    assert.equal(kitVerdict.readerGuide.realProjectAssessed,false);
+    assert.equal(kitVerdict.readerGuide.independentAuditCompleted,false);
+    assert.equal(kitVerdict.readerGuide.independentBetaVerified,false);
+    assert.equal(kitVerdict.readerGuide.nextSteps.length,2);
     assert.deepEqual(kitVerdict.checks.map(x=>x.matched),[true,true,true]);
     assert.equal(kitVerdict.checks[2].observedSafetyStatus,'FAIL');
     assert.equal(kitVerdict.checks[2].expectationStatus,'MATCH');
@@ -348,6 +355,8 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.equal(rejected.status,2);
     const rejectedReport=JSON.parse(rejected.stdout);
     assert.equal(rejectedReport.errorCode,'INVALID_OR_UNREADABLE_INPUT');
+    assert.equal(rejectedReport.readerGuide.code,'INVALID_OFFLINE_INPUT');
+    assert.equal(rejectedReport.readerGuide.realProjectAssessed,false);
     assert.ok(!rejected.stdout.includes('fictional-forged-kit.json'));
 
     save(join(adopter,'fictional-descriptor.json'),kit.starterDescriptor);
@@ -362,6 +371,15 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       assert.equal(run.status,0,'installed kit source artifact must roundtrip');
       const result=JSON.parse(run.stdout);
       assert.equal(result.status,'PASS');
+      assert.equal(result.readerGuide.readerGuideSchemaVersion,1);
+      assert.equal(result.readerGuide.realProjectAssessed,false);
+      assert.equal(result.readerGuide.externalMcpContactAuthorized,false);
+      assert.equal(result.readerGuide.code,
+        observedSafety===null
+          ? 'DESCRIPTOR_SHAPE_AND_FICTIONAL_CONTROLS_MATCH'
+          : observedSafety==='PASS'
+            ? 'CLEAN_FICTIONAL_TRACE_MATCH'
+            : 'FICTIONAL_VIOLATION_DETECTED_AS_EXPECTED');
       assert.equal(result.connectionStatus,'NOT_ATTEMPTED');
       assert.equal(result.externalTargetContacted,false);
       if(observedSafety!==null){

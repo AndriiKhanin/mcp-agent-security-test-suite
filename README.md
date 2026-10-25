@@ -79,6 +79,19 @@ fetches may require network; **no user MCP target is contacted**.
 [Safety limits and optional fabricated assertions](docs/GETTING_STARTED.md#m6-d--portable-copy-only-github-actions-recipe-fictional-controls).
 A green job is **not a security audit or independent beta evidence**.
 
+## Reading fictional CI results (M6-E)
+
+The offline `adapter-kit`, `adapter-quickstart`,
+`adapter-kit-verify` and `adapter-trace-expect` commands now return
+a source-authored `readerGuide` with a plain-language result and
+specific next steps alongside the unchanged JSON-v1/exit-code contract.
+An **expected fabricated violation** still has
+`observedSafetyStatus:FAIL` when `expectationStatus:MATCH` and
+the CI job exits 0; a true expectation mismatch exits 1, malformed
+input exits 2. The guide is strictly fictional-only and does not
+establish any MCP server's real security or provenance.
+[Results and boundaries](docs/GETTING_STARTED.md#m6-e--readable-explanations-alongside-existing-json-reports).
+
 ## Quickstart
 
 For an independent **fictional-only** beta evaluation, see the [fixed public SHA, offline archive and safe feedback checklist](docs/BETA_TESTING.md#independent-evaluator-quick-path-m5-07-no-live-targets). This is only evaluation guidance; there is no independently verified beta participant yet. Real MCP servers, npm publication and security certification remain outside scope.

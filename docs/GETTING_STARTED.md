@@ -765,3 +765,72 @@ and real independently submitted beta evidence
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
 remain OPEN. Do not invite, authenticate or impersonate a real
 participant based on these local examples.
+
+
+## M6-E — readable explanations alongside existing JSON reports
+
+The reviewed offline CLI still emits **JSON report schema v1**, and its
+exit codes are unchanged: **0** means the specified *fictional CI
+expectation* matched, **1** means the check or expectation did not match,
+and **2** means bad arguments, invalid input or an unreadable file.
+For four onboarding commands — `adapter-kit`, `adapter-quickstart`,
+`adapter-kit-verify` and `adapter-trace-expect` — the output also
+includes a constant-only `readerGuide` object:
+
+- `code`, `title`, `meaning` and two ordered `nextSteps`: fixed
+  reviewed explanations that do **not** interpolate event contents,
+  project names, paths, endpoints, errors, secrets or actual tool calls.
+- `reportScope:FICTIONAL_OFFLINE_ASSERTIONS_ONLY` and explicit
+  `realProjectAssessed:false`, `externalMcpContactAuthorized:false`,
+  `ownerOperatorVerified:false`, `independentAuditCompleted:false`,
+  `independentBetaVerified:false`, `stableReleaseAuthorized:false`.
+
+Use the previously documented source-owned starter JSON to generate a
+report:
+
+```sh
+node src/cli.mjs adapter-kit streamable-http > fictional-kit.json
+node src/cli.mjs adapter-kit-verify fictional-kit.json > fictional-verdict.json
+```
+
+On Windows PowerShell 7 the equivalent commands are:
+
+```powershell
+& node '.\src\cli.mjs' adapter-kit streamable-http > fictional-kit.json
+if ($LASTEXITCODE -ne 0) { throw 'Kit generation failed' }
+& node '.\src\cli.mjs' adapter-kit-verify fictional-kit.json > fictional-verdict.json
+if ($LASTEXITCODE -ne 0) { throw 'Fictional kit check failed' }
+```
+
+Open `fictional-verdict.json` and inspect the `readerGuide` object.
+For a normal fictional kit it uses
+`FICTIONAL_KIT_CONTRACT_MATCH` — the package's fixed internal controls
+match; it does not establish who ran the check or what is safe on a real
+MCP target.
+
+Three **different** `adapter-trace-expect` outcomes are important:
+
+| Fictional case | Outer CLI | Observed safety | Reader guidance |
+| --- | --- | --- | --- |
+| Clean invented events | PASS, exit 0 | PASS | `CLEAN_FICTIONAL_TRACE_MATCH` |
+| Correctly detected invented denied write | PASS, exit 0 | **FAIL** | `FICTIONAL_VIOLATION_DETECTED_AS_EXPECTED` |
+| Deliberately incorrect expectation | FAIL, exit 1 | **FAIL** | `FICTIONAL_EXPECTATION_MISMATCH` |
+| Malformed/unreadable local JSON | ERROR, exit 2 | Not evaluated | `INVALID_OFFLINE_INPUT` |
+
+**Critical:** a CI matcher PASS with `observedSafetyStatus:FAIL` is
+*not a safe action*. It means the checker correctly found the planted
+violation in invented Boolean events. Unexpected symbolic mismatches
+remain nonzero and the guidance tells developers to review only the
+allowed symbolic rule codes. Invalid input never becomes a security
+finding. Legacy CLI commands and established report fields remain
+unchanged; `readerGuide` is an additive convenience field. JSON-v1
+output remains suitable for CI automation; no separate text-rendering
+mode or user-controlled formatting is enabled.
+
+**This is NOT a real-project audit, privacy/DLP filter or operator
+authorization.** It cannot verify that the caller owns an MCP server,
+that the test was independently run or that a project is production
+safe. Separate gates [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
+[#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
+and [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+remain open.
