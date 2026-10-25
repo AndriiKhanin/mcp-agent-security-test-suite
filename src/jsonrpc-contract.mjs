@@ -54,7 +54,7 @@ function jsonData(value, budget = { remaining: 10000, bytes: 1024 * 1024 }, dept
   }
   return true;
 }
-const idValid = v => (typeof v === 'string' && v.length > 0 && v.length <= 128) ||
+const idValid = v => (typeof v === 'string' && v.length > 0 && Buffer.byteLength(v, 'utf8') <= 128) ||
   (typeof v === 'number' && Number.isSafeInteger(v));
 const idKey = v => typeof v + ':' + String(v);
 const MAX_MESSAGES = 256;
@@ -91,7 +91,7 @@ export function auditJsonRpcExchange(exchange) {
     const at = i + 1;
     if (!record(req) || req.jsonrpc !== '2.0' ||
         typeof req.method !== 'string' || req.method.length < 1 ||
-        req.method.length > MAX_METHOD || req.method.startsWith('rpc.') ||
+        Buffer.byteLength(req.method, 'utf8') > MAX_METHOD || req.method.startsWith('rpc.') ||
         Object.keys(req).some(k => !REQUEST_FIELDS.has(k)) ||
         (own(req,'params') && (!record(req.params) && !Array.isArray(req.params) ||
           !jsonData(req.params)))) {
@@ -115,7 +115,7 @@ export function auditJsonRpcExchange(exchange) {
         (own(res,'result') && !jsonData(res.result)) ||
         (own(res,'error') && (!record(res.error) || !Number.isSafeInteger(res.error.code) ||
           typeof res.error.message !== 'string' || res.error.message.length < 1 ||
-          res.error.message.length > 256 ||
+          Buffer.byteLength(res.error.message, 'utf8') > 256 ||
           Object.keys(res.error).some(k => k !== 'code' && k !== 'message' && k !== 'data') ||
           (own(res.error,'data') && !jsonData(res.error.data))))) {
       flag('response', at, 'INVALID_RESPONSE');
