@@ -52,6 +52,16 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Check the local beta checkout before reporting (M7-M/N/O)
+
+In a source checkout (Git available), run
+`node tools/beta-checkout-receipt.mjs` to obtain a local full Git SHA
+and a clean/changed status without printing file paths. It reports only
+**local metadata**, not trusted source provenance. Compare its SHA
+manually to the reviewed public commit before running
+`node tools/beta-feedback-card.mjs`. The helper never scans MCP
+targets or submits a beta report. See [beta protocol](docs/BETA_TESTING.md).
+
 ## Optional fictional beta feedback card (M7-J/K/L)
 
 To run the five fixed offline beta controls and create a minimal Markdown

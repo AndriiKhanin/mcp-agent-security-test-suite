@@ -2,6 +2,33 @@
 
 **Status:** engineering protocol for candidate `0.0.10-rc.1`. This document does **not** prove that an independent tester has run it. No real MCP servers, customer events, credentials, proprietary code, registry publication or external network tests are approved.
 
+## M7-M/N/O — local checkout receipt for volunteer beta review
+
+Before executing the fixed offline beta controls in a clean public source
+checkout, you may run:
+
+```sh
+node tools/beta-checkout-receipt.mjs
+node tools/beta-feedback-card.mjs
+```
+
+The first command uses **only local, fixed Git read commands** to return
+the full current commit SHA plus `NO_REPORTED_CHANGES` or
+`CHANGES_PRESENT`. It never prints local filenames or raw Git
+status output. Its JSON `sourceVerification:LOCAL_GIT_METADATA_ONLY`
+**does not verify** the public remote, commit signature, ignored files,
+external reviewer identity, or independent execution. A dirty checkout
+returns exit 1. Invalid arguments or an inaccessible Git repository
+return a static error with exit 2; a clean checkout returns exit 0.
+
+The volunteer must still manually compare the SHA to the agreed, reviewed
+public GitHub commit. Then run the second command to obtain the five-case
+fictional feedback card and manually fill in system details and usability
+feedback. This does not establish M5-06 independent beta acceptance:
+consenting reviewer provenance, reproducible public revision, sanitized
+feedback and human triage remain required. Neither command contacts MCP
+servers or uploads evidence.
+
 ## M7-J/K/L — optional local beta feedback card
 
 A volunteer using a **clean public checkout** can run the existing five fixed
