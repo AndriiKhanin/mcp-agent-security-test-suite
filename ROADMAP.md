@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 732 synthetic/local, M6-E safe static reader guide for fictional CLI results, M6-D pinned adopter CI example, M6-C exported kit verification, and negative controls | [M6-E PR #151](../../pull/151), [main CI #40164911500](../../actions/runs/40164911500): **4/4 PASS, 732/732 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 739 synthetic/local, M6-F opt-in fictional terminal guidance, M6-E safe JSON reader guide, M6-D pinned adopter CI example, M6-C exported kit verification and negative controls | [M6-F PR #154](../../pull/154), [main CI #40166187805](../../actions/runs/40166187805): **4/4 PASS, 739/739 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,16 +91,20 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-F — strictly opt-in fictional terminal report interpretation
 
-- **IMPLEMENTATION / CI QUALIFICATION PENDING:** [Issue #153](../../issues/153), branch
-  `feat/m6-f-offline-terminal-view`. Add `adapter-report-view
-  <local-expectation-json>` to recompute **only bounded fictional Boolean/enum
-  symbolic assertions** and render safe static human-readable status,
-  two concrete next steps and explicit zero-authorization limits. Preserve
-  existing JSON-v1 commands, reject untrusted report claims/ANSI/private
-  data, exercise both transports in source and installed npm tarball.
-  Await 4/4 PR and post-merge CI before engineering acceptance. Preserve
-  reviewed 80 packaged paths and keep real-target #21, independent audit
-  #43 and independent beta #59 OPEN. No stable npm publication.
+- **DONE — fictional offline UX only:** [Issue #153](../../issues/153),
+  [merged PR #154](../../pull/154), [PR CI #40166068973](../../actions/runs/40166068973)
+  and [post-merge main CI #40166187805](../../actions/runs/40166187805):
+  **4/4 PASS, 739/739 tests/job**, zero failures/skips on Ubuntu/Windows
+  Node20/22. `adapter-report-view <local-expectation-json>` recomputes
+  **only bounded fictional Boolean/enum symbolic assertions** and prints
+  reviewed human-language guidance, two next steps and explicit no-authority
+  conditions. Unlike existing JSON-v1 commands, the new text view is opt-in
+  only. Strict adversarial source and installed offline npm-tarball checks
+  for both fictional transports reject untrusted report claims,
+  ANSI/control injection, paths, malformed/oversized/UTF-8 data and leaf
+  symlinks. The 80-path npm package inventory and zero new dependencies
+  remain unchanged. Real target #21, independent audit #43, and genuine
+  independent beta #59 remain **OPEN**; no stable npm publication.
 
 ## M6-E — readable, non-authorizing offline results
 
