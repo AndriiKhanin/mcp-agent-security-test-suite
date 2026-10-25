@@ -2,7 +2,27 @@
 // Strict testing profile, not a complete MCP implementation or network transport.
 // Never invokes a method, opens a socket, runs a command or emits request payloads.
 const own = (v, k) => Object.hasOwn(v, k);
-const record = v => !!v && typeof v === 'object' && !Array.isArray(v);
+// Direct-JS envelope inputs must be plain, enumerable own data records.
+ // This is a structural guard, not a sandbox for hostile Proxy objects.
+const record = v => {
+  if (!v || typeof v !== 'object' || Array.isArray(v) ||
+      Object.getPrototypeOf(v) !== Object.prototype) return false;
+  const descriptors = Object.getOwnPropertyDescriptors(v);
+  return Reflect.ownKeys(descriptors).every(key =>
+    typeof key === 'string' && Object.hasOwn(descriptors[key], 'value') &&
+    descriptors[key].enumerable);
+};
+const denseMessages = value => {
+  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype ||
+      value.length > MAX_MESSAGES) return false;
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  if (Reflect.ownKeys(descriptors).length !== value.length + 1) return false;
+  for (let i = 0; i < value.length; i++) {
+    const slot = descriptors[String(i)];
+    if (!slot || !Object.hasOwn(slot, 'value') || !slot.enumerable) return false;
+  }
+  return true;
+};
 const idValid = v => (typeof v === 'string' && v.length > 0 && v.length <= 128) ||
   (typeof v === 'number' && Number.isSafeInteger(v));
 const idKey = v => typeof v + ':' + String(v);
@@ -21,8 +41,8 @@ const RESPONSE_FIELDS = new Set(['jsonrpc', 'id', 'result', 'error']);
  * required by the JSON-RPC standard or MCP.
  */
 export function auditJsonRpcExchange(exchange) {
-  if (!record(exchange) || !Array.isArray(exchange.requests) ||
-      !Array.isArray(exchange.responses) ||
+  if (!record(exchange) || !denseMessages(exchange.requests) ||
+      !denseMessages(exchange.responses) ||
       Object.keys(exchange).some(k => k !== 'requests' && k !== 'responses') ||
       exchange.requests.length < 1 || exchange.requests.length > MAX_MESSAGES ||
       exchange.responses.length > MAX_MESSAGES) {
