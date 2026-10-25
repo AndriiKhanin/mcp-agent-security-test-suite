@@ -248,7 +248,7 @@ test('M6-C: help, documentation and reviewed packed inventory remain aligned',()
   const help=cli('help');
   assert.equal(help.status,0);
   const data=JSON.parse(help.stdout);
-  assert.equal(data.commands.length,28);
+  assert.equal(data.commands.length,29);
   assert.ok(data.commands.includes('adapter-kit-verify'));
   assert.ok(data.syntax.includes('node src/cli.mjs adapter-kit-verify fictional-kit.json'));
   for(const file of ['docs/GETTING_STARTED.md','ROADMAP.md']){
