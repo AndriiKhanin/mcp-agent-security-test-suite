@@ -52,6 +52,17 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Optional fictional beta feedback card (M7-J/K/L)
+
+To run the five fixed offline beta controls and create a minimal Markdown
+draft for a future consenting independent reviewer, use a public source
+checkout and run `node tools/beta-feedback-card.mjs`. The result contains
+only symbolic fixed-case outcomes and placeholders for **manually verified**
+public commit SHA, OS, Node version and sanitized usability feedback. No
+external MCP target is contacted, no issue is submitted automatically, and
+no independent reviewer has yet been verified. See
+[beta handoff instructions](docs/BETA_TESTING.md#m7-jkl--optional-local-beta-feedback-card).
+
 ## One-command offline project quickstart (M6-A)
 
 Run `node src/cli.mjs adapter-quickstart
