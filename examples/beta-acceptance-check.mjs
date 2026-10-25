@@ -49,15 +49,37 @@ export function matchesBetaCase(id, exit, data) {
   }
 }
 
-export function betaSummary(outcomes) {
-  if (!Array.isArray(outcomes) || outcomes.length!==BETA_CASES.length ||
-      outcomes.some((out,i)=>out?.id!==BETA_CASES[i].id ||
-        typeof out?.matched!=='boolean' ||
-        !['NONE','BETA_PROCESS_FAILURE','BETA_REPORT_INVALID',
-          'BETA_EXPECTATION_MISMATCH'].includes(out?.rule))) {
-    throw new TypeError('BETA_INVALID_SUMMARY_INPUT');
+/** M7-G/H/I: direct-JS beta summaries accept only dense first-party-shaped
+ * symbolic evidence, never caller-controlled getters or contradictory rules.
+ * This is not a Proxy sandbox or evidence of independent beta execution. */
+function exactSummaryRows(rows) {
+  if(!Array.isArray(rows) || Object.getPrototypeOf(rows)!==Array.prototype ||
+     rows.length!==BETA_CASES.length) return false;
+  const arrayProps=Object.getOwnPropertyDescriptors(rows);
+  if(Reflect.ownKeys(arrayProps).length!==rows.length+1) return false;
+  for(let i=0;i<rows.length;i++) {
+    const slot=arrayProps[String(i)];
+    if(!slot || !Object.hasOwn(slot,'value') || !slot.enumerable) return false;
+    const item=slot.value;
+    if(!item || typeof item!=='object' || Array.isArray(item) ||
+       Object.getPrototypeOf(item)!==Object.prototype) return false;
+    const props=Object.getOwnPropertyDescriptors(item);
+    if(Reflect.ownKeys(props).length!==3) return false;
+    for(const key of ['id','matched','rule']) {
+      if(!Object.hasOwn(props,key) || !Object.hasOwn(props[key],'value') ||
+         !props[key].enumerable) return false;
+    }
+    if(item.id!==BETA_CASES[i].id || typeof item.matched!=='boolean' ||
+       !['NONE','BETA_PROCESS_FAILURE','BETA_REPORT_INVALID',
+          'BETA_EXPECTATION_MISMATCH'].includes(item.rule) ||
+       (item.matched && item.rule!=='NONE') ||
+       (!item.matched && item.rule==='NONE')) return false;
   }
-  const failures = outcomes.filter(x=>!x.matched).length;
+  return true;
+}
+export function betaSummary(outcomes) {
+  if(!exactSummaryRows(outcomes)) throw new TypeError('BETA_INVALID_SUMMARY_INPUT');
+  const failures=outcomes.filter(x=>!x.matched).length;
   return {
     betaSchemaVersion:1,
     profile:PROFILE,
