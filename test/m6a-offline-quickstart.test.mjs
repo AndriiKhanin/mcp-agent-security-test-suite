@@ -200,7 +200,7 @@ test('M6-A: instructions and help expose one command without target approval',()
   const p=cli('help');
   assert.equal(p.status,0);
   const r=JSON.parse(p.stdout);
-  assert.equal(r.commands.length,29);
+  assert.equal(r.commands.length,30);
   assert.ok(r.commands.includes('adapter-quickstart'));
   assert.ok(r.syntax.includes(
     'node src/cli.mjs adapter-quickstart examples/adapter-profiles/streamable-http-project.json'));

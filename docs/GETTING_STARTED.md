@@ -1,3 +1,34 @@
+## M7-A/B/C — built-in fictional adapter first-run guide
+
+On Node.js 20+ in a clean source checkout, get a reviewed sequence
+without supplying a project path, executable or URL:
+
+```sh
+node src/cli.mjs adapter-guide
+```
+
+The fixed JSON-v1 plan has four steps: (1) select either inert
+`stdio` or `streamable-http` adapter kit, (2) export the kit to a
+local `fictional-kit.json`, (3) verify its fixed synthetic checks,
+and (4) optionally run the existing offline `adapter-quickstart` on
+a bundled inert example. It uses no user-supplied configuration,
+credentials, process launch or external MCP connection.
+
+For example, follow the stdio branch:
+
+```sh
+node src/cli.mjs adapter-kit stdio > fictional-kit.json
+node src/cli.mjs adapter-kit-verify fictional-kit.json
+node src/cli.mjs adapter-quickstart examples/adapter-profiles/stdio-project.json
+```
+
+You can choose `streamable-http` instead. Neither route connects to
+the endpoint named in its fictional descriptor. The guide states
+`externalMcpTargetContacted:false`, `ownershipVerified:false`,
+`independentBetaVerified:false` and
+`stableReleaseAuthorized:false`. No result can be used as real
+server authorization or security certification.
+
 # Getting started: offline security contract checks
 
 **For developers and contributors.** This independent MIT-licensed package uses Node.js **20 or newer**, Git and **no npm installation or paid API**. It tests only fictional security contracts. Do not provide credentials, customer logs or production target addresses. Passing these tests does not mean a real MCP server is secure.
