@@ -17,7 +17,7 @@ import { auditRecords, parseJsonl } from './trace.mjs';
 import { auditJsonRpcExchange } from './jsonrpc-contract.mjs';
 import { auditMcpEraTranscript } from './mcp-era-contract.mjs';
 import { auditModernNegotiation } from './mcp-modern-negotiation.mjs';
-import { CLI_COMMANDS, buildCliReport, buildCliErrorReport, buildOfflineDemoResult, buildCliHelpResult, buildCliVersionResult } from './report-contract.mjs';
+import { CLI_COMMANDS, buildCliReport, buildCliErrorReport, buildOfflineDemoResult, buildCliHelpResult, buildCliVersionResult, buildAdapterGuideResult } from './report-contract.mjs';
 
 async function readBoundedFile(path,maxBytes=1024*1024) {
   // Open a single handle with O_NOFOLLOW where available; reject non-regular file.
@@ -118,7 +118,7 @@ async function main() {
     '--help':'help', '-h':'help', '--version':'version', '-V':'version'
   });
   const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
-  const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest' || command === 'adapter-onboarding-demo';
+  const noFile = command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-guide' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest' || command === 'adapter-onboarding-demo';
   // Only two reviewed selectors are legal. Never treat template selection as
   // a file path, process command, URL, flag or caller-provided descriptor.
   const validArgs=(command==='adapter-template' || command==='adapter-kit')
@@ -130,13 +130,18 @@ async function main() {
       emitFictionalTerminalView(buildCliErrorReport('adapter-trace-expect','INVALID_CLI_ARGUMENTS'));
       return 2;
     }
-    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs help|version|demo|adapter-guide|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
   try {
     if (command === 'help') {
       const report = buildCliReport('help', buildCliHelpResult());
+      emit(report);
+      return report.exitCode;
+    }
+    if (command === 'adapter-guide') {
+      const report=buildCliReport('adapter-guide',buildAdapterGuideResult());
       emit(report);
       return report.exitCode;
     }
