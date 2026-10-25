@@ -23,6 +23,31 @@ const denseMessages = value => {
   }
   return true;
 };
+/** M6-U/V/W: bounded JSON-shaped evidence, without reading accessors.
+ * Direct JS only; not an adversarial Proxy sandbox. */
+function jsonData(value, budget = { remaining: 10000 }, depth = 0) {
+  if (--budget.remaining < 0 || depth > 32) return false;
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (!value || typeof value !== 'object') return false;
+  if (Array.isArray(value)) {
+    if (Object.getPrototypeOf(value) !== Array.prototype || value.length > 10000) return false;
+    const desc = Object.getOwnPropertyDescriptors(value);
+    if (Reflect.ownKeys(desc).length !== value.length + 1) return false;
+    for (let i = 0; i < value.length; i++) {
+      const field = desc[String(i)];
+      if (!field || !Object.hasOwn(field, 'value') || !field.enumerable ||
+          !jsonData(field.value, budget, depth + 1)) return false;
+    }
+    return true;
+  }
+  if (!record(value)) return false;
+  const desc = Object.getOwnPropertyDescriptors(value);
+  for (const key of Reflect.ownKeys(desc)) {
+    if (!jsonData(desc[key].value, budget, depth + 1)) return false;
+  }
+  return true;
+}
 const idValid = v => (typeof v === 'string' && v.length > 0 && v.length <= 128) ||
   (typeof v === 'number' && Number.isSafeInteger(v));
 const idKey = v => typeof v + ':' + String(v);
@@ -62,7 +87,8 @@ export function auditJsonRpcExchange(exchange) {
         typeof req.method !== 'string' || req.method.length < 1 ||
         req.method.length > MAX_METHOD || req.method.startsWith('rpc.') ||
         Object.keys(req).some(k => !REQUEST_FIELDS.has(k)) ||
-        (own(req,'params') && !record(req.params) && !Array.isArray(req.params))) {
+        (own(req,'params') && (!record(req.params) && !Array.isArray(req.params) ||
+          !jsonData(req.params)))) {
       flag('request', at, 'INVALID_REQUEST');
       continue;
     }
@@ -83,7 +109,8 @@ export function auditJsonRpcExchange(exchange) {
         (own(res,'error') && (!record(res.error) || !Number.isSafeInteger(res.error.code) ||
           typeof res.error.message !== 'string' || res.error.message.length < 1 ||
           res.error.message.length > 256 ||
-          Object.keys(res.error).some(k => k !== 'code' && k !== 'message' && k !== 'data')))) {
+          Object.keys(res.error).some(k => k !== 'code' && k !== 'message' && k !== 'data') ||
+          (own(res.error,'data') && !jsonData(res.error.data))))) {
       flag('response', at, 'INVALID_RESPONSE');
       continue;
     }
