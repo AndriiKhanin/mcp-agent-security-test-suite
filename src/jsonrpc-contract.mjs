@@ -25,11 +25,15 @@ const denseMessages = value => {
 };
 /** M6-U/V/W: bounded JSON-shaped evidence, without reading accessors.
  * Direct JS only; not an adversarial Proxy sandbox. */
-function jsonData(value, budget = { remaining: 10000 }, depth = 0) {
+function jsonData(value, budget = { remaining: 10000, bytes: 1024 * 1024 }, depth = 0) {
   if (--budget.remaining < 0 || depth > 32) return false;
   if (value === null || typeof value === 'boolean') return true;
-  if (typeof value === 'string') return Buffer.byteLength(value, 'utf8') <= 1024 * 1024;
-  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value === 'string') {
+    budget.bytes -= Buffer.byteLength(value, 'utf8');
+    return budget.bytes >= 0;
+  }
+  if (typeof value === 'number') return Number.isFinite(value) &&
+    (!Number.isInteger(value) || Number.isSafeInteger(value));
   if (!value || typeof value !== 'object') return false;
   if (Array.isArray(value)) {
     if (Object.getPrototypeOf(value) !== Array.prototype || value.length > 10000) return false;
@@ -45,7 +49,8 @@ function jsonData(value, budget = { remaining: 10000 }, depth = 0) {
   if (!record(value)) return false;
   const desc = Object.getOwnPropertyDescriptors(value);
   for (const key of Reflect.ownKeys(desc)) {
-    if (!jsonData(desc[key].value, budget, depth + 1)) return false;
+    budget.bytes -= Buffer.byteLength(key, 'utf8');
+    if (budget.bytes < 0 || !jsonData(desc[key].value, budget, depth + 1)) return false;
   }
   return true;
 }
