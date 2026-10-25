@@ -105,6 +105,17 @@ rejects arbitrary saved reports and never prints paths, customer logs,
 tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
 exit codes are unchanged. No real project, operator or target was verified.
 
+## Local independent-review preparation (M6-H)
+
+For a *preliminary*, nonauthorizing byte inventory on an already obtained
+public source checkout, use `node tools/reviewer-receipt.mjs snapshot`
+and `node tools/reviewer-receipt.mjs verify <local-receipt.json>`.
+This optional `tools/` script is **not** in the npm package. It compares
+the fixed package-file list with an offline npm dry-run and checks reviewed
+source file bytes, but does not itself verify Git provenance or real archive
+bytes, sign anything, contact user MCP servers or complete an independent
+security audit. See [assessor handoff](docs/R5_INDEPENDENT_REVIEW.md#m6-h--deterministic-local-source-byte-receipt-engineering-preview).
+
 ## Public CLI compatibility guard (M6-G)
 
 A dedicated **test-only** regression suite pins literal expected fields for
