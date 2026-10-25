@@ -248,7 +248,7 @@ test('M4-B9-A: CLI help exposes offline-only audit command',()=>{
   const x=cli('help');
   assert.equal(x.status,0);
   const r=JSON.parse(x.stdout);
-  assert.equal(r.commands.length,28);
+  assert.equal(r.commands.length,29);
   assert.ok(r.commands.includes('adapter-fixture-audit'));
   assert.ok(r.syntax.some(s=>s.startsWith('node src/cli.mjs adapter-fixture-audit ')));
   assert.ok(!x.stdout.includes('https://'));
@@ -539,7 +539,7 @@ test('M4-B9-B: help lists trace command without executable target or URL',()=>{
   const p=cli('help');
   assert.equal(p.status,0);
   const r=JSON.parse(p.stdout);
-  assert.equal(r.commands.length,28);
+  assert.equal(r.commands.length,29);
   assert.ok(r.commands.includes('adapter-synthetic-trace'));
   assert.ok(r.syntax.some(s=>s.startsWith('node src/cli.mjs adapter-synthetic-trace ')));
   assert.ok(!p.stdout.includes('https://'));
