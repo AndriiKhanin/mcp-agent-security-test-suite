@@ -47,8 +47,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export FICTIONAL_KIT_DIR="$(mktemp -d)"
-          trap 'rm -rf "$FICTIONAL_KIT_DIR"' EXIT
+          export FICTIONAL_KIT_DIR="$(node -e 'const f=require("node:fs"),o=require("node:os"),p=require("node:path");process.stdout.write(f.mkdtempSync(p.join(o.tmpdir(),"fictional-adopter-ci-")))')"
+          trap 'node -e '\''require("node:fs").rmSync(process.env.FICTIONAL_KIT_DIR,{recursive:true,force:true})'\''' EXIT
           node reviewed-suite/src/cli.mjs adapter-kit stdio > "$FICTIONAL_KIT_DIR/kit.json"
           node reviewed-suite/src/cli.mjs adapter-kit-verify "$FICTIONAL_KIT_DIR/kit.json" > "$FICTIONAL_KIT_DIR/verified.json"
           node --input-type=module -e '
