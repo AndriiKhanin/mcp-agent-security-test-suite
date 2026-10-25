@@ -27,7 +27,8 @@ const denseMessages = value => {
  * Direct JS only; not an adversarial Proxy sandbox. */
 function jsonData(value, budget = { remaining: 10000 }, depth = 0) {
   if (--budget.remaining < 0 || depth > 32) return false;
-  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
+  if (value === null || typeof value === 'boolean') return true;
+  if (typeof value === 'string') return Buffer.byteLength(value, 'utf8') <= 1024 * 1024;
   if (typeof value === 'number') return Number.isFinite(value);
   if (!value || typeof value !== 'object') return false;
   if (Array.isArray(value)) {
@@ -106,6 +107,7 @@ export function auditJsonRpcExchange(exchange) {
     if (!record(res) || res.jsonrpc !== '2.0' || !own(res,'id') ||
         !idValid(res.id) || Object.keys(res).some(k => !RESPONSE_FIELDS.has(k)) ||
         own(res,'result') === own(res,'error') ||
+        (own(res,'result') && !jsonData(res.result)) ||
         (own(res,'error') && (!record(res.error) || !Number.isSafeInteger(res.error.code) ||
           typeof res.error.message !== 'string' || res.error.message.length < 1 ||
           res.error.message.length > 256 ||
