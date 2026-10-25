@@ -218,8 +218,9 @@ test('P1 M5-07: Markdown fences are balanced and shell snippets cannot consume l
     'node tools/beta-checkout-receipt.mjs',
     'node tools/beta-feedback-card.mjs'
   ]);
+  assert.deepEqual(blocks[1].lines,['node tools/beta-feedback-card.mjs']);
   for(const [index,block] of blocks.entries()){
-    assert.ok(block.lines.length>=(index===0?2:4),'empty/truncated fenced block');
+    assert.ok(block.lines.length>=(index===0?2:index===1?1:4),'empty/truncated fenced block');
     assert.ok(block.lines.every(line=>!/^#{1,4} /.test(line) && !line.startsWith('| Case identifier')),
       'a Markdown section/table was swallowed inside a shell block');
   }
