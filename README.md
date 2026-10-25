@@ -105,6 +105,19 @@ rejects arbitrary saved reports and never prints paths, customer logs,
 tokens, credentials or ANSI escapes. Existing JSON-v1 CLI/CI output and
 exit codes are unchanged. No real project, operator or target was verified.
 
+## Offline actual archive review (M6-I)
+
+The optional **nonpackaged** `tools/reviewer-archive.mjs` can produce
+a temporary first-party tarball custody receipt with
+`node tools/reviewer-archive.mjs snapshot`. Save its JSON in your
+own disposable directory, then use `node tools/reviewer-archive.mjs verify
+<local-receipt.json>` to rebuild and compare. The script uses offline
+npm, disables all lifecycle hooks, checks exact installed bytes against
+the 80-file manifest and source, and deletes temporary artifacts. This is
+**not** an independently trusted artifact digest, a signed release,
+an independent security review, or authorization for any real MCP target.
+See [R5 reviewer handoff](docs/R5_INDEPENDENT_REVIEW.md).
+
 ## Local independent-review preparation (M6-H)
 
 For a *preliminary*, nonauthorizing byte inventory on an already obtained
