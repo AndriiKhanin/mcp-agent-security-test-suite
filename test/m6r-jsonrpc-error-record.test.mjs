@@ -10,22 +10,22 @@ test('M6-R: nested error getters are never invoked',()=>{
   const x=make();let count=0;
   Object.defineProperty(x.responses[0].error,field,{enumerable:true,
    get(){count++;throw Error('PRIVATE_CANARY');}});
-  assert.deepEqual(rules(auditJsonRpcExchange(x)),['INVALID_RESPONSE']);
+  assert.deepEqual(rules(auditJsonRpcExchange(x)),['INVALID_RESPONSE','MISSING_RESPONSE']);
   assert.equal(count,0);
  }
 });
 test('M6-R: inherited, hidden and symbol error evidence denied',()=>{
  const a=make();Object.setPrototypeOf(a.responses[0].error,{code:-32603});
- assert.deepEqual(rules(auditJsonRpcExchange(a)),['INVALID_RESPONSE']);
+ assert.deepEqual(rules(auditJsonRpcExchange(a)),['INVALID_RESPONSE','MISSING_RESPONSE']);
  const b=make();Object.defineProperty(b.responses[0].error,'code',{value:-32603,enumerable:false});
- assert.deepEqual(rules(auditJsonRpcExchange(b)),['INVALID_RESPONSE']);
+ assert.deepEqual(rules(auditJsonRpcExchange(b)),['INVALID_RESPONSE','MISSING_RESPONSE']);
  const c=make();c.responses[0].error[Symbol('canary')]='PRIVATE_CANARY';
- assert.deepEqual(rules(auditJsonRpcExchange(c)),['INVALID_RESPONSE']);
+ assert.deepEqual(rules(auditJsonRpcExchange(c)),['INVALID_RESPONSE','MISSING_RESPONSE']);
 });
 test('M6-R: unknown error fields denied, standard data allowed',()=>{
  const a=make();a.responses[0].error.unreviewed='SYNTHETIC_CANARY';
  const negative=auditJsonRpcExchange(a);
- assert.deepEqual(rules(negative),['INVALID_RESPONSE']);
+ assert.deepEqual(rules(negative),['INVALID_RESPONSE','MISSING_RESPONSE']);
  assert.equal(JSON.stringify(negative).includes('SYNTHETIC_CANARY'),false);
  const b=make();b.responses[0].error.data={synthetic:true};
  assert.equal(auditJsonRpcExchange(b).status,'PASS');
