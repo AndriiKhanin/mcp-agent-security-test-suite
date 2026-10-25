@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 739 synthetic/local, M6-F opt-in fictional terminal guidance, M6-E safe JSON reader guide, M6-D pinned adopter CI example, M6-C exported kit verification and negative controls | [M6-F PR #154](../../pull/154), [main CI #40166187805](../../actions/runs/40166187805): **4/4 PASS, 739/739 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 747 synthetic/local, M6-G CLI compatibility regression guard, M6-F opt-in fictional terminal guidance, M6-E safe JSON reader guide, M6-D pinned adopter CI example, M6-C exported kit verification and negative controls | [M6-G PR #157](../../pull/157), [main CI #40169200481](../../actions/runs/40169200481): **4/4 PASS, 747/747 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,17 +91,24 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-G — backward-compatibility/authorization regression guard
 
-- **IN PROGRESS — source and installed-package qualification pending:**
-  [Issue #156](../../issues/156). Add independent literal oracle tests for
-  JSON-v1 help/version and both inert transports; exported kit, quickstart,
-  verification, fictional clean/detected/mismatch assertions, 0/1/2 exits,
-  and the separate opt-in text-only M6-F view. Include malformed/forged
-  report, ANSI, oversize, duplicate-key and symlink denials, plus
-  test-owned interception of first-party network/process APIs (NOT an
-  OS sandbox or formal egress audit). Preserve the reviewed **80 npm paths**,
-  zero new dependencies and unchanged CLI implementations. Acceptance needs
-  4/4 PR and post-merge main CI with no failed/skipped tests.
-  Open gates #21/#43/#59 are never satisfied by these regressions.
+- **DONE — fictional offline public contract maintenance only:**
+  [Issue #156](../../issues/156), [merged PR #157](../../pull/157),
+  [PR CI #40169124810](../../actions/runs/40169124810),
+  [post-merge main CI #40169200481](../../actions/runs/40169200481):
+  **4/4 PASS, 747/747 tests/job**, 0 failures/skips on Windows/Ubuntu
+  Node20/22. Eight new independent literal compatibility tests pin selected
+  JSON-v1 help/version and both inert transport contract semantics,
+  quickstart, exported kit verification, fictional clean/detected/mismatch
+  0/1/2 exits and the separate M6-F text-only view. Negative controls reject
+  malformed/forged PASS/readerGuide/authority values, invalid UTF-8,
+  oversize, duplicate JSON keys, ANSI/secret/path echo and leaf symlinks.
+  A test-owned runtime preloader witnesses selected Node first-party
+  network/process API calls on non-contact command paths; it is not
+  an OS sandbox, proof of absence of all egress or independent audit.
+  The unrelated installed offline npm tarball regression remains covered.
+  No new runtime dependencies/paid APIs, no new CLI command, no package
+  inventory change (**80 paths**) or stable npm publish. Real-target
+  #21, independent security review #43 and external beta #59 stay **OPEN**.
 
 ## M6-F — strictly opt-in fictional terminal report interpretation
 
