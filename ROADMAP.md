@@ -89,6 +89,22 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-K — strict JSON numeric and depth fail-closed hardening
+
+- **IN PROGRESS — implementation and CI under review:**
+  [Issue #168](../../issues/168). First-party JSON parser must not
+  silently convert syntactically valid extreme numeric tokens to
+  `Infinity`, nonzero underflow into `0`, or rounded unsafe JS
+  integers before fictional policy/evidence checks. The parser
+  pre-bounds excessively deep nested structures (ignoring quoted
+  brackets/escaped quotes) before `JSON.parse` materializes them.
+  Literal negative regression tests cover overflow, underflow, integer
+  precision, deep arrays/objects, quoted strings, legacy duplicate-key
+  and syntax errors, sanitized JSONL/CLI 0/1/2 responses.
+  This is genuine offline input-boundary hardening, NOT a new MCP
+  connection/owner grant or security certification. Gates #21/#43/#59
+  remain OPEN.
+
 ## M6-J — bounded first-party independent assessor handoff
 
 - **DONE — local engineering handoff, not independent review:**
