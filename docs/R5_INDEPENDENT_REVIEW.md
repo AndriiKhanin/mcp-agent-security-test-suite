@@ -211,3 +211,37 @@ a self-computed MATCH cannot attest source provenance, artifact bytes,
 operator identity, real MCP security, completed audit, or release approval.
 The independent security gate [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
 remains OPEN.
+
+## M6-I — temporary npm archive and installed-byte receipt (internal only)
+
+The opt-in **nonpackaged** script `tools/reviewer-archive.mjs` extends
+M6-H's source-byte index to the **actual temporary candidate .tgz**. From
+an already obtained, separately authenticated public source checkout, invoke
+`node tools/reviewer-archive.mjs snapshot > local-archive-receipt.json`
+and `node tools/reviewer-archive.mjs verify local-archive-receipt.json`.
+
+It runs two isolated `npm pack --offline --ignore-scripts --json` builds
+in disposable system temporary directories, compares the actual two archive
+digests, checks SHA-1 and SHA-512 against npm metadata, and installs **only
+the temporary local tarball** with `npm install --offline --ignore-scripts`
+and lifecycle hooks disabled. All **80 installed files** must have the
+expected paths and match reviewed source bytes, allowing only the documented
+first-line Node CLI shebang CRLF-to-LF normalization on Windows. It
+produces a bounded canonical receipt containing the actual local .tgz
+SHA-256, SHA-512, npm integrity and installed byte-index SHA-256.
+Temporary packages, npm homes/caches and installation directories are
+removed after checking; the command does **not** keep, publish, upload
+or sign any artifact. Exit codes: 0 exact local MATCH, 1 well-formed
+but differing locally regenerated receipt, 2 invalid/unreadable or unsafe
+input. Never provide private credentials, MCP endpoints or production data.
+
+**Assessor trust warning:** archive hashing provides a local custody
+measurement, *not* independent artifact provenance. Anyone able to
+rewrite the checkout and locally generated receipt can make both
+self-consistent. The actual assessor must independently establish an
+immutable Git source SHA, separately anchor the receipt/digest,
+inspect excluded `.github/` and `test/` code, and review the archive
+with independently chosen tooling before delivering a scoped sign-off.
+Do not claim byte-identical cross-OS tarballs or a public npm release from
+the local two-pack check. Gates #21 (external targets), #43 (independent
+security and provenance review), and #59 (real independent beta) remain OPEN.
