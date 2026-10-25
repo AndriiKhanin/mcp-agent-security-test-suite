@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-H — nonpackaged reviewer source-byte receipt
+
+- **IN PROGRESS — engineering qualification pending:** [Issue #159](../../issues/159)
+  adds an opt-in nonpackaged local `snapshot`/`verify` tool for the
+  locked 80-path candidate npm inventory, with offline npm dry-run identity
+  comparison, deterministic per-file SHA-256/byte-length receipt, and strict
+  synthetic receipt tampering, UTF-8, symlink, schema and path controls.
+  Local self-consistent hashes cannot replace an independently trusted
+  source SHA, signed artifact, actual archive inspection or genuine
+  independent assessor. No new published file/runtime dependency, no
+  arbitrary user process/MCP target access; gates #21/#43/#59 remain OPEN.
+
 ## M6-G — backward-compatibility/authorization regression guard
 
 - **DONE — fictional offline public contract maintenance only:**
