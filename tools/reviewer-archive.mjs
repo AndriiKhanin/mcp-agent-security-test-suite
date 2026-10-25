@@ -22,7 +22,7 @@ const hash=(bytes,algorithm,encoding='hex')=>
   createHash(algorithm).update(bytes).digest(encoding);
 const decoder=new TextDecoder('utf-8',{fatal:true});
 const FILE_LIMIT=1_048_576,ARCHIVE_LIMIT=2_000_000,RECEIPT_LIMIT=4096;
-const hex=/^[0-9a-f]{64}$/u;
+const hex256=/^[0-9a-f]{64}$/u,hex512=/^[0-9a-f]{128}$/u;
 const reviewedScope=Object.freeze({
   rawLocalArchiveHashed:true,
   installedBytesComparedToLocalSource:true,
@@ -231,8 +231,8 @@ function validReceipt(v){
     v.packagePathCount!==80||
     !Number.isSafeInteger(v.archiveBytes)||
     v.archiveBytes<2000||v.archiveBytes>ARCHIVE_LIMIT||
-    !hex.test(v.archiveSha256)||!hex.test(v.archiveSha512)||
-    !hex.test(v.installedIndexSha256)||
+    !hex256.test(v.archiveSha256)||!hex512.test(v.archiveSha512)||
+    !hex256.test(v.installedIndexSha256)||
     v.npmIntegrity!=='sha512-'+Buffer.from(v.archiveSha512,'hex').toString('base64')||
     !Number.isSafeInteger(v.sourceBytesTotal)||
     v.sourceBytesTotal<0||v.sourceBytesTotal>ARCHIVE_LIMIT||
