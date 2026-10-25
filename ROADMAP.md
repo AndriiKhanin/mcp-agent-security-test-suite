@@ -89,6 +89,19 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-L — direct fictional policy data boundary
+
+- **IN PROGRESS — regression and implementation verification:**
+  [Issue #171](../../issues/171). The direct JS module entrypoint for
+  fictional offline note-policy scenarios now requires plain records
+  with own data fields and dense plain data arrays; inherited owner/grant
+  values, accessors/getters, sparse lists, extra symbols and unexpected
+  nonenumerable keys are rejected before being treated as authorization
+  evidence. This does NOT sandbox hostile JavaScript Proxy traps and adds
+  no external user MCP contact, credentials, process/network authority or
+  release permission. Fixed 80-file npm package inventory and existing
+  synthetic JSON fixtures remain unchanged. Gates #21/#43/#59 OPEN.
+
 ## M6-K — strict JSON numeric and depth fail-closed hardening
 
 - **DONE — actual first-party input validation fix:** [Issue #168](../../issues/168),
