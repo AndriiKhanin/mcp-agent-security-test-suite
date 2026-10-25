@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 771 synthetic/local, M6-J offline auditor handoff including excluded test/CI/tool byte inventory, M6-I actual npm archive verification, M6-H source-byte receipt, M6-G CLI compatibility guard and earlier offline adopter controls | [M6-J PR #166](../../pull/166), [post-merge main CI #40177103990](../../actions/runs/40177103990): **4/4 PASS, 771/771 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 779 synthetic/local, M6-K strict JSON number/depth hardening, M6-J offline auditor handoff, M6-I local archive verification and prior fictional adopter controls | [M6-K PR #169](../../pull/169), [post-merge main CI #40179073042](../../actions/runs/40179073042): **4/4 PASS, 779/779 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,19 +91,20 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-K — strict JSON numeric and depth fail-closed hardening
 
-- **IN PROGRESS — implementation and CI under review:**
-  [Issue #168](../../issues/168). First-party JSON parser must not
-  silently convert syntactically valid extreme numeric tokens to
-  `Infinity`, nonzero underflow into `0`, or rounded unsafe JS
-  integers before fictional policy/evidence checks. The parser
-  pre-bounds excessively deep nested structures (ignoring quoted
-  brackets/escaped quotes) before `JSON.parse` materializes them.
-  Literal negative regression tests cover overflow, underflow, integer
-  precision, deep arrays/objects, quoted strings, legacy duplicate-key
-  and syntax errors, sanitized JSONL/CLI 0/1/2 responses.
-  This is genuine offline input-boundary hardening, NOT a new MCP
-  connection/owner grant or security certification. Gates #21/#43/#59
-  remain OPEN.
+- **DONE — actual first-party input validation fix:** [Issue #168](../../issues/168),
+  [merged PR #169](../../pull/169), [PR CI #40178865822](../../actions/runs/40178865822)
+  and [post-merge main CI #40179073042](../../actions/runs/40179073042):
+  **4/4 PASS, 779/779 tests/job**, zero fail/skipped on Windows/Ubuntu
+  Node20/22. First-party `src/strict-json.mjs` now pre-bounds quoted-string-
+  aware JSON nesting before native parsing and rejects JSON numbers silently
+  converted to `Infinity`, nonzero values rounded to zero, or integer values
+  outside safe JS integer precision. Eight new literal negative and positive
+  controls exercise top-level and nested numeric overflow/underflow,
+  precision, deep arrays/objects, escapes/quoted brackets, duplicate keys,
+  malformed JSON, JSONL and sanitized CLI exit2. Existing JSON-v1 public
+  command compatibility maintained; **80 shipped npm paths** and zero
+  dependencies/new execution capabilities. This is not an external MCP target
+  security audit or stable-release approval. #21/#43/#59 remain OPEN.
 
 ## M6-J — bounded first-party independent assessor handoff
 
