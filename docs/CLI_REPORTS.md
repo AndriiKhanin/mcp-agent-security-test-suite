@@ -133,3 +133,18 @@ All three intentionally exit 1. Never use real logs, customer identifiers, secre
 - All coverage is developer-authored synthetic regression evidence. It does not prove real MCP security, complete JSON-RPC/MCP conformance or independent certification.
 
 See [SECURITY.md](../SECURITY.md), [threat model](THREAT_MODEL.md) and [Roadmap M2-01 (#5)](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/5).
+
+
+## M6-F: opt-in human text view (not part of the JSON-v1 contract)
+
+`adapter-report-view <local-expectation-json>` is the **one explicit exception**
+to the JSON-v1 stdout convention: this NEW command intentionally prints
+only static human-oriented lines. It recomputes the same bounded, strict
+symbolic `adapter-trace-expect` expectations from a local fictional input;
+it never trusts preexisting report statuses, saved `readerGuide` fields,
+private logs, file paths or executable arguments. Exit 0 is expectation
+MATCH, possibly with *observed synthetic safety FAIL*; exit 1 is MISMATCH;
+exit 2 is input/argument rejection. No ANSI codes or input fields are echoed.
+All older commands retain their JSON-v1 output and original exit contract.
+No real MCP project or operator was verified, no user target contacted,
+and no stable release authorized. [Exact example](GETTING_STARTED.md#m6-f--opt-in-terminal-only-view-of-fictional-symbolic-expectations).
