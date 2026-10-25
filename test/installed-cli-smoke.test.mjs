@@ -423,6 +423,43 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       assert.equal(result.authorizationStatus,'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
     }
 
+    // M6-F: terminal view is opt-in and works from this INSTALLED tarball,
+    // in the unrelated adopter cwd, for BOTH fictional transport shapes.
+    for(const transport of ['stdio','streamable-http']){
+      const selected=transport==='streamable-http'
+        ? kit : JSON.parse(adopterRun('adapter-kit',transport).stdout);
+      const broken=structuredClone(selected.expectedViolation);
+      broken.expectedStatus='PASS';
+      broken.expected[0].ruleCodes=[];
+      for(const [input,exit,match,safety] of [
+        [selected.cleanExpectation,0,'MATCH','PASS'],
+        [selected.expectedViolation,0,'MATCH','FAIL'],
+        [broken,1,'MISMATCH','FAIL']
+      ]){
+        save(assertionFile,input);
+        const human=adopterRun('adapter-report-view','local-expectation.json');
+        assert.equal(human.status,exit,'installed terminal view matches CI exit');
+        assert.equal(human.stderr,'');
+        assert.match(human.stdout,/^FICTIONAL ONLY/);
+        assert.ok(human.stdout.includes('CI expectation: '+match));
+        assert.ok(human.stdout.includes('Observed fictional safety: '+safety));
+        assert.ok(human.stdout.includes('Real project assessed: NO'));
+        assert.ok(human.stdout.includes('Real MCP target execution: NOT AUTHORIZED'));
+        assert.ok(!human.stdout.includes('mcp.example.org'));
+        assert.ok(!human.stdout.includes('local-expectation.json'));
+        assert.ok(!human.stdout.startsWith('{'),'view should never mix JSON with text');
+      }
+    }
+    writeFileSync(assertionFile,'{"private":"PRIVATE_CANARY\\u001b[31m"}','utf8');
+    const invalidHuman=adopterRun('adapter-report-view','local-expectation.json');
+    assert.equal(invalidHuman.status,2);
+    assert.match(invalidHuman.stdout,/Observed fictional safety: NOT EVALUATED/);
+    assert.ok(!(invalidHuman.stdout+invalidHuman.stderr).includes('PRIVATE_CANARY'));
+    assert.ok(!invalidHuman.stdout.includes('\u001b'));
+    const absentHuman=adopterRun('adapter-report-view','PRIVATE_CANARY-unreadable.json');
+    assert.equal(absentHuman.status,2);
+    assert.ok(!(absentHuman.stdout+absentHuman.stderr).includes('PRIVATE_CANARY'));
+
     // Import the installed SDK module from a *different* working directory.
     // Relative resolution is pinned to the installed artifact, not src/ in
     // the repository or an implicit shell/current-directory assumption.
