@@ -89,6 +89,21 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-M — sparse synthetic trace fail-closed boundary
+
+- **IN PROGRESS — test/CI qualification:** [Issue #174](../../issues/174).
+  `src/trace.mjs` previously used `Array.forEach` to audit events, which
+  silently skips sparse array holes and could report **PASS, checked=1**
+  for a nonexistent event. The direct JS trace audit now refuses sparse,
+  accessor-backed, extra-key and foreign-prototype arrays *before*
+  enumeration; individual event records must be plain own-data objects,
+  rejecting inherited authorization fields, unexpected symbols/hidden
+  data and event getters without calling ordinary getters. Normal fictional
+  JSONL data, 200-finding truncation, public JSON-v1 PASS/FAIL contracts
+  and offline-only authority boundaries remain unchanged. This neither
+  runs nor authorizes real customer MCP targets, signs provenance, or grants
+  release approval; #21/#43/#59 remain OPEN.
+
 ## M6-L — direct fictional policy data boundary
 
 - **DONE — first-party offline policy API validation hardening:**
