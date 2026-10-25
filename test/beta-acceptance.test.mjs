@@ -203,7 +203,7 @@ test('P1 M5-07: Markdown fences are balanced and shell snippets cannot consume l
   const d=documented('docs/BETA_TESTING.md');
   const codeMarker=line=>['```','```sh','```powershell'].includes(line.trim());
   const fences=d.split('\n').filter(codeMarker);
-  assert.equal(fences.length,10,'5 complete code blocks are expected');
+  assert.equal(fences.length,12,'6 complete code blocks are expected');
   let open=null,blocks=[];
   for(const line of d.split('\n')){
     const match=codeMarker(line) ? [line.trim(),line.trim().slice(3)] : null;
@@ -213,10 +213,13 @@ test('P1 M5-07: Markdown fences are balanced and shell snippets cannot consume l
     }else if(open!==null)open.lines.push(line);
   }
   assert.equal(open,null,'unterminated fenced block');
-  assert.deepEqual(blocks.map(b=>b.lang),['sh','sh','sh','powershell','sh']);
-  assert.deepEqual(blocks[0].lines,['node tools/beta-feedback-card.mjs']);
+  assert.deepEqual(blocks.map(b=>b.lang),['sh','sh','sh','sh','powershell','sh']);
+  assert.deepEqual(blocks[0].lines,[
+    'node tools/beta-checkout-receipt.mjs',
+    'node tools/beta-feedback-card.mjs'
+  ]);
   for(const [index,block] of blocks.entries()){
-    assert.ok(block.lines.length>=(index===0?1:4),'empty/truncated fenced block');
+    assert.ok(block.lines.length>=(index===0?2:4),'empty/truncated fenced block');
     assert.ok(block.lines.every(line=>!/^#{1,4} /.test(line) && !line.startsWith('| Case identifier')),
       'a Markdown section/table was swallowed inside a shell block');
   }
