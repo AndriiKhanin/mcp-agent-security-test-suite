@@ -25,7 +25,8 @@ function eventShape(event) {
   const desc=Object.getOwnPropertyDescriptors(event);
   for(const key of Reflect.ownKeys(desc)) {
     if(typeof key!=='string' || !KEYS.has(key) ||
-       !Object.hasOwn(desc[key],'value')) return 'INVALID_FIELDS';
+       !Object.hasOwn(desc[key],'value') || !desc[key].enumerable)
+      return 'INVALID_FIELDS';
   }
   if(!Object.hasOwn(desc,'decision') || !Object.hasOwn(desc,'effect') ||
      !['ALLOW','DENY'].includes(desc.decision.value) ||
