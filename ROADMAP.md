@@ -89,6 +89,20 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-G — backward-compatibility/authorization regression guard
+
+- **IN PROGRESS — source and installed-package qualification pending:**
+  [Issue #156](../../issues/156). Add independent literal oracle tests for
+  JSON-v1 help/version and both inert transports; exported kit, quickstart,
+  verification, fictional clean/detected/mismatch assertions, 0/1/2 exits,
+  and the separate opt-in text-only M6-F view. Include malformed/forged
+  report, ANSI, oversize, duplicate-key and symlink denials, plus
+  test-owned interception of first-party network/process APIs (NOT an
+  OS sandbox or formal egress audit). Preserve the reviewed **80 npm paths**,
+  zero new dependencies and unchanged CLI implementations. Acceptance needs
+  4/4 PR and post-merge main CI with no failed/skipped tests.
+  Open gates #21/#43/#59 are never satisfied by these regressions.
+
 ## M6-F — strictly opt-in fictional terminal report interpretation
 
 - **DONE — fictional offline UX only:** [Issue #153](../../issues/153),
