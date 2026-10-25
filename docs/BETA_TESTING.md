@@ -2,6 +2,35 @@
 
 **Status:** engineering protocol for candidate `0.0.10-rc.1`. This document does **not** prove that an independent tester has run it. No real MCP servers, customer events, credentials, proprietary code, registry publication or external network tests are approved.
 
+## M7-J/K/L — optional local beta feedback card
+
+A volunteer using a **clean public checkout** can run the existing five fixed
+fictional checks and produce a ready-to-review, minimal Markdown card:
+
+```sh
+node tools/beta-feedback-card.mjs
+```
+
+The tool accepts **no arguments**, runs the same local
+`examples/beta-acceptance-check.mjs` five-case suite, and formats only fixed
+case identifiers, symbolic results and instructions. It never records Git
+identity, host details, credentials, endpoint URLs or participant information.
+On matched controls it exits 0; if a fixed check fails it exits 1 and displays
+the known mismatch rule; invalid invocation exits 2 with a static message.
+The `tools/` script is available in a source checkout, **not** the npm
+distribution.
+
+The volunteer must manually fill in the full public commit SHA from
+`git rev-parse HEAD`, Windows/Ubuntu, Node major, and optional sanitized
+usability feedback. The card does not verify any of those fields. Do not
+submit unreviewed terminal history or private paths. A volunteer may copy the
+sanitized card into the public [fictional beta issue
+form](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose)
+only after reviewing it. Genuine independent beta evidence requires a consenting
+external developer, manual provenance verification and issue triage per
+[#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
+No public card, PASS, or author-run CI is a release or real-target authorization.
+
 ## Fresh-checkout procedure (Node.js 20 or 22; Windows / Ubuntu)
 
 Use a public clean clone, *not* a privileged runtime or real MCP integration environment. The `git clone` step retrieves this public repository; **the subsequent beta check itself makes no network requests**.
