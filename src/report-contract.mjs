@@ -4,7 +4,7 @@
  */
 export const REPORT_SCHEMA_VERSION = 1;
 export const CLI_COMMANDS = Object.freeze([
-  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check','adapter-selftest','adapter-policy-check','staging-selftest','staging-process-selftest','adapter-staging-selftest','adapter-onboard','adapter-onboarding-demo','adapter-template','adapter-fixture-audit','adapter-synthetic-trace','adapter-trace-expect','adapter-quickstart','adapter-kit','adapter-kit-verify','adapter-report-view'
+  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check','adapter-selftest','adapter-policy-check','staging-selftest','staging-process-selftest','adapter-staging-selftest','adapter-onboard','adapter-onboarding-demo','adapter-template','adapter-fixture-audit','adapter-synthetic-trace','adapter-trace-expect','adapter-quickstart','adapter-kit','adapter-kit-verify','adapter-report-view','adapter-guide'
 ]);
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);
@@ -290,6 +290,43 @@ export function buildOfflineDemoResult(positive, negative) {
 }
 
 
+/**
+ * M7-A: fixed first-run plan. No paths, hosts, arguments or secrets from
+ * callers enter these messages; these are inert commands to be run manually.
+ * Steps 3 and 4 are optional local fictional checks, not live MCP tests.
+ */
+export function buildAdapterGuideResult() {
+  return {
+    status:'PASS',
+    profile:'offline-adapter-first-run-guide-v1',
+    guideSchemaVersion:1,
+    scope:'FICTIONAL_LOCAL_ONLY',
+    steps:[
+      {step:1,code:'SELECT_TEMPLATE',command:'node src/cli.mjs adapter-kit stdio',
+       alternative:'node src/cli.mjs adapter-kit streamable-http',
+       meaning:'Review an inert descriptor and fixed fictional test plan. No server is started.'},
+      {step:2,code:'EXPORT_KIT',command:'node src/cli.mjs adapter-kit stdio > fictional-kit.json',
+       alternative:'node src/cli.mjs adapter-kit streamable-http > fictional-kit.json',
+       meaning:'Store only the generated fictional starter JSON locally.'},
+      {step:3,code:'VERIFY_LOCAL_KIT',command:'node src/cli.mjs adapter-kit-verify fictional-kit.json',
+       alternative:null,meaning:'Verify the exported symbolic kit and its fixed CI controls.'},
+      {step:4,code:'REVIEW_INERT_DESCRIPTOR',command:'node src/cli.mjs adapter-quickstart examples/adapter-profiles/stdio-project.json',
+       alternative:'node src/cli.mjs adapter-quickstart examples/adapter-profiles/streamable-http-project.json',
+       meaning:'Check descriptor syntax and fixed fictional controls; do not contact the described endpoint.'}
+    ],
+    limits:{
+      externalMcpTargetContacted:false,
+      projectCodeExecuted:false,
+      ownershipVerified:false,
+      independentBetaVerified:false,
+      independentSecurityAuditCompleted:false,
+      stableReleaseAuthorized:false
+    },
+    nextAction:'CHOOSE_STDIO_OR_STREAMABLE_HTTP_FICTIONAL_TEMPLATE',
+    failureCount:0,findingsTruncated:false,findings:[]
+  };
+}
+
 /** Reviewed, literal-only offline command discovery, not remote capability probing. */
 export function buildCliHelpResult() {
   return {
@@ -310,6 +347,7 @@ export function buildCliHelpResult() {
       'node src/cli.mjs adapter-onboarding-demo',
       'node src/cli.mjs adapter-template stdio',
       'node src/cli.mjs adapter-template streamable-http',
+      'node src/cli.mjs adapter-guide',
       'node src/cli.mjs adapter-kit stdio',
       'node src/cli.mjs adapter-kit streamable-http',
       'node src/cli.mjs adapter-kit-verify fictional-kit.json',
