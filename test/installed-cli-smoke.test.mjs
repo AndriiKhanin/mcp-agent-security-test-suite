@@ -459,6 +459,9 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     const absentHuman=adopterRun('adapter-report-view','PRIVATE_CANARY-unreadable.json');
     assert.equal(absentHuman.status,2);
     assert.ok(!(absentHuman.stdout+absentHuman.stderr).includes('PRIVATE_CANARY'));
+    // Restore the expected mismatch input for the preexisting SDK import
+    // regression below: it explicitly expects a FAIL/MISMATCH result.
+    save(assertionFile,expected('WRITE','PASS',[]));
 
     // Import the installed SDK module from a *different* working directory.
     // Relative resolution is pinned to the installed artifact, not src/ in
