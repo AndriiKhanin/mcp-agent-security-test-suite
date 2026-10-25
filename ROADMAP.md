@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 763 synthetic/local, M6-I actual local npm archive receipt and byte checks, M6-H source-byte receipt, M6-G CLI compatibility guard, M6-F opt-in fictional terminal view and earlier offline adopter controls | [M6-I PR #163](../../pull/163), [post-merge main CI #40175726328](../../actions/runs/40175726328): **4/4 PASS, 763/763 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 771 synthetic/local, M6-J offline auditor handoff including excluded test/CI/tool byte inventory, M6-I actual npm archive verification, M6-H source-byte receipt, M6-G CLI compatibility guard and earlier offline adopter controls | [M6-J PR #166](../../pull/166), [post-merge main CI #40177103990](../../actions/runs/40177103990): **4/4 PASS, 771/771 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,16 +91,24 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-J — bounded first-party independent assessor handoff
 
-- **IN PROGRESS — local engineering scope only:** [Issue #165](../../issues/165)
-  adds the nonpackaged opt-in `tools/reviewer-handoff.mjs` to pair M6-H
-  shipped 80-file source receipts with M6-I temporary npm archive and installed
-  byte digests, plus independent *source-surface inventory* of excluded
-  `.github/`, `test/`, `tools/` code. Bounded canonical packet; 0/1/2
-  MATCH/MISMATCH/INVALID; malicious/duplicate keys, forged approval, changed
-  excluded files and symlink denial regressions. All nine true independent
-  gates remain explicitly NOT_VERIFIED. No stable release, signatures,
-  authenticated source Git identity, external MCP contact or owner approval
-  inferred from an internal self-matching receipt. #21/#43/#59 stay OPEN.
+- **DONE — local engineering handoff, not independent review:**
+  [Issue #165](../../issues/165), [merged PR #166](../../pull/166),
+  [PR CI #40176896559](../../actions/runs/40176896559) and
+  [post-merge main CI #40177103990](../../actions/runs/40177103990):
+  **4/4 PASS, 771/771 tests/job**, zero failures/skips on Windows/Ubuntu
+  Node20/22. Eight new tests verify optional nonpackaged
+  `tools/reviewer-handoff.mjs` source/archive receipts and additional
+  deterministic per-file SHA-256 inventory for every source under
+  excluded `.github/`, `test/`, `tools/` review surfaces (not
+  shipped npm files). Negative controls reject altered content and
+  internally inconsistent/forged packets, invalid UTF-8, duplicate keys,
+  oversized inputs, symlinks and unauthorized gate claims; 0/1/2
+  MATCH/MISMATCH/INVALID exits are preserved. Source archive still
+  exactly **80 paths**, zero new runtime dependencies, no release or
+  external MCP contact. Nine independent approval/provenance/evidence
+  fields remain **NOT_VERIFIED**. Author-operated self-consistent
+  receipts are not external provenance or an audit. Gates #21, #43 and
+  #59 are still OPEN.
 
 ## M6-I — offline archive custody and installed byte-receipt
 
