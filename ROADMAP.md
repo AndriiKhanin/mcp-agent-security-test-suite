@@ -89,6 +89,18 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-E — readable, non-authorizing offline results
+
+- **IN DEVELOPMENT — fictional report interpretation only:** [Issue #150](../../issues/150).
+  Add source-owned fixed `readerGuide` strings to the existing JSON-v1
+  output of `adapter-kit`, `adapter-quickstart`,
+  `adapter-kit-verify` and `adapter-trace-expect`; distinguish
+  clean synthetic PASS, correctly detected fictional safety FAIL,
+  unexpected CI MISMATCH and invalid input. No free-text input
+  interpolation, project scanning, additional executable command, new
+  packaged paths or dependencies. Preserve legacy machine-readable
+  exit codes and retain independent gates #21, #43 and #59 OPEN.
+
 ## M6-D — portable fictional adopter GitHub Actions example
 
 - **DONE — fictional workflows only:** [Issue #147](../../issues/147), [merged PR #148](../../pull/148), [post-merge main CI #40163810749](../../actions/runs/40163810749): **4/4 PASS, 720/720 tests/job**, zero failures/skips.
