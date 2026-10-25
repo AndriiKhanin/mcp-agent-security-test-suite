@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 755 synthetic/local, M6-H nonpackaged offline reviewer receipt, M6-G CLI compatibility guard, M6-F opt-in fictional terminal view, M6-E reader guide, M6-D pinned adopter CI and M6-C exported kit verification | [M6-H PR #160](../../pull/160), [post-merge main CI #40173346649](../../actions/runs/40173346649): **4/4 PASS, 755/755 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 763 synthetic/local, M6-I actual local npm archive receipt and byte checks, M6-H source-byte receipt, M6-G CLI compatibility guard, M6-F opt-in fictional terminal view and earlier offline adopter controls | [M6-I PR #163](../../pull/163), [post-merge main CI #40175726328](../../actions/runs/40175726328): **4/4 PASS, 763/763 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,17 +91,22 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-I — offline archive custody and installed byte-receipt
 
-- **IN PROGRESS (engineering):** [Issue #162](../../issues/162).
-  Nonpackaged `tools/reviewer-archive.mjs` performs two disposable
-  offline, lifecycle-disabled actual npm archive builds, hashes the raw
-  tarballs (SHA-256, SHA-512 and npm integrity), installs the temporary
-  archive without a registry, and verifies that the exact 80 locally
-  installed file bytes match source with only the documented Node
-  shebang line-ending exception. It prints a bounded canonical receipt
-  for a future *independent* assessor; fabricated/altered receipts are
-  rejected with 0/1/2 semantics and eight synthetic/adversarial tests.
-  Does not independently anchor Git, attest the package, publish,
-  contact real MCP targets, or satisfy gates #21/#43/#59.
+- **DONE — strictly local engineering preflight:** [Issue #162](../../issues/162),
+  [merged implementation PR #163](../../pull/163), [PR CI #40175558109](../../actions/runs/40175558109)
+  and [post-merge main CI #40175726328](../../actions/runs/40175726328):
+  **4/4 PASS, 763/763 tests/job**, zero failed/skipped on Windows/Ubuntu
+  Node20/22. Eight new tests cover exact raw installed byte comparisons,
+  npm archive SHA-256/SHA-512 and metadata, two-pack reproducibility,
+  hostile/forged canonical receipts, direct symlink and unsafe path guards,
+  and the only permitted Windows CLI shebang normalization. The opt-in
+  `tools/reviewer-archive.mjs` generates a local SHA/integrity receipt
+  from temporary offline npm archives; the 80-file installed package is
+  verified and temporary archives are removed. Packaged file count remains
+  **80**, with zero new runtime dependencies, install hooks or live target
+  access. **Self-computed artifact hashes are not independent provenance,
+  source authentication, audit approval or release permission.** Gates
+  #21 (real MCP targets), #43 (independent security audit) and #59
+  (independent external beta) remain **OPEN**.
 
 ## M6-H — nonpackaged reviewer source-byte receipt
 
