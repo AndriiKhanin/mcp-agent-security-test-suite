@@ -89,6 +89,20 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 
 
+## M6-I — offline archive custody and installed byte-receipt
+
+- **IN PROGRESS (engineering):** [Issue #162](../../issues/162).
+  Nonpackaged `tools/reviewer-archive.mjs` performs two disposable
+  offline, lifecycle-disabled actual npm archive builds, hashes the raw
+  tarballs (SHA-256, SHA-512 and npm integrity), installs the temporary
+  archive without a registry, and verifies that the exact 80 locally
+  installed file bytes match source with only the documented Node
+  shebang line-ending exception. It prints a bounded canonical receipt
+  for a future *independent* assessor; fabricated/altered receipts are
+  rejected with 0/1/2 semantics and eight synthetic/adversarial tests.
+  Does not independently anchor Git, attest the package, publish,
+  contact real MCP targets, or satisfy gates #21/#43/#59.
+
 ## M6-H — nonpackaged reviewer source-byte receipt
 
 - **DONE — engineering-only local source-byte preflight:** [Issue #159](../../issues/159),
