@@ -171,15 +171,6 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       const result=JSON.parse(adapter.stdout);
       assert.equal(result.reportSchemaVersion,1);
       assert.equal(result.status,'PASS');
-      assert.equal(result.readerGuide.readerGuideSchemaVersion,1);
-      assert.equal(result.readerGuide.realProjectAssessed,false);
-      assert.equal(result.readerGuide.externalMcpContactAuthorized,false);
-      assert.equal(result.readerGuide.code,
-        observedSafety===null
-          ? 'DESCRIPTOR_SHAPE_AND_FICTIONAL_CONTROLS_MATCH'
-          : observedSafety==='PASS'
-            ? 'CLEAN_FICTIONAL_TRACE_MATCH'
-            : 'FICTIONAL_VIOLATION_DETECTED_AS_EXPECTED');
       assert.equal(result.connectionStatus,'NOT_ATTEMPTED');
       assert.equal(result.executionEnabled,false);
       assert.equal(result.transport,expected);
@@ -380,6 +371,15 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
       assert.equal(run.status,0,'installed kit source artifact must roundtrip');
       const result=JSON.parse(run.stdout);
       assert.equal(result.status,'PASS');
+      assert.equal(result.readerGuide.readerGuideSchemaVersion,1);
+      assert.equal(result.readerGuide.realProjectAssessed,false);
+      assert.equal(result.readerGuide.externalMcpContactAuthorized,false);
+      assert.equal(result.readerGuide.code,
+        observedSafety===null
+          ? 'DESCRIPTOR_SHAPE_AND_FICTIONAL_CONTROLS_MATCH'
+          : observedSafety==='PASS'
+            ? 'CLEAN_FICTIONAL_TRACE_MATCH'
+            : 'FICTIONAL_VIOLATION_DETECTED_AS_EXPECTED');
       assert.equal(result.connectionStatus,'NOT_ATTEMPTED');
       assert.equal(result.externalTargetContacted,false);
       if(observedSafety!==null){
