@@ -148,7 +148,7 @@ test('M6-G: quickstart and exported kit verification preserve literal JSON envel
     assert.equal(quick.controls[3].fictionalObservedStatus,'FAIL');
     noAuthority(quick);
     reader(quick,'DESCRIPTOR_SHAPE_AND_FICTIONAL_CONTROLS_MATCH');
-    assert.ok(!quick.toString?.includes?.('PRIVATE_CANARY'));
+    assert.ok(!JSON.stringify(quick).includes('PRIVATE_CANARY'));
 
     const kit=jsonResult(cli('adapter-kit',type),'adapter-kit',0,'PASS');
     const exported=save('fictional-kit.json',JSON.stringify(kit));
