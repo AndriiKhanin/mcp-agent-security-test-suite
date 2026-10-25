@@ -463,6 +463,61 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     // regression below: it explicitly expects a FAIL/MISMATCH result.
     save(assertionFile,expected('WRITE','PASS',[]));
 
+    // M6-G: independent literal expectations from the INSTALLED offline
+    // tarball, not generated reference results from the library under test.
+    for(const transport of ['stdio','streamable-http']){
+      const packageKit=adopterRun('adapter-kit',transport);
+      assert.equal(packageKit.status,0);
+      assert.equal(packageKit.stderr,'');
+      const exportedKit=JSON.parse(packageKit.stdout);
+      assert.equal(exportedKit.reportSchemaVersion,1);
+      assert.equal(exportedKit.command,'adapter-kit');
+      assert.equal(exportedKit.kitSchemaVersion,1);
+      assert.equal(exportedKit.transport,transport);
+      assert.equal(exportedKit.projectSafetyAssessed,false);
+      assert.equal(exportedKit.starterDescriptor.policy.allowNetwork,false);
+      assert.equal(exportedKit.starterDescriptor.policy.allowProcessSpawn,false);
+      assert.deepEqual(exportedKit.expectedResults,{
+        quickstart:{exitCode:0,shapeStatus:'PASS',fictionalControlsMatched:5,
+          projectSafetyAssessed:false},
+        cleanCi:{exitCode:0,observedSafetyStatus:'PASS',expectationStatus:'MATCH'},
+        expectedViolationCi:{exitCode:0,observedSafetyStatus:'FAIL',
+          expectationStatus:'MATCH',observedRule:'DENIED_ACTION_HAD_EFFECT'}
+      });
+      assert.equal(exportedKit.releaseAuthorized,false);
+      for(const [name,fixture,exit,observed,match] of [
+        ['clean',exportedKit.cleanExpectation,0,'PASS','MATCH'],
+        ['negative',exportedKit.expectedViolation,0,'FAIL','MATCH'],
+        ['mismatch',{
+          ...exportedKit.expectedViolation,expectedStatus:'PASS',
+          expected:[{event:1,ruleCodes:[]}]
+        },1,'FAIL','MISMATCH']
+      ]){
+        save(assertionFile,fixture);
+        const classic=adopterRun('adapter-trace-expect','local-expectation.json');
+        assert.equal(classic.status,exit,'installed JSON compatibility '+name);
+        const classicJson=JSON.parse(classic.stdout);
+        assert.equal(classicJson.reportSchemaVersion,1);
+        assert.equal(classicJson.command,'adapter-trace-expect');
+        assert.equal(classicJson.observedSafetyStatus,observed);
+        assert.equal(classicJson.expectationStatus,match);
+        assert.equal(classicJson.exitCode,exit);
+        assert.equal(classicJson.authorizationStatus,
+          'REAL_TARGET_EXECUTION_NOT_AUTHORIZED');
+        assert.equal(classicJson.readerGuide.realProjectAssessed,false);
+        assert.ok(!classic.stdout.includes('local-expectation.json'));
+        const human=adopterRun('adapter-report-view','local-expectation.json');
+        assert.equal(human.status,exit,'installed text compatibility '+name);
+        assert.equal(human.stderr,'');
+        assert.ok(human.stdout.startsWith('FICTIONAL ONLY'));
+        assert.ok(human.stdout.includes('Observed fictional safety: '+observed));
+        assert.ok(human.stdout.includes('CI expectation: '+match));
+        assert.ok(!human.stdout.trimStart().startsWith('{'));
+      }
+    }
+    // Existing SDK test requires the intentionally mismatching case.
+    save(assertionFile,expected('WRITE','PASS',[]));
+
     // Import the installed SDK module from a *different* working directory.
     // Relative resolution is pinned to the installed artifact, not src/ in
     // the repository or an implicit shell/current-directory assumption.
