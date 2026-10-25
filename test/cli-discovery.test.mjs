@@ -26,12 +26,14 @@ test('M5-04: canonical and aliased help enumerate only reviewed fictional modes'
   assert.equal(data.command,'help');
   assert.equal(data.status,'PASS');
   assert.deepEqual(data.commands,CLI_COMMANDS);
-  assert.equal(data.commands.length,28);
+  assert.equal(data.commands.length,29);
   assert.ok(data.commands.includes('adapter-staging-selftest'));
   assert.ok(data.commands.includes('adapter-onboard'));
   assert.ok(data.commands.includes('adapter-quickstart'));
   assert.ok(data.commands.includes('adapter-kit'));
   assert.ok(data.commands.includes('adapter-kit-verify'));
+  assert.ok(data.commands.includes('adapter-report-view'));
+  assert.ok(data.syntax.includes('node src/cli.mjs adapter-report-view fictional-clean-ci.json'));
   assert.ok(data.syntax.includes('node src/cli.mjs adapter-kit-verify fictional-kit.json'));
   assert.ok(data.syntax.includes('node src/cli.mjs adapter-kit stdio'));
   assert.ok(data.commands.includes('adapter-onboarding-demo'));
