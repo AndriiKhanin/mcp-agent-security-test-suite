@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 713 synthetic/local, M6-C one-command exported fictional-kit CI verification, M6-B starter kit, M6-A quickstart, fixed violation checks and auditor handoff | [M6-C PR #145](../../pull/145), [main CI #40127657693](../../actions/runs/40127657693): **4/4 PASS, 713/713 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 720 synthetic/local, M6-D inactive pinned adopter CI example, executable fictional Bash checks, M6-C exported-kit verification and fixed negative controls | [M6-D PR #148](../../pull/148), [main CI #40163810749](../../actions/runs/40163810749): **4/4 PASS, 720/720 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,14 +91,14 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-D — portable fictional adopter GitHub Actions example
 
-- **IN DEVELOPMENT — no live targets:** [Issue #147](../../issues/147).
+- **DONE — fictional workflows only:** [Issue #147](../../issues/147), [merged PR #148](../../pull/148), [post-merge main CI #40163810749](../../actions/runs/40163810749): **4/4 PASS, 720/720 tests/job**, zero failures/skips.
   Add an inactive copy-only adopter CI recipe outside the packaged source
   that checks out a **fixed full Git SHA**, runs the source-owned kit
   verifier and clean/negative/mismatch symbolic expectations on
   Windows/Ubuntu Node20/22 with no npm install, credentials or user MCP
   contact. Verify the literal shell commands in a separate temporary
   adopter directory, reject tampered controls and clean up temp files.
-  Preserve the existing 80 packaged paths, no runtime dependencies,
+  Existing 80 packaged paths preserved; no new runtime dependencies,
   paid APIs or npm publication. Real-target #21, independent audit #43,
   independent beta #59 remain OPEN.
 
