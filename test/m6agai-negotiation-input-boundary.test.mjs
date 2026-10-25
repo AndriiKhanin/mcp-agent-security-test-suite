@@ -24,11 +24,11 @@ test('M6-AH: sparse and accessor step positions rejected without execution',()=>
  invalid(b);assert.equal(count,0);
 });
 test('M6-AI: cyclic and excessive nested evidence fails within bounded traversal',()=>{
- const a=base();a.steps[0].response.result.self=a.steps[0].response.result;invalid(a);
+ const a=base();a.steps[0].request.params.self=a.steps[0].request.params;invalid(a);
  const b=base();let nested={ok:true};
  for(let i=0;i<40;i++)nested={next:nested};
- b.steps[0].response.result=nested;invalid(b);
- const c=base();c.steps[0].response.result={huge:'€'.repeat(350000)};invalid(c);
+ b.steps[0].request.params.synthetic=nested;invalid(b);
+ const c=base();c.steps[0].request.params.synthetic={huge:'€'.repeat(350000)};invalid(c);
 });
 test('M6-AG/AH/AI: unchanged synthetic negotiation fixture remains accepted',()=>{
  assert.equal(auditModernNegotiation(base()).status,'PASS');
