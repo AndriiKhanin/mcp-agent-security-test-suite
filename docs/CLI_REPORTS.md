@@ -148,3 +148,31 @@ exit 2 is input/argument rejection. No ANSI codes or input fields are echoed.
 All older commands retain their JSON-v1 output and original exit contract.
 No real MCP project or operator was verified, no user target contacted,
 and no stable release authorized. [Exact example](GETTING_STARTED.md#m6-f--opt-in-terminal-only-view-of-fictional-symbolic-expectations).
+
+## M6-G: public v1 compatibility regression guard
+
+A separate **nonpackaged** `test/m6g-cli-compatibility.test.mjs` suite keeps
+literal expected values for stable *selected* public fields of `help`,
+`version`, `adapter-kit`, `adapter-quickstart`,
+`adapter-kit-verify` and `adapter-trace-expect`, across both
+source-defined fictional transports. It also checks the deliberately
+separate opt-in `adapter-report-view` text format. The baseline covers
+the 0/1/2 exit contract and the distinction between CI expectation
+`MATCH` and **observed fictional safety FAIL**. These expectations are
+not calculated using the production reporter under test.
+
+Negative cases reject forged statuses/approval and `readerGuide` values,
+malformed/duplicate keys, oversized or invalid UTF-8, hostile ANSI and
+direct symlinks without emitting private paths. A test-owned runtime
+preloader intercepts selected Node process/network APIs for the reviewed
+**non-contact** command paths; this checks first-party API use only,
+**not** all possible OS egress, an OS sandbox or an independent audit.
+The existing offline installed-tarball smoke also rechecks literal JSON-v1
+semantic fields from an unrelated fictional adopter working directory.
+
+The guard is **additive compatibility protection**, not a full structural
+snapshot or an indefinite guarantee of every nested field. Legitimate
+future API/CLI changes must receive deliberate review, explicit versioning
+when breaking, and updated CI evidence. It does not authenticate operators,
+authorize real MCP target contact, establish third-party provenance, or
+permit stable npm publication. Independent gates #21, #43 and #59 stay OPEN.
