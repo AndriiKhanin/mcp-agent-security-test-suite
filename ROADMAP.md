@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**; 720 synthetic/local, M6-D inactive pinned adopter CI example, executable fictional Bash checks, M6-C exported-kit verification and fixed negative controls | [M6-D PR #148](../../pull/148), [main CI #40163810749](../../actions/runs/40163810749): **4/4 PASS, 720/720 tests/job**, 0 failed/skipped |
+| Latest candidate in `main` | **v0.0.10-rc.1**; 732 synthetic/local, M6-E safe static reader guide for fictional CLI results, M6-D pinned adopter CI example, M6-C exported kit verification, and negative controls | [M6-E PR #151](../../pull/151), [main CI #40164911500](../../actions/runs/40164911500): **4/4 PASS, 732/732 tests/job**, 0 failed/skipped |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
@@ -91,7 +91,7 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
 
 ## M6-E — readable, non-authorizing offline results
 
-- **IN DEVELOPMENT — fictional report interpretation only:** [Issue #150](../../issues/150).
+- **DONE — fictional report interpretation only:** [Issue #150](../../issues/150), [merged PR #151](../../pull/151), [post-merge main CI #40164911500](../../actions/runs/40164911500): **4/4 PASS, 732/732 tests/job**, zero failed/skipped.
   Add source-owned fixed `readerGuide` strings to the existing JSON-v1
   output of `adapter-kit`, `adapter-quickstart`,
   `adapter-kit-verify` and `adapter-trace-expect`; distinguish
@@ -99,7 +99,8 @@ These are actual GitHub Issues, not aspirational checkmarks. **Close each only w
   unexpected CI MISMATCH and invalid input. No free-text input
   interpolation, project scanning, additional executable command, new
   packaged paths or dependencies. Preserve legacy machine-readable
-  exit codes and retain independent gates #21, #43 and #59 OPEN.
+  exit codes; 80 reviewed packaged paths unchanged, no new dependencies.
+  Independent gates #21, #43 and #59 remain OPEN.
 
 ## M6-D — portable fictional adopter GitHub Actions example
 
