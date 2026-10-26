@@ -52,6 +52,16 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## One-command local fictional beta review (M7-P/Q/R)
+
+From a **clean public source checkout**, run
+`node tools/beta-review.mjs`. This read-only source helper combines a
+local Git SHA/dirty-state receipt with five existing fictional acceptance
+checks, and prints an optional Markdown feedback draft. It fails closed if
+the checkout has reported changes, and accepts no target or argument.
+It does **not** validate public Git provenance, real MCP targets, or an
+independent reviewer. See [beta testing](docs/BETA_TESTING.md).
+
 ## Check the local beta checkout before reporting (M7-M/N/O)
 
 In a source checkout (Git available), run

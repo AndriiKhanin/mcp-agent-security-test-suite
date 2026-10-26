@@ -2,6 +2,29 @@
 
 **Status:** engineering protocol for candidate `0.0.10-rc.1`. This document does **not** prove that an independent tester has run it. No real MCP servers, customer events, credentials, proprietary code, registry publication or external network tests are approved.
 
+## M7-P/Q/R — one-command local fictional beta review
+
+A volunteer may run `node tools/beta-review.mjs` in a **clean public
+checkout** with Node.js 20+ and Git installed. It performs the fixed
+read-only local Git SHA/status check, refuses reported uncommitted or
+untracked changes, and only then executes the existing five fixed offline
+acceptance checks. The Markdown result labels its SHA as *locally reported*,
+not independently verified. No user-supplied path, URL, server, command,
+token or environment dump is accepted or printed. The command exits 0
+for all five matched fictional checks, 1 for reported checkout changes
+or fictional mismatches, and 2 for invalid use or unavailable evidence.
+
+This is a convenient alternative to manually running
+`node tools/beta-checkout-receipt.mjs` and
+`node tools/beta-feedback-card.mjs` separately. Before voluntarily
+sharing the output, an independent reviewer must manually compare the
+SHA with the agreed public GitHub revision and sanitize any added
+usability comments. Neither this script nor its output verifies remote
+identity, independent execution or real MCP safety; manual acceptance
+gate [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+remains open. The source-only `tools/` helper is not part of the npm
+package and never submits feedback automatically.
+
 ## M7-M/N/O — local checkout receipt for volunteer beta review
 
 Before executing the fixed offline beta controls in a clean public source
