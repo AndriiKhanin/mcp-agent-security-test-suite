@@ -1,9 +1,6 @@
 # Volunteer offline beta handoff — v0.0.10-rc.1
 
-**Status: invitation-ready instructions only. No independent tester, outreach,
-accepted external beta, live MCP evaluation, stable release or certification
-is claimed.** The contributor must opt in independently. Do not send
-unsolicited invitations or inspect real MCP servers.
+**Status: public opt-in invitation [#195](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/195) published. No independent tester, accepted external beta, live MCP evaluation, stable release or certification is claimed.** The contributor must opt in independently. Do not send unsolicited invitations or inspect real MCP servers.
 
 ## What to expect
 
@@ -50,8 +47,7 @@ provide only the following non-sensitive information through the existing
 Do not copy environment details, username, email address, local file paths,
 private endpoints, tokens, transcripts, shell history, raw log output or
 proprietary code. Do not post security vulnerabilities publicly; consult
-[SECURITY.md](../SECURITY.md). Submission is **manual and optional**. No
-telemetry or automatic GitHub Issue creation exists.
+[SECURITY.md](../SECURITY.md). Submission is **manual and optional**. No telemetry or automatic GitHub Issue creation exists.
 
 ## Maintainer triage and strict exit gate
 
