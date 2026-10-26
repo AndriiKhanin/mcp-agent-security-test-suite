@@ -41,6 +41,19 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M7-T:** source-backed assertions ensure the instructions preserve the fictional-only scope, privacy boundaries, independent evidence and owner-acceptance requirements.
 - **M7-U:** README links to the handoff so a voluntary independent contributor can find it; engineering completion does **not** satisfy [M5-06 #59](../../issues/59). The owner has authorized invitations and an opt-in call is published in [#195](../../issues/195); external user MCP servers remain off limits, and the acceptance checklist remains open.
 
+## M8-D/E/F — offline descriptor troubleshooting
+
+- **M8-D:** fixed, source-authored privacy-safe `readerGuide` for existing
+  `adapter-check` and `adapter-onboard` PASS/ERROR results. It shows
+  local schema/policy repair steps without accessing a real MCP server.
+- **M8-E:** CLI and pure-function regressions cover successful fictional
+  descriptors, invalid private input and no-echo failure behavior.
+- **M8-F:** README shows how to use the existing local validation command;
+  preserve JSON-v1 and default-deny authorization.
+- **Gate:** Windows/Ubuntu × Node 20/22 4/4 CI, followed by post-merge main
+  verification. No independent beta, real-project testing or external
+  target approval is implied.
+
 ## M8 — quick dual-transport fictional adapter smoke
 
 - **M8-A:** `node tools/adapter-smoke.mjs` runs the existing fixed in-memory kit/quickstart checks for both `stdio` and `streamable-http`; no manual JSON export, file writes, external process or MCP target contact.

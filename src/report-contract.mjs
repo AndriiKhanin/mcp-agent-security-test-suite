@@ -63,8 +63,28 @@ function safeGuidance(codes) {
  */
 const READER_COMMANDS=new Set([
   'adapter-kit','adapter-quickstart',
-  'adapter-kit-verify','adapter-trace-expect'
+  'adapter-kit-verify','adapter-trace-expect','adapter-check','adapter-onboard'
 ]);
+const DESCRIPTOR_GUIDE=Object.freeze({
+  VALID:Object.freeze({
+    code:'OFFLINE_DESCRIPTOR_VALIDATED',
+    title:'Offline descriptor accepted',
+    meaning:'Only local descriptor shape and deny-by-default policy were checked. No real MCP endpoint or user code was contacted.',
+    nextSteps:Object.freeze([
+      'Review the expected transport and protocol version in the local JSON report.',
+      'Run the bundled adapter-smoke source example before considering any separately authorized integration.'
+    ])
+  }),
+  INVALID:Object.freeze({
+    code:'OFFLINE_DESCRIPTOR_INPUT_REJECTED',
+    title:'Offline descriptor could not be validated',
+    meaning:'The file or descriptor was rejected. The report cannot identify a particular failing field without disclosing input-derived details.',
+    nextSteps:Object.freeze([
+      'Compare the local JSON with examples/adapter-profiles/stdio-project.json or streamable-http-project.json: exact keys and protocolVersion are required.',
+      'Use validate-only policy: allowNetwork, allowProcessSpawn, allowToolCalls and allowCredentials must all be false; check UTF-8 and 1 MiB maximum.'
+    ])
+  })
+});
 const READER_KINDS=Object.freeze({
   KIT_READY:Object.freeze({
     code:'FICTIONAL_KIT_GENERATED',
@@ -142,6 +162,20 @@ const READER_KINDS=Object.freeze({
 function fixedReaderGuide(command, result, error=false){
   if(!READER_COMMANDS.has(command)) return undefined;
   let key='CONTROL_FAILED';
+  if(command==='adapter-check' || command==='adapter-onboard'){
+    // The same generic literal checklist for parse, file, policy and schema
+    // failures. Never derive a diagnosis from private file data or exceptions.
+    const fixed=DESCRIPTOR_GUIDE[error || result.status!=='PASS'?'INVALID':'VALID'];
+    return {
+      readerGuideSchemaVersion:1,
+      code:fixed.code,title:fixed.title,meaning:fixed.meaning,
+      nextSteps:[...fixed.nextSteps],
+      reportScope:'FICTIONAL_OFFLINE_ASSERTIONS_ONLY',
+      realProjectAssessed:false,externalMcpContactAuthorized:false,
+      independentAuditCompleted:false,independentBetaVerified:false,
+      ownerOperatorVerified:false,stableReleaseAuthorized:false
+    };
+  }
   if(error) key='INVALID_INPUT';
   else if(result.status==='PASS'){
     if(command==='adapter-kit') key='KIT_READY';
