@@ -33,6 +33,22 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Fast offline adapter smoke (M8-A/B/C)
+
+From a reviewed public **source checkout** with Node.js 20+, run:
+
+```sh
+node tools/adapter-smoke.mjs
+```
+
+This zero-argument script runs the existing fixed fictional adapter-kit
+verification and descriptor quickstart for **both** `stdio` and
+`streamable-http` in memory. It does not create configuration files,
+start user processes, contact endpoints, ask for tokens, or check your
+project. It is excluded from the npm package. `PASS` reports only the
+two bundled fictional controls matching; real interoperability and
+independent security review remain unverified.
+
 ## Start here: built-in fictional adapter guide (M7-A/B/C)
 
 For an ordered, **non-executing** first-run plan, run:
