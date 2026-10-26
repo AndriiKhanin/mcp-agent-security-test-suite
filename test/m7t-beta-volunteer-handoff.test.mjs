@@ -5,7 +5,7 @@ import {readFileSync} from 'node:fs';
 import {resolve,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const handoff=readFileSync(resolve(root,'docs/BETA_VOLUNTEER_HANDOFF.md'),'utf8');
+const handoff=readFileSync(resolve(root,'.github/BETA_VOLUNTEER_HANDOFF.md'),'utf8');
 
 test('M7-T: voluntary handoff uses only source checkout and the fixed offline beta entrypoint',()=>{
  for(const text of [
