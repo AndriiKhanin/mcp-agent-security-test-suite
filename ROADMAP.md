@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-25 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
+> **Last reviewed:** 2026-10-26 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -12,10 +12,10 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**, still fictional/local-only; M6 offline input hardening and M7-A/B/C first-run adapter guide merged; real-target gates remain closed | [PR #188](../../pull/188), [PR CI #40202127930](../../actions/runs/40202127930) **4/4 PASS**; post-merge main run tracked separately |
+| Latest candidate in `main` | **v0.0.10-rc.1**, still fictional/local-only; M7-A through M7-U engineering merged and source-backed; external-beta acceptance is **PENDING** | [PR #194](../../pull/194), [post-merge main CI #40358493703](../../actions/runs/40358493703): **4/4 PASS** |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
-| Tracked near-term roadmap work | **6/6 issues complete** | [Open issues](../../issues?q=is%3Aissue+is%3Aopen) |
+| Original M1–M3 issue plan | **6/6 original issues complete**; newer M5 external beta gate **OPEN** | [Original issues #2–#7](../../issues?q=is%3Aissue); [open gate #59](../../issues/59) |
 | Real external MCP-server interoperability/security testing | **Not yet implemented** | See **M4**; no live-scanner claim |
 | Deployment, hosted service, npm release, certification | **Not yet delivered**; R0/R1 local packaging and install checks accepted, publication not authorized | [Release gates](docs/RELEASE_READINESS.md), [R0 #26](../../issues/26), [R1 #29](../../issues/29) |
 
@@ -31,7 +31,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M3 — Safe adapter foundation** | Explicitly bounded local, fixed stdio MCP mock adapter | **DONE — 1/1** | [#6](../../issues/6) | Cross-platform mock interoperability without arbitrary commands, credentials or external network |
 | **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D/B6-E/B6-F/B7-A/B7-B/B7-C/B8-A/B8-B/B9-A/B9-B/B9-C/B9-D/B10-A ENGINEERING DONE; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
-| **M7 — Usable offline adopter onboarding** | Plain-language first-run guide and reproducible dual-transport fictional examples | **IN PROGRESS — M7-A/B/C merged; D/E/F verification & progress documentation in review** | [PR #188](../../pull/188); follow-on PR pending | Cross-platform end-to-end check of both kit flows, negative tampering case, source-backed instructions, 4/4 CI and post-merge verification |\n| **M6 — Product maturity / 1.0 candidate** | Stable contracts, threat-model upkeep, independent review and maintainability | **FUTURE** | Issues to be scoped | Stable versioned public API/CLI, negative-control coverage, externally reviewed limits and maintenance policy |
+| **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
@@ -41,12 +41,17 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M7-T:** source-backed assertions ensure the instructions preserve the fictional-only scope, privacy boundaries, independent evidence and owner-acceptance requirements.
 - **M7-U:** README links to the handoff so a voluntary independent contributor can find it; engineering completion does **not** satisfy [M5-06 #59](../../issues/59). The owner has authorized invitations and an opt-in call is published in [#195](../../issues/195); external user MCP servers remain off limits, and the acceptance checklist remains open.
 
-## M7 onboarding evidence (2026-10-25)
+## M7 onboarding evidence (verified through 2026-10-26)
 
-- **M7-A/B/C engineering merged:** [PR #188](../../pull/188) provides a source-authored four-step `adapter-guide`, JSON-v1 CLI compatibility and help/discovery tests, and a user walkthrough. Required pull-request CI [#40202127930](../../actions/runs/40202127930) passed 4/4.
-- **M7-D/E — in progress in the follow-on PR:** run the *actual* exported fictional kit verification and inert quickstart for both `stdio` and `streamable-http`, and prove that editing the exported kit is denied without echoing private input. New tests must pass Windows/Ubuntu Node 20/22. Do not count test source code as independent user adoption.
-- **M7-F — in progress:** document the evidence and keep the user onboarding roadmap distinct from real integration. No independent user, actual MCP target, provenance, live security audit, or release authorization has been verified.
-- **Next gate:** finish follow-on CI 4/4 and verify the resulting `main` run before marking M7-D/E/F complete. Separately pursue the genuine external feedback gate [#59](../../issues/59), without granting real-server access.
+- **M7-A/B/C:** offline first-run guide and reviewed commands — [PR #188](../../pull/188).
+- **M7-D/E/F:** actual local walkthroughs for both `stdio` and `streamable-http`, tampered-kit denial and progress evidence — [PR #189](../../pull/189).
+- **M7-G/H/I:** reject contradictory, accessor-backed and malformed synthetic beta-summary claims — [PR #190](../../pull/190).
+- **M7-J/K/L:** source-only, opt-in fictional beta Markdown feedback card — [PR #191](../../pull/191).
+- **M7-M/N/O:** read-only local checkout SHA/dirty-state receipt without local file-path disclosure — [PR #192](../../pull/192).
+- **M7-P/Q/R:** one-command clean-checkout fictional beta review — [PR #193](../../pull/193).
+- **M7-S/T/U:** optional independent-volunteer handoff outside locked npm-package inventory and opt-in public invitation [#195](../../issues/195) — [PR #194](../../pull/194). The owner authorized outreach on 2026-10-26.
+- **Engineering acceptance:** final post-merge [main CI #40358493703](../../actions/runs/40358493703) **4/4 PASS** on Windows/Ubuntu with Node.js 20/22. These are first-party offline tests, not external adoption or live MCP proof.
+- **External evidence still required:** [M5-06 #59](../../issues/59) stays **OPEN** pending a real consenting independent developer, sanitized reproducible feedback, manual provenance review, triage, fresh CI and owner acceptance. Independent audit [#43](../../issues/43), actual MCP target authorization and release are separate gates.
 
 ## Ordered near-term backlog
 
