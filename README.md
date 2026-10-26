@@ -33,6 +33,23 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Offline descriptor troubleshooting (M8-D/E/F)
+
+The existing `adapter-check` and `adapter-onboard` JSON-v1 reports now
+include a fixed `readerGuide` on both successful validation and rejected
+input. For a local inert example, try:
+
+```sh
+node src/cli.mjs adapter-check examples/adapter-profiles/stdio-project.json
+```
+
+On errors, the guide suggests comparing the strict schema with bundled
+examples and checking the `validate-only` policy (all execution/network/
+credential flags must be false). The same static checklist applies to
+unreadable, malformed, unauthorized or otherwise invalid input: it does
+**not** reveal the user's file contents, path, offending field, token or
+endpoint. This is not live MCP interoperability or a security audit.
+
 ## Fast offline adapter smoke (M8-A/B/C)
 
 From a reviewed public **source checkout** with Node.js 20+, run:
