@@ -37,7 +37,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 
 ## M7-S/T/U — independent beta handoff preparation
 
-- **M7-S:** concise [voluntary beta handoff](docs/BETA_VOLUNTEER_HANDOFF.md) with exact public-source revision selection, offline-first test instructions, and minimal opt-in feedback fields.
+- **M7-S:** concise [voluntary beta handoff](.github/BETA_VOLUNTEER_HANDOFF.md) with exact public-source revision selection, offline-first test instructions, and minimal opt-in feedback fields.
 - **M7-T:** source-backed assertions ensure the instructions preserve the fictional-only scope, privacy boundaries, independent evidence and owner-acceptance requirements.
 - **M7-U:** README links to the handoff so a voluntary independent contributor can find it; engineering completion does **not** satisfy [M5-06 #59](../../issues/59). No unsolicited outreach is authorized, external user MCP servers remain off limits, and the acceptance checklist remains open.
 
