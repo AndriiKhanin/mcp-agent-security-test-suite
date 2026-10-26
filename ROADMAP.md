@@ -35,6 +35,12 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
+## M7-S/T/U — independent beta handoff preparation
+
+- **M7-S:** concise [voluntary beta handoff](.github/BETA_VOLUNTEER_HANDOFF.md) with exact public-source revision selection, offline-first test instructions, and minimal opt-in feedback fields.
+- **M7-T:** source-backed assertions ensure the instructions preserve the fictional-only scope, privacy boundaries, independent evidence and owner-acceptance requirements.
+- **M7-U:** README links to the handoff so a voluntary independent contributor can find it; engineering completion does **not** satisfy [M5-06 #59](../../issues/59). The owner has authorized invitations and an opt-in call is published in [#195](../../issues/195); external user MCP servers remain off limits, and the acceptance checklist remains open.
+
 ## M7 onboarding evidence (2026-10-25)
 
 - **M7-A/B/C engineering merged:** [PR #188](../../pull/188) provides a source-authored four-step `adapter-guide`, JSON-v1 CLI compatibility and help/discovery tests, and a user walkthrough. Required pull-request CI [#40202127930](../../actions/runs/40202127930) passed 4/4.
