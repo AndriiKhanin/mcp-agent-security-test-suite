@@ -41,6 +41,13 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M7-T:** source-backed assertions ensure the instructions preserve the fictional-only scope, privacy boundaries, independent evidence and owner-acceptance requirements.
 - **M7-U:** README links to the handoff so a voluntary independent contributor can find it; engineering completion does **not** satisfy [M5-06 #59](../../issues/59). The owner has authorized invitations and an opt-in call is published in [#195](../../issues/195); external user MCP servers remain off limits, and the acceptance checklist remains open.
 
+## M8 — quick dual-transport fictional adapter smoke
+
+- **M8-A:** `node tools/adapter-smoke.mjs` runs the existing fixed in-memory kit/quickstart checks for both `stdio` and `streamable-http`; no manual JSON export, file writes, external process or MCP target contact.
+- **M8-B:** negative CLI argument controls and two-transport output assertions, including the non-packaged source-only boundary.
+- **M8-C:** README discovery, with explicit separation between a convenient synthetic smoke and future authorized real-project interoperability.
+- **Acceptance:** Windows/Ubuntu Node20/22 CI 4/4 and verified post-merge `main`; does not satisfy independent beta [#59](../../issues/59) or real MCP approval.
+
 ## M7 onboarding evidence (verified through 2026-10-26)
 
 - **M7-A/B/C:** offline first-run guide and reviewed commands — [PR #188](../../pull/188).
