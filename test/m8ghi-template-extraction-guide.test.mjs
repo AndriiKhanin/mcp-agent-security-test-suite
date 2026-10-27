@@ -43,7 +43,9 @@ for(const transport of ['stdio','streamable-http']){
 test('M8-H: command-line errors do not claim template object is ready',()=>{
  const err=buildCliErrorReport('adapter-template','INVALID_CLI_ARGUMENTS');
  assert.equal(err.status,'ERROR');assert.equal(err.exitCode,2);
- assert.equal(err.readerGuide,undefined);
+ assert.equal(err.readerGuide.code,'INVALID_OFFLINE_INPUT');
+ assert.equal(err.readerGuide.externalMcpContactAuthorized,false);
+ assert.notEqual(err.readerGuide.code,'FICTIONAL_TEMPLATE_OBJECT_READY');
 });
 test('M8-H: copied template help is constant, contains no private input',()=>{
  const guide=buildCliReport('adapter-template',
