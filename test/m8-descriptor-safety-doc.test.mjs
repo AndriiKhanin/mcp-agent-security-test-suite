@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-const checklist = readFileSync(new URL('../docs/M8_DESCRIPTOR_SAFETY_CHECKLIST.md', import.meta.url), 'utf8');
+const checklist = readFileSync(new URL('../.github/M8_DESCRIPTOR_SAFETY_CHECKLIST.md', import.meta.url), 'utf8');
 const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
 
 // Documentation contract only: these assertions never run an adapter or open a socket.
