@@ -33,6 +33,18 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Copying a fictional adapter template correctly (M8-G/H/I)
+
+Run `node src/cli.mjs adapter-template stdio` (or
+`streamable-http`) to receive a JSON-v1 **report**. For your local
+descriptor file, copy **only the nested `template` object**, not
+the entire report wrapper; then check it with
+`node src/cli.mjs adapter-check <local-descriptor-file>`.
+The new `readerGuide` explains this distinction in every successful
+template report. Neither check runs the fictional command or contacts
+the described endpoint. Replace fictional values only in a disposable
+offline descriptor, and never paste credentials.
+
 ## Offline descriptor troubleshooting (M8-D/E/F)
 
 The existing `adapter-check` and `adapter-onboard` JSON-v1 reports now
