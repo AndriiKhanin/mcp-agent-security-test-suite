@@ -63,8 +63,17 @@ function safeGuidance(codes) {
  */
 const READER_COMMANDS=new Set([
   'adapter-kit','adapter-quickstart',
-  'adapter-kit-verify','adapter-trace-expect','adapter-check','adapter-onboard'
+  'adapter-kit-verify','adapter-trace-expect','adapter-check','adapter-onboard','adapter-template'
 ]);
+const TEMPLATE_GUIDE=Object.freeze({
+  code:'FICTIONAL_TEMPLATE_OBJECT_READY',
+  title:'Offline template is ready to copy',
+  meaning:'The JSON-v1 result is a report wrapper. Only its nested template object is a project descriptor; no project or MCP endpoint was contacted.',
+  nextSteps:Object.freeze([
+    'Copy only the template property into a local JSON descriptor file; do not pass the entire report wrapper to adapter-check or adapter-onboard.',
+    'Run node src/cli.mjs adapter-check <local-descriptor-file> to validate it offline. Do not run the fictional command or connect the described endpoint.'
+  ])
+});
 const DESCRIPTOR_GUIDE=Object.freeze({
   VALID:Object.freeze({
     code:'OFFLINE_DESCRIPTOR_VALIDATED',
@@ -162,6 +171,17 @@ const READER_KINDS=Object.freeze({
 function fixedReaderGuide(command, result, error=false){
   if(!READER_COMMANDS.has(command)) return undefined;
   let key='CONTROL_FAILED';
+  if(command==='adapter-template' && !error && result.status==='PASS'){
+    return {
+      readerGuideSchemaVersion:1,
+      code:TEMPLATE_GUIDE.code,title:TEMPLATE_GUIDE.title,
+      meaning:TEMPLATE_GUIDE.meaning,nextSteps:[...TEMPLATE_GUIDE.nextSteps],
+      reportScope:'FICTIONAL_OFFLINE_ASSERTIONS_ONLY',
+      realProjectAssessed:false,externalMcpContactAuthorized:false,
+      independentAuditCompleted:false,independentBetaVerified:false,
+      ownerOperatorVerified:false,stableReleaseAuthorized:false
+    };
+  }
   if(command==='adapter-check' || command==='adapter-onboard'){
     // The same generic literal checklist for parse, file, policy and schema
     // failures. Never derive a diagnosis from private file data or exceptions.
