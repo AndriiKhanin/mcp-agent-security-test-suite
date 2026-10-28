@@ -57,6 +57,25 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## Optional in-memory toy-agent replay of every fictional case (M10-D/E/F)
+
+To check every fictional fixture against the independent in-memory
+toy-agent gateway method-call observer:
+
+```sh
+node tools/toy-agent-batch.mjs
+```
+
+Each file receives five fixed first-party toy modes (one safe,
+four deliberately failing). The zero-argument batch expects exact
+`PASS`/`FAIL` outcomes and zero protected effects, and emits only
+ordinal counts and fixed rule codes. Contributors need **no runner edits**
+to add a fictional fixture-only PR.
+
+This is **not a real agent**, actual MCP integration, or semantic assessment
+of your injected instruction. See the
+[toy-agent batch design](M10_TOY_AGENT_BATCH.md).
+
 ## Read one clear, privacy-safe fictional review (M9-G/H/I)
 
 For a brief summary of the entire reviewed fictional fixture set:
