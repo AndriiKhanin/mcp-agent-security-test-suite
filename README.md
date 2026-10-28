@@ -104,6 +104,29 @@ and neither external MCP servers nor unrelated files are accessed.
 See the [concurrent correlation guide](.github/M11_CONCURRENT_RESPONSE.md)
 and [Issue #232](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/232).
 
+## Fresh fictional owner capabilities across independent runs (M11-P/Q/R)
+
+Run the source-only fixed localhost test:
+
+```sh
+node tools/m11-owner-epoch.mjs
+```
+
+Two **separate** reviewed first-party `127.0.0.1` HTTP listeners
+are started and fully shut down in sequence. Each issues its own
+source-generated synthetic capability; the next run **must reject a
+capability from the prior run**, even if the request shape is otherwise
+correct. The tool result reaches a distinct M10 toy gateway only after
+strict on-wire request ID, fictional owner/epoch and content validation.
+
+The selftest expects **one clean PASS and 17 deliberate FAIL controls**,
+including stale/replayed authority, forged requests, swapped responses
+and incomplete replies. No user target, real credential, external MCP,
+arbitrary command or AI agent is exercised. This **does not prove real
+authentication or LLM prompt-injection resilience**. See the
+[owner-epoch guide](.github/M11_OWNER_EPOCH.md) and
+[Issue #238](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/238).
+
 ## Cross-session replay and response-binding checks (M11-D/E/F)
 
 Use the source-only, zero-argument test on a reviewed local checkout:
