@@ -127,6 +127,28 @@ authentication or LLM prompt-injection resilience**. See the
 [owner-epoch guide](.github/M11_OWNER_EPOCH.md) and
 [Issue #238](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/238).
 
+## Modern MCP x-mcp-header parameter mirror (M12-D/E/F)
+
+In a reviewed source checkout (Node.js 20+), run:
+
+```sh
+node tools/m12-header-parameter-mirror.mjs
+```
+
+This zero-argument, source-only demonstration mirrors **four primitive
+fictional tool parameters** into 2026-07-28 `Mcp-Param-*` headers on
+a disposable **127.0.0.1** HTTP server. It requires exact agreement
+between the JSON body and HTTP headers, including canonical Base64
+handling for Unicode, padded text and Base64-sentinel-like text.
+Conflicts fail with HTTP 400 and JSON-RPC `-32020` (`HeaderMismatch`).
+Only verified fictional response data enters the M10 toy gateway.
+
+The 26 fixed controls include four expected PASS and 22 expected
+FAIL outcomes. This is **not complete MCP conformance**, a real AI
+agent, external server test or semantic prompt-injection detector.
+See the [M12 header-mirror guide](.github/M12_HEADER_MIRROR.md)
+and [Issue #244](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/244).
+
 ## Modern MCP 2026-07-28 owned localhost smoke (M12-A/B/C)
 
 In a reviewed source checkout, run the opt-in, source-only test:
