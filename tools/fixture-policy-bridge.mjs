@@ -44,7 +44,7 @@ const PROBES=Object.freeze([
 const invalid=Object.freeze({
   reportSchemaVersion:1,status:'ERROR',exitCode:2,
   ruleCode:'FIXTURE_POLICY_BRIDGE_INPUT_REJECTED',scope:SCOPE,
-  fixtureTextInterpreted:false,actualAgentBehaviorObserved:false,
+  fixtureContentInterpreted:false,actualAgentBehaviorObserved:false,
   realFilesystemReadObserved:false,externalMcpContacted:false,
   securityCertified:false
 });
