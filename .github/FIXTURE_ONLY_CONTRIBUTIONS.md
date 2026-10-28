@@ -32,6 +32,23 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## Check that corrupted symbolic results cannot pass (M9-F)
+
+To verify the fictional policy report's negative controls across **all**
+contributor fixtures, use:
+
+```sh
+node tools/fictional-negative-control-matrix.mjs
+```
+
+The source-only matrix challenges the independent M9-E report validator
+with 43 fixed, intentionally corrupted symbolic outcomes **per fixture**.
+Every mutation must fail while the pristine result passes. The command
+accepts no additional arguments, prints no fixture text or path, and
+runs no agent or MCP server. This is **not a real agent** attack evaluation
+or semantic prompt-injection detection. See the
+[negative-control guide](M9_NEGATIVE_MUTATION_MATRIX.md).
+
 ## One-command check for all fictional proposals (M9-E)
 
 After adding a **fictional** `.json` fixture, you can validate the
