@@ -33,6 +33,26 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Run toy-agent gateway checks over all fictional fixtures (M10-D/E/F)
+
+From a reviewed source checkout:
+
+```sh
+node tools/toy-agent-batch.mjs
+```
+
+The source-only batch runs the **actual in-memory JavaScript method-call**
+toy-agent harness in five fixed modes for every valid fictional JSON
+contributor fixture (up to 16). A separate verifier confirms the safe
+PASS, four expected fault-mode FAIL results, exact denied-request counters
+and zero committed protected effects. The JSON summary is ordinal-only,
+without scenario names, paths or tool-result text.
+
+This is **not a real agent**, semantic prompt-injection detector or
+authorization to contact third-party MCP servers. Read the
+[toy-agent batch guide](.github/M10_TOY_AGENT_BATCH.md)
+and [Issue #223](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/223).
+
 ## In-memory toy-agent method-call exchange (M10-A/B/C)
 
 Run the first-party, source-only toy-agent demonstration:
