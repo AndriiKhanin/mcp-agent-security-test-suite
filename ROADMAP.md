@@ -12,7 +12,7 @@ This roadmap is the **source of truth for priorities and acceptance criteria**. 
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**, still fictional/local-only; M7-A through M7-U engineering merged and source-backed; external-beta acceptance is **PENDING** | [PR #194](../../pull/194), [post-merge main CI #40358493703](../../actions/runs/40358493703): **4/4 PASS** |
+| Latest candidate in `main` | **v0.0.10-rc.1**, unpublished; M10-A/F toy-agent engineering merged, first external fixture accepted via PR #212, independent-beta acceptance still **PENDING** | [PR #212](../../pull/212), [main CI #1053](../../actions/runs/40687127717): **4/4 PASS** |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Original M1–M3 issue plan | **6/6 original issues complete**; newer M5 external beta gate **OPEN** | [Original issues #2–#7](../../issues?q=is%3Aissue); [open gate #59](../../issues/59) |
@@ -33,12 +33,33 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
-| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D merged; M9-E merged; M9-F merged; M9-G/H/I merged; M9-J/K/L merged; M10-A/B/C merged; M10-D/E/F IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
-| **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway and method-call witness, not real LLM execution | **M10-A/B/C IN PROGRESS** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
+| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
+| **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **M10-A through M10-F MERGED; M10-G/H/I IN PROGRESS** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M10-D/E/F — batch toy-agent gateway replay for fictional fixtures (IN PROGRESS)
+## M10-G/H/I — stateful toy-agent task/result witness (IN PROGRESS)
+
+- [Issue #226](../../issues/226): source-only
+  `tools/toy-agent-session.mjs` adds a parent-owned in-memory state
+  machine (`NEW → AWAITING_RESULT → RESULT_RECEIVED → FINISHED`).
+  The toy agent must start one fictional task, consume one tool result
+  **only as untrusted data**, and then finish.
+- The parent gateway independently counts actual in-memory JavaScript
+  method calls and rejects premature, replayed and post-completion
+  tool-result deliveries. Unrelated read/tool calls and forged authority
+  claims are denied with **zero** protected effects.
+- [M10-G/H/I design](.github/M10_TOY_AGENT_SESSION.md) and
+  `test/m10-toy-agent-session.test.mjs` check eight fixed source-owned
+  scenarios (one PASS, seven expected FAIL), all contributor fixtures,
+  cross-session witness isolation, false claims, no-echo CLI and the
+  unchanged 80-path npm release inventory.
+- **Pending:** Windows/Ubuntu × Node 20/22 PR CI 4/4, merge and
+  separately verified post-merge push CI. This is **not** an LLM,
+  real-agent prompt-injection assessment, OS-level file witness, real
+  MCP contact or release approval. #21/#43/#59 remain open.
+
+## M10-D/E/F — batch toy-agent gateway replay for fictional fixtures (merged engineering)
 
 - [Issue #223](../../issues/223): `tools/toy-agent-batch.mjs` replays
   every strictly bounded source-owned fictional JSON contribution through
@@ -51,9 +72,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 - `test/m10-toy-agent-batch.test.mjs` covers each contribution, negative
   report mutations, hidden/accessor properties, no-echo CLI and the locked
   npm inventory. [Contributor guide](.github/M10_TOY_AGENT_BATCH.md).
-- **Pending:** Windows/Ubuntu × Node.js 20/22 4/4 PR CI, merge and
-  post-merge main verification. Still **not a real AI agent** or
-  semantic prompt-injection detector; #21/#43/#59 remain open.
+- **Engineering merged:** [PR #224](../../pull/224), [PR CI #1044](../../actions/runs/40678464485) successful. Latest combined [main push CI #1053](../../actions/runs/40687127717) **4/4 PASS**. Still **not a real AI agent** or semantic prompt-injection detector; #21/#43/#59 remain open.
 
 ## M10-A/B/C — first-party toy-agent method-call witness (merged engineering)
 

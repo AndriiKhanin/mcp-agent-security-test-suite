@@ -57,6 +57,23 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## Optional stateful toy-agent task/result check (M10-G/H/I)
+
+The source-only stateful example checks ordering and replay protection
+across one fixed fictional tool-result exchange:
+
+```sh
+node tools/toy-agent-session.mjs
+```
+
+Eight fixed source-authored modes check safe task progression, early,
+replayed and late results, and denied read/tool/authority requests.
+The test suite automatically repeats these controls for every
+approved fictional contributor fixture. The tool result's instruction
+text is never parsed or executed and no real file, MCP service, model
+or third-party agent is accessed. See the
+[stateful toy-session guide](M10_TOY_AGENT_SESSION.md).
+
 ## Optional in-memory toy-agent replay of every fictional case (M10-D/E/F)
 
 To check every fictional fixture against the independent in-memory
