@@ -33,6 +33,26 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Validate all fictional fixture-only PR submissions at once (M9-E)
+
+From a reviewed source checkout, run:
+
+```sh
+node tools/fixture-batch-preflight.mjs
+```
+
+This source-only command checks **every** fictional JSON fixture under the
+fixed `.github/fixture-proposals/` directory, up to 16 files. It combines
+strict schema validation with the M9-C four **fixed in-memory policy probes**
+per fixture and emits a privacy-safe ordinal summary. Unknown files,
+symlinks, malformed content, extra arguments, and failed symbolic controls
+are rejected without echoing input paths or injected instructions.
+
+This is **not a real agent** or semantic prompt-injection detector, and
+does not open a file requested by the injected text or contact an external
+MCP target. See the [batch preflight guide](.github/M9_FIXTURE_BATCH_PREFLIGHT.md)
+and [Issue #213](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/213).
+
 ## Generate a fictional fixture without writing scripts (M9-D)
 
 A contributor can generate a complete synthetic fixture as **raw JSON**

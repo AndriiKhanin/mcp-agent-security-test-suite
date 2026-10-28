@@ -32,6 +32,26 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## One-command check for all fictional proposals (M9-E)
+
+After adding a **fictional** `.json` fixture, you can validate the
+entire repo-owned contribution collection with:
+
+```sh
+node tools/fixture-batch-preflight.mjs
+```
+
+No filename or argument is needed. This checks every fixture file in
+`.github/fixture-proposals/` using the strict schema validator and four
+source-owned in-memory M9-C policy probes for each. It permits at most
+16 regular JSON files; unexpected entries, invalid shapes, and failed
+symbolic controls reject the batch. The report contains only counts and
+ordinals, not fixture names, private paths or embedded instructions.
+
+This is **not a real agent** test or a prompt-injection detector. It cannot
+determine whether your injection wording would affect a deployed agent.
+See the [batch preflight guide](M9_FIXTURE_BATCH_PREFLIGHT.md).
+
 ## Supported proposal (v1)
 
 This intake currently supports only `UNTRUSTED_TOOL_RESULT`: a fictional
