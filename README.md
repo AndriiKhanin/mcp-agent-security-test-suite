@@ -33,6 +33,16 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Public fictional fixture privacy guard (M9-J/K/L)
+
+The source-only validator rejects some obvious private-looking strings in
+contributed fictional JSON: URL schemes, local home paths, email addresses,
+credential-like prefixes, key headers and IPv4 literals. Rejections return
+constant non-echoing errors; **this is not a complete secret scanner**.
+Contributors must still sanitize all details manually. See the
+[fixture guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) and
+[PR checklist](.github/PULL_REQUEST_TEMPLATE.md).
+
 ## Contributor-friendly offline fictional review (M9-G/H/I)
 
 From a reviewed source checkout with Node.js 20+, run one command:
