@@ -113,10 +113,17 @@ export function runFixturePolicyBridge(fixture){
 }
 
 export async function runFixturePolicyBridgeFile(args=[]){
-  if(!Array.isArray(args) || args.length!==1) return invalid;
+  if(!Array.isArray(args) ||
+     Object.getPrototypeOf(args)!==Array.prototype ||
+     args.length!==1) return invalid;
+  const slots=Object.getOwnPropertyDescriptors(args);
+  if(Reflect.ownKeys(slots).length!==2 ||
+     !Object.hasOwn(slots,'0') || !slots['0'].enumerable ||
+     !Object.hasOwn(slots['0'],'value') ||
+     typeof slots['0'].value!=='string') return invalid;
   try{
     // M8 loader bounds paths, file bytes, symlinks, JSON and strict schema.
-    const fixture=await loadValidatedFixtureProposalFile(args[0]);
+    const fixture=await loadValidatedFixtureProposalFile(slots['0'].value);
     return runFixturePolicyBridge(fixture);
   }catch{
     // Never include path, embedded instruction, token, parsed JSON or stack.
