@@ -70,7 +70,7 @@ test('M9-D: bad user case IDs fail closed before string interpolation',()=>{
     assert.deepEqual(res,{
       exitCode:2,text:'ERROR: INVALID_FICTIONAL_FIXTURE_TEMPLATE_REQUEST\n'
     });
-    assert.ok(!res.text.includes(id));
+    if(id) assert.ok(!res.text.includes(id));
   }
 });
 
