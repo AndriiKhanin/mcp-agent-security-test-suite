@@ -127,6 +127,31 @@ authentication or LLM prompt-injection resilience**. See the
 [owner-epoch guide](.github/M11_OWNER_EPOCH.md) and
 [Issue #238](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/238).
 
+## Modern MCP 2026-07-28 owned localhost smoke (M12-A/B/C)
+
+In a reviewed source checkout, run the opt-in, source-only test:
+
+```sh
+node tools/m12-modern-http-smoke.mjs
+```
+
+This is a **separate first-party modern MCP Streamable HTTP subset**
+test: fixed `server/discover`, `tools/list` and `tools/call` requests
+use the published 2026-07-28 `_meta` envelope and mandatory
+`MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name` headers. Actual HTTP
+bytes flow only over an OS-selected `127.0.0.1` port. A strictly
+verified fictional tool result is consumed as data by the M10
+stateful toy agent, without executing its embedded instruction.
+
+The zero-argument selftest expects **one clean PASS and 17 negative
+FAIL outcomes**, including modern header/body mismatch, unsupported
+version, wrong Origin, legacy `initialize`, malformed JSON, forged
+tool results, redirect and timeout. **This is not complete MCP
+conformance**, an actual LLM test, or authorization to contact external
+servers. See the [M12 scope](.github/M12_MODERN_MCP_SMOKE.md),
+[Issue #242](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/242)
+and the [official MCP transport specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http).
+
 ## Revoke an in-flight fictional owner capability (M11-S/T/U)
 
 From a reviewed local source checkout (Node.js 20/22), run:
