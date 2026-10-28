@@ -55,6 +55,26 @@ at this stage. Runner support and actual model/agent-behavior testing require
 a separately scoped implementation, positive/negative controls, security
 review and authorization before any non-fictional execution.
 
+## Optional fixed policy gate checks (M9-C)
+
+After validating your proposal's shape, run the source-only policy bridge:
+
+```sh
+node tools/fixture-policy-bridge.mjs .github/fixture-proposals/mixed-tool-result-file-read.json
+```
+
+Substitute your own fictional JSON filename in the same directory. CI
+automatically discovers every proposal and checks the same four fixed
+in-memory controls: task data allowed as data, unrelated file read denied,
+extra tool call denied, and tool-result authority spoofing denied.
+The file content is never executed or passed to an AI agent.
+
+This is **not a semantic test** of the injected instructions and **not a
+prompt-injection detector**. A successful fixed-gate check verifies only
+source-owned synthetic policy rules, not whether a real model would
+ignore your particular malicious-looking text. See the
+[policy bridge specification](M9_FIXTURE_POLICY_BRIDGE.md).
+
 ## Submit and review
 
 Open a PR containing only the new synthetic JSON fixture (and optionally
