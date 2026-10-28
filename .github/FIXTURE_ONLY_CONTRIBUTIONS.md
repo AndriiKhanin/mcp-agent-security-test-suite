@@ -57,6 +57,20 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## Optional owned two-session replay test (M11-D/E/F)
+
+```sh
+node tools/m11-replay-session.mjs
+```
+
+This test uses two fixed, public **fictional** fixtures and a disposable
+first-party IPv4 loopback listener to require source-owned session IDs,
+one-use request identifiers and exact response correlation. It checks
+15 deliberate negative cases, but **does not** interpret the attack
+wording, run a real agent, contact a user MCP target or grant external
+testing permission. No contributor can supply a URL, command or
+credential to this test. See [M11 replay guide](M11_REPLAY_SESSION.md).
+
 ## Optional first-party local HTTP check (M11-A/B/C)
 
 Run `node tools/m11-loopback-tool-result.mjs` for a finite review of a

@@ -33,6 +33,29 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Cross-session replay and response-binding checks (M11-D/E/F)
+
+Use the source-only, zero-argument test on a reviewed local checkout:
+
+```sh
+node tools/m11-replay-session.mjs
+```
+
+The first-party harness checks the accepted M11 discovery/local transport,
+then runs **two distinct fictional tool requests** over a separate
+disposable `127.0.0.1` listener. Each HTTP response must match its fixed
+request ID, task-session marker and reviewed fictional content.
+Source-owned negative controls reject replayed or swapped responses,
+reused request IDs, forged authority, premature or post-completion
+requests, malformed JSON, redirects and stalled replies **before
+untrusted text enters the M10 toy-agent gateway**.
+
+The CLI requires one safe PASS and 15 expected negative FAIL outcomes;
+every response/session count and TCP socket close is checked. **This is
+not a real AI agent**, LLM prompt-injection assessment, third-party MCP
+scan or OS sandbox. See the [M11 replay guide](.github/M11_REPLAY_SESSION.md)
+and [Issue #230](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/230).
+
 ## First-party localhost tool-result trust bridge (M11-A/B/C)
 
 In a reviewed source checkout, run the fixed two-stage local demonstration:
