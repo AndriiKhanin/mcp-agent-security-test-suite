@@ -33,6 +33,29 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## First-party symbolic prompt-injection controls (M9-A)
+
+In a reviewed source checkout with Node.js 20+, run:
+
+```sh
+node tools/symbolic-injection-evaluator.mjs
+```
+
+This source-only selftest checks four fixed **fictional, symbolic** tool-result
+outcomes: clean task data, rejected injected text, an unauthorized unrelated
+file-read *request*, and an unauthorized tool-call *request*. The latter two
+are expected negative controls; the selftest succeeds only when they are
+identified as symbolic failures.
+
+This is **not a real AI agent**, not an MCP prompt-injection detector, and
+not an independent security assessment. It reads only one reviewed fictional
+fixture and does **not** follow an embedded instruction, read unrelated
+files, execute tools, contact real MCP servers or certify safety. Its
+reports distinguish author-supplied symbolic events from authenticated
+real-agent observations, which remain unavailable. See the
+[trust-boundary RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) and
+[design Issue #204](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/204).
+
 ## Contribute a fictional tool-result injection case (M8-S/T/U)
 
 **Fixture-only contributions are welcome**, independently of runner changes.

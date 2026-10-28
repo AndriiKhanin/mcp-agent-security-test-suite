@@ -32,11 +32,32 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M4 — Authorized integration preview** | Universal adapter descriptors and safe first-party mock; external staging separate | **M4-A/B0/B1/B2/B3/B4/B5/B6-A/B6-B/B6-C/B6-D/B6-E/B6-F/B7-A/B7-B/B7-C/B8-A/B8-B/B9-A/B9-B/B9-C/B9-D/B10-A ENGINEERING DONE; EXTERNAL MCP TARGETS NOT AUTHORIZED** | [M4-A #23](../../issues/23), [M4-B0 #61](../../issues/61), [M4-B1 #63](../../issues/63), [RFC #21](../../issues/21) | Allowlist + explicit target authorization + strict default deny; no production probes |
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
-| **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U IN PROGRESS** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
+| **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
+| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M8-S/T/U — independent fictional fixture-only intake (IN PROGRESS)
+## M9-A — first-party symbolic injection evaluator (IN PROGRESS)
+
+- [Issue #204](../../issues/204) defines the next safe extension:
+  [M9 symbolic trust-boundary RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md),
+  which explicitly separates expected safe behavior, author-supplied
+  symbolic observations and real-agent behavior (**not observed**).
+- Source-only `tools/symbolic-injection-evaluator.mjs` compares a single
+  reviewed fictional tool-result fixture against four fixed symbolic trace
+  examples: clean task, injected instruction rejected, unrelated file-read
+  request, and unauthorized tool-call request. Both negative examples must
+  produce symbolic FAIL for the combined selftest to PASS.
+- `test/m9-symbolic-injection.test.mjs` guards event validation, cross-resource
+  violations, missing rejection evidence, attempted false-success claims,
+  no-echo reporting, zero-argument CLI and release inventory boundaries.
+- **Acceptance pending:** four PR CI jobs on Windows/Ubuntu × Node 20/22,
+  merge and post-merge verification. No actual agent execution, unrelated
+  file read, external MCP contact, real prompt-injection detection, beta
+  evidence, independent audit or authorization is asserted. #21/#43/#59
+  remain open.
+
+## M8-S/T/U — independent fictional fixture-only intake (merged engineering)
 
 - **M8-S — source-only intake:** `tools/fixture-proposal-check.mjs` validates a
   bounded **fictional** tool-result prompt-injection JSON proposal placed in
@@ -52,8 +73,8 @@ We will not claim a release is production-ready merely because a synthetic test 
   and [CONTRIBUTING](CONTRIBUTING.md) explain how to contribute a synthetic
   mixed-data/instruction case; the [beta volunteer handoff](.github/BETA_VOLUNTEER_HANDOFF.md)
   distinguishes a case proposal from **actual independent beta execution**.
-- **Acceptance pending:** four successful CI jobs (Windows/Ubuntu × Node20/22),
-  PR merge and post-merge main verification. A fixture shape PASS is not a model
+- **Engineering merged:** [PR #203](../../pull/203), [PR CI #945](../../actions/runs/40642598475)
+  **4/4 PASS** (925/925 tests per job); separate post-merge main CI verification pending. A fixture shape PASS is not a model
   safety assessment, independent beta [#59](../../issues/59), audit [#43](../../issues/43)
   or real-target approval [#21](../../issues/21).
 
