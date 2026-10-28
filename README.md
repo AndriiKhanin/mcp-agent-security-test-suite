@@ -33,6 +33,29 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## First-party localhost tool-result trust bridge (M11-A/B/C)
+
+In a reviewed source checkout, run the fixed two-stage local demonstration:
+
+```sh
+node tools/m11-loopback-tool-result.mjs
+```
+
+The source-only test first runs the existing **discovery-only staging**
+MCP mock, then starts a **separate, disposable 127.0.0.1 HTTP server**
+with an MCP-shaped fictional `tools/call` reply. The reply contains
+legitimate task data plus an embedded instruction; actual on-wire bytes
+are strictly checked before the decoded result enters the M10 stateful
+toy-agent gateway. Eleven source-authored cases require one clean PASS
+and ten expected FAIL results. The original discovery server still
+**rejects tools/call**, and no third-party MCP destination is contacted.
+
+**This is not a real AI agent**, comprehensive MCP server, OS sandbox
+or semantic prompt-injection detector. The toy agent does not interpret
+embedded instructions; only approved fictional source files are read.
+See the [M11 local-transport design](.github/M11_LOOPBACK_TOOL_RESULT.md)
+and [Issue #228](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/228).
+
 ## Stateful fictional toy-agent task/result session (M10-G/H/I)
 
 Run the source-only deterministic eight-case session test:
