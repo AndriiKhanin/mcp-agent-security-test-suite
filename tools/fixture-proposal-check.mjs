@@ -24,10 +24,23 @@ function record(value, keys){
     keys.every(key=>Object.hasOwn(props,key) &&
       Object.hasOwn(props[key],'value') && props[key].enumerable);
 }
+// Conservative public-fixture hygiene: reject obvious private-looking
+// strings, WITHOUT claiming comprehensive secret scanning or sanitization.
+// All inputs are already bounded to 256 single-line printable ASCII chars.
+const PRIVATE_INDICATORS=Object.freeze([
+  /(?:https?|ssh|file|mcp):\/\//iu,
+  /(?:[a-z]:\\(?:users|documents|windows)\\|\/(?:home|users)\/[a-z0-9._-]{2,})/iu,
+  /(?:[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/iu,
+  /(?:\b(?:sk-[a-z0-9_-]{12,}|gh[pousr]_[a-z0-9_]{12,}|github_pat_[a-z0-9_]{12,}|AKIA[A-Z0-9]{16})\b)/iu,
+  /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/iu,
+  /\b(?:\d{1,3}\.){3}\d{1,3}\b/u
+]);
 function fictionalText(value){
-  // Short single-line public fictional strings only; NOT a secret scanner.
+  // This rejects some obvious sensitive patterns, NOT arbitrary secrets.
+  // Contributors must still manually sanitize every field before posting.
   return typeof value==='string' && value.length>=10 && value.length<=256 &&
-    /^[\x20-\x7e]+$/u.test(value);
+    /^[\x20-\x7e]+$/u.test(value) &&
+    !PRIVATE_INDICATORS.some(indicator=>indicator.test(value));
 }
 
 /** Shape acceptance only: no assessment of downstream agent behavior. */
