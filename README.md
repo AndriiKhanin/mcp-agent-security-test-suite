@@ -33,6 +33,29 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Concurrent first-party HTTP response correlation (M11-G/H/I)
+
+In a reviewed source checkout, run:
+
+```sh
+node tools/m11-concurrent-response.mjs
+```
+
+The first-party local mock now launches **two overlapping HTTP
+requests**, then deliberately issues their responses in either order.
+The client must match every returned response to its own exact
+JSON-RPC ID, fictional session marker, and approved on-wire data
+**before** invoking the M10 toy gateway. The suite includes two safe
+positive modes and 13 negative modes for swapped/replayed responses,
+request ID reuse, forged headers, malformed JSON, redirects, oversized
+or stalled responses. Actual request and socket-close counters are
+checked, but OS packet arrival order is **not** claimed.
+
+This is **not a real AI agent** or semantic prompt-injection test,
+and neither external MCP servers nor unrelated files are accessed.
+See the [concurrent correlation guide](.github/M11_CONCURRENT_RESPONSE.md)
+and [Issue #232](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/232).
+
 ## Cross-session replay and response-binding checks (M11-D/E/F)
 
 Use the source-only, zero-argument test on a reviewed local checkout:

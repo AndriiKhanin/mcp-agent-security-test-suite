@@ -57,6 +57,20 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## Optional overlapping first-party HTTP reply test (M11-G/H/I)
+
+```sh
+node tools/m11-concurrent-response.mjs
+```
+
+This source-only command overlaps two source-owned fictional HTTP
+requests at a disposable `127.0.0.1` listener, deliberately allows
+response B to be issued before A, then checks exact request ID,
+session markers and body binding. It has 13 negative controls and
+accepts no user endpoint, credential, filename or command. It does
+**not** evaluate the semantic effect of prompt injection on a real
+LLM. See the [concurrency guide](M11_CONCURRENT_RESPONSE.md).
+
 ## Optional owned two-session replay test (M11-D/E/F)
 
 ```sh
