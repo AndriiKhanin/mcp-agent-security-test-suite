@@ -125,7 +125,7 @@ function servePair(fixtures,fault,port,counters){
     res.end(body);
   }
   function flush(){
-    if(flushed||counters.received!==2)return;
+    if(flushed||counters.processed!==2)return;
     flushed=true;
     const order=fault==='reverse-delivery'?[1,0]:[0,1];
     for(const index of order)sendAccepted(index);
@@ -147,6 +147,7 @@ function servePair(fixtures,fault,port,counters){
         parsed=parseStrictJson(new TextDecoder('utf-8',{fatal:true})
           .decode(Buffer.concat(chunks)));
       }catch{}
+      counters.processed++;
       const index=IDS.indexOf(parsed?.id);
       const expected=index<0?null:REQUESTS[index];
       const correctHeaders=expected!==null&&
@@ -254,7 +255,7 @@ function exchange(port,index,fixture,fault,deadlineMs){
 }
 async function runLocalPair(fixtures,fault,deadlineMs){
   const server=http.createServer(),sockets=[];
-  const counters={received:0,accepted:0,denied:0,
+  const counters={received:0,processed:0,accepted:0,denied:0,
     socketClosed:0,responseClosed:0,issued:[],maxPending:0};
   server.on('connection',socket=>{
     sockets.push(new Promise(resolve=>socket.once('close',()=>{
@@ -333,7 +334,10 @@ export async function runOwnedConcurrentM11(first,second,settings={}){
         completed++;
     }
   }
-  const pass=ready&&local?.code===null&&completed===2&&
+  const expectedIssuance=fault==='reverse-delivery'?'B_THEN_A':'A_THEN_B';
+  const actualIssuance=counts.issued.join(',');
+  const orderOK=actualIssuance===(expectedIssuance==='B_THEN_A'?'62,61':'61,62');
+  const pass=ready&&local?.code===null&&completed===2&&orderOK&&
     counts.received===2&&counts.accepted===2&&counts.denied===0&&
     counts.socketClosed===2&&counts.responseClosed===2&&
     counts.maxPending===2&&counts.issued.length===2;
