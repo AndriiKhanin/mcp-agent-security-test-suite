@@ -403,9 +403,9 @@ const CASES=Object.freeze([
     'server-request','wrong-final-id','wrong-progress-token',
     'extra-result-authority','malformed-json','duplicate-json-key',
     'invalid-utf8','oversized','too-many-comments','wrong-event',
-    'missing-final','truncated-frame','wrong-content-type',
-    'redirect'].map(x=>
+    'missing-final','truncated-frame','wrong-content-type'].map(x=>
     [x,'FAIL','M12_SSE_RESPONSE_REJECTED',1,0,0,0]),
+  ['redirect','FAIL','M12_SSE_RESPONSE_REJECTED',1,0,302,0],
   ['hang','FAIL','M12_SSE_REQUEST_TIMEOUT',1,0,0,0],
   ['wrong-origin','FAIL','M12_SSE_REQUEST_REJECTED',0,1,403,0],
   ['wrong-method','FAIL','M12_SSE_REQUEST_REJECTED',0,1,400,0]
