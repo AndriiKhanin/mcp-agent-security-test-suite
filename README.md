@@ -33,6 +33,25 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Challenge synthetic policy results with negative controls (M9-F)
+
+Run a zero-argument source-only mutation sensitivity check from a reviewed
+checkout:
+
+```sh
+node tools/fictional-negative-control-matrix.mjs
+```
+
+For **every** fictional JSON contributor fixture, this checks the pristine
+M9-C policy report and then applies **43 fixed negative mutations** to
+authority flags, protected-effect counters, fixed deny rules, and the
+four-case report inventory. Every corrupted symbolic result must be rejected.
+Outputs include only safe counts and fixed rule codes.
+
+This is **not a real agent** test, semantic prompt-injection detector,
+credential validator, or permission to contact external MCP servers.
+See the [M9-F mutation-matrix guide](.github/M9_NEGATIVE_MUTATION_MATRIX.md).
+
 ## Validate all fictional fixture-only PR submissions at once (M9-E)
 
 From a reviewed source checkout, run:
