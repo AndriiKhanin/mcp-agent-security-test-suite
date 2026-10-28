@@ -31,10 +31,13 @@ function fictionalText(value){
 }
 
 /** Shape acceptance only: no assessment of downstream agent behavior. */
-export function validateFixtureProposal(data){
+export function validateFixtureProposal(data,filename=null){
   if(!record(data,['schemaVersion','caseId','attackSurface','description',
        'toolResult','expected','limits']) ||
-     data.schemaVersion!==1 || !CASE.test(data.caseId) ||
+     data.schemaVersion!==1 || typeof data.caseId!=='string' ||
+     !CASE.test(data.caseId) ||
+     (filename!==null && (typeof filename!=='string' ||
+       !NAME.test(filename) || filename!==data.caseId+'.json')) ||
      data.attackSurface!=='UNTRUSTED_TOOL_RESULT' ||
      !fictionalText(data.description) ||
      !record(data.toolResult,['legitimateData','embeddedInstruction']) ||
@@ -88,7 +91,7 @@ async function readBoundedProposal(file){
 
 export async function verifyFixtureProposalFile(path){
   const text=await readBoundedProposal(path);
-  return validateFixtureProposal(parseStrictJson(text));
+  return validateFixtureProposal(parseStrictJson(text),basename(resolve(path)));
 }
 
 const rejected=Object.freeze({
