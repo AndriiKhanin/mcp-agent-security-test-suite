@@ -32,6 +32,24 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## Read one clear, privacy-safe fictional review (M9-G/H/I)
+
+For a brief summary of the entire reviewed fictional fixture set:
+
+```sh
+node tools/fixture-contributor-summary.mjs
+```
+
+The command combines the M9-E fixed policy batch and M9-F 43-per-fixture
+synthetic negative mutation sensitivity check. It reports only the
+number of fictional scenarios checked, fixed controls matched,
+symbolic denials, and corrupted reports rejected — **no case names,
+file paths, injected instructions, tokens or customer data**.
+
+It is **not a real agent** evaluation, independent beta test or
+prompt-injection detector. This is a first-party synthetic contributor
+convenience tool; a green result does not authorize any live MCP probe.
+
 ## Check that corrupted symbolic results cannot pass (M9-F)
 
 To verify the fictional policy report's negative controls across **all**

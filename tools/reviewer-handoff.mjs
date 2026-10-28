@@ -24,7 +24,7 @@ const MAX_TOTAL_BYTES=2_000_000;
 const MAX_PACKET_BYTES=24_576;
 // Allow bounded growth of reviewed source-only test/guide/fixture files.
 // Every file remains hashed in the canonical excluded-source inventory.
-const MAX_EXCLUDED_FILES=120;
+const MAX_EXCLUDED_FILES=128;
 const SHA256=/^[0-9a-f]{64}$/u;
 const SHA512=/^[0-9a-f]{128}$/u;
 const roots=Object.freeze(['.github','test','tools']);

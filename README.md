@@ -33,6 +33,27 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Contributor-friendly offline fictional review (M9-G/H/I)
+
+From a reviewed source checkout with Node.js 20+, run one command:
+
+```sh
+node tools/fixture-contributor-summary.mjs
+```
+
+This source-only command combines the **M9-E fictional batch fixture preflight**
+and **M9-F negative mutation matrix** into one small human-readable
+summary. It verifies the four fixed policy controls and 43 deliberately
+corrupted symbolic reports **per fixture**, then prints only bounded counts
+and explicit limitations. It accepts no arguments, user-defined commands,
+real endpoints, private paths or credentials.
+
+This is **not a real agent** or semantic prompt-injection detector.
+No actual MCP target is contacted and no unrelated file is read. A
+successful synthetic review does not establish independent beta evidence,
+security certification or release permission. See the
+[fixture-only contributor guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
+
 ## Challenge synthetic policy results with negative controls (M9-F)
 
 Run a zero-argument source-only mutation sensitivity check from a reviewed
