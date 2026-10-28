@@ -58,6 +58,29 @@ MCP scan or semantic injection assessment. See the
 [cancellation design](.github/M11_CANCELLED_RESPONSE.md) and
 [Issue #234](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/234).
 
+## Two fictional owners on one isolated localhost transport (M11-M/N/O)
+
+From a reviewed repository checkout, run:
+
+```sh
+node tools/m11-owner-isolation.mjs
+```
+
+The source-only test runs **two overlapping fictional owner sessions** on
+a disposable `127.0.0.1` HTTP listener. Each source-owned request has
+its own task ID, owner/session marker and one-run **ephemeral synthetic
+capability**. Both strictly validated on-wire responses must match the
+right owner before any data reaches an independent M10 toy gateway.
+Seventeen fixed controls include two valid delivery orders and fifteen
+deliberate failures (cross-owner capability, swapped response, forged
+approval, duplicate JSON key, redirect, oversized/stalled reply, etc.).
+
+This is **not real authentication**, an LLM, external MCP testing or
+semantic prompt-injection detection. Capabilities are not user credentials;
+the test never prints them. See the
+[M11 owner isolation design](.github/M11_OWNER_ISOLATION.md) and
+[Issue #236](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/236).
+
 ## Concurrent first-party HTTP response correlation (M11-G/H/I)
 
 In a reviewed source checkout, run:

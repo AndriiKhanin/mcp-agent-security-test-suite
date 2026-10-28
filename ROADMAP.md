@@ -35,11 +35,35 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
-| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-I ACCEPTED; M11-J/K/L IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [guide](.github/M11_CANCELLED_RESPONSE.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
+| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-L ACCEPTED; M11-M/N/O IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [guide](.github/M11_OWNER_ISOLATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M11-J/K/L — in-flight owned HTTP cancellation and late-response isolation (IN PROGRESS)
+## M11-M/N/O — owned concurrent fictional owner isolation (IN PROGRESS)
+
+- [Issue #236](../../issues/236) adds source-only
+  `tools/m11-owner-isolation.mjs`: two simultaneous, fixed fictional
+  owner requests on a disposable `127.0.0.1` listener, with
+  per-run source-generated in-memory **synthetic owner capabilities**.
+  The code accepts no external hosts, ports, commands or credentials.
+- **M11-M:** validate exact owner capability header, request ID,
+  fictional owner/session marker and strictly bounded on-wire JSON
+  before allowing data from each request into its distinct M10 toy
+  gateway. Both valid reply orders must succeed.
+- **M11-N:** 15 fixed negative controls for wrong/missing/swapped owner
+  capability, malformed request/response, reused ID, forged authority,
+  redirect, size/time limits and response-data swaps. Independent
+  counters verify observed accepts/denials, gateway sessions and
+  shutdown of both response and TCP sockets. No embedded text is
+  interpreted or echoed.
+- **M11-O:** strict zero-argument CLI, fixture-corpus regressions,
+  [design](.github/M11_OWNER_ISOLATION.md), exact 80-path npm
+  candidate and complete bounded M6-J excluded-source SHA-256 custody.
+- **Pending:** 4/4 Windows/Ubuntu Node20/22 PR CI, merge, independent
+  4/4 main push CI. **Not real authentication**, not LLM behavior,
+  third-party MCP or independent audit. External #21/#43/#59 open.
+
+## M11-J/K/L — in-flight owned HTTP cancellation and late-response isolation (merged engineering)
 
 - [Issue #234](../../issues/234): new source-only
   `tools/m11-cancelled-response.mjs`. Two owned fictional HTTP requests
@@ -59,10 +83,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M11-L:** no-argument CLI, regression across all reviewed fixtures,
   [design and limitations](.github/M11_CANCELLED_RESPONSE.md), exact
   80-path npm candidate, and full M6-J bounded excluded-source hashing.
-- **Pending:** PR CI Windows/Ubuntu Node20/22 4/4, merge,
-  independent main push CI 4/4. No real model, unrelated OS file
-  access or external MCP target; beta/audit/authorization #59/#43/#21
-  remain open.
+- **Engineering accepted:** [PR #235](../../pull/235) merged as `e9d736a9`; independent [main push CI #1102](../../actions/runs/40716067377) **4/4 PASS** on Windows/Ubuntu Node20/22. This is a local first-party cancellation witness, not a real LLM or external target. Beta/audit/authorization #59/#43/#21 remain open.
 
 ## M11-G/H/I — overlapping localhost requests with per-response correlation (merged engineering)
 

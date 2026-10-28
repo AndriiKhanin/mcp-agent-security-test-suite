@@ -71,6 +71,16 @@ accepts no user endpoint, credential, filename or command. It does
 **not** evaluate the semantic effect of prompt injection on a real
 LLM. See the [concurrency guide](M11_CONCURRENT_RESPONSE.md).
 
+## Optional fictional two-owner isolation (M11-M/N/O)
+
+Run `node tools/m11-owner-isolation.mjs` to check 17 fixed
+source-owned owner-isolation cases over disposable IPv4 loopback HTTP.
+The test uses per-run **synthetic** capability markers, not real account
+credentials. It rejects wrong-owner responses and unexpected authority
+before passing data to a deterministic toy gateway. This is **not real
+authentication**, real LLM safety evaluation, external MCP testing or
+permission to access private files. See [design](M11_OWNER_ISOLATION.md).
+
 ## Optional owned HTTP cancellation test (M11-J/K/L)
 
 ```sh
