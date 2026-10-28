@@ -33,11 +33,28 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
-| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D merged; M9-E IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
+| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D merged; M9-E merged; M9-F IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M9-E — one-command fictional fixture batch preflight (IN PROGRESS)
+## M9-F — fictional policy report negative-control matrix (IN PROGRESS)
+
+- [Issue #215](../../issues/215) adds source-only
+  `tools/fictional-negative-control-matrix.mjs`, which loads all reviewed
+  fictional fixtures (maximum 16) through the M8/M9-C/M9-E preflight.
+- Each pristine source-authored symbolic result must PASS the independently
+  checked M9-E contract. **43 fixed mutations per fixture** must then
+  be rejected, covering forged authority/observation flags, rule and
+  decision tampering, protected effects and duplicated/missing controls.
+- `test/m9-negative-control-matrix.test.mjs` verifies deterministic
+  rejection, every fixture's coverage, no-echo responses and the exact
+  80-path npm package inventory. All local commands remain source-only.
+- **Pending:** full Windows/Ubuntu Node20/22 CI 4/4, merge and separately
+  verified main post-merge CI. This is synthetic regression sensitivity,
+  **not** real-agent prompt-injection detection, independent beta,
+  independent audit or external target authorization (#59/#43/#21).
+
+## M9-E — one-command fictional fixture batch preflight (merged engineering)
 
 - [Issue #213](../../issues/213): `tools/fixture-batch-preflight.mjs`
   discovers only the fixed repo-owned `.github/fixture-proposals/` folder.
@@ -51,8 +68,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 - `test/m9-fixture-batch-preflight.test.mjs` covers deterministic
   ordering, malformed symbolic outcome mutations, getter/symbol
   injection, no-echo CLI, file enumeration and locked npm 80-path inventory.
-- **Acceptance pending:** PR CI on Windows/Ubuntu × Node 20/22 4/4,
-  merge and separate main post-merge verification. This is not real agent
+- **Engineering merged:** [PR #214](../../pull/214), [PR CI #994](../../actions/runs/40666262279) **4/4 PASS** (980/980 per verified Ubuntu job); separate post-merge main CI verification pending. This is not real agent
   execution, semantic prompt-injection assessment, independent beta or
   real-target authorization. Issues #21/#43/#59 remain open.
 
