@@ -57,6 +57,18 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
+## Optional first-party local HTTP check (M11-A/B/C)
+
+Run `node tools/m11-loopback-tool-result.mjs` for a finite review of a
+**fixed** fictional tool-result transported over localhost HTTP to the
+first-party toy gateway. It uses two disposable owned servers: the
+existing discovery-only test and a **separate** MCP-shaped response
+mock. This is not an LLM attack evaluation and does not grant
+permission to contact any user MCP server. No contributor input can
+choose a network target, port, executable or command; CI separately
+discovers contributor fixtures through the bounded M8 loader. See
+[M11 guide](M11_LOOPBACK_TOOL_RESULT.md).
+
 ## Optional stateful toy-agent task/result check (M10-G/H/I)
 
 The source-only stateful example checks ordering and replay protection

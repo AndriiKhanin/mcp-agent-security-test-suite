@@ -34,11 +34,37 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
-| **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **M10-A through M10-F MERGED; M10-G/H/I IN PROGRESS** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
+| **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
+
+| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A/B/C IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [guide](.github/M11_LOOPBACK_TOOL_RESULT.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M10-G/H/I — stateful toy-agent task/result witness (IN PROGRESS)
+## M11-A/B/C — fixed owned localhost tool-result trust bridge (IN PROGRESS)
+
+- [Issue #228](../../issues/228) adds
+  `tools/m11-loopback-tool-result.mjs`, a source-only, zero-argument
+  two-stage first-party local test: the existing M4-B6-A strict
+  `server/discover` staging call, followed by **a separate**
+  ephemeral `127.0.0.1` MCP-shaped `tools/call` response mock.
+  The protected discovery server still denies `tools/call`.
+- The client validates the exact JSON-RPC-shaped envelope, source-owned
+  fictional task data, request/response bounds, fixed method/version/
+  Origin/Host, socket cleanup and timeouts. Actual loopback response
+  bytes enter the M10 stateful toy gateway **as data only**; no
+  embedded instruction is interpreted.
+- `test/m11-loopback-tool-result.test.mjs` requires one positive
+  and ten negative source-authored transport/discovery controls,
+  invalid-option rejection, privacy non-echo, cross-fixture positive
+  coverage, no external tool/process/model calls and the unchanged
+  80-path npm candidate. [Design](.github/M11_LOOPBACK_TOOL_RESULT.md).
+- **Acceptance pending:** Windows/Ubuntu × Node 20/22 4/4 PR CI,
+  merge and separately verified main push CI. This demonstrates a
+  real *first-party localhost* HTTP transfer, **not** real-agent
+  prompt-injection safety, MCP conformance or authorized external
+  testing. #21/#43/#59 remain open.
+
+## M10-G/H/I — stateful toy-agent task/result witness (merged engineering)
 
 - [Issue #226](../../issues/226): source-only
   `tools/toy-agent-session.mjs` adds a parent-owned in-memory state
@@ -54,10 +80,7 @@ We will not claim a release is production-ready merely because a synthetic test 
   scenarios (one PASS, seven expected FAIL), all contributor fixtures,
   cross-session witness isolation, false claims, no-echo CLI and the
   unchanged 80-path npm release inventory.
-- **Pending:** Windows/Ubuntu × Node 20/22 PR CI 4/4, merge and
-  separately verified post-merge push CI. This is **not** an LLM,
-  real-agent prompt-injection assessment, OS-level file witness, real
-  MCP contact or release approval. #21/#43/#59 remain open.
+- **Engineering accepted:** [PR #227](../../pull/227), [PR CI #1061](../../actions/runs/40689253808) **4/4 PASS**, and independent [post-merge main CI #1062](../../actions/runs/40689852321) **4/4 PASS**. This is **not** an LLM, real-agent prompt-injection assessment, OS-level file witness, external MCP contact or release approval. #21/#43/#59 remain open.
 
 ## M10-D/E/F — batch toy-agent gateway replay for fictional fixtures (merged engineering)
 
