@@ -127,6 +127,30 @@ authentication or LLM prompt-injection resilience**. See the
 [owner-epoch guide](.github/M11_OWNER_EPOCH.md) and
 [Issue #238](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/238).
 
+## Revoke an in-flight fictional owner capability (M11-S/T/U)
+
+From a reviewed local source checkout (Node.js 20/22), run:
+
+```sh
+node tools/m11-inflight-revocation.mjs
+```
+
+Two source-owned fictional owners send overlapping requests to a
+disposable `127.0.0.1` HTTP listener. After **both complete requests**
+have been validated but **before** either reply is released, fixed
+negative controls revoke A, B or both. The parent checks capability
+status again **after receiving real on-wire bytes**, before the M10
+stateful toy gateway can consume the data. Revoked responses are
+blocked even if the original HTTP request was accepted.
+
+The 13 fixed selftest cases require one clean PASS and 12 expected
+FAIL outcomes, including revocation, forged owner authority and
+replayed or malformed replies. Protected fictional effects remain
+zero. This is **not real authentication**, a live LLM prompt-injection
+test or authorization to access external MCP targets. See the
+[M11 in-flight revocation guide](.github/M11_INFLIGHT_REVOCATION.md)
+and [Issue #240](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/240).
+
 ## Cross-session replay and response-binding checks (M11-D/E/F)
 
 Use the source-only, zero-argument test on a reviewed local checkout:
