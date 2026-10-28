@@ -131,7 +131,7 @@ test('M9-C: file runner denies unrelated paths, missing files and extra argument
     assert.equal(r.exitCode,2);
     assert.equal(r.ruleCode,'FIXTURE_POLICY_BRIDGE_INPUT_REJECTED');
     assert.equal(r.actualAgentBehaviorObserved,false);
-    assert.equal(r.fixtureTextInterpreted,false);
+    assert.equal(r.fixtureContentInterpreted,false);
     assert.equal(r.externalMcpContacted,false);
     assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
   }
