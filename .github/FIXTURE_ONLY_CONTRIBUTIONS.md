@@ -81,6 +81,23 @@ before passing data to a deterministic toy gateway. This is **not real
 authentication**, real LLM safety evaluation, external MCP testing or
 permission to access private files. See [design](M11_OWNER_ISOLATION.md).
 
+## Optional first-party modern MCP HTTP subset check (M12-A/B/C)
+
+```sh
+node tools/m12-modern-http-smoke.mjs
+```
+
+From a reviewed source checkout only. The command exercises fixed,
+source-owned `2026-07-28` `server/discover`, `tools/list` and
+`tools/call` requests against one disposable local listener. It
+uses proper modern request metadata and compares on-wire responses
+strictly before data reaches the inert toy gateway.
+
+This is **not complete MCP conformance**, a real agent or an actual
+prompt-injection detector. It does not use your project, credentials,
+network endpoints or executable commands. See the
+[M12 design](M12_MODERN_MCP_SMOKE.md).
+
 ## Optional post-admission fictional revocation check (M11-S/T/U)
 
 ```sh
