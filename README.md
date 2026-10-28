@@ -33,6 +33,31 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Cancelled first-party HTTP requests and isolated late results (M11-J/K/L)
+
+From a reviewed source checkout run:
+
+```sh
+node tools/m11-cancelled-response.mjs
+```
+
+This **source-only** selftest puts two fictional MCP-shaped HTTP requests
+in flight against a disposable first-party `127.0.0.1` listener. It
+cancels request A only after both request bodies are processed, verifies
+that A's response/socket actually closes, then checks request B
+independently. A late attempt to deliver A's response is suppressed
+**without sending bytes to a closed socket**. The B reply must match its
+exact ID, fictional session marker and reviewed body before being
+passed as data to the M10 toy gateway.
+
+Fourteen fixed checks expect two safe PASS and 12 deliberate negative FAIL
+cases, including a swapped response, forged approval, duplicated JSON
+keys, redirect, timeout and replayed request ID. All public output
+contains only fixed codes/counts. This is **not a real AI agent**, remote
+MCP scan or semantic injection assessment. See the
+[cancellation design](.github/M11_CANCELLED_RESPONSE.md) and
+[Issue #234](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/234).
+
 ## Concurrent first-party HTTP response correlation (M11-G/H/I)
 
 In a reviewed source checkout, run:

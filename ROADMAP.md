@@ -35,11 +35,36 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
-| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-F ACCEPTED; M11-G/H/I IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [guide](.github/M11_CONCURRENT_RESPONSE.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
+| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-I ACCEPTED; M11-J/K/L IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [guide](.github/M11_CANCELLED_RESPONSE.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M11-G/H/I — overlapping localhost requests with per-response correlation (IN PROGRESS)
+## M11-J/K/L — in-flight owned HTTP cancellation and late-response isolation (IN PROGRESS)
+
+- [Issue #234](../../issues/234): new source-only
+  `tools/m11-cancelled-response.mjs`. Two owned fictional HTTP requests
+  enter a disposable `127.0.0.1` listener, but the owner cancels A
+  **after both validated request bodies are processed**. The listener
+  witnesses A's response closure before sending an independently
+  checked B response.
+- **M11-J:** A cannot be readmitted after abort; a deliberately
+  attempted late response is suppressed after socket closure. Only
+  B's exact ID/session/content can enter M10's toy gateway.
+- **M11-K:** 14 fixed scenarios (two positive, 12 expected negative)
+  cover cross-session/replayed responses, wrong IDs, added authority,
+  malformed/duplicate JSON, redirects, oversized or stalled replies,
+  duplicated request IDs and forged headers. Independently check
+  real HTTP request/deny counts, both socket closes and zero
+  protected fictional effects.
+- **M11-L:** no-argument CLI, regression across all reviewed fixtures,
+  [design and limitations](.github/M11_CANCELLED_RESPONSE.md), exact
+  80-path npm candidate, and full M6-J bounded excluded-source hashing.
+- **Pending:** PR CI Windows/Ubuntu Node20/22 4/4, merge,
+  independent main push CI 4/4. No real model, unrelated OS file
+  access or external MCP target; beta/audit/authorization #59/#43/#21
+  remain open.
+
+## M11-G/H/I — overlapping localhost requests with per-response correlation (merged engineering)
 
 - [Issue #232](../../issues/232) introduces
   `tools/m11-concurrent-response.mjs`. Two first-party source-owned
@@ -61,10 +86,11 @@ We will not claim a release is production-ready merely because a synthetic test 
   [design guide](.github/M11_CONCURRENT_RESPONSE.md), preserved M4
   discovery-only contract and exact 80-path npm candidate; M6-J
   continues to SHA-256 hash every excluded source.
-- **Acceptance pending:** PR CI Windows/Ubuntu × Node20/22 **4/4**,
-  merge and separate main push CI **4/4**. This does not measure
-  semantic LLM prompt-injection resistance or authorize external
-  MCP targets; #21/#43/#59 stay open.
+- **Engineering accepted:** [PR #233](../../pull/233) merged at
+  `a47087ae`; independent [main push CI #1093](../../actions/runs/40711380740)
+  **4/4 PASS** across Windows/Ubuntu × Node20/22. This does not
+  measure semantic LLM prompt-injection resistance or authorize
+  external MCP targets; #21/#43/#59 remain open.
 
 ## M11-D/E/F — two-session owned loopback response and replay binding (merged engineering)
 
