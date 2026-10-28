@@ -357,8 +357,9 @@ export async function runOwnedM11ReplayPair(first,second,settings={}){
     c.socketClosed===2&&c.responseClosed===2&&c.gatewaySessions===2;
   return Object.freeze({
     reportSchemaVersion:1,status:pass?'PASS':'FAIL',exitCode:pass?0:1,
-    ruleCode:!prerequisite?'M11_PRIOR_OWNED_TRANSPORT_REJECTED':
-      codeFor(raw),
+    ruleCode:pass?'M11_SEPARATE_SESSION_CORRELATION_PASS':
+      !prerequisite?'M11_PRIOR_OWNED_TRANSPORT_REJECTED':
+      raw.code===null?'M11_SESSION_COUNTERS_MISMATCH':codeFor(raw),
     scope:SCOPE,
     evidenceKind:'FIRST_PARTY_LOOPBACK_HTTP_CORRELATION_AND_TOY_GATEWAY_ONLY',
     priorOwnedTransportAccepted:prerequisite,
