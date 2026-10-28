@@ -33,11 +33,28 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
-| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B merged (PR CI 4/4 each); M9-C IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
+| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M9-C — fixture-only JSON to fixed policy-gate bridge (IN PROGRESS)
+## M9-D — zero-write fictional fixture template generator (IN PROGRESS)
+
+- [Issue #210](../../issues/210) adds
+  `node tools/fixture-proposal-template.mjs <case-id>`, a source-only,
+  no-write generator of **raw JSON** matching the strict M8 fixture schema.
+- Validated lowercase fictional IDs are used solely in a local fixture
+  file name; unsafe or extra arguments are rejected without echo.
+- `test/m9-fixture-proposal-template.test.mjs` checks deterministic
+  safe output, malformed/secret-looking IDs, CLI no-echo, compatibility
+  with M8 validation and M9-C fixed policy checks, and unchanged npm
+  80-file inventory.
+- The generator does **not** execute the injected instruction, contact
+  external MCP servers, write files, run agents, or evaluate semantic
+  prompt-injection resilience.
+- **Acceptance pending:** 4/4 PR CI, merge and verified main post-merge CI;
+  independent beta/audit/real-target approvals #59/#43/#21 remain open.
+
+## M9-C — fixture-only JSON to fixed policy-gate bridge (merged engineering)
 
 - [Issue #208](../../issues/208) extends M8 fixture-only submissions with
   the [source-only M9-C bridge](.github/M9_FIXTURE_POLICY_BRIDGE.md).
@@ -54,8 +71,7 @@ We will not claim a release is production-ready merely because a synthetic test 
   embedded instructions are never interpreted or fed to a model, and
   no real agent/MCP/file operation is observed. A `PASS` is limited to
   fixed synthetic policy gate controls.
-- **Acceptance pending:** Windows/Ubuntu × Node20/22 PR CI 4/4, merge,
-  separately verified main CI; #21/#43/#59 remain open.
+- **Engineering merged:** [PR #209](../../pull/209), [PR CI #975](../../actions/runs/40646461057) **4/4 PASS** (962/962 per verified Ubuntu job); separate post-merge main CI not verified. #21/#43/#59 remain open.
 
 ## M9-B — parent-owned in-memory fictional action gate (merged engineering)
 
