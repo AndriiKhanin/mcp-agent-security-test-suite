@@ -81,6 +81,21 @@ before passing data to a deterministic toy gateway. This is **not real
 authentication**, real LLM safety evaluation, external MCP testing or
 permission to access private files. See [design](M11_OWNER_ISOLATION.md).
 
+## Optional post-admission fictional revocation check (M11-S/T/U)
+
+```sh
+node tools/m11-inflight-revocation.mjs
+```
+
+The command runs two fixed localhost requests with fictional owner
+capabilities. A source-owned barrier allows an owner capability to
+be revoked **after request acceptance but before response delivery**.
+The parent then blocks each revoked response from reaching the toy
+gateway. This is **not real authentication**, an LLM or permission to
+test any contributor-owned MCP server. No credentials, network targets
+or executable scripts can be supplied. See
+[M11 in-flight design](M11_INFLIGHT_REVOCATION.md).
+
 ## Optional synthetic owner run-rotation check (M11-P/Q/R)
 
 ```sh
