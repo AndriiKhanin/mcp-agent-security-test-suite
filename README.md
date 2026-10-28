@@ -33,6 +33,23 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Generate a fictional fixture without writing scripts (M9-D)
+
+A contributor can generate a complete synthetic fixture as **raw JSON**
+without manually recreating the strict schema:
+
+```sh
+node tools/fixture-proposal-template.mjs fictional-contributor-case
+```
+
+Copy the printed JSON into a reviewed source checkout under
+`.github/fixture-proposals/fictional-contributor-case.json` and edit the
+fictional fields in a text editor. The generator creates no files and
+runs no MCP tools. Then use the existing fixture checker and the fixed
+policy bridge for local verification. This is **not a semantic test**
+or a real-agent prompt-injection assessment. See the
+[fixture-only contribution guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
+
 ## Fixture-only policy bridge (M9-C)
 
 A contributor can add an inert JSON test case under

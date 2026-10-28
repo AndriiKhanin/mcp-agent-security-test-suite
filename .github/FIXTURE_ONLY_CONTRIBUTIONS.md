@@ -5,6 +5,33 @@ JSON test case in `.github/fixture-proposals/` **without changing the test
 runner**. The existing CI discovers and validates each proposal automatically.
 Proposals are reviewed by a maintainer before merging.
 
+## Generate a safe starter fixture (M9-D)
+
+Instead of writing the strict schema manually, choose a fictional lowercase
+case ID (6–61 ASCII letters/numbers/hyphens; must begin with a letter) and
+run the **source-only, no-write** generator:
+
+```sh
+node tools/fixture-proposal-template.mjs fictional-contributor-case
+```
+
+It prints **raw JSON** for the exact M8 fictional proposal schema (not a
+report wrapper). Copy the printed JSON into a new file named
+`.github/fixture-proposals/fictional-contributor-case.json` using your
+editor. You may then edit only the fictional description, legitimate task
+data and embedded instruction text to describe the proposed case.
+
+The generator does **not** write files, launch a command, connect to an
+MCP service, use credentials or run an AI model. Never paste real paths,
+production details, customer data or secrets. Verify the local file
+with `node tools/fixture-proposal-check.mjs <local-proposal-file>` and
+`node tools/fixture-policy-bridge.mjs <local-proposal-file>`.
+
+This is **not a semantic test** of prompt injection or a proof that an
+agent resists the generated text. Only the fixed schema and synthetic
+in-memory policy gates are assessed. A separate independent user test
+is required to claim real interoperability or beta acceptance.
+
 ## Supported proposal (v1)
 
 This intake currently supports only `UNTRUSTED_TOOL_RESULT`: a fictional
