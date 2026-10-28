@@ -33,6 +33,27 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## First-party in-memory action gate (M9-B)
+
+Run the new source-only, zero-argument selftest in a reviewed checkout:
+
+```sh
+node tools/in-memory-injection-gate.mjs
+```
+
+This first-party fictional gate models consumption of legitimate task data
+while denying unrelated file-read requests, unapproved tool calls and
+claims of extra authority embedded in lower-trust tool results. Its private
+**in-memory witness** records 2 permitted data operations, 3 denials and
+zero committed protected effects in the fixed demonstration.
+
+This is **not a real agent** and does not test actual filesystem effects,
+real MCP servers, credentials or real-world prompt-injection resilience.
+The input is only source-owned symbolic action/resource enums, never
+executable tool-response content. See the
+[in-memory gate design](.github/M9_IN_MEMORY_ACTION_GATE.md) and
+[Issue #206](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/206).
+
 ## First-party symbolic prompt-injection controls (M9-A)
 
 In a reviewed source checkout with Node.js 20+, run:
