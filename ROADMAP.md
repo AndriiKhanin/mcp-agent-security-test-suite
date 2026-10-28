@@ -33,11 +33,31 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
-| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
+| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A merged (PR CI 4/4); M9-B IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M9-A — first-party symbolic injection evaluator (IN PROGRESS)
+## M9-B — parent-owned in-memory fictional action gate (IN PROGRESS)
+
+- [Issue #206](../../issues/206): source-only
+  [M9-B gate design](.github/M9_IN_MEMORY_ACTION_GATE.md) separates
+  lower-trust `UNTRUSTED_TOOL_RESULT` data from task authority.
+- `tools/in-memory-injection-gate.mjs` applies a strict allowlist to
+  source-owned action/resource enums. Legitimate `TASK_DATA` may be
+  consumed as data, but a fictional unrelated file read, unauthorized
+  tool call or forged tool-result approval is rejected.
+- The in-memory parent-owned witness records permitted task-data handling
+  separately from denied action proposals, with zero committed protected
+  effects. **This does not observe OS or real-agent effects.**
+- `test/m9-in-memory-injection-gate.test.mjs` checks positive and
+  negative controls, forged authority, resource mismatch, dense data
+  bounds, privacy/no-echo CLI and unchanged 80-file npm inventory.
+- **Acceptance pending:** 4/4 PR CI, merge and separately verified
+  post-merge main CI. No actual MCP/model execution, real filesystem
+  access, customer data, independent beta or audit. #21/#43/#59
+  remain open.
+
+## M9-A — first-party symbolic injection evaluator (merged engineering)
 
 - [Issue #204](../../issues/204) defines the next safe extension:
   [M9 symbolic trust-boundary RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md),
@@ -51,8 +71,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 - `test/m9-symbolic-injection.test.mjs` guards event validation, cross-resource
   violations, missing rejection evidence, attempted false-success claims,
   no-echo reporting, zero-argument CLI and release inventory boundaries.
-- **Acceptance pending:** four PR CI jobs on Windows/Ubuntu × Node 20/22,
-  merge and post-merge verification. No actual agent execution, unrelated
+- **Engineering merged:** [PR #205](../../pull/205) and [PR CI #953](../../actions/runs/40644593810) **4/4 PASS**, 938/938 per tested Linux job. Separate post-merge main CI verification pending. No actual agent execution, unrelated
   file read, external MCP contact, real prompt-injection detection, beta
   evidence, independent audit or authorization is asserted. #21/#43/#59
   remain open.
