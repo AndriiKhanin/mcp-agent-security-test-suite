@@ -81,6 +81,21 @@ before passing data to a deterministic toy gateway. This is **not real
 authentication**, real LLM safety evaluation, external MCP testing or
 permission to access private files. See [design](M11_OWNER_ISOLATION.md).
 
+## Optional synthetic owner run-rotation check (M11-P/Q/R)
+
+```sh
+node tools/m11-owner-epoch.mjs
+```
+
+Two sequential, fully disposable first-party localhost servers use
+different source-generated **fictional** capabilities. The old
+capability must be rejected by the new run. Seventeen additional
+negative controls verify request/response binding, replay rejection,
+bounded timeout and cleanup. These are not real credentials or
+production authorization, and this command never connects to a user
+MCP server or interprets a contributor's embedded instructions.
+See [M11 owner-epoch guide](M11_OWNER_EPOCH.md).
+
 ## Optional owned HTTP cancellation test (M11-J/K/L)
 
 ```sh
