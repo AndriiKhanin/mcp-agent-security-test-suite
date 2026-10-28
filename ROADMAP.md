@@ -35,11 +35,42 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
-| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-R ENGINEERING MERGED; M11-S/T/U IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
+| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-U ENGINEERING ACCEPTED; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
+| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A/B/C IN PROGRESS; no external targets or real agent** | [#242](../../issues/242), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M11-S/T/U — fictional in-flight owner capability revocation (IN PROGRESS)
+## M12-A/B/C — source-only modern MCP 2026-07-28 HTTP subset (IN PROGRESS)
+
+- [Issue #242](../../issues/242) adds
+  `tools/m12-modern-http-smoke.mjs`: one **separate, disposable,
+  first-party** 127.0.0.1 HTTP mock serving fixed modern
+  `server/discover`, `tools/list` and `tools/call` requests.
+  This is **not complete MCP conformance** and does not modify the
+  M4 strict discovery-only staging implementation.
+- **M12-A:** pin the real modern `2026-07-28` request shape:
+  each POST carries `params._meta` protocolVersion, clientInfo,
+  clientCapabilities; `Accept`, `MCP-Protocol-Version`,
+  `Mcp-Method` and `Mcp-Name` (when calling a tool) must agree with
+  body values. Tools/list advertises one fictional schema; tools/call
+  returns `resultType: "complete"` and only validated fictional
+  tool-result data reaches the stateful M10 toy gate.
+- **M12-B:** seventeen source-owned failure cases include mismatched
+  metadata headers, invalid/legacy versions, Origin rejection,
+  malformed/duplicate JSON, replayed/forged tool results, redirect,
+  oversized and stalled reply. Verify actual observed HTTP
+  requests, accepted/denied decisions and TCP cleanup, with
+  zero private input echo or protected effects.
+- **M12-C:** zero-argument CLI, all reviewed fictional fixtures,
+  strict no-target/credential args, [scope document](.github/M12_MODERN_MCP_SMOKE.md),
+  exact 80-path unpublished npm candidate and complete M6-J SHA-256
+  excluded-source custody. No real LLM, external MCP or actual
+  prompt-injection resistance claim.
+- **Acceptance pending:** PR CI Windows/Ubuntu Node 20/22 **4/4**,
+  squash merge and independently verified main push CI.
+  External #21/#43/#59 remain open.
+
+## M11-S/T/U — fictional in-flight owner capability revocation (merged engineering)
 
 - [Issue #240](../../issues/240) adds
   `tools/m11-inflight-revocation.mjs`, a source-only test with two
@@ -59,10 +90,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M11-U:** zero-argument local selftest, per-fixture regression,
   strict target-option rejection, [scope documentation](.github/M11_INFLIGHT_REVOCATION.md),
   preserved 80-path npm inventory and full M6-J SHA-256 source custody.
-- **Acceptance pending:** PR CI Windows/Ubuntu Node 20/22 **4/4**,
-  squash merge and independently verified post-merge main push CI.
-  **Not real authentication, OS isolation or an LLM evaluation**.
-  External #21/#43/#59 remain open.
+- **Engineering accepted:** [PR #241](../../pull/241) merged at `a5838ee1`, [PR CI #1129](../../actions/runs/40749175506) **4/4 PASS**, independent [main push CI #1130](../../actions/runs/40749770236) **4/4 PASS**. This remains synthetic-only: **not real authentication, OS isolation or an LLM evaluation**. External #21/#43/#59 remain open.
 
 ## M11-P/Q/R — synthetic capability rotation across independent runs (merged engineering)
 
