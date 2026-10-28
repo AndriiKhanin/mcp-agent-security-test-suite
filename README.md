@@ -33,6 +33,16 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Human-readable fictional first run (M8-P/Q/R)
+
+From a reviewed source checkout with Node.js 20+, run:
+
+```sh
+node tools/adapter-first-run-view.mjs
+```
+
+This opt-in, **fictional** terminal guide explains the fixed in-memory `stdio` and `streamable-http` checks. It accepts no arguments, does not read project descriptors or contact any real MCP target. A local PASS is **not a security audit** or release authorization. For structured JSON instead, run `node tools/adapter-first-run.mjs`. Both helpers are source-only and excluded from the npm package. See the [first-run guide](.github/M8_FIRST_RUN_GUIDE.md).
+
 ## Copying a fictional adapter template correctly (M8-G/H/I)
 
 Run `node src/cli.mjs adapter-template stdio` (or
