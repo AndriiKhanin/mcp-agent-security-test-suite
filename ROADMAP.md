@@ -33,11 +33,30 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
-| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D merged; M9-E merged; M9-F merged; M9-G/H/I IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
+| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D merged; M9-E merged; M9-F merged; M9-G/H/I merged; M9-J/K/L IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M9-G/H/I — human-readable fictional contributor review (IN PROGRESS)
+## M9-J/K/L — public fixture privacy hygiene and submission checklist (IN PROGRESS)
+
+- [Issue #219](../../issues/219) adds conservative, no-echo privacy
+  indicators to the M8 strict fictional fixture validator for obvious
+  URL schemes, absolute home paths, email-shaped strings, common token
+  prefixes, private-key headers and IPv4 literals.
+- **M9-J:** refuses clearly private-looking material in the fixture's
+  three bounded public text fields without evaluating any injected
+  instructions or contacting external services.
+- **M9-K:** extends the existing fixture test suite with synthetic
+  rejection examples in every freeform text field and positive tests
+  preserving safe fictional scenario submissions.
+- **M9-L:** adds a GitHub PR template and guidance requiring manual
+  sanitization and explaining that this is **not a complete secret
+  scanner** nor an assessment of a real AI agent.
+- **Pending:** Windows/Ubuntu Node20/22 PR CI 4/4, merge and independent
+  post-merge verification. Pinned 80-path npm release inventory unchanged.
+  External approval/beta/audit gates #21/#59/#43 remain open.
+
+## M9-G/H/I — human-readable fictional contributor review (merged engineering)
 
 - [Issue #217](../../issues/217) adds source-only
   `node tools/fixture-contributor-summary.mjs`, combining the M9-E
@@ -52,9 +71,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M9-I:** README and the fixture-only contributor guide explain
   a single safe command and distinguish fictional report sensitivity
   from actual agent security assessment.
-- **Pending:** PR CI on Windows/Ubuntu × Node 20/22 4/4,
-  merge and separately verified main post-merge CI. No real MCP target,
-  model, prompt execution, independent beta or audit. #21/#43/#59 open.
+- **Engineering merged:** [PR #218](../../pull/218), [PR CI #1014](../../actions/runs/40668580343) **4/4 PASS**, 997/997 per verified Ubuntu job. Separate post-merge main CI not yet confirmed. No real MCP target, model, prompt execution, independent beta or audit. #21/#43/#59 open.
 
 ## M9-F — fictional policy report negative-control matrix (merged engineering)
 

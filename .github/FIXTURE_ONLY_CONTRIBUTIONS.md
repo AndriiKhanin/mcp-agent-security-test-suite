@@ -5,6 +5,31 @@ JSON test case in `.github/fixture-proposals/` **without changing the test
 runner**. The existing CI discovers and validates each proposal automatically.
 Proposals are reviewed by a maintainer before merging.
 
+## Privacy indicators and manual review (M9-J/K/L)
+
+The strict offline fixture validator now conservatively rejects
+obvious private-looking strings in the three freeform fields
+(`description`, `toolResult.legitimateData` and
+`toolResult.embeddedInstruction`): URL schemes (`https://`,
+`ssh://`, `file://`, `mcp://`), absolute home paths, email-shaped
+addresses, common token/key prefixes, private-key headers, and IPv4
+literals. The check does not send any field to an external service,
+does not print its content on refusal and does not interpret its
+instructions.
+
+**This is not a complete secret scanner.** It is only a bounded,
+conservative warning against readily recognizable patterns; it cannot
+guarantee that a string is safe or that a contributor has publication
+rights. It may reject a purely fictional example that resembles a real
+address or token. Rewrite such examples using ordinary fictional prose,
+rather than bypassing the guard. Contributors **must manually inspect
+every field** for private details, real paths, logs, endpoints and
+customer data before creating a public PR.
+
+The [PR checklist](PULL_REQUEST_TEMPLATE.md) reminds contributors that
+fixture-only PRs need no runner changes, require manual sanitation and
+do not constitute evidence of real-agent security.
+
 ## Generate a safe starter fixture (M9-D)
 
 Instead of writing the strict schema manually, choose a fictional lowercase
