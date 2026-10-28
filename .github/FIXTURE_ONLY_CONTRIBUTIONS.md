@@ -81,6 +81,20 @@ before passing data to a deterministic toy gateway. This is **not real
 authentication**, real LLM safety evaluation, external MCP testing or
 permission to access private files. See [design](M11_OWNER_ISOLATION.md).
 
+## Optional modern x-mcp-header mirror verification (M12-D/E/F)
+
+```sh
+node tools/m12-header-parameter-mirror.mjs
+```
+
+The source-only test checks four fixed fictional `Mcp-Param-*`
+header mirrors, strict JSON/header consistency and expected
+`HeaderMismatch` denials on a one-off `127.0.0.1` mock.
+It accepts no URL, executable, credential or remote MCP target.
+Its 26 cases are deterministic; no injected tool-result text is
+executed or interpreted. See [scope and limitations](M12_HEADER_MIRROR.md).
+This is **not** full conformance or real-agent attack assessment.
+
 ## Optional first-party modern MCP HTTP subset check (M12-A/B/C)
 
 ```sh
