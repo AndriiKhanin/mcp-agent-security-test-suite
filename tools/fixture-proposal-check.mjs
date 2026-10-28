@@ -89,9 +89,20 @@ async function readBoundedProposal(file){
   }
 }
 
-export async function verifyFixtureProposalFile(path){
+/**
+ * Trusted source-only adapter boundary: read ONLY a strictly approved,
+ * bounded fictional proposal file and validate it before returning its
+ * parsed object to another first-party simulator. Never emit its content.
+ */
+export async function loadValidatedFixtureProposalFile(path){
   const text=await readBoundedProposal(path);
-  return validateFixtureProposal(parseStrictJson(text),basename(resolve(path)));
+  const fixture=parseStrictJson(text);
+  validateFixtureProposal(fixture,basename(resolve(path)));
+  return fixture;
+}
+export async function verifyFixtureProposalFile(path){
+  const fixture=await loadValidatedFixtureProposalFile(path);
+  return validateFixtureProposal(fixture,basename(resolve(path)));
 }
 
 const rejected=Object.freeze({
