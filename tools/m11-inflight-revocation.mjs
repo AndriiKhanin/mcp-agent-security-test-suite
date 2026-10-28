@@ -84,7 +84,7 @@ function responseServer(fixtures,capabilities,live,fault,port,witness){
   const pending=new Map();
   let released=false;
   function flush(){
-    if(released||witness.received!==2)return;
+    if(released||witness.processed!==2)return;
     released=true;
     witness.barrierReached=true;
     // All request admission decisions are complete. Revoke *before*
@@ -156,6 +156,8 @@ function responseServer(fixtures,capabilities,live,fault,port,witness){
         isDeepStrictEqual(parsed,expected);
       if(!valid){witness.denied++;denied(res);}
       else{witness.accepted++;pending.set(index,res);}
+      // Admission barrier only after both complete bodies are validated.
+      witness.processed++;
       flush();
     });
     req.on('error',()=>{});
@@ -235,7 +237,7 @@ function clientRequest(port,index,fixture,fault,capability,deadlineMs){
 async function wirePair(fixtures,fault,deadlineMs){
   const caps=[randomBytes(16).toString('hex'),randomBytes(16).toString('hex')];
   const live=[true,true];
-  const witness={received:0,accepted:0,denied:0,responsesIssued:0,
+  const witness={received:0,processed:0,accepted:0,denied:0,responsesIssued:0,
     responsesIssuedAfterBarrier:0,responsesClosed:0,socketsClosed:0,
     barrierReached:false,revokedAtBarrier:0};
   const server=http.createServer(),socketWaits=[];
@@ -278,7 +280,7 @@ async function wirePair(fixtures,fault,deadlineMs){
       if(!all)transport='SOCKET_CLEANUP_UNCONFIRMED';
     }
   }
-  if(witness.received!==2||witness.socketsClosed!==2||
+  if(witness.received!==2||witness.processed!==2||witness.socketsClosed!==2||
      witness.responsesClosed!==2||witness.barrierReached!==true)
     transport='SOCKET_CLEANUP_UNCONFIRMED';
   return {transport,results,live,witness};
@@ -296,7 +298,7 @@ export async function runOwnedInFlightRevocation(first,second,settings={}){
     prerequisite.protectedFictionalEffectsCommitted===0&&
     prerequisite.realExternalMcpContacted===false;
   const local=ready?await wirePair([first,second],fault,deadlineMs):null;
-  const w=local?.witness??{received:0,accepted:0,denied:0,
+  const w=local?.witness??{received:0,processed:0,accepted:0,denied:0,
     responsesIssued:0,responsesIssuedAfterBarrier:0,responsesClosed:0,
     socketsClosed:0,barrierReached:false,revokedAtBarrier:0};
   let bytesValidated=0,revokedBlocked=0,gatewayDelivered=0;
@@ -336,7 +338,8 @@ export async function runOwnedInFlightRevocation(first,second,settings={}){
     ruleCode:rule,scope:SCOPE,
     evidenceKind:'OWNED_LOOPBACK_HTTP_AND_FIRST_PARTY_REVOCATION_WITNESS_ONLY',
     prerequisiteAccepted:ready,
-    requestsReceived:w.received,requestsAccepted:w.accepted,
+    requestsReceived:w.received,requestsProcessed:w.processed,
+    requestsAccepted:w.accepted,
     requestsDenied:w.denied,responsesIssued:w.responsesIssued,
     responsesIssuedAfterBarrier:w.responsesIssuedAfterBarrier,
     responsesClosed:w.responsesClosed,socketsClosed:w.socketsClosed,
@@ -388,7 +391,8 @@ export async function runFixedInFlightRevocationSelftest(args=[]){
       const r=await runOwnedInFlightRevocation(first,second,{fault});
       const matched=r.status===status&&r.ruleCode===code&&
         r.exitCode===(status==='PASS'?0:1)&&r.prerequisiteAccepted&&
-        r.requestsReceived===2&&r.requestsAccepted===accepted&&
+        r.requestsReceived===2&&r.requestsProcessed===2&&
+        r.requestsAccepted===accepted&&
         r.requestsDenied===denied&&r.responsesClosed===2&&
         r.socketsClosed===2&&r.admissionBarrierObserved&&
         r.responseBodiesValidated===wire&&
