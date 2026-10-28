@@ -35,11 +35,38 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
-| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A/B/C ACCEPTED; M11-D/E/F IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [guide](.github/M11_REPLAY_SESSION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
+| **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-F ACCEPTED; M11-G/H/I IN PROGRESS; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [guide](.github/M11_CONCURRENT_RESPONSE.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M11-D/E/F — two-session owned loopback response and replay binding (IN PROGRESS)
+## M11-G/H/I — overlapping localhost requests with per-response correlation (IN PROGRESS)
+
+- [Issue #232](../../issues/232) introduces
+  `tools/m11-concurrent-response.mjs`. Two first-party source-owned
+  JSON-RPC-shaped HTTP requests are **concurrently in flight**
+  against one disposable `127.0.0.1` listener (OS-selected port).
+  The server records overlapping pending requests and supports
+  both A-before-B and deliberately **B-before-A** response issuance.
+- **M11-G:** validate actual response bytes and exact request ID,
+  fictional session marker, approved content and status **per client**
+  before independently passing a tool result to its M10 toy gateway.
+- **M11-H:** 13 deliberate negative fault modes reject replayed/swapped
+  results, unexpected authority, malformed/duplicate-key responses,
+  redirects, oversized/stalled output, duplicated or unknown request
+  IDs and forged headers. Count actual HTTP accepts/denials, response
+  closures and TCP socket cleanup; a failed second reply never
+  manufactures a second successful gateway session.
+- **M11-I:** zero-argument CLI, regression coverage for all reviewed
+  fictional fixture proposals, privacy-safe fixed counts,
+  [design guide](.github/M11_CONCURRENT_RESPONSE.md), preserved M4
+  discovery-only contract and exact 80-path npm candidate; M6-J
+  continues to SHA-256 hash every excluded source.
+- **Acceptance pending:** PR CI Windows/Ubuntu × Node20/22 **4/4**,
+  merge and separate main push CI **4/4**. This does not measure
+  semantic LLM prompt-injection resistance or authorize external
+  MCP targets; #21/#43/#59 stay open.
+
+## M11-D/E/F — two-session owned loopback response and replay binding (merged engineering)
 
 - [Issue #230](../../issues/230): source-only
   `tools/m11-replay-session.mjs` checks an accepted M11-A/B/C owned
@@ -60,11 +87,7 @@ We will not claim a release is production-ready merely because a synthetic test 
   cross-fixture and no-echo regression tests, [reviewed design](.github/M11_REPLAY_SESSION.md),
   unchanged protected M4 discovery contract and exact 80-path npm
   candidate, with M6-J full bounded hashed excluded-source custody.
-- **Acceptance pending:** PR CI Windows/Ubuntu × Node 20/22 **4/4**,
-  merge, and separate post-merge main push CI. This is first-party
-  loopback evidence, **not** actual LLM resistance to prompt
-  injection, independent audit or real-target authorization.
-  External #21/#43/#59 remain open.
+- **Engineering accepted:** [PR #231](../../pull/231), [PR CI #1082](../../actions/runs/40705618413) **4/4 PASS**, independent [main CI #1083](../../actions/runs/40706248682) **4/4 PASS** (1066/1066 in verified Ubuntu Node20). This is first-party loopback evidence, **not** actual LLM resistance to prompt injection, independent audit or real-target authorization. External #21/#43/#59 remain open.
 
 ## M11-A/B/C — fixed owned localhost tool-result trust bridge (merged engineering)
 
