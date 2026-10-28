@@ -71,6 +71,20 @@ accepts no user endpoint, credential, filename or command. It does
 **not** evaluate the semantic effect of prompt injection on a real
 LLM. See the [concurrency guide](M11_CONCURRENT_RESPONSE.md).
 
+## Optional owned HTTP cancellation test (M11-J/K/L)
+
+```sh
+node tools/m11-cancelled-response.mjs
+```
+
+This source-only test checks a **first-party** owned cancellation while
+another fictional `127.0.0.1` request remains in flight. A closed
+response must never deliver a stale tool result into the surviving
+M10 toy session. The CLI accepts no URLs, paths, arbitrary commands,
+models, credentials or customer endpoints. The 14 fixed controls are
+synthetic and **do not evaluate a real AI agent** or attack wording.
+See the [M11 cancellation design](M11_CANCELLED_RESPONSE.md).
+
 ## Optional owned two-session replay test (M11-D/E/F)
 
 ```sh
