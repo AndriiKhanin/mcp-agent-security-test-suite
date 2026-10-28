@@ -33,6 +33,29 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Stateful fictional toy-agent task/result session (M10-G/H/I)
+
+Run the source-only deterministic eight-case session test:
+
+```sh
+node tools/toy-agent-session.mjs
+```
+
+A first-party toy agent calls a separate **in-memory gateway** that records
+the actual JavaScript method-call sequence: one owner task starts, one
+fictional tool result is accepted as data, and the task finishes. Early,
+replayed and post-completion tool results are denied. Extra unrelated
+file-read requests, unauthorized tool calls and forged permission
+claims are also denied. The combined selftest expects one clean PASS
+and seven deliberately unsafe FAIL outcomes, all with zero protected
+effects.
+
+**This is not a real AI agent**, LLM, external MCP target or semantic
+prompt-injection detector. No tool-result instructions are executed,
+and the witness does not observe real OS file reads or network access.
+See the [stateful session design](.github/M10_TOY_AGENT_SESSION.md)
+and [Issue #226](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/226).
+
 ## Run toy-agent gateway checks over all fictional fixtures (M10-D/E/F)
 
 From a reviewed source checkout:
