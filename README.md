@@ -143,14 +143,18 @@ notification followed by a final JSON-RPC tool response. The client
 strictly verifies each frame, UTF-8, IDs, exact fictional data and
 the final response before passing any tool content into the M10
 deterministic toy gateway. Valid fragmented chunks, CRLF, comments
-and multiline data are accepted; 20 fixed negative outcomes must
-all fail safely.
+and multiline data are accepted; M12-J/K/L extends the source-only
+matrix to 40 checks (4 accepted, 36 deliberately rejected). Forged
+progress/result metadata, SSE id/retry control lines and a comment frame
+after the final reply are rejected before any toy gateway delivery.
 
 This is **not complete MCP conformance**, a real LLM evaluation,
 external MCP test, independent security audit or authorization
 to scan user servers. See the [source-only modern SSE scope](
 .github/M12_MODERN_MCP_SMOKE.md#m12-ghi--request-scoped-sse-response-checks)
 and [Issue #246](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/246).
+The added fail-closed framing controls are tracked in
+[Issue #248](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/248).
 
 ## Modern MCP x-mcp-header parameter mirror (M12-D/E/F)
 

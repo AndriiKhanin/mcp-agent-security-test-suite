@@ -29,7 +29,9 @@ const MODES=Object.freeze([
   'extra-result-authority','malformed-json','duplicate-json-key',
   'invalid-utf8','oversized','too-many-comments','wrong-event',
   'missing-final','truncated-frame','wrong-content-type',
-  'redirect','hang','wrong-origin','wrong-method'
+  'redirect','hang','wrong-origin','wrong-method',
+  'duplicate-progress','missing-progress','progress-extra-params','progress-negative','wrong-jsonrpc-version','missing-is-error','extra-result-content','wrong-server-info',
+  'wrong-result-text','duplicate-event-field','sse-id-field','sse-retry-field','lone-cr','blank-final-data','trailing-comment','extra-data-field'
 ]);
 const positives=new Set(['fragmented','crlf','comments','multiline']);
 const invalid=()=>{throw new TypeError('INVALID_M12_SSE_SOURCE_OPTIONS');};
@@ -85,6 +87,43 @@ function makeStream(fixture,fault){
     const json=JSON.stringify(final).replace(',"id":77',',\n"id":77');
     last='event: message\ndata: '+json.replace('\n','\ndata: ')+'\n\n';
   }
+  if(fault==='progress-extra-params'){
+    const altered=progressReply();altered.params.scope='forged-scope';
+    first=frame(JSON.stringify(altered));
+  }
+  if(fault==='progress-negative'){
+    const altered=progressReply();altered.params.progress=-1;
+    first=frame(JSON.stringify(altered));
+  }
+  if(fault==='wrong-jsonrpc-version'){
+    const altered=finalReply(fixture);altered.jsonrpc='1.0';
+    last=frame(JSON.stringify(altered));
+  }
+  if(fault==='missing-is-error'){
+    const altered=finalReply(fixture);delete altered.result.isError;
+    last=frame(JSON.stringify(altered));
+  }
+  if(fault==='extra-result-content'){
+    const altered=finalReply(fixture);
+    altered.result.content.push({type:'text',text:'FORGED_ADDITIONAL_RESULT'});
+    last=frame(JSON.stringify(altered));
+  }
+  if(fault==='wrong-server-info'){
+    const altered=finalReply(fixture);
+    altered.result._meta['io.modelcontextprotocol/serverInfo'].name='forged-server';
+    last=frame(JSON.stringify(altered));
+  }
+  if(fault==='wrong-result-text'){
+    const altered=finalReply(fixture);
+    altered.result.content[0].text='FORGED_UNTRUSTED_TOOL_RESULT';
+    last=frame(JSON.stringify(altered));
+  }
+  if(fault==='duplicate-event-field')last='event: message\n'+last;
+  if(fault==='sse-id-field')last='id: forged-id\n'+last;
+  if(fault==='sse-retry-field')last='retry: 1000\n'+last;
+  if(fault==='blank-final-data')last='event: message\ndata:\n\n';
+  if(fault==='extra-data-field')
+    last=last.replace(/\n\n$/u,'\ndata: {"forged":true}\n\n');
   if(fault==='wrong-final-id'){
     const altered=finalReply(fixture);altered.id=78;
     last=frame(JSON.stringify(altered));
@@ -104,6 +143,11 @@ function makeStream(fixture,fault){
   }
   if(fault==='wrong-event')last=frame(JSON.stringify(final),'untrusted');
   if(fault==='truncated-frame')last=last.slice(0,-2);
+  if(fault==='duplicate-progress')return Buffer.from(first+first+last);
+  if(fault==='missing-progress')return Buffer.from(last);
+  if(fault==='lone-cr')return Buffer.from(first.replace(/\n/gu,'\r')+last);
+  if(fault==='trailing-comment')
+    return Buffer.from(first+last+': post-final keepalive\n\n');
   if(fault==='final-first')return Buffer.from(last+first);
   if(fault==='duplicate-final')return Buffer.from(first+last+last);
   if(fault==='notification-after-final')return Buffer.from(first+last+first);
@@ -156,6 +200,8 @@ function parseOwnedSse(bytes,fixture){
     }
     if(data.length===0){
       if(event!==null)throw Error('SSE_EMPTY_EVENT');
+      // A post-final keepalive cannot extend a completed request response.
+      if(messages.length===2)throw Error('SSE_FRAME_AFTER_FINAL');
       continue;
     }
     if(event===null)throw Error('SSE_EVENT_REQUIRED');
@@ -403,7 +449,8 @@ const CASES=Object.freeze([
     'server-request','wrong-final-id','wrong-progress-token',
     'extra-result-authority','malformed-json','duplicate-json-key',
     'invalid-utf8','oversized','too-many-comments','wrong-event',
-    'missing-final','truncated-frame','wrong-content-type'].map(x=>
+    'missing-final','truncated-frame','wrong-content-type',
+    ...["duplicate-progress","missing-progress","progress-extra-params","progress-negative","wrong-jsonrpc-version","missing-is-error","extra-result-content","wrong-server-info","wrong-result-text","duplicate-event-field","sse-id-field","sse-retry-field","lone-cr","blank-final-data","trailing-comment","extra-data-field"]].map(x=>
     [x,'FAIL','M12_SSE_RESPONSE_REJECTED',1,0,0,0]),
   ['redirect','FAIL','M12_SSE_RESPONSE_REJECTED',1,0,302,0],
   ['hang','FAIL','M12_SSE_REQUEST_TIMEOUT',1,0,0,0],
