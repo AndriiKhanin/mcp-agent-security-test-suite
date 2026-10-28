@@ -101,8 +101,11 @@ function serve(fixture,fault,port,counts){
       counts.accepted++;
       res.once('close',()=>{counts.responseClosed++;});
       if(fault==='hang'){
+        // A syntactically valid but deliberately incomplete owned response:
+        // the client must time out, not reject a missing Content-Length.
         res.writeHead(200,{'content-type':'application/json',
-          'cache-control':'no-store',connection:'close'});
+          'cache-control':'no-store',connection:'close',
+          'content-length':'1024'});
         res.flushHeaders();return;
       }
       if(fault==='redirect'){
