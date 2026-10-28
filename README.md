@@ -33,6 +33,30 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## In-memory toy-agent method-call exchange (M10-A/B/C)
+
+Run the first-party, source-only toy-agent demonstration:
+
+```sh
+node tools/toy-agent-exchange.mjs
+```
+
+Unlike M9's author-supplied symbolic event reports, this exercise makes
+**real in-memory JavaScript method calls** from a small deterministic
+toy agent to a separately parent-owned gateway. Four source-authored
+fault modes deliberately request a fictional unrelated file read,
+unauthorized tool call or forged authority. The gateway counts each
+attempt, denies all protected actions, and records zero protected effects.
+The five-case combined selftest passes only if all safe and expected-FAIL
+outcomes match.
+
+**This is not a real AI agent**, external MCP evaluation, semantic
+prompt-injection detector, OS sandbox or security certification. Its
+source-owned fault modes do not interpret or execute the contributor's
+embedded instruction. See the
+[full M10 trust-boundary guide](.github/M10_TOY_AGENT_EXCHANGE.md)
+and [Issue #221](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/221).
+
 ## Public fictional fixture privacy guard (M9-J/K/L)
 
 The source-only validator rejects some obvious private-looking strings in
