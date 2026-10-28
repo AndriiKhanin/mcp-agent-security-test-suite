@@ -33,6 +33,28 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Fixture-only policy bridge (M9-C)
+
+A contributor can add an inert JSON test case under
+`.github/fixture-proposals/` without changing runner source. From a
+reviewed source checkout, validate and run its fixed in-memory gate
+checks:
+
+```sh
+node tools/fixture-policy-bridge.mjs .github/fixture-proposals/mixed-tool-result-file-read.json
+```
+
+CI discovers all fixture proposal files automatically. The source-only
+bridge validates the file and runs four **source-authored synthetic**
+policy controls: task data permitted as data, unrelated file read denied,
+unauthorized tool call denied, and spoofed authority denied. It never
+executes or interprets the submitted instruction.
+
+**This is not a semantic test** and not a real agent prompt-injection
+detector. `PASS` only asserts fixture shape and fixed in-memory policy
+behavior, not a model's response to the submitted attack text. See the
+[M9-C safety contract](.github/M9_FIXTURE_POLICY_BRIDGE.md).
+
 ## First-party in-memory action gate (M9-B)
 
 Run the new source-only, zero-argument selftest in a reviewed checkout:
