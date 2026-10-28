@@ -36,11 +36,38 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
 | **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-U ENGINEERING ACCEPTED; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
-| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A/B/C ACCEPTED; M12-D/E/F IN PROGRESS; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [guide](.github/M12_HEADER_MIRROR.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
+| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A/B/C and D/E/F ACCEPTED; M12-G/H/I IN PROGRESS; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M12-D/E/F — modern 2026-07-28 x-mcp-header parity (IN PROGRESS)
+## M12-G/H/I — request-scoped modern SSE tool-result stream (IN PROGRESS)
+
+- [Issue #246](../../issues/246) adds source-only
+  `tools/m12-modern-sse.mjs`, a separate disposable first-party
+  `127.0.0.1` modern `tools/call` POST returning an actual
+  `text/event-stream`. The source-owned request includes fixed modern
+  protocol metadata and a fictional progress token.
+- **M12-G:** strict bounded SSE receiver validates byte fragments,
+  CRLF, comments, multiline data, exactly one request-related
+  `notifications/progress`, and a matching final JSON-RPC response
+  **before** sending fictional data to the independent M10 toy gateway.
+- **M12-H:** 24 source-authored controls (4 PASS/20 expected FAIL)
+  covering unauthorized server requests, replay/duplicate or forged
+  finals, wrong ID/token, malformed/duplicate JSON, invalid UTF-8,
+  unknown events, overlong/flooded/truncated frames, stalled stream,
+  wrong content type, redirect and wrong Origin/method.
+  Verify actual HTTP request/deny counters and TCP cleanup.
+- **M12-I:** strict zero-argument CLI, fixture-only regression,
+  [modern transport limits](.github/M12_MODERN_MCP_SMOKE.md#m12-ghi--request-scoped-sse-response-checks),
+  unchanged **80-path unpublished npm candidate** and bounded
+  M6-J **176-file full SHA-256** excluded-source custody, with
+  a fail-closed 177-file negative test.
+- **Pending:** PR CI Windows/Ubuntu × Node20/22 **4/4**,
+  merge and separately verified main push CI. Not full MCP
+  conformance, actual LLM attack evaluation, external MCP testing
+  or release approval. #21/#43/#59 remain OPEN.
+
+## M12-D/E/F — modern 2026-07-28 x-mcp-header parity (merged engineering)
 
 - [Issue #244](../../issues/244) adds source-only
   `tools/m12-header-parameter-mirror.mjs`, a separate disposable
@@ -63,9 +90,7 @@ We will not claim a release is production-ready merely because a synthetic test 
   unchanged 80-path unpublished npm candidate and complete M6-J
   SHA-256 excluded-source custody. Still not full MCP conformance,
   actual LLM test or general authorization gateway.
-- **Pending:** Windows/Ubuntu × Node 20/22 PR CI 4/4, merge,
-  independently verified post-merge main push CI. External
-  target #21, audit #43 and independent beta #59 remain OPEN.
+- **Engineering accepted:** [PR #245](../../pull/245) merged at `d4a35563`; [PR CI #1147](../../actions/runs/40754677970) **4/4 PASS**, independent [post-merge main CI #1148](../../actions/runs/40755339363) **4/4 PASS**. External #21/#43/#59 remain OPEN.
 
 ## M12-A/B/C — source-only modern MCP 2026-07-28 HTTP subset (merged engineering)
 
