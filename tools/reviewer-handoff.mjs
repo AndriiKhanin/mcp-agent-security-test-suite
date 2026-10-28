@@ -22,6 +22,9 @@ const decoder=new TextDecoder('utf-8',{fatal:true});
 const MAX_FILE_BYTES=1_048_576;
 const MAX_TOTAL_BYTES=2_000_000;
 const MAX_PACKET_BYTES=24_576;
+// Allow bounded growth of reviewed source-only test/guide/fixture files.
+// Every file remains hashed in the canonical excluded-source inventory.
+const MAX_EXCLUDED_FILES=120;
 const SHA256=/^[0-9a-f]{64}$/u;
 const SHA512=/^[0-9a-f]{128}$/u;
 const roots=Object.freeze(['.github','test','tools']);
@@ -73,13 +76,13 @@ function excludedFileIndex(){
         total+=bytes.length;
         if(total>MAX_TOTAL_BYTES)denied();
         files.push({path:label,byteLength:bytes.length,sha256:sha(bytes)});
-        if(files.length>100)denied();
+        if(files.length>MAX_EXCLUDED_FILES)denied();
       }else denied();
     }
   }
   for(const name of roots)walk(join(root,name),name);
   files.sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
-  if(files.length<50||files.length>100||
+  if(files.length<50||files.length>MAX_EXCLUDED_FILES||
     !files.some(x=>x.path==='.github/workflows/ci.yml')||
     !files.some(x=>x.path==='test/expected-package-files.json')||
     !files.some(x=>x.path==='test/r5-content-preflight.test.mjs')||
@@ -153,7 +156,7 @@ export function validateHandoff(value){
     ])||
     !Number.isSafeInteger(value.excludedReview.fileCount)||
     value.excludedReview.fileCount<50||
-    value.excludedReview.fileCount>100||
+    value.excludedReview.fileCount>MAX_EXCLUDED_FILES||
     !Number.isSafeInteger(value.excludedReview.rawBytesTotal)||
     value.excludedReview.rawBytesTotal<0||
     value.excludedReview.rawBytesTotal>MAX_TOTAL_BYTES||

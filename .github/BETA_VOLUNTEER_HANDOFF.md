@@ -33,6 +33,21 @@ The tool's displayed SHA is **not independently authenticated**; inspect
 the public GitHub commit and manually check it matches the agreed revision.
 Its five checks can detect expected fictional failures. PASS is not an MCP security assessment or confirmation of independent reviewer provenance.
 
+## Optional synthetic fixture contribution (separate from beta evidence)
+
+A volunteer may also submit a **fixture-only PR** independently of runner
+changes. See the [fixture-only contribution guide](FIXTURE_ONLY_CONTRIBUTIONS.md)
+for a strict inert tool-result prompt-injection format, an example, and the
+local `node tools/fixture-proposal-check.mjs` validation command. Proposed
+tool-result instructions are treated only as untrusted data; nothing runs
+an agent, an embedded command or an external MCP target. A schema PASS is
+not a prompt-injection detection result.
+
+A proposed fixture **does not** count as independent beta execution or
+acceptance under #59. The five-case beta protocol above and its evidence
+requirements remain separate. No unsolicited requests for real logs or
+live-target access are allowed.
+
 ## Submit voluntary, minimal feedback
 
 After running the test yourself, review the generated Markdown card and

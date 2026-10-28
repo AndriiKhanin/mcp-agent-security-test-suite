@@ -14,6 +14,19 @@ Release candidates must pass the [offline package preflight](docs/RELEASE_READIN
 
 See [SECURITY.md](SECURITY.md) for security reporting.
 
+## Fixture-only prompt-injection proposals (M8-S/T/U)
+
+**Fixture-only PRs are accepted for review separately from runner changes.**
+For a synthetic tool result that mixes useful task data with a malicious
+instruction, add one JSON file under `.github/fixture-proposals/` and follow
+the [fixture-only contributor guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
+Run `node tools/fixture-proposal-check.mjs <local-proposal-file>` locally.
+The CI suite automatically validates proposed fixture shapes without running
+an AI agent, external MCP server, user command or embedded instruction.
+This is **not** a prompt-injection detection test or security audit; future
+runner support is a separate scoped change. Never include real file paths,
+credentials, customer data or production snippets.
+
 ## Public beta feedback: fictional-only reproduction (M5-03)
 
 Open the [Issue chooser](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose) and select **Synthetic bug report** or **Synthetic feature request**. The GitHub forms collect a release-candidate version, operating system, Node.js version, an offline command, a symbolic `summary.ruleCodes` value, a fictional reproduction, and expected versus observed behavior. The feature form asks for a fictional positive and negative control and whether the proposal requires separate authorization.

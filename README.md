@@ -33,6 +33,20 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Contribute a fictional tool-result injection case (M8-S/T/U)
+
+**Fixture-only contributions are welcome**, independently of runner changes.
+A synthetic tool result can mix legitimate task data and an instruction to
+read an unrelated file. Propose a JSON file under
+`.github/fixture-proposals/` following the [fixture-only guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md);
+check it using `node tools/fixture-proposal-check.mjs <local-proposal-file>`.
+New fixture files are automatically schema-checked in CI on both supported
+operating systems.
+
+This is **shape validation only**, not an AI-agent execution, prompt-injection
+detector, security audit or authorization for live MCP traffic. Do not submit
+real paths, endpoints, credentials, logs or proprietary content.
+
 ## Human-readable fictional first run (M8-P/Q/R)
 
 From a reviewed source checkout with Node.js 20+, run:
