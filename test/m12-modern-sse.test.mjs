@@ -20,7 +20,9 @@ const BAD_RESPONSE=[
   'server-request','wrong-final-id','wrong-progress-token',
   'extra-result-authority','malformed-json','duplicate-json-key',
   'invalid-utf8','oversized','too-many-comments','wrong-event',
-  'missing-final','truncated-frame','wrong-content-type','redirect'
+  'missing-final','truncated-frame','wrong-content-type','redirect',
+  'duplicate-progress','missing-progress','progress-extra-params','progress-negative','wrong-jsonrpc-version','missing-is-error','extra-result-content','wrong-server-info',
+  'wrong-result-text','duplicate-event-field','sse-id-field','sse-retry-field','lone-cr','blank-final-data','trailing-comment','extra-data-field'
 ];
 
 test('M12-G: real fragmented SSE byte stream has exact progress and final result',async()=>{
@@ -56,8 +58,8 @@ test('M12-G: CRLF, comments, data fragmentation and multiline data are accepted'
   }
 });
 
-test('M12-H: all 17 malformed SSE reply classes fail before gateway',async()=>{
-  assert.equal(BAD_RESPONSE.length,17);
+test('M12-H: all 33 malformed SSE reply classes fail before gateway',async()=>{
+  assert.equal(BAD_RESPONSE.length,33);
   for(const fault of BAD_RESPONSE){
     const r=await runOwnedModernSse(fixture,{fault});
     assert.equal(r.status,'FAIL',fault);
@@ -73,6 +75,19 @@ test('M12-H: all 17 malformed SSE reply classes fail before gateway',async()=>{
     assert.equal(r.protectedFictionalEffectsCommitted,0,fault);
     assert.equal(r.actualExternalMcpContacted,false,fault);
   }
+});
+
+test('M12-J: a comment-only frame after the final response is forbidden',async()=>{
+  const bad=await runOwnedModernSse(fixture,{fault:'trailing-comment'});
+  assert.equal(bad.status,'FAIL');
+  assert.equal(bad.ruleCode,'M12_SSE_RESPONSE_REJECTED');
+  assert.equal(bad.toyGatewayDeliveries,0);
+  assert.equal(bad.httpResponsesClosed,1);
+  assert.equal(bad.tcpSocketsClosed,1);
+  assert.equal(bad.socketCleanupConfirmed,true);
+  const good=await runOwnedModernSse(fixture,{fault:'comments'});
+  assert.equal(good.status,'PASS');
+  assert.equal(good.toyGatewayDeliveries,1);
 });
 
 test('M12-H: HTTP 302 is recorded but never followed into a gateway',async()=>{
@@ -209,16 +224,16 @@ test('M12-H: no arbitrary target, host, process or unsafe options accepted',asyn
       /INVALID_M12_SSE_SOURCE_OPTIONS/);
 });
 
-test('M12-I: zero-argument selftest checks 4 positive and 20 expected negative controls',async()=>{
+test('M12-I: zero-argument selftest checks 4 positive and 36 expected negative controls',async()=>{
   const r=await runFixedModernSseSelftest();
   assert.equal(r.status,'PASS');
   assert.equal(r.exitCode,0);
   assert.equal(r.ruleCode,'M12_SSE_FIXED_CONTROLS_MATCH');
-  assert.equal(r.checked,24);
-  assert.equal(r.matched,24);
+  assert.equal(r.checked,40);
+  assert.equal(r.matched,40);
   assert.equal(r.expectedPositiveControls,4);
-  assert.equal(r.expectedNegativeControls,20);
-  assert.equal(r.negativeControlsMatched,20);
+  assert.equal(r.expectedNegativeControls,36);
+  assert.equal(r.negativeControlsMatched,36);
   assert.ok(r.cases.every(x=>x.matched));
   assert.ok(Object.isFrozen(r));
   assert.ok(Object.isFrozen(r.cases));
@@ -235,7 +250,7 @@ test('M12-I: zero-argument CLI rejects attempts to supply target or file',()=>{
   assert.equal(good.stderr,'');
   const report=JSON.parse(good.stdout);
   assert.equal(report.status,'PASS');
-  assert.equal(report.checked,24);
+  assert.equal(report.checked,40);
   for(const arg of [
     '--url=https://private.invalid','../../secret.json','PRIVATE_CANARY'
   ]){
