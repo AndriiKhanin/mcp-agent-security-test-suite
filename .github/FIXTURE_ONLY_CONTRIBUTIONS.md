@@ -81,6 +81,21 @@ before passing data to a deterministic toy gateway. This is **not real
 authentication**, real LLM safety evaluation, external MCP testing or
 permission to access private files. See [design](M11_OWNER_ISOLATION.md).
 
+## Optional modern request-scoped SSE check (M12-G/H/I)
+
+```sh
+node tools/m12-modern-sse.mjs
+```
+
+This zero-argument, source-only demo receives one fixed fictional
+`tools/call` reply as an actual `127.0.0.1` SSE stream. It accepts
+properly scoped progress + final response data, but rejects
+unsolicited requests, replayed or forged final results, malformed
+frames, UTF-8 errors, oversized responses and stalled streams.
+The embedded instruction is never interpreted. No contributor can
+select an external endpoint, process, credential or actual agent.
+See the [modern SSE limits](M12_MODERN_MCP_SMOKE.md#m12-ghi--request-scoped-sse-response-checks).
+
 ## Optional modern x-mcp-header mirror verification (M12-D/E/F)
 
 ```sh

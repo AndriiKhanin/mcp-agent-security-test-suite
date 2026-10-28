@@ -99,3 +99,27 @@ connection is checked for close.
 Engineering acceptance requires full **4/4** Windows/Ubuntu Node.js
 20/22 PR CI, squash merge, and an independently verified **4/4**
 post-merge main push CI. None of these results authorizes release.
+
+
+## M12-G/H/I — Request-scoped SSE response checks
+
+**Tracking:** [Issue #246](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/246). This is an additional **source-only** first-party `127.0.0.1` test. The earlier JSON-response M12-A/B/C server and the M4 protected staging server are unchanged.
+
+The [MCP 2026-07-28 Streamable HTTP specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http) allows a server's single POST response to contain an SSE stream with related notifications before the final JSON-RPC response. This demo covers **only one finite request-scoped stream**, not `subscriptions/listen`, arbitrary notifications, SSE resumption, MRTR, authentication or a general MCP server.
+
+From a reviewed checkout with Node 20 or 22:
+
+```sh
+node tools/m12-modern-sse.mjs
+node --test test/m12-modern-sse.test.mjs
+```
+
+The client sends exactly one source-owned modern `tools/call` POST with fixed `MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`, `Accept`, Origin and request `_meta`. The temporary server uses an OS-selected port on literal `127.0.0.1`. A valid SSE stream contains one `notifications/progress` notification bound to a fictional request token, followed by the exact fixed JSON-RPC final response ID. The server deliberately fragments bytes on the wire. The receiver bounds input to 8192 bytes, eight blocks, four comments, 4096 bytes/frame, and validates fatal UTF-8, event names, JSON duplicate keys, ordering, IDs and the exact reviewed tool result.
+
+**Fixed matrix: 24 controls**, comprising **four expected PASS** (fragmented, CRLF, SSE comments and multiline `data:`) and **20 expected FAIL** (final-first, duplicate/late final, unsolicited server request, wrong ID/progress token, fake authority, malformed/duplicate JSON, invalid UTF-8, too many comments, oversized or truncated frame, unknown event, missing final, wrong content type, redirect, bounded hanging response, wrong Origin or method).
+
+No untrusted tool-result text is passed to the M10 toy gateway **until the entire on-wire SSE response is validated**, including exactly one matching progress notification and one matching final response. All protected fictional effects remain zero. Every owned HTTP connection must close; failures use fixed non-echoing rule codes and never disclose response bodies, paths, ports or tokens.
+
+**Not complete MCP conformance. Not a real AI agent, LLM test, OS sandbox, credential validation, semantic prompt-injection detector or security certification.** Only first-party source-owned sockets are contacted. All new source-only files are included in M6-J's complete, bounded SHA-256 custody; the limit is expanded to **176**, and 177 files are still rejected. The exact **80-path unpublished npm candidate** remains unchanged.
+
+External server authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21), independent security audit [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and independent beta [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) remain OPEN. Require 4/4 CI on Windows/Ubuntu Node20/22, merge and separately verified post-merge main push CI; no release is authorized.
