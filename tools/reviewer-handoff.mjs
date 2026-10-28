@@ -21,10 +21,11 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const decoder=new TextDecoder('utf-8',{fatal:true});
 const MAX_FILE_BYTES=1_048_576;
 const MAX_TOTAL_BYTES=2_000_000;
-const MAX_PACKET_BYTES=24_576;
+// Complete excluded-source custody is preserved and size-bounded.
+const MAX_PACKET_BYTES=40_960;
 // Allow bounded growth of reviewed source-only test/guide/fixture files.
 // Every file remains hashed in the canonical excluded-source inventory.
-const MAX_EXCLUDED_FILES=120;
+const MAX_EXCLUDED_FILES=128;
 const SHA256=/^[0-9a-f]{64}$/u;
 const SHA512=/^[0-9a-f]{128}$/u;
 const roots=Object.freeze(['.github','test','tools']);

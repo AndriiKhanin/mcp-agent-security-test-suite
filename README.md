@@ -33,6 +33,120 @@ independent usability evidence remains an open manual acceptance gate
 [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
 [Reviewer limitations and field contract](docs/BETA_TESTING.md#m5-08--offline-consistency-preflight-for-a-future-beta-report).
 
+## Run toy-agent gateway checks over all fictional fixtures (M10-D/E/F)
+
+From a reviewed source checkout:
+
+```sh
+node tools/toy-agent-batch.mjs
+```
+
+The source-only batch runs the **actual in-memory JavaScript method-call**
+toy-agent harness in five fixed modes for every valid fictional JSON
+contributor fixture (up to 16). A separate verifier confirms the safe
+PASS, four expected fault-mode FAIL results, exact denied-request counters
+and zero committed protected effects. The JSON summary is ordinal-only,
+without scenario names, paths or tool-result text.
+
+This is **not a real agent**, semantic prompt-injection detector or
+authorization to contact third-party MCP servers. Read the
+[toy-agent batch guide](.github/M10_TOY_AGENT_BATCH.md)
+and [Issue #223](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/223).
+
+## In-memory toy-agent method-call exchange (M10-A/B/C)
+
+Run the first-party, source-only toy-agent demonstration:
+
+```sh
+node tools/toy-agent-exchange.mjs
+```
+
+Unlike M9's author-supplied symbolic event reports, this exercise makes
+**real in-memory JavaScript method calls** from a small deterministic
+toy agent to a separately parent-owned gateway. Four source-authored
+fault modes deliberately request a fictional unrelated file read,
+unauthorized tool call or forged authority. The gateway counts each
+attempt, denies all protected actions, and records zero protected effects.
+The five-case combined selftest passes only if all safe and expected-FAIL
+outcomes match.
+
+**This is not a real AI agent**, external MCP evaluation, semantic
+prompt-injection detector, OS sandbox or security certification. Its
+source-owned fault modes do not interpret or execute the contributor's
+embedded instruction. See the
+[full M10 trust-boundary guide](.github/M10_TOY_AGENT_EXCHANGE.md)
+and [Issue #221](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/221).
+
+## Public fictional fixture privacy guard (M9-J/K/L)
+
+The source-only validator rejects some obvious private-looking strings in
+contributed fictional JSON: URL schemes, local home paths, email addresses,
+credential-like prefixes, key headers and IPv4 literals. Rejections return
+constant non-echoing errors; **this is not a complete secret scanner**.
+Contributors must still sanitize all details manually. See the
+[fixture guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) and
+[PR checklist](.github/PULL_REQUEST_TEMPLATE.md).
+
+## Contributor-friendly offline fictional review (M9-G/H/I)
+
+From a reviewed source checkout with Node.js 20+, run one command:
+
+```sh
+node tools/fixture-contributor-summary.mjs
+```
+
+This source-only command combines the **M9-E fictional batch fixture preflight**
+and **M9-F negative mutation matrix** into one small human-readable
+summary. It verifies the four fixed policy controls and 43 deliberately
+corrupted symbolic reports **per fixture**, then prints only bounded counts
+and explicit limitations. It accepts no arguments, user-defined commands,
+real endpoints, private paths or credentials.
+
+This is **not a real agent** or semantic prompt-injection detector.
+No actual MCP target is contacted and no unrelated file is read. A
+successful synthetic review does not establish independent beta evidence,
+security certification or release permission. See the
+[fixture-only contributor guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
+
+## Challenge synthetic policy results with negative controls (M9-F)
+
+Run a zero-argument source-only mutation sensitivity check from a reviewed
+checkout:
+
+```sh
+node tools/fictional-negative-control-matrix.mjs
+```
+
+For **every** fictional JSON contributor fixture, this checks the pristine
+M9-C policy report and then applies **43 fixed negative mutations** to
+authority flags, protected-effect counters, fixed deny rules, and the
+four-case report inventory. Every corrupted symbolic result must be rejected.
+Outputs include only safe counts and fixed rule codes.
+
+This is **not a real agent** test, semantic prompt-injection detector,
+credential validator, or permission to contact external MCP servers.
+See the [M9-F mutation-matrix guide](.github/M9_NEGATIVE_MUTATION_MATRIX.md).
+
+## Validate all fictional fixture-only PR submissions at once (M9-E)
+
+From a reviewed source checkout, run:
+
+```sh
+node tools/fixture-batch-preflight.mjs
+```
+
+This source-only command checks **every** fictional JSON fixture under the
+fixed `.github/fixture-proposals/` directory, up to 16 files. It combines
+strict schema validation with the M9-C four **fixed in-memory policy probes**
+per fixture and emits a privacy-safe ordinal summary. Unknown files,
+symlinks, malformed content, extra arguments, and failed symbolic controls
+are rejected without echoing input paths or injected instructions.
+
+This is **not a real agent** or semantic prompt-injection detector, and
+does not open a file requested by the injected text or contact an external
+MCP target. See the [batch preflight guide](.github/M9_FIXTURE_BATCH_PREFLIGHT.md)
+and [Issue #213](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/213).
+
 ## Generate a fictional fixture without writing scripts (M9-D)
 
 A contributor can generate a complete synthetic fixture as **raw JSON**

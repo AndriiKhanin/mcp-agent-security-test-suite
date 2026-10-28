@@ -33,11 +33,117 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M5 — Useful OSS beta** | Packaging, contribution loop, documented examples and community feedback | **IN PROGRESS — independent tester evidence pending** | [M5-01 #45](../../issues/45), [M5-02 #49](../../issues/49), [M5-03 #48](../../issues/48), [M5-04 #54](../../issues/54), [M5-05 #57](../../issues/57), [M5-06 #59](../../issues/59), [M5-07 #127](../../issues/127), [M5-08 #132](../../issues/132) | Repeatable installation/use, versioned releases, triaged external feedback |
 | **M7 — Usable offline adopter onboarding** | Plain-language first-run guide, dual-transport fictional walkthrough, local beta tools and volunteer handoff | **ENGINEERING DONE — M7-A through M7-U; independent evaluation NOT VERIFIED** | [PR #188](../../pull/188), [#189](../../pull/189), [#190](../../pull/190), [#191](../../pull/191), [#192](../../pull/192), [#193](../../pull/193), [#194](../../pull/194) | Synthetic and documentation CI 4/4; genuine independent user feedback remains [M5-06 #59](../../issues/59) |
 | **M8 — Offline adopter safety and fixture contributions** | Dual-transport source-only smoke, human-readable first run, and inert fixture-only intake | **M8-A through M8-R engineering merged; M8-S/T/U MERGED (PR #203, PR CI 4/4; post-merge not separately verified)** | [PRs #197–#202](../../pulls?q=is%3Apr+is%3Amerged), fixture-only guide | Four-job CI + reviewed synthetic contracts; no claim of live injection defense |
-| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
+| **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **M9-A/B/C merged (PR CI 4/4 each); M9-D merged; M9-E merged; M9-F merged; M9-G/H/I merged; M9-J/K/L merged; M10-A/B/C merged; M10-D/E/F IN PROGRESS; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
+| **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway and method-call witness, not real LLM execution | **M10-A/B/C IN PROGRESS** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M9-D — zero-write fictional fixture template generator (IN PROGRESS)
+## M10-D/E/F — batch toy-agent gateway replay for fictional fixtures (IN PROGRESS)
+
+- [Issue #223](../../issues/223): `tools/toy-agent-batch.mjs` replays
+  every strictly bounded source-owned fictional JSON contribution through
+  the deterministic M10 toy-agent/gateway method-call harness, in five
+  reviewed fixed modes (one safe and four deliberately unsafe).
+- The separate verifier checks exact method-call and denial counts, no
+  protected effects, no external operations and rejects forged real-agent
+  evidence. A single mismatch fails the batch without echoing file names
+  or injected text.
+- `test/m10-toy-agent-batch.test.mjs` covers each contribution, negative
+  report mutations, hidden/accessor properties, no-echo CLI and the locked
+  npm inventory. [Contributor guide](.github/M10_TOY_AGENT_BATCH.md).
+- **Pending:** Windows/Ubuntu × Node.js 20/22 4/4 PR CI, merge and
+  post-merge main verification. Still **not a real AI agent** or
+  semantic prompt-injection detector; #21/#43/#59 remain open.
+
+## M10-A/B/C — first-party toy-agent method-call witness (merged engineering)
+
+- **M10-A:** [Issue #221](../../issues/221) implements a deterministic
+  source-owned toy agent that consumes a validated fictional tool result
+  and calls only a parent-owned in-memory gateway. Unlike M9, the gateway
+  counts actual in-memory method invocations, not caller-authored event lists.
+- **M10-B:** five reviewed cases cover safe data-only processing and four
+  deliberate fault modes (unrelated file request, unauthorized tool request,
+  forged authority, and combined). All protected effects remain zero;
+  the four expected fault outcomes must be FAIL while the aggregate
+  fixed selftest must match all five predictions.
+- **M10-C:** `tools/toy-agent-exchange.mjs` runs without arguments, and
+  `test/m10-toy-agent-exchange.test.mjs` verifies strict input boundaries,
+  exact observed counters, all fictional fixtures, no-echo output and
+  unchanged npm 80-path inventory. [Guide](.github/M10_TOY_AGENT_EXCHANGE.md).
+- **Engineering merged:** [PR #222](../../pull/222), [PR CI #1034](../../actions/runs/40677630122) **4/4 PASS** (1013/1013 per verified Ubuntu job); post-merge main CI not separately verified. **Not an LLM, real agent, semantic injection
+  detector, OS sandbox, real file access, or external MCP target.**
+  Independent external beta #59, audit #43, and real-target #21 open.
+
+## M9-J/K/L — public fixture privacy hygiene and submission checklist (merged engineering)
+
+- [Issue #219](../../issues/219) adds conservative, no-echo privacy
+  indicators to the M8 strict fictional fixture validator for obvious
+  URL schemes, absolute home paths, email-shaped strings, common token
+  prefixes, private-key headers and IPv4 literals.
+- **M9-J:** refuses clearly private-looking material in the fixture's
+  three bounded public text fields without evaluating any injected
+  instructions or contacting external services.
+- **M9-K:** extends the existing fixture test suite with synthetic
+  rejection examples in every freeform text field and positive tests
+  preserving safe fictional scenario submissions.
+- **M9-L:** adds a GitHub PR template and guidance requiring manual
+  sanitization and explaining that this is **not a complete secret
+  scanner** nor an assessment of a real AI agent.
+- **Engineering merged:** [PR #220](../../pull/220), [PR CI #1023](../../actions/runs/40675851048) **4/4 PASS** (1000/1000 per verified Ubuntu job); separate post-merge verification pending. Pinned 80-path npm inventory unchanged.
+  External approval/beta/audit gates #21/#59/#43 remain open.
+
+## M9-G/H/I — human-readable fictional contributor review (merged engineering)
+
+- [Issue #217](../../issues/217) adds source-only
+  `node tools/fixture-contributor-summary.mjs`, combining the M9-E
+  bounded fixture batch and the M9-F **43 mutations per fixture**.
+- **M9-G:** strict report renderer accepts only exact first-party
+  symbolic schemas, verified bounded integer counts and all explicit
+  false real-agent/authorization claims. It prints no contributor data,
+  file names, paths or attack text.
+- **M9-H:** deterministic CLI and tampering tests reject forged PASS,
+  conflicting counters, prototype/accessor-backed JS objects, hidden
+  properties, extra arguments and authority escalation claims.
+- **M9-I:** README and the fixture-only contributor guide explain
+  a single safe command and distinguish fictional report sensitivity
+  from actual agent security assessment.
+- **Engineering merged:** [PR #218](../../pull/218), [PR CI #1014](../../actions/runs/40668580343) **4/4 PASS**, 997/997 per verified Ubuntu job. Separate post-merge main CI not yet confirmed. No real MCP target, model, prompt execution, independent beta or audit. #21/#43/#59 open.
+
+## M9-F — fictional policy report negative-control matrix (merged engineering)
+
+- [Issue #215](../../issues/215) adds source-only
+  `tools/fictional-negative-control-matrix.mjs`, which loads all reviewed
+  fictional fixtures (maximum 16) through the M8/M9-C/M9-E preflight.
+- Each pristine source-authored symbolic result must PASS the independently
+  checked M9-E contract. **43 fixed mutations per fixture** must then
+  be rejected, covering forged authority/observation flags, rule and
+  decision tampering, protected effects and duplicated/missing controls.
+- `test/m9-negative-control-matrix.test.mjs` verifies deterministic
+  rejection, every fixture's coverage, no-echo responses and the exact
+  80-path npm package inventory. All local commands remain source-only.
+- **Engineering merged:** [PR #216](../../pull/216), [PR CI #1003](../../actions/runs/40667424349) **4/4 PASS** (989/989 per verified Ubuntu job); separate post-merge main verification pending. This is synthetic regression sensitivity,
+  **not** real-agent prompt-injection detection, independent beta,
+  independent audit or external target authorization (#59/#43/#21).
+
+## M9-E — one-command fictional fixture batch preflight (merged engineering)
+
+- [Issue #213](../../issues/213): `tools/fixture-batch-preflight.mjs`
+  discovers only the fixed repo-owned `.github/fixture-proposals/` folder.
+  It rejects symlinks, non-JSON entries, extra CLI arguments, empty sets
+  and collections over 16 files, and never echoes paths or payload text.
+- Every contribution is passed through the bounded M8 file loader and
+  M9-C source-authored four-probe policy bridge. The batch verifier
+  independently checks all four fixed symbolic decisions, three
+  denials, zero protected fictional effects and explicit no-real-execution
+  flags; a single mismatch fails the entire batch.
+- `test/m9-fixture-batch-preflight.test.mjs` covers deterministic
+  ordering, malformed symbolic outcome mutations, getter/symbol
+  injection, no-echo CLI, file enumeration and locked npm 80-path inventory.
+- **Engineering merged:** [PR #214](../../pull/214), [PR CI #994](../../actions/runs/40666262279) **4/4 PASS** (980/980 per verified Ubuntu job); separate post-merge main CI verification pending. This is not real agent
+  execution, semantic prompt-injection assessment, independent beta or
+  real-target authorization. Issues #21/#43/#59 remain open.
+
+## M9-D — zero-write fictional fixture template generator (merged engineering)
 
 - [Issue #210](../../issues/210) adds
   `node tools/fixture-proposal-template.mjs <case-id>`, a source-only,
@@ -51,8 +157,7 @@ We will not claim a release is production-ready merely because a synthetic test 
 - The generator does **not** execute the injected instruction, contact
   external MCP servers, write files, run agents, or evaluate semantic
   prompt-injection resilience.
-- **Acceptance pending:** 4/4 PR CI, merge and verified main post-merge CI;
-  independent beta/audit/real-target approvals #59/#43/#21 remain open.
+- **Engineering merged:** [PR #211](../../pull/211) after PR CI 4/4 PASS; main post-merge CI independently not yet confirmed. External beta/audit/real-target approvals #59/#43/#21 remain open.
 
 ## M9-C — fixture-only JSON to fixed policy-gate bridge (merged engineering)
 

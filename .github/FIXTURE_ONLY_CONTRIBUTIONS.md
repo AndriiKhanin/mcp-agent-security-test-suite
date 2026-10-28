@@ -5,6 +5,31 @@ JSON test case in `.github/fixture-proposals/` **without changing the test
 runner**. The existing CI discovers and validates each proposal automatically.
 Proposals are reviewed by a maintainer before merging.
 
+## Privacy indicators and manual review (M9-J/K/L)
+
+The strict offline fixture validator now conservatively rejects
+obvious private-looking strings in the three freeform fields
+(`description`, `toolResult.legitimateData` and
+`toolResult.embeddedInstruction`): URL schemes (`https://`,
+`ssh://`, `file://`, `mcp://`), absolute home paths, email-shaped
+addresses, common token/key prefixes, private-key headers, and IPv4
+literals. The check does not send any field to an external service,
+does not print its content on refusal and does not interpret its
+instructions.
+
+**This is not a complete secret scanner.** It is only a bounded,
+conservative warning against readily recognizable patterns; it cannot
+guarantee that a string is safe or that a contributor has publication
+rights. It may reject a purely fictional example that resembles a real
+address or token. Rewrite such examples using ordinary fictional prose,
+rather than bypassing the guard. Contributors **must manually inspect
+every field** for private details, real paths, logs, endpoints and
+customer data before creating a public PR.
+
+The [PR checklist](PULL_REQUEST_TEMPLATE.md) reminds contributors that
+fixture-only PRs need no runner changes, require manual sanitation and
+do not constitute evidence of real-agent security.
+
 ## Generate a safe starter fixture (M9-D)
 
 Instead of writing the strict schema manually, choose a fictional lowercase
@@ -31,6 +56,80 @@ This is **not a semantic test** of prompt injection or a proof that an
 agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
+
+## Optional in-memory toy-agent replay of every fictional case (M10-D/E/F)
+
+To check every fictional fixture against the independent in-memory
+toy-agent gateway method-call observer:
+
+```sh
+node tools/toy-agent-batch.mjs
+```
+
+Each file receives five fixed first-party toy modes (one safe,
+four deliberately failing). The zero-argument batch expects exact
+`PASS`/`FAIL` outcomes and zero protected effects, and emits only
+ordinal counts and fixed rule codes. Contributors need **no runner edits**
+to add a fictional fixture-only PR.
+
+This is **not a real agent**, actual MCP integration, or semantic assessment
+of your injected instruction. See the
+[toy-agent batch design](M10_TOY_AGENT_BATCH.md).
+
+## Read one clear, privacy-safe fictional review (M9-G/H/I)
+
+For a brief summary of the entire reviewed fictional fixture set:
+
+```sh
+node tools/fixture-contributor-summary.mjs
+```
+
+The command combines the M9-E fixed policy batch and M9-F 43-per-fixture
+synthetic negative mutation sensitivity check. It reports only the
+number of fictional scenarios checked, fixed controls matched,
+symbolic denials, and corrupted reports rejected — **no case names,
+file paths, injected instructions, tokens or customer data**.
+
+It is **not a real agent** evaluation, independent beta test or
+prompt-injection detector. This is a first-party synthetic contributor
+convenience tool; a green result does not authorize any live MCP probe.
+
+## Check that corrupted symbolic results cannot pass (M9-F)
+
+To verify the fictional policy report's negative controls across **all**
+contributor fixtures, use:
+
+```sh
+node tools/fictional-negative-control-matrix.mjs
+```
+
+The source-only matrix challenges the independent M9-E report validator
+with 43 fixed, intentionally corrupted symbolic outcomes **per fixture**.
+Every mutation must fail while the pristine result passes. The command
+accepts no additional arguments, prints no fixture text or path, and
+runs no agent or MCP server. This is **not a real agent** attack evaluation
+or semantic prompt-injection detection. See the
+[negative-control guide](M9_NEGATIVE_MUTATION_MATRIX.md).
+
+## One-command check for all fictional proposals (M9-E)
+
+After adding a **fictional** `.json` fixture, you can validate the
+entire repo-owned contribution collection with:
+
+```sh
+node tools/fixture-batch-preflight.mjs
+```
+
+No filename or argument is needed. This checks every fixture file in
+`.github/fixture-proposals/` using the strict schema validator and four
+source-owned in-memory M9-C policy probes for each. It permits at most
+16 regular JSON files; unexpected entries, invalid shapes, and failed
+symbolic controls reject the batch. The report contains only counts and
+ordinals, not fixture names, private paths or embedded instructions.
+
+This is **not a real agent** test or a prompt-injection detector. It cannot
+determine whether your injection wording would affect a deployed agent.
+See the [batch preflight guide](M9_FIXTURE_BATCH_PREFLIGHT.md).
 
 ## Supported proposal (v1)
 
