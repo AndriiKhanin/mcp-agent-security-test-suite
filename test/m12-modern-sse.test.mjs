@@ -75,6 +75,17 @@ test('M12-H: all 17 malformed SSE reply classes fail before gateway',async()=>{
   }
 });
 
+test('M12-H: HTTP 302 is recorded but never followed into a gateway',async()=>{
+  const r=await runOwnedModernSse(fixture,{fault:'redirect'});
+  assert.equal(r.status,'FAIL');
+  assert.equal(r.ruleCode,'M12_SSE_RESPONSE_REJECTED');
+  assert.equal(r.rejectedHttpStatus,302);
+  assert.equal(r.toyGatewayDeliveries,0);
+  assert.equal(r.httpResponsesClosed,1);
+  assert.equal(r.tcpSocketsClosed,1);
+  assert.equal(r.actualExternalMcpContacted,false);
+});
+
 test('M12-H: request metadata and Origin errors stop before SSE response',async()=>{
   for(const [fault,statusCode] of [
     ['wrong-origin',403],['wrong-method',400]
