@@ -77,6 +77,16 @@ test('M8-T: refuse unknown fields, wrong types, missing parts and accessors',()=
     assert.throws(()=>validateFixtureProposal(bad),/INVALID_FICTIONAL_FIXTURE/);
 });
 
+test('M8-T: filename must match case ID and coercion cannot run user code',()=>{
+  assert.deepEqual(validateFixtureProposal(clone(),'mixed-tool-result-file-read.json'),
+    validateFixtureProposal(clone()));
+  assert.throws(()=>validateFixtureProposal(clone(),'different-fictional-case.json'),
+    /INVALID_FICTIONAL_FIXTURE/);
+  const hostile=clone();
+  hostile.caseId={toString(){throw new Error('UNTRUSTED_TOSTRING_CALLED');}};
+  assert.throws(()=>validateFixtureProposal(hostile),/INVALID_FICTIONAL_FIXTURE/);
+});
+
 test('M8-T: strict JSON grammar rejects duplicate fields without reparsing instructions',()=>{
   const raw=readFileSync(fixtureFile,'utf8');
   const duplicate=raw.replace('"schemaVersion": 1,','"schemaVersion": 1, "schemaVersion": 1,');
