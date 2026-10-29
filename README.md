@@ -595,6 +595,21 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Additional owned attack-family matrix (M16, source only)
+
+Run `node tools/owned-attack-matrix.mjs` from a **reviewed source checkout**
+to reproduce three distinct *intentionally unsafe* MCP-shaped behaviors:
+a forged owner claim inside untrusted tool-result data, a replayed
+fictional ledger operation, and a wrong-ID JSON-RPC reply. A second guarded
+case for each attack proves the matching server/client boundary. Six
+ephemeral `127.0.0.1` servers exchange fixed requests with a deterministic
+toy client. `6/6 PASS` means all three *synthetic* unsafe effects were
+actually witnessed and all three protected variants behaved as expected;
+it is **not** real-agent or external-server security evidence. No real
+file access, user target, model, credentials or Stable Bridge. Source-only,
+not part of the unpublished npm candidate. See
+[attack matrix guide](.github/M16_OWNED_ATTACK_MATRIX.md).
+
 ## Intentionally vulnerable MCP-shaped red-team lab (M15, source only)
 
 In a **reviewed first-party source checkout**, try the fixed differential
