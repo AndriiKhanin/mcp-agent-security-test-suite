@@ -161,7 +161,7 @@ test('M22-B: malformed records and getter-bearing objects cannot grant rights',(
     x=>{x.schemaVersion=2;},
     x=>{x.expected.guardedDecision='ALLOW_ALL';},
     x=>{x.expected.guardedRuleCode='SOME_UNKNOWN_RULE';},
-    x=>{x.expected.permissiveDecision='DENY';},
+    x=>{x.expected.permissiveDecision='UNSUPPORTED';},
     x=>{x.toolResultAuthorityClaim='true';},
     x=>{x.origin='OWNER_TASK';x.toolResultAuthorityClaim=true;},
     x=>{x.operation='EXECUTE_SHELL';},
