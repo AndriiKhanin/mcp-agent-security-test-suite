@@ -48,11 +48,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M19 — Single first-party assessment summary** | Source-separated one-command integration of all owned-wire and symbolic evidence without falsely aggregating real attacks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#279](../../issues/279), [PR #280](../../pull/280), [main CI #40912510667](../../actions/runs/40912510667), [guide](.github/M19_ASSESSMENT_SUMMARY.md) | Five verified report gates / 23 wire + 32 symbolic source-owned cases; independent beta pending |
 
-| **M20 — Privacy-minimal beta intake preflight** | Bounded stdin JSON; categorical consistency checks, no-echo and explicit human provenance requirement | **M20-A/B/C IN PROGRESS — CI PENDING** | [#282](../../issues/282), [guide](.github/M20_BETA_INTAKE_PREFLIGHT.md) | Real volunteers can self-check without credentials or raw logs; no automatic beta approval; 4/4 PR and main CI |
+| **M20 — Privacy-minimal beta intake preflight** | Bounded stdin JSON; categorical consistency checks, no-echo and explicit human provenance requirement | **M20-A/B/C ENGINEERING ACCEPTED — PR/main CI 4/4** | [#282](../../issues/282), [PR #283](../../pull/283), [main CI #40919664479](../../actions/runs/40919664479), [guide](.github/M20_BETA_INTAKE_PREFLIGHT.md) | Human triage only, no independent beta claim; 4/4 PR + 4/4 main CI verified |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M20-A/B/C — safety-bounded voluntary beta intake preflight (engineering in progress)
+## M20-A/B/C — safety-bounded voluntary beta intake preflight (engineering accepted)
 
 - **M20-A:** [Issue #282](../../issues/282) adds the source-only,
   argument-free `node tools/m20-beta-intake.mjs`. It accepts one
@@ -71,9 +71,13 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M20-C:** [strict input format](.github/M20_BETA_INTAKE_PREFLIGHT.md),
   source-only mutation tests, no-echo and zero external-MCP/no Stable Bridge
   controls. The original publicly pinned M13 volunteer procedure and
-  **unpublished 80-path npm candidate** remain unchanged. Acceptance
-  requires Windows/Ubuntu Node20/22 PR CI **4/4** and separate matching
-  post-merge main-push CI **4/4**.
+  **unpublished 80-path npm candidate** remain unchanged. [PR #283](../../pull/283)
+  passed [PR CI #40919148260](../../actions/runs/40919148260) **4/4**
+  (Ubuntu/Windows Node20/22), merged as exact commit
+  `5f07ef308f05106e15313a614460e577e6a72e14`, and independent
+  [main CI #40919664479](../../actions/runs/40919664479) passed
+  **4/4 on the same SHA**. This engineering acceptance leaves independent
+  user beta #59, security audit #43 and owner target gate #21 OPEN.
 
 ## M19-A/B/C — first-party one-command evidence assessment (engineering accepted)
 
