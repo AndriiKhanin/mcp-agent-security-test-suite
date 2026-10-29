@@ -52,7 +52,35 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M21 — Bounded multi-report beta triage** | Strict offline batch of 2–4 M20 categorical self-reports, repeated-pattern flags and conservative attribution | **M21-A/B/C ENGINEERING IN PROGRESS — PR CI pending** | [#285](../../issues/285), [guide](.github/M21_BETA_BATCH_TRIAGE.md) | No verified unique testers, no raw echo, source-only custody and PR/main 4/4 |
 
+| **M23 — Community-requested attack-family demonstration** | Fixed toy controls for tool-description rug pulls, multi-server authority crossing and error-channel leaks | **SOURCE-ONLY ENGINEERING IN PROGRESS — CI PENDING** | [#288](../../issues/288), [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md) | 10/10 independent toy comparisons, negative mutation controls, PR + main CI 4/4 |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M23-A/B/C — community-requested trust-boundary scenarios (engineering in progress)
+
+- [Issue #288](../../issues/288) covers three X-suggested gaps:
+  metadata changes **after tool registration**, cross-server claims of
+  resource authority, and error-response echo of environment-like
+  variables, paths or request headers.
+- **M23-A:** a source-only, no-argument
+  `node tools/m23-community-attack-families.mjs` runs ten fixed
+  *first-party in-memory toy* controls. Three protected effects and
+  three error-channel leaks must be exposed in deliberately unsafe toys
+  while guarded counterparts deny or redact, preserving benign outcomes.
+- **M23-B:** independent source-authored expected outcomes and mutations
+  reject forged PASS, missing unsafe effects, guarded leaks, false
+  denials and malicious witness objects. Synthetic error markers are
+  literal fictional strings — no real environment, headers, file or
+  credentials are read.
+- **M23-C:** [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md),
+  README, regression CI, strict no-echo output and fixed unpublished
+  80-path package. M8's existing fixture schema does *not* represent
+  these three families and must not be mislabelled as a semantic
+  rug-pull or multi-server tester; separate M22 [#287](../../issues/287)
+  tracks future contributed finite-action cases.
+  No user MCP targets, LLM, networking or Stable Bridge. Independent
+  beta #59, audit #43 and external approval #21 remain OPEN. Require
+  PR and post-merge main Windows/Ubuntu Node20/22 **4/4**.
 
 ## M21-A/B/C — privacy-minimal multi-report preflight (engineering in progress)
 
