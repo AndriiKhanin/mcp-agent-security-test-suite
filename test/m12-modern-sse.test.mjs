@@ -22,7 +22,12 @@ const BAD_RESPONSE=[
   'invalid-utf8','oversized','too-many-comments','wrong-event',
   'missing-final','truncated-frame','wrong-content-type','redirect',
   'duplicate-progress','missing-progress','progress-extra-params','progress-negative','wrong-jsonrpc-version','missing-is-error','extra-result-content','wrong-server-info',
-  'wrong-result-text','duplicate-event-field','sse-id-field','sse-retry-field','lone-cr','blank-final-data','trailing-comment','extra-data-field'
+  'wrong-result-text','duplicate-event-field','sse-id-field','sse-retry-field','lone-cr','blank-final-data','trailing-comment','extra-data-field',
+  'response-set-cookie','response-session-id','response-authorization',
+  'response-content-encoding','response-content-disposition',
+  'response-cache-public','response-buffering-enabled',
+  'response-connection-keepalive','response-duplicate-content-type',
+  'response-refresh'
 ];
 
 test('M12-G: real fragmented SSE byte stream has exact progress and final result',async()=>{
@@ -58,8 +63,8 @@ test('M12-G: CRLF, comments, data fragmentation and multiline data are accepted'
   }
 });
 
-test('M12-H: all 33 malformed SSE reply classes fail before gateway',async()=>{
-  assert.equal(BAD_RESPONSE.length,33);
+test('M12-H: all 43 malformed SSE reply classes fail before gateway',async()=>{
+  assert.equal(BAD_RESPONSE.length,43);
   for(const fault of BAD_RESPONSE){
     const r=await runOwnedModernSse(fixture,{fault});
     assert.equal(r.status,'FAIL',fault);
@@ -88,6 +93,26 @@ test('M12-J: a comment-only frame after the final response is forbidden',async()
   const good=await runOwnedModernSse(fixture,{fault:'comments'});
   assert.equal(good.status,'PASS');
   assert.equal(good.toyGatewayDeliveries,1);
+});
+
+test('M12-N: unexpected HTTP response metadata denies otherwise valid SSE bytes',async()=>{
+  const faults=BAD_RESPONSE.filter(x=>x.startsWith('response-'));
+  assert.equal(faults.length,10);
+  for(const fault of faults){
+    const r=await runOwnedModernSse(fixture,{fault});
+    assert.equal(r.ruleCode,'M12_SSE_RESPONSE_REJECTED',fault);
+    assert.equal(r.status,'FAIL',fault);
+    assert.equal(r.httpRequestsObserved,1,fault);
+    assert.equal(r.httpRequestsAccepted,1,fault);
+    assert.equal(r.httpRequestsDenied,0,fault);
+    assert.equal(r.httpResponsesClosed,1,fault);
+    assert.equal(r.tcpSocketsClosed,1,fault);
+    assert.equal(r.socketCleanupConfirmed,true,fault);
+    assert.equal(r.toyGatewayDeliveries,0,fault);
+    assert.equal(r.protectedFictionalEffectsCommitted,0,fault);
+    assert.equal(r.actualExternalMcpContacted,false,fault);
+    assert.ok(!JSON.stringify(r).includes('FICTIONAL-NO-AUTHORITY'));
+  }
 });
 
 test('M12-H: HTTP 302 is recorded but never followed into a gateway',async()=>{
@@ -224,16 +249,16 @@ test('M12-H: no arbitrary target, host, process or unsafe options accepted',asyn
       /INVALID_M12_SSE_SOURCE_OPTIONS/);
 });
 
-test('M12-I: zero-argument selftest checks 4 positive and 36 expected negative controls',async()=>{
+test('M12-I: zero-argument selftest checks 4 positive and 46 expected negative controls',async()=>{
   const r=await runFixedModernSseSelftest();
   assert.equal(r.status,'PASS');
   assert.equal(r.exitCode,0);
   assert.equal(r.ruleCode,'M12_SSE_FIXED_CONTROLS_MATCH');
-  assert.equal(r.checked,40);
-  assert.equal(r.matched,40);
+  assert.equal(r.checked,50);
+  assert.equal(r.matched,50);
   assert.equal(r.expectedPositiveControls,4);
-  assert.equal(r.expectedNegativeControls,36);
-  assert.equal(r.negativeControlsMatched,36);
+  assert.equal(r.expectedNegativeControls,46);
+  assert.equal(r.negativeControlsMatched,46);
   assert.ok(r.cases.every(x=>x.matched));
   assert.ok(Object.isFrozen(r));
   assert.ok(Object.isFrozen(r.cases));
@@ -250,7 +275,7 @@ test('M12-I: zero-argument CLI rejects attempts to supply target or file',()=>{
   assert.equal(good.stderr,'');
   const report=JSON.parse(good.stdout);
   assert.equal(report.status,'PASS');
-  assert.equal(report.checked,40);
+  assert.equal(report.checked,50);
   for(const arg of [
     '--url=https://private.invalid','../../secret.json','PRIVATE_CANARY'
   ]){

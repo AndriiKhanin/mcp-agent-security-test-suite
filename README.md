@@ -144,9 +144,14 @@ strictly verifies each frame, UTF-8, IDs, exact fictional data and
 the final response before passing any tool content into the M10
 deterministic toy gateway. Valid fragmented chunks, CRLF, comments
 and multiline data are accepted; M12-J/K/L extends the source-only
-matrix to 40 checks (4 accepted, 36 deliberately rejected). Forged
+matrix to 50 checks (4 accepted, 46 deliberately rejected). Forged
 progress/result metadata, SSE id/retry control lines and a comment frame
 after the final reply are rejected before any toy gateway delivery.
+M12-M/N/O additionally denies ten unreviewed response-header variants,
+including legacy session/cookie fields, altered caching and duplicate
+Content-Type, even when the SSE body bytes would otherwise be valid.
+The response-header allowlist is specific to the first-party mock, not
+complete MCP or HTTP conformance.
 
 This is **not complete MCP conformance**, a real LLM evaluation,
 external MCP test, independent security audit or authorization
@@ -155,6 +160,8 @@ to scan user servers. See the [source-only modern SSE scope](
 and [Issue #246](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/246).
 The added fail-closed framing controls are tracked in
 [Issue #248](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/248).
+Response header hardening is tracked in
+[Issue #250](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/250).
 
 ## Modern MCP x-mcp-header parameter mirror (M12-D/E/F)
 

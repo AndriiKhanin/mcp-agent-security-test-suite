@@ -31,7 +31,8 @@ const MODES=Object.freeze([
   'missing-final','truncated-frame','wrong-content-type',
   'redirect','hang','wrong-origin','wrong-method',
   'duplicate-progress','missing-progress','progress-extra-params','progress-negative','wrong-jsonrpc-version','missing-is-error','extra-result-content','wrong-server-info',
-  'wrong-result-text','duplicate-event-field','sse-id-field','sse-retry-field','lone-cr','blank-final-data','trailing-comment','extra-data-field'
+  'wrong-result-text','duplicate-event-field','sse-id-field','sse-retry-field','lone-cr','blank-final-data','trailing-comment','extra-data-field',
+  'response-set-cookie','response-session-id','response-authorization','response-content-encoding','response-content-disposition','response-cache-public','response-buffering-enabled','response-connection-keepalive','response-duplicate-content-type','response-refresh'
 ]);
 const positives=new Set(['fragmented','crlf','comments','multiline']);
 const invalid=()=>{throw new TypeError('INVALID_M12_SSE_SOURCE_OPTIONS');};
@@ -230,6 +231,26 @@ function duplicateHeaders(req){
   }
   return false;
 }
+/** Strict first-party response contract; not a general-purpose SSE client. */
+function validOwnedSseResponseHeaders(res){
+  const required={
+    'content-type':'text/event-stream',
+    'cache-control':'no-store',
+    'x-accel-buffering':'no',
+    connection:'close',
+    'transfer-encoding':'chunked'
+  };
+  const allowed=new Set([...Object.keys(required),'date']);
+  for(const [name,value] of Object.entries(required))
+    if(res.headers[name]!==value)return false;
+  const seen=new Set();
+  for(let i=0;i<res.rawHeaders.length;i+=2){
+    const name=res.rawHeaders[i].toLowerCase();
+    if(!allowed.has(name)||seen.has(name))return false;
+    seen.add(name);
+  }
+  return true;
+}
 function sendError(res,status){
   const text=JSON.stringify({jsonrpc:'2.0',
     error:{code:status===403?-32000:-32020,message:'Owned request denied'}});
@@ -277,9 +298,30 @@ function serve(fixture,fault,port,counts){
           connection:'close','cache-control':'no-store'});
         res.end();return;
       }
-      res.writeHead(200,{'content-type':fault==='wrong-content-type'?
+      const replyHeaders={'content-type':fault==='wrong-content-type'?
         'application/json':'text/event-stream',
-        'x-accel-buffering':'no','cache-control':'no-store',connection:'close'});
+        'x-accel-buffering':'no','cache-control':'no-store',connection:'close'};
+      if(fault==='response-set-cookie')
+        replyHeaders['set-cookie']='fictional=one; HttpOnly';
+      if(fault==='response-session-id')
+        replyHeaders['mcp-session-id']='fictional-unapproved-session';
+      if(fault==='response-authorization')
+        replyHeaders.authorization='Bearer FICTIONAL-NO-AUTHORITY';
+      if(fault==='response-content-encoding')
+        replyHeaders['content-encoding']='gzip';
+      if(fault==='response-content-disposition')
+        replyHeaders['content-disposition']='attachment; filename="fictional.txt"';
+      if(fault==='response-cache-public')
+        replyHeaders['cache-control']='public, max-age=3600';
+      if(fault==='response-buffering-enabled')
+        replyHeaders['x-accel-buffering']='yes';
+      if(fault==='response-connection-keepalive')
+        replyHeaders.connection='keep-alive';
+      if(fault==='response-duplicate-content-type')
+        replyHeaders['content-type']=['text/event-stream','text/event-stream'];
+      if(fault==='response-refresh')
+        replyHeaders.refresh='0;url=http://unapproved.invalid';
+      res.writeHead(200,replyHeaders);
       const bytes=makeStream(fixture,fault);
       if(fault==='hang'){
         // Emit one complete request-scoped notification, then stall.
@@ -324,8 +366,7 @@ function exchange(port,fixture,fault,deadlineMs){
           'REQUEST_REJECTED':'RESPONSE_REJECTED',null,res.statusCode);
         return;
       }
-      if(res.headers['content-type']!=='text/event-stream'||
-         Object.hasOwn(res.headers,'location')){
+      if(!validOwnedSseResponseHeaders(res)){
         res.resume();finish('RESPONSE_REJECTED');return;
       }
       const chunks=[];let size=0;
@@ -450,7 +491,8 @@ const CASES=Object.freeze([
     'extra-result-authority','malformed-json','duplicate-json-key',
     'invalid-utf8','oversized','too-many-comments','wrong-event',
     'missing-final','truncated-frame','wrong-content-type',
-    ...["duplicate-progress","missing-progress","progress-extra-params","progress-negative","wrong-jsonrpc-version","missing-is-error","extra-result-content","wrong-server-info","wrong-result-text","duplicate-event-field","sse-id-field","sse-retry-field","lone-cr","blank-final-data","trailing-comment","extra-data-field"]].map(x=>
+    ...["duplicate-progress","missing-progress","progress-extra-params","progress-negative","wrong-jsonrpc-version","missing-is-error","extra-result-content","wrong-server-info","wrong-result-text","duplicate-event-field","sse-id-field","sse-retry-field","lone-cr","blank-final-data","trailing-comment","extra-data-field",
+      "response-set-cookie","response-session-id","response-authorization","response-content-encoding","response-content-disposition","response-cache-public","response-buffering-enabled","response-connection-keepalive","response-duplicate-content-type","response-refresh"]].map(x=>
     [x,'FAIL','M12_SSE_RESPONSE_REJECTED',1,0,0,0]),
   ['redirect','FAIL','M12_SSE_RESPONSE_REJECTED',1,0,302,0],
   ['hang','FAIL','M12_SSE_REQUEST_TIMEOUT',1,0,0,0],

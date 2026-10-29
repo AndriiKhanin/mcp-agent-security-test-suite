@@ -36,11 +36,18 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
 | **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-U ENGINEERING ACCEPTED; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
-| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-I ACCEPTED; M12-J/K/L IN PROGRESS; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
+| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-L ACCEPTED; M12-M/N/O IN PROGRESS; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M12-J/K/L — fail-closed SSE frame and result hardening (PR validation pending)
+## M12-M/N/O — strict first-party modern SSE response-header gate (PR validation pending)
+
+- [Issue #250](../../issues/250): reject missing, unexpected or duplicate HTTP response fields even when body SSE data is valid; strict source-owned Node 20/22 header allowlist, not a complete HTTP/MCP conformance rule.
+- Add ten fixed negative modes covering cookie/session/authorization, response encoding/disposition/refresh, altered cache/buffering/connection and duplicate content type; require rejection before M10 delivery and exact HTTP/TCP close witnesses.
+- M12 selftest: **50** controls (4 accepted, 46 rejected). Preserve the unpublished **80-path** candidate and complete SHA-256 excluded-source custody. External gates #21/#43/#59 stay open.
+- Require 4/4 PR CI and independent 4/4 post-merge main CI before engineering acceptance.
+
+## M12-J/K/L — fail-closed SSE frame and result hardening (engineering accepted)
 
 - [Issue #248](../../issues/248) extends the accepted source-only,
   127.0.0.1 request-scoped modern SSE test, without adding external
@@ -55,8 +62,9 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M12-L:** update contributor documentation and exact source-only
   regression; preserve the **80-path unpublished npm candidate** and
   full bounded M6-J SHA-256 excluded-source inventory.
-- **Acceptance pending:** Windows/Ubuntu Node20/22 PR CI 4/4;
-  after squash merge, independently verify main push CI 4/4.
+- **Engineering accepted:** [PR #249](../../pull/249) merged as
+  `6aea8047`; independent [main push CI](../../actions/runs/40767450604)
+  **4/4 PASS** on Windows/Ubuntu Node20/22.
   External approval #21, audit #43 and beta #59 stay OPEN.
 
 ## M12-G/H/I — request-scoped modern SSE tool-result stream (merged engineering)
