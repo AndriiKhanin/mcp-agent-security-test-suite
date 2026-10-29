@@ -50,11 +50,43 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M20 — Privacy-minimal beta intake preflight** | Bounded stdin JSON; categorical consistency checks, no-echo and explicit human provenance requirement | **M20-A/B/C ENGINEERING ACCEPTED — PR/main CI 4/4** | [#282](../../issues/282), [PR #283](../../pull/283), [main CI #40919664479](../../actions/runs/40919664479), [guide](.github/M20_BETA_INTAKE_PREFLIGHT.md) | Human triage only, no independent beta claim; 4/4 PR + 4/4 main CI verified |
 
-| **M21 — Bounded multi-report beta triage** | Strict offline batch of 2–4 M20 categorical self-reports, repeated-pattern flags and conservative attribution | **M21-A/B/C ENGINEERING IN PROGRESS — PR CI pending** | [#285](../../issues/285), [guide](.github/M21_BETA_BATCH_TRIAGE.md) | No verified unique testers, no raw echo, source-only custody and PR/main 4/4 |
+| **M21 — Bounded multi-report beta triage** | Strict offline batch of 2–4 M20 categorical self-reports, repeated-pattern flags and conservative attribution | **ENGINEERING ACCEPTED — PR/main CI 4/4; beta not independently verified** | [#285](../../issues/285), [PR #286](../../pull/286), [main CI #40926082743](../../actions/runs/40926082743), [guide](.github/M21_BETA_BATCH_TRIAGE.md) | Categorically scoped triage, no verified unique testers, no untrusted input echo |
+
+| **M22 — Finite-action contributed security scenarios** | Reviewed, constrained enum-only JSON files auto-discovered by a fixed source-only runner | **ENGINEERING IN PROGRESS — PR/main CI required** | [#287](../../issues/287), [guide](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md) | 8 initial source-owned cases; contributor ninth auto-discovered, forged expectations and unsafe files fail closed |
 
 | **M23 — Community-requested attack-family demonstration** | Fixed toy controls for tool-description rug pulls, multi-server authority crossing and error-channel leaks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#288](../../issues/288), [PR #289](../../pull/289), [main CI #40930780325](../../actions/runs/40930780325), [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md) | 10/10 source-owned comparisons + negative mutations; no live MCP/model certification |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M22-A/B/C — reviewed finite-action contributor scenarios (engineering in progress)
+
+- [Issue #287](../../issues/287): `node tools/m22-finite-scenario-runner.mjs`
+  reads only the fixed `.github/m22-scenarios/` directory, **5–12**
+  regular JSON files of **1–1,024 bytes each**. Exact filenames, bounded
+  reads, strict UTF-8 and duplicate-key checks, no unknown fields, no
+  symlinks or user path/URL arguments. It never executes supplied code.
+- **M22-A:** eight committed enum-only cases include two authorized
+  task-data controls and six denied attempts across untrusted resource,
+  extra tool, spoofed claims, owner-side forbidden access and mismatch.
+  The existing M9-B in-memory policy is checked against a **separate
+  source-authored oracle**, not the contributor's asserted expectations.
+  The deliberately permissive toy must expose precisely six fictional
+  protected counter effects; guarded policy must expose zero.
+- **M22-B:** source-only CI tests copy reviewed runner/dependencies into
+  a disposable **separate temporary directory**, add a ninth valid
+  scenario without editing runner code, and require `checked=9`.
+  Wrong expected guarded/permissive decisions yield **FAIL**; unsafe
+  malformed or symlinked files yield **ERROR**. Additional negative
+  mutations detect fake guarded decisions, missing unsafe effects,
+  forged witness status and raw-input echo.
+- **M22-C:** [schema and contribution guide](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md),
+  README, 80-path npm candidate unchanged, M6-J full excluded-source
+  hashing widened only to **224 entries** while preserving size limits,
+  40 KiB canonical packet and 2 MB reviewed-source cap. This is *not*
+  independent model/agent testing or semantic prompt-injection coverage.
+  No external MCP, Stable Bridge, real files, secrets or telemetry;
+  owner/independent gates #21/#43/#59 remain OPEN. Require
+  Windows/Ubuntu Node20/22 PR **4/4** and exact main CI **4/4**.
 
 ## M23-A/B/C — community-requested trust-boundary scenarios (engineering accepted)
 
@@ -77,7 +109,7 @@ We will not claim a release is production-ready merely because a synthetic test 
   80-path package. M8's existing fixture schema does *not* represent
   these three families and must not be mislabelled as a semantic
   rug-pull or multi-server tester; separate M22 [#287](../../issues/287)
-  tracks future contributed finite-action cases.
+  now has a separate finite-action scenario contribution contract.
   No user MCP targets, LLM, networking or Stable Bridge. Independent
   beta #59, audit #43 and external approval #21 remain OPEN. [PR #289](../../pull/289)
   passed [PR CI #40930112479](../../actions/runs/40930112479) **4/4**,
@@ -86,7 +118,7 @@ We will not claim a release is production-ready merely because a synthetic test 
   passed **4/4 on the same SHA** (Windows/Ubuntu Node20/22).
   Engineering acceptance is **not** real-agent validation or independent beta.
 
-## M21-A/B/C — privacy-minimal multi-report preflight (engineering in progress)
+## M21-A/B/C — privacy-minimal multi-report preflight (engineering accepted)
 
 - [Issue #285](../../issues/285) adds a source-only
   `node tools/m21-beta-batch.mjs` entrypoint, reading at most
@@ -107,8 +139,12 @@ We will not claim a release is production-ready merely because a synthetic test 
   README, regression/mutation/no-echo tests and source-only custody.
   Preserve pinned M13 historical test instructions and unpublished
   **80-path** npm candidate. Independent beta #59, audit #43 and
-  real-target approval #21 remain OPEN. Require PR and exact post-merge
-  main CI **4/4** (Windows/Ubuntu Node20/22).
+  real-target approval #21 remain OPEN. [PR #286](../../pull/286)
+  passed [PR CI #40925522858](../../actions/runs/40925522858)
+  **4/4** and merged as `e2e282012df24f6263c0d1658810142b8c416ba0`;
+  independent [main CI #40926082743](../../actions/runs/40926082743)
+  passed **4/4 on that exact SHA** (Windows/Ubuntu Node20/22).
+  This closes engineering scope only, not real independent beta.
 
 ## M20-A/B/C — safety-bounded voluntary beta intake preflight (engineering accepted)
 
