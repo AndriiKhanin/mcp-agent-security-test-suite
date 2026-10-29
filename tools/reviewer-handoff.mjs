@@ -205,6 +205,8 @@ function readPacket(path){
  * to recheck the archive, installed files and every excluded source byte.
  */
 function quickLocalSourceFingerprint(){
+  const testRoot=lstatSync(join(root,'test'));
+  if(!testRoot.isDirectory()||testRoot.isSymbolicLink())denied();
   const indexPath=join(root,'test','expected-package-files.json');
   const indexStat=lstatSync(indexPath);
   if(!indexStat.isFile()||indexStat.isSymbolicLink()||
