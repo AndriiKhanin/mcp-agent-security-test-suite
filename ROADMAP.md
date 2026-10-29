@@ -39,11 +39,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-R ENGINEERING ACCEPTED; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [#255](../../issues/255), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
 | **M13 — Self-service fictional beta handoff** | Frozen source revision, correct combined review card and pinned volunteer instructions | **M13-A/B/C ENGINEERING ACCEPTED; independent beta still OPEN** | [#258](../../issues/258), [PR #259](../../pull/259), [handoff](.github/BETA_VOLUNTEER_HANDOFF.md) | Matched 4/4 PR and main CI; independent consenting tester report remains [#59](../../issues/59) |
 | **M14 — Optional first-party capability tour** | Four deeper synthetic demonstrations for volunteers | **ENGINEERING ACCEPTED — first-party source only** | [#261](../../issues/261), [PR #262](../../pull/262), [main CI #40846079531](../../actions/runs/40846079531) | PR and main CI 4/4; genuine beta #59 separate |
-| **M15 — Owned deliberately vulnerable MCP lab** | Differential intentionally susceptible/guarded toy agent and local server, observed effects | **IN PROGRESS — PR and CI pending** | [#263](../../issues/263), [guide](.github/M15_OWNED_REDTEAM_LAB.md) | Detect deliberately observed synthetic unsafe effect + both defenses; PR/main CI 4/4 |
+| **M15 — Owned deliberately vulnerable MCP lab** | Differential intentionally susceptible/guarded toy agent and local server, observed effects | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#263](../../issues/263), [PR #264](../../pull/264), [main CI #40857820827](../../actions/runs/40857820827), [guide](.github/M15_OWNED_REDTEAM_LAB.md) | One synthetic unsafe effect witnessed + both defenses; real-agent tests remain separate |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M15-A/B/C — intentionally vulnerable owned MCP differential lab (engineering in progress)
+## M15-A/B/C — intentionally vulnerable owned MCP differential lab (engineering accepted)
 
 - [Issue #263](../../issues/263) adds `node tools/owned-redteam-lab.mjs`
   as a fixed, no-argument **source-only** comparison. Four independent
@@ -60,7 +60,12 @@ We will not claim a release is production-ready merely because a synthetic test 
   experimentation from real-agent security or full protocol conformance.
   No Stable Bridge, credentials, external MCP server, real file read or
   user-driven URL. 80-path unpublished candidate and external gates
-  #21/#43/#59 unchanged. PR and post-merge main CI **4/4** required.
+  #21/#43/#59 unchanged. [PR #264](../../pull/264) passed
+  [PR CI #40857361062](../../actions/runs/40857361062) **4/4** and
+  merged as `a606df890a8664566a482b439e1e1bb0c1bc9bc7`;
+  independently triggered [main CI #40857820827](../../actions/runs/40857820827)
+  passed **4/4** on the **same SHA**. A Windows socket-close witness race
+  was repaired before merge; no external beta or security audit claimed.
 
 ## M14-A/B/C — optional broader first-party beta tour (engineering accepted)
 
