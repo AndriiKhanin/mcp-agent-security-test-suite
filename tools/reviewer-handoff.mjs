@@ -243,8 +243,10 @@ export function verifyHandoff(value){
   validateHandoff(value);
   // Do not run three isolated npm operations for a provably stale packet.
   // The positive path still executes every original independent check.
-  if(!exact(value.packagedSource,quickLocalSourceFingerprint())||
-     !exact(value.excludedReview,excludedFileIndex()))return false;
+  const source=quickLocalSourceFingerprint();
+  const excluded=excludedFileIndex();
+  if(!exact(value.packagedSource,source)||
+     !exact(value.excludedReview,excluded))return false;
   return canonical(value)===canonical(buildHandoff());
 }
 const reply=(status,code)=>JSON.stringify({
