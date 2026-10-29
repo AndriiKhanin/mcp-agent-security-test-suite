@@ -40,8 +40,28 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M13 — Self-service fictional beta handoff** | Frozen source revision, correct combined review card and pinned volunteer instructions | **M13-A/B/C ENGINEERING ACCEPTED; independent beta still OPEN** | [#258](../../issues/258), [PR #259](../../pull/259), [handoff](.github/BETA_VOLUNTEER_HANDOFF.md) | Matched 4/4 PR and main CI; independent consenting tester report remains [#59](../../issues/59) |
 | **M14 — Optional first-party capability tour** | Four deeper synthetic demonstrations for volunteers | **ENGINEERING ACCEPTED — first-party source only** | [#261](../../issues/261), [PR #262](../../pull/262), [main CI #40846079531](../../actions/runs/40846079531) | PR and main CI 4/4; genuine beta #59 separate |
 | **M15 — Owned deliberately vulnerable MCP lab** | Differential intentionally susceptible/guarded toy agent and local server, observed effects | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#263](../../issues/263), [PR #264](../../pull/264), [main CI #40857820827](../../actions/runs/40857820827), [guide](.github/M15_OWNED_REDTEAM_LAB.md) | One synthetic unsafe effect witnessed + both defenses; real-agent tests remain separate |
+| **M16 — Owned authority/replay/response-tamper differential** | Three independent deliberately vulnerable mock/client pairs with exact observed boundaries | **IN PROGRESS — PR/CI not accepted yet** | [#266](../../issues/266), [guide](.github/M16_OWNED_ATTACK_MATRIX.md) | Six fixed real localhost cases; 3 unsafe effects observed, 3 guarded outcomes; PR/main CI 4/4 |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M16-A/B/C — owned authority, replay and reply-tamper matrix (engineering in progress)
+
+- [Issue #266](../../issues/266): `node tools/owned-attack-matrix.mjs`
+  runs six first-party real HTTP checks over fresh ephemeral
+  `127.0.0.1` servers. The deliberately unsafe pairs witness
+  **one unauthorized effect from forged tool-data authority**, **two
+  effects from replay of the same synthetic idempotency key** and
+  **one extra effect from a wrong-ID JSON-RPC reply**.
+- Each guarded counterpart must witness respectively **HTTP 403
+  with zero effect**, **HTTP 409 with exactly one initial effect**, and
+  **no follow-on request**. Strict source-owned independent counters,
+  precise HTTP replies, cleanup and negative mutations prevent silently
+  treating intentionally unsafe behavior as safe.
+- [Guide](.github/M16_OWNED_ATTACK_MATRIX.md) states limits.
+  Source-only; unchanged unpublished 80-path npm candidate.
+  **Not** a real LLM, user MCP test, security audit or independent beta.
+  Owner/independent gates #21/#43/#59 remain OPEN. PR and post-merge
+  main 4/4 CI required.
 
 ## M15-A/B/C — intentionally vulnerable owned MCP differential lab (engineering accepted)
 
