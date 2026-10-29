@@ -354,7 +354,7 @@ test('M12-I: docs, source-only custody and npm release inventory remain bounded'
   for(const t of [doc,readme])
     assert.match(t,/node tools\/m12-modern-sse\.mjs/);
   assert.match(roadmap,/M12-G\/H\/I/);
-  assert.match(custody,/MAX_EXCLUDED_FILES=176/);
+  assert.match(custody,/MAX_EXCLUDED_FILES=192/);
   assert.match(source,/HOST='127\.0\.0\.1'/);
   assert.match(source,/runOwnedModernMcpSubset/);
   assert.match(source,/runFictionalToySession/);
