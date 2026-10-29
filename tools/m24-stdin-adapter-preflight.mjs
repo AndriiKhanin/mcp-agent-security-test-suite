@@ -43,8 +43,10 @@ const allowedControls=new Set(OFFLINE_FIXTURE_CASES);
  */
 export function inspectStdinAdapterDescriptor(descriptor) {
   try {
-    const schema=inspectProjectAdapter(descriptor);
+    // First reject accessors/foreign prototypes before the legacy schema
+    // validator reads any direct property of a JS API caller's object.
     const check=previewOfflineAdapterQuickstart(descriptor);
+    const schema=inspectProjectAdapter(descriptor);
     if(schema.status!=='PASS'||
        check.status!=='PASS'||
        schema.transport!==check.transport||
