@@ -13,8 +13,8 @@ node tools/m16-permission-replay-lab.mjs
 ```
 
 The helper accepts **zero arguments**. It owns both ends of **18 ephemeral
-IPv4 \`127.0.0.1\` HTTP interactions** (9 cases, guarded and deliberately
-permissive configuration). The \`REPLAY\` case makes two calls per configuration;
+IPv4 `127.0.0.1` HTTP interactions** (9 cases, guarded and deliberately
+permissive configuration). The `REPLAY` case makes two calls per configuration;
 the other eight cases make one each, so **20 requests total**. All ports are
 kernel-assigned and closed before report generation. There are **no external
 destinations**, no Stable Bridge interaction, no user-submitted endpoint,
@@ -40,7 +40,7 @@ The guarded policy compares a request against a **source-owned fictional
 grant**, checks the server-owned logical tick and revocation flag, and
 consumes the grant on successful use. The permissive policy is intentionally
 wrong: it admits all source-owned well-formed requests. Both produce only
-in-memory effect counters. The literal \`FICTIONAL-CAPABILITY-ONLY\` is a
+in-memory effect counters. The literal `FICTIONAL-CAPABILITY-ONLY` is a
 test string, not a bearer credential or authorization proof.
 
 The independent report oracle demands exact HTTP status sequences, server
@@ -51,8 +51,8 @@ arrays and accessor-bearing input. The CLI report only emits fixed case
 identifiers and symbolic witness field names; no mock token, payload, paths
 or listener URLs.
 
-**Expected result:** JSON \`status: "PASS"\`, \`checked: 9\`,
-\`matched: 9\`, \`expectedUnsafeCases: 8\`. This means all **deliberately
+**Expected result:** JSON `status: "PASS"`, `checked: 9`,
+`matched: 9`, `expectedUnsafeCases: 8`. This means all **deliberately
 vulnerable** behaviors were witnessed and all guarded equivalents behaved as
 expected. It emphatically **does not mean the permissive server is secure**.
 
