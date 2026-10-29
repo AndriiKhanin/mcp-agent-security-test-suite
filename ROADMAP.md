@@ -46,11 +46,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M18 — Measurable symbolic classification QA** | Exhaustive authored profile/event combinations and separate rule oracle; three-way alert/clear/abstain confusion accounting | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#276](../../issues/276), [PR #277](../../pull/277), [main CI #40908374045](../../actions/runs/40908374045), [guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md) | 32/32 symbolic reference cases, TP/FP/FN/TN and bad baselines; no external-efficacy inference |
 
-| **M19 — Single first-party assessment summary** | Source-separated one-command integration of all owned-wire and symbolic evidence without falsely aggregating real attacks | **ENGINEERING IN PROGRESS — CI PENDING** | [#279](../../issues/279), [guide](.github/M19_ASSESSMENT_SUMMARY.md) | Five report gates / 23 wire + 32 symbolic source-owned cases; independent PR and main 4/4 CI |
+| **M19 — Single first-party assessment summary** | Source-separated one-command integration of all owned-wire and symbolic evidence without falsely aggregating real attacks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#279](../../issues/279), [PR #280](../../pull/280), [main CI #40912510667](../../actions/runs/40912510667), [guide](.github/M19_ASSESSMENT_SUMMARY.md) | Five verified report gates / 23 wire + 32 symbolic source-owned cases; independent beta pending |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M19-A/B/C — first-party one-command evidence assessment (engineering in progress)
+## M19-A/B/C — first-party one-command evidence assessment (engineering accepted)
 
 - **M19-A:** [Issue #279](../../issues/279) adds
   `node tools/m19-assessment-summary.mjs` — a zero-argument source-only
@@ -68,8 +68,12 @@ We will not claim a release is production-ready merely because a synthetic test 
   README, source-only test suite, 80-file unpublished package unchanged.
   No Stable Bridge, user MCP server, LLM or new runtime dependency.
   Independent beta #59, audit #43 and target authorization #21 stay
-  OPEN. Acceptance requires both PR CI **4/4** and exact post-merge
-  main CI **4/4** (Windows/Ubuntu Node20/22).
+  OPEN. [PR #280](../../pull/280) passed
+  [PR CI #40911862973](../../actions/runs/40911862973) **4/4**,
+  merged as `12b5eec7aa585e36f6d017075dcd485d8b019c1f`,
+  and separately [main CI #40912510667](../../actions/runs/40912510667)
+  passed **4/4 on that same SHA** (Windows/Ubuntu Node20/22).
+  Engineering acceptance does not satisfy the external beta or audit gate.
 
 ## M18-A/B/C — symbolic measurement and negative-control benchmark (engineering accepted)
 
