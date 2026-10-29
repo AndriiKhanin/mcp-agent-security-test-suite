@@ -12,7 +12,9 @@ import {BETA_CASES,runBeta} from '../examples/beta-acceptance-check.mjs';
 const RULES=new Set(['NONE','BETA_PROCESS_FAILURE','BETA_REPORT_INVALID','BETA_EXPECTATION_MISMATCH']);
 const invalid=()=>{throw new TypeError('INVALID_FICTIONAL_BETA_CARD_INPUT');};
 
-export function buildBetaFeedbackCard(result) {
+export function buildBetaFeedbackCard(result, mode='standalone') {
+  // Both modes are source-owned presentation profiles; neither grants new authority.
+  if(mode!=='standalone' && mode!=='combined-review') invalid();
   if(!result || typeof result!=='object' || Array.isArray(result) ||
      Object.getPrototypeOf(result)!==Object.prototype ||
      !Array.isArray(result.cases) || result.cases.length!==BETA_CASES.length ||
@@ -53,10 +55,12 @@ export function buildBetaFeedbackCard(result) {
     '# Fictional offline beta feedback — self-reported only',
     '',
     'Candidate: 0.0.10-rc.1',
-    'Public Git commit SHA: [fill manually from git rev-parse HEAD]',
+    mode==='standalone'
+      ? 'Public Git commit SHA: [fill manually from git rev-parse HEAD]'
+      : 'Public Git commit SHA: see local Git HEAD above (independently verify)',
     'Operating system (Windows/Ubuntu): [fill manually]',
     'Node major (20/22): [fill manually]',
-    'Commands used: node tools/beta-feedback-card.mjs',
+    'Commands used: node tools/'+(mode==='standalone'?'beta-feedback-card.mjs':'beta-review.mjs'),
     'Fixed check matches: '+matched+'/'+BETA_CASES.length,
     'Runner status: '+(result.status==='PASS'?'PASS':'FAIL'),
     '',
