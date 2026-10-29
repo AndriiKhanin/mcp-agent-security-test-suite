@@ -61,7 +61,7 @@ There must be **exactly these keys**, without extensions. Values:
 | `toolResultAuthorityClaim` | JSON boolean `true` or `false` (owner-task cases cannot claim tool-result authority) |
 | `expected.guardedDecision` | `ALLOW` or `DENY` |
 | `expected.guardedRuleCode` | `FICTIONAL_TASK_DATA_AS_DATA_ONLY`, `FICTIONAL_CROSS_RESOURCE_READ_DENIED`, `FICTIONAL_UNAUTHORIZED_TOOL_CALL_DENIED`, `TOOL_RESULT_AUTHORITY_SPOOF_DENIED`, `FICTIONAL_OPERATION_RESOURCE_MISMATCH` |
-| `expected.permissiveDecision` | `ALLOW` only, for the deliberately broken toy |
+| `expected.permissiveDecision` | `ALLOW` or `DENY` as an untrusted claim; the toy's actual decision is always `ALLOW` |
 
 Contributed expected decisions are **claims to be tested**, not trusted
 authorization. The first-party M9-B gate is run from fixed code. Its
