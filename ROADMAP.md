@@ -42,11 +42,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M15 — Owned deliberately vulnerable MCP lab** | Differential intentionally susceptible/guarded toy agent and local server, observed effects | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#263](../../issues/263), [PR #264](../../pull/264), [main CI #40857820827](../../actions/runs/40857820827), [guide](.github/M15_OWNED_REDTEAM_LAB.md) | One synthetic unsafe effect witnessed + both defenses; real-agent tests remain separate |
 | **M16 — Owned authority/replay/response-tamper differential** | Four owned attack-family and permission-grant differential controls | **M16-A through M16-G ENGINEERING ACCEPTED; no real agent** | [#266](../../issues/266), [#270](../../issues/270), [PR #271](../../pull/271), [main CI #40875297476](../../actions/runs/40875297476) | 7/7 earlier attack witnesses + 9/9 guarded/permissive grant comparisons; independently verified 4/4 CI |
 
-| **M17 — Concurrent replay race on owned MCP-shaped HTTP** | Deterministic two-request overlap exposes check-then-commit double effect and proves per-key pre-effect reservation | **M17-A/B/C IN PROGRESS — CI PENDING** | [#273](../../issues/273), [guide](.github/M17_CONCURRENT_REPLAY_RACE.md) | 3/3 real localhost witnesses + independent mutations, 4/4 PR CI and matched main CI |
+| **M17 — Concurrent replay race on owned MCP-shaped HTTP** | Deterministic two-request overlap exposes check-then-commit double effect and proves per-key pre-effect reservation | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#273](../../issues/273), [PR #274](../../pull/274), [main CI #40886331660](../../actions/runs/40886331660), [guide](.github/M17_CONCURRENT_REPLAY_RACE.md) | 3/3 first-party witnesses, 4/4 PR + 4/4 main CI; real-agent evidence separate |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M17-A/B/C — deterministic concurrent replay race (engineering in progress)
+## M17-A/B/C — deterministic concurrent replay race (engineering accepted)
 
 - [Issue #273](../../issues/273): `node tools/m17-concurrent-replay-lab.mjs`
   creates **three separate first-party ephemeral IPv4 loopback servers**
@@ -64,8 +64,12 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M17-C:** [guide](.github/M17_CONCURRENT_REPLAY_RACE.md),
   source-only command, README and frozen npm 80-file candidate.
   **M17 cannot prove real-agent, real-user or remote-server security**.
-  Gates #21/#43/#59 stay OPEN. Require Windows/Ubuntu Node20/22
-  PR CI **4/4** and separately verified post-merge main CI **4/4**.
+  Gates #21/#43/#59 stay OPEN. [PR #274](../../pull/274) passed
+  [PR CI #40885722243](../../actions/runs/40885722243) **4/4**,
+  merged at exact commit `472fc64efc4ec18a6dbaac54b4f3de36896657ae`,
+  and independent [main CI #40886331660](../../actions/runs/40886331660)
+  passed **4/4 on that same SHA**. This is engineering acceptance only,
+  not independently operated beta or real-target security validation.
 
 ## M16-E/F/G — isolated permission-grant scope and replay differential (engineering accepted)
 
