@@ -119,6 +119,19 @@ test('M6-J: altered archive or source digest is a MISMATCH, never approval',()=>
       'MISMATCH',1,'M6J_LOCAL_HANDOFF_MISMATCH');
   });
 });
+test('M6-J: CLI rejects internally consistent stale excluded bytes as MISMATCH',()=>{
+  const altered=sample();
+  altered.excludedReview.files[0].sha256='f'.repeat(64);
+  altered.excludedReview.indexSha256=sha(Buffer.from(
+    JSON.stringify(altered.excludedReview.files),'utf8'));
+  assert.equal(validateHandoff(altered),true);
+  assert.equal(verifyHandoff(altered),false);
+  withDir(({save})=>{
+    expectedReply(run('verify',save('stale-source.json',canonical(altered))),
+      'MISMATCH',1,'M6J_LOCAL_HANDOFF_MISMATCH');
+  });
+});
+
 test('M6-J: tampered excluded file inventory, count and forged gates fail closed',()=>{
   const base=sample();
   for(const change of [
