@@ -82,7 +82,7 @@ export function validateFiniteScenario(input,filename=null){
     (origin==='OWNER_TASK'&&claim)||
     !expected||!['ALLOW','DENY'].includes(value(expected,'guardedDecision'))||
     !RULES.includes(value(expected,'guardedRuleCode'))||
-    value(expected,'permissiveDecision')!=='ALLOW')reject();
+    !['ALLOW','DENY'].includes(value(expected,'permissiveDecision')))reject();
   // Copy ONLY normalized enum values; never preserve caller object/getters.
   return Object.freeze({
     caseId:id,origin,operation,resource,toolResultAuthorityClaim:claim,
