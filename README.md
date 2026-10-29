@@ -595,6 +595,28 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Optional first-party capability tour (M14-A/B/C)
+
+In an **M14 or later reviewed public source checkout** (not the older
+M13-pinned baseline), run:
+
+```sh
+node tools/beta-capability-tour.mjs
+```
+
+This opt-in, source-only command checks two inert adapter profiles, a
+fictional tool-result action policy, and two disposable **127.0.0.1**
+modern SSE exchanges: one approved response and one intentionally denied
+Authorization-header request. The four controls must all **MATCH**;
+expected synthetic DENY is a successful rejection, not live-target safety.
+Only fixed identifiers/counts/booleans are printed. No external MCP server,
+real model, user code, credentials or user-supplied URL is accessed.
+
+**This is supplementary**: it neither replaces the existing five-case
+independent beta protocol nor counts as a genuine participant report.
+The helper is excluded from the unpublished npm candidate. See the
+[beta testing guide](docs/BETA_TESTING.md#m14--optional-capability-tour).
+
 ## Voluntary independent-beta instructions (M7-S/T/U)
 
 A short [volunteer handoff](.github/BETA_VOLUNTEER_HANDOFF.md)
