@@ -58,5 +58,11 @@ network isolation are outside scope.
 Only first-party source/test/guide files were added; the unpublished
 80-path npm candidate, M6-J custody and external gates
 [#21](../issues/21), [#43](../issues/43), [#59](../issues/59) remain
-unchanged. GitHub Actions Windows/Ubuntu Node 20/22 and post-merge main
-CI must both pass before engineering acceptance.
+unchanged. Engineering acceptance (2026-10-29): [PR #264](../pull/264) passed
+[PR CI #40857361062](../actions/runs/40857361062) **4/4** and
+merged as `a606df890a8664566a482b439e1e1bb0c1bc9bc7`.
+Independent [main push CI #40857820827](../actions/runs/40857820827)
+also passed **4/4 on that exact commit** (Windows/Ubuntu Node 20/22).
+A Windows socket-close observation race was caught and corrected before
+merge. These are **author-controlled engineering tests**, never independent
+beta, real-agent validation or external security attestation.
