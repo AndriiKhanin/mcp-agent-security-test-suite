@@ -116,5 +116,10 @@ canonical packet bounds is a build failure, not permission to skip
 files. Maintainer approval precedes merge. Independently observed beta
 [#59](../issues/59), security audit [#43](../issues/43) and authorized
 real-target testing [#21](../issues/21) remain OPEN; Stable Bridge is
-excluded. Engineering acceptance requires Windows/Ubuntu × Node20/22
-PR CI **4/4** followed by exact post-merge main CI **4/4**.
+excluded. M22 engineering acceptance (2026-10-29): [PR #291](../pull/291)
+passed [PR CI #40941191039](../actions/runs/40941191039) **4/4**
+(Windows/Ubuntu Node20/22), merged at exact main SHA
+`5d4c7f81ead97183184f33142dc14b8d62a782e1`, then independent
+[main CI #40941967881](../actions/runs/40941967881) passed **4/4 on
+that exact SHA**. This remains first-party engineering evidence, not
+independent beta, real-agent validation or a published release.
