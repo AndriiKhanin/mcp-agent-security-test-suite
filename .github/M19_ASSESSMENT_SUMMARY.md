@@ -61,6 +61,10 @@ This helper is **source-only** and excluded from the frozen, unpublished
 80-file npm candidate. No runtime dependency was added. Owner-target
 approval [#21](../issues/21), independent security review
 [#43](../issues/43), and independent beta result
-[#59](../issues/59) remain open. M19 engineering acceptance requires
-PR CI **4/4** Windows/Ubuntu Node20/22 and separately verified main-push
-CI **4/4**, both tied to exact git SHAs.
+[#59](../issues/59) remain open. M19 engineering acceptance (2026-10-29):
+[PR #280](../pull/280) passed [PR CI #40911862973](../actions/runs/40911862973)
+**4/4** on Windows/Ubuntu Node20/22; it merged as
+`12b5eec7aa585e36f6d017075dcd485d8b019c1f`, and the independently
+triggered [main CI #40912510667](../actions/runs/40912510667) passed
+**4/4 on that exact SHA**. This demonstrates first-party engineering
+repeatability, not independently operated user beta or security certification.
