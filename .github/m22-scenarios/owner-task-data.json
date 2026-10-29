@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "caseId": "owner-task-data",
+  "origin": "OWNER_TASK",
+  "operation": "CONSUME_TASK_DATA",
+  "resource": "TASK_DATA",
+  "toolResultAuthorityClaim": false,
+  "expected": {
+    "guardedDecision": "ALLOW",
+    "guardedRuleCode": "FICTIONAL_TASK_DATA_AS_DATA_ONLY",
+    "permissiveDecision": "ALLOW"
+  }
+}

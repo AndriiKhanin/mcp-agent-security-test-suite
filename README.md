@@ -661,6 +661,36 @@ fixture. No external MCP, real LLM, credentials, data collection or
 Stable Bridge. See [M19 guide](.github/M19_ASSESSMENT_SUMMARY.md).
 The unpublished 80-file npm candidate is unchanged.
 
+## Contributed finite-action security fixtures (M22, source only)
+
+A contributor can add a reviewed **enum-only JSON file** to the fixed
+`.github/m22-scenarios/` directory, without changing runner code. In a
+first-party source checkout, run:
+
+```sh
+node tools/m22-finite-scenario-runner.mjs
+```
+
+The eight sample cases exercise legitimate owner/untrusted task data,
+unrelated resource requests, unauthorized extra tools, spoofed
+tool-result authority and operation/resource mismatch. The runner
+enforces **5–12 source-owned files**, at most **1,024 bytes each**,
+strict duplicate-key UTF-8 JSON, exact filenames and enum-only fields.
+It compares M9-B's actual **in-memory guarded policy** to a separate
+source-authored oracle and a **deliberately permissive** toy. Wrong
+contributor expectations fail, malformed records are rejected, and an
+additional reviewed valid file is automatically included.
+
+A passing `8/8` means **fictional policy decisions and protected
+effect counters matched**. It is not an assessment of arbitrary
+natural-language prompt injections, real MCP servers, LLMs or
+user-contributed executable code. The runner reads only approved JSON fixtures, and tests create disposable
+local copies; it never reads a protected unrelated file or contacts a
+network target, credential service, external tool or Stable Bridge.
+See [strict contribution guide](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md).
+The tool and scenario files are source-only and excluded from the
+unpublished 80-path npm candidate.
+
 ## Community-requested rug-pull, multi-server and error-leak cases (M23)
 
 From a **reviewed source checkout**, run this fixed source-only
@@ -683,7 +713,7 @@ user targets, network access, model execution, credentials, telemetry
 or Stable Bridge. This is **not** an M8 contributor JSON schema:
 those fixtures specifically represent untrusted tool-result text.
 See the [M23 scope guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md)
-and [separate M22 finite-action contribution plan](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/287).
+and [M22's separate enum-only contributor fixture runner](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md).
 The helper remains outside the unpublished 80-path npm candidate.
 
 ## Symbolic classification benchmark (M18, source only)

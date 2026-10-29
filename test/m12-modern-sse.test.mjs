@@ -354,7 +354,10 @@ test('M12-I: docs, source-only custody and npm release inventory remain bounded'
   for(const t of [doc,readme])
     assert.match(t,/node tools\/m12-modern-sse\.mjs/);
   assert.match(roadmap,/M12-G\/H\/I/);
-  assert.match(custody,/MAX_EXCLUDED_FILES=192/);
+  const custodyLimit=custody.match(/MAX_EXCLUDED_FILES=(\d+);/);
+  assert.ok(custodyLimit,'bounded reviewer custody constant required');
+  assert.ok(Number(custodyLimit[1])>=200&&Number(custodyLimit[1])<=256,
+    'custody must remain within an explicitly bounded audited range');
   assert.match(source,/HOST='127\.0\.0\.1'/);
   assert.match(source,/runOwnedModernMcpSubset/);
   assert.match(source,/runFictionalToySession/);

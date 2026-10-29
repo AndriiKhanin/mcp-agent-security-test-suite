@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "caseId": "spoofed-task-claim",
+  "origin": "UNTRUSTED_TOOL_RESULT",
+  "operation": "CONSUME_TASK_DATA",
+  "resource": "TASK_DATA",
+  "toolResultAuthorityClaim": true,
+  "expected": {
+    "guardedDecision": "DENY",
+    "guardedRuleCode": "TOOL_RESULT_AUTHORITY_SPOOF_DENIED",
+    "permissiveDecision": "ALLOW"
+  }
+}
