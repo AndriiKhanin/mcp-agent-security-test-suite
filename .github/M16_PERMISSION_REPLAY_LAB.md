@@ -67,5 +67,14 @@ MCP deployments or demonstrate resistance by arbitrary LLMs.
 
 No production registry publication or 80-file npm package changes.
 Owner authorization #21, independent audit #43 and independent beta #59
-remain open. PR CI must pass Windows/Ubuntu Node 20/22 (4/4), followed by
-separate matched main-push 4/4 acceptance.
+remain open.
+
+**Engineering acceptance (2026-10-29):** [PR #271](../pull/271) passed
+[PR CI #40874846038](../actions/runs/40874846038) **4/4** and merged
+as exact commit `9e53becf1d0413c1ca9292ad95d0b4524cb84146`.
+The separate [post-merge main CI #40875297476](../actions/runs/40875297476)
+passed **4/4 on attempt 2** at that exact SHA. The first attempt was
+**cancelled**, with three successful jobs and Windows Node22 cancelled;
+the cancelled Windows job was rerun successfully. This is author-run
+engineering evidence, not actual agent, independent beta, external-target
+approval or security certification.
