@@ -143,15 +143,20 @@ notification followed by a final JSON-RPC tool response. The client
 strictly verifies each frame, UTF-8, IDs, exact fictional data and
 the final response before passing any tool content into the M10
 deterministic toy gateway. Valid fragmented chunks, CRLF, comments
-and multiline data are accepted; M12-J/K/L extends the source-only
-matrix to 50 checks (4 accepted, 46 deliberately rejected). Forged
+and multiline data are accepted; M12-J/K/L established 40 checks,
+M12-M/N/O expanded this to 50, and M12-P/Q/R expands the first-party
+matrix to **60** (4 accepted, 56 deliberately rejected). Forged
 progress/result metadata, SSE id/retry control lines and a comment frame
 after the final reply are rejected before any toy gateway delivery.
 M12-M/N/O additionally denies ten unreviewed response-header variants,
 including legacy session/cookie fields, altered caching and duplicate
 Content-Type, even when the SSE body bytes would otherwise be valid.
 The response-header allowlist is specific to the first-party mock, not
-complete MCP or HTTP conformance.
+complete MCP or HTTP conformance. M12-P/Q/R also enforces the fixed
+incoming request-header allowlist and rejects unreviewed/duplicate
+headers, including fictional Proxy-Authorization, Mcp-Session-Id,
+Mcp-Param-Owner, Cookie and forged owner claims before tool admission.
+The allowlist is source-owned and not intended as a general MCP client.
 
 This is **not complete MCP conformance**, a real LLM evaluation,
 external MCP test, independent security audit or authorization
@@ -162,6 +167,8 @@ The added fail-closed framing controls are tracked in
 [Issue #248](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/248).
 Response header hardening is tracked in
 [Issue #250](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/250).
+Request-side header custody is tracked in
+[Issue #255](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/255).
 
 ## Modern MCP x-mcp-header parameter mirror (M12-D/E/F)
 
