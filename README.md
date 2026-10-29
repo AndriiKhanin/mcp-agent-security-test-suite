@@ -764,6 +764,33 @@ Stable Bridge or user-supplied arguments. See the
 [M18 evaluation guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md).
 This command is source-only and excluded from the unpublished npm candidate.
 
+## Community-requested approval policy drift and gate restart (M25, source only)
+
+From a reviewed first-party source checkout run:
+
+```sh
+node tools/m25-policy-epoch-restart.mjs
+```
+
+A fixed **local** MCP-shaped HTTP experiment tests two practical
+authorization gaps raised by **TheAsymmetricMind**: approve a request,
+then change policy before it executes; or logically restart the gate
+while approval is still pending. The guarded toy binds an approval to
+the exact **policy version and gate generation**, rechecks them before
+the simulated effect, and kills pending approvals on generation
+replacement. A deliberately unsafe toy incorrectly executes the
+stale request. Fresh approval after either change must still work.
+
+Five cases, 10 disposable `127.0.0.1` servers, 14 fixed requests.
+`5/5 PASS` means the synthetic unsafe behavior was **observed** and
+the guarded controls matched, not that real MCP servers or agents have
+been certified. **Restart here is a logical in-memory generation
+replacement, not a crashed and relaunched OS process.**
+No arbitrary endpoints, credentials, real files, subprocesses, external
+MCP servers or Stable Bridge. See the
+[M25 test guide](.github/M25_APPROVAL_POLICY_EPOCH.md).
+The helper is source-only, outside the unpublished npm package.
+
 ## Concurrent first-party replay race (M17, source only)
 
 From a **reviewed source checkout**, run:
