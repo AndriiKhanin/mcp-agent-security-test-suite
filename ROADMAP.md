@@ -44,7 +44,32 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M17 — Concurrent replay race on owned MCP-shaped HTTP** | Deterministic two-request overlap exposes check-then-commit double effect and proves per-key pre-effect reservation | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#273](../../issues/273), [PR #274](../../pull/274), [main CI #40886331660](../../actions/runs/40886331660), [guide](.github/M17_CONCURRENT_REPLAY_RACE.md) | 3/3 first-party witnesses, 4/4 PR + 4/4 main CI; real-agent evidence separate |
 
+| **M18 — Measurable symbolic classification QA** | Exhaustive authored profile/event combinations and separate rule oracle; three-way alert/clear/abstain confusion accounting | **M18-A/B/C IN PROGRESS — CI PENDING** | [#276](../../issues/276), [guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md) | 32/32 symbolic rule/class agreement; bad baselines with meaningful FP/FN; 4/4 PR and main CI |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M18-A/B/C — symbolic measurement and negative-control benchmark (engineering in progress)
+
+- [Issue #276](../../issues/276): fixed source-only
+  `node tools/m18-symbolic-evaluation.mjs` tests **32** profile ×
+  event-set combinations, beyond M9's original four static controls.
+  A separate source-authored label/rule oracle classifies **28 symbolic
+  attacks, two benign controls and two insufficient/contradictory
+  evidence** cases; this is NOT independently collected real traffic.
+- **M18-A:** compare exact M9 evaluator rule precedence and expected
+  safety classifications. Abstain on missing evidence rather than
+  treating every symbolic `FAIL` as a detected attacker action.
+- **M18-B:** explicitly count TP/FP/FN/TN, precision, recall, FPR,
+  FNR, coverage, abstentions and unsupported claims. Fixed degraded
+  baselines **always-clear** and **always-alert** expose FN and FP;
+  naive FAIL-is-attack baseline exposes unsupported allegations.
+  Strict negative mutations reject hidden attacks, false classifications,
+  corrupt verdicts, source gettors, missing rows and forged evidence.
+- **M18-C:** [scope and limitations](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md),
+  README and 4/4 Windows/Ubuntu Node20/22 PR and separate post-merge
+  main CI. No user MCP server, LLM, external tool, arbitrary file,
+  credential, Stable Bridge or actual attack effectiveness measured.
+  Unpublished 80-path npm candidate and #21/#43/#59 gates unchanged.
 
 ## M17-A/B/C — deterministic concurrent replay race (engineering accepted)
 
