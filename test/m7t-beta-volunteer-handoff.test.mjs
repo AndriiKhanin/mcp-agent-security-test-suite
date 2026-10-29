@@ -10,7 +10,8 @@ const handoff=readFileSync(resolve(root,'.github/BETA_VOLUNTEER_HANDOFF.md'),'ut
 test('M7-T: voluntary handoff uses only source checkout and the fixed offline beta entrypoint',()=>{
  for(const text of [
   'git clone https://github.com/AndriiKhanin/mcp-agent-security-test-suite.git',
-  'git switch --detach <AGREED_PUBLIC_40_CHARACTER_COMMIT_SHA>',
+  'git switch --detach 88212759fd5ba8e8431d028c466b33028e3a2c9b',
+  'git rev-parse HEAD',
   'node tools/beta-review.mjs',
   'Node.js 20 or 22',
   'disposable checkout',
@@ -20,6 +21,13 @@ test('M7-T: voluntary handoff uses only source checkout and the fixed offline be
  assert.equal((handoff.match(/^\`\`\`$/gm)||[]).length,1);
 });
 
+test('M13-A: self-service beta snapshot has an exact source commit and real four-job CI reference',()=>{
+ assert.ok(handoff.includes('88212759fd5ba8e8431d028c466b33028e3a2c9b'));
+ assert.ok(handoff.includes('40838819933'));
+ assert.ok(handoff.includes('without waiting for a maintainer reply'));
+ assert.ok(!handoff.includes('<AGREED_PUBLIC_40_CHARACTER_COMMIT_SHA>'));
+ assert.ok(handoff.includes('If any SHA differs, stop'));
+});
 test('M7-T: independent provenance and real target gates remain explicit',()=>{
  for(const phrase of [
   'Issue [#59]',
