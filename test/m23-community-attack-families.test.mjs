@@ -197,4 +197,10 @@ test('M23-C: no real system APIs and no change to unpublished 80-path candidate'
   assert.ok(!manifest.files.includes('.github'));
   assert.doesNotMatch(source,/from ['"]node:(?:fs|https?|net|child_process|os|worker_threads)['"]/);
   assert.doesNotMatch(source,/\bprocess\.env\b|\bfetch\s*\(|\bspawn\s*\(|\bexecFile\s*\(/);
+  // These are fixed, structured FICTIONAL strings, never runtime values.
+  assert.match(source,/MOCK_SETTING=SYNTHETIC_ENV_CANARY_NEVER_REAL/);
+  assert.match(source,/\/fictional\/workspace\/SYNTHETIC_PATH_CANARY_NEVER_REAL/);
+  assert.match(source,/x-fictional-request: demo; authorization: FictionalOnly/);
+  assert.match(source,/jsonrpc:'2\.0',id:'synthetic-error-only'/);
+  assert.match(source,/error:\{code:-32000,message:rendered\}/);
 });
