@@ -716,6 +716,31 @@ See the [M23 scope guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md)
 and [M22's separate enum-only contributor fixture runner](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md).
 The helper remains outside the unpublished 80-path npm candidate.
 
+## Private stdin-only adapter preflight (M24, source only)
+
+Want to check an adapter descriptor **without creating another file or
+contacting your MCP server**? Pipe a reviewed local JSON descriptor into:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\descriptor.json | node tools/m24-stdin-adapter-preflight.mjs
+```
+
+Linux/macOS: `cat ./descriptor.json | node tools/m24-stdin-adapter-preflight.mjs`.
+
+The helper accepts one **bounded 4 KiB strict JSON document** from stdin,
+no arguments, and runs the existing offline descriptor validator plus
+**five unrelated fixed fictional safety controls**. It does not spawn the
+specified `stdio` command, resolve/connect to a supplied HTTPS endpoint,
+read filesystem resources itself, or handle credentials. It emits only
+source-owned categorical status and `NOT_ATTEMPTED` / `REAL_TARGET_NOT_AUTHORIZED`,
+**never user paths, endpoints, commands, arguments or project names**.
+An accepted descriptor is not proof that the server or agent is safe.
+
+See [M24 guide](.github/M24_STDIN_ADAPTER_PREFLIGHT.md) and the inert
+`node src/cli.mjs adapter-template stdio` /
+`node src/cli.mjs adapter-template streamable-http` examples.
+This source-only helper is outside the unpublished 80-file npm candidate.
+
 ## Symbolic classification benchmark (M18, source only)
 
 From a reviewed first-party source checkout run:
