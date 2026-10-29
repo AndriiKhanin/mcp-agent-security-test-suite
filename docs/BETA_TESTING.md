@@ -5,9 +5,9 @@
 ## M13-A/B/C — frozen self-service beta source snapshot and accurate combined report
 
 Independent volunteers may use the explicitly pinned public commit
-`88212759fd5ba8e8431d028c466b33028e3a2c9b` (four-job [main CI #40838819933](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40838819933): **4/4 PASS**).
+`2ad680ed2e4c322374fdabf3c2007e396f893a59` (four-job [main CI #40842071546](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40842071546): **4/4 PASS**).
 After reviewing and cloning the **public source**, use
-`git switch --detach 88212759fd5ba8e8431d028c466b33028e3a2c9b`, verify the exact full SHA with
+`git switch --detach 2ad680ed2e4c322374fdabf3c2007e396f893a59`, verify the exact full SHA with
 `git rev-parse HEAD`, then run `node tools/beta-review.mjs` without
 arguments. The [volunteer handoff](../.github/BETA_VOLUNTEER_HANDOFF.md)
 contains the short copyable sequence. The historical pin is deliberate:

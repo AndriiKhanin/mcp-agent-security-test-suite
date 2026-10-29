@@ -37,8 +37,34 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
 | **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-U ENGINEERING ACCEPTED; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
 | **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-R ENGINEERING ACCEPTED; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [#255](../../issues/255), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
+| **M13 — Self-service fictional beta handoff** | Frozen source revision, correct combined review card and pinned volunteer instructions | **M13-A/B/C ENGINEERING ACCEPTED; independent beta still OPEN** | [#258](../../issues/258), [PR #259](../../pull/259), [handoff](.github/BETA_VOLUNTEER_HANDOFF.md) | Matched 4/4 PR and main CI; independent consenting tester report remains [#59](../../issues/59) |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M13-A/B/C — self-service pinned fictional beta handoff (engineering accepted)
+
+- **M13-A:** The voluntary handoff now identifies the immutable public
+  source commit `2ad680ed2e4c322374fdabf3c2007e396f893a59` as the
+  recommended independent **offline** beta revision. This is the corrected
+  beta card implementation, not the earlier M12-only snapshot. Its
+  [post-merge main CI #40842071546](../../actions/runs/40842071546)
+  passed **4/4** on Windows/Ubuntu Node20/22. The contributor must manually
+  compare the full Git SHA with GitHub; local Git metadata does not prove
+  independently verified origin or execution.
+- **M13-B:** The combined `node tools/beta-review.mjs` card names the
+  command actually run and points to its locally reported SHA. Separate
+  standalone `beta-feedback-card.mjs` manual fields remain unchanged.
+- **M13-C:** Focused regression tests for both presentation profiles and
+  the pin. [PR #259](../../pull/259) passed
+  [PR CI #40841574872](../../actions/runs/40841574872) **4/4 PASS**,
+  merged as `2ad680ed2e4c322374fdabf3c2007e396f893a59`; an
+  independent [main push CI #40842071546](../../actions/runs/40842071546)
+  also passed **4/4**. Docs pin reconciliation has its own PR/CI.
+  Unpublished **80-path** candidate and M6-J SHA-256 custody preserved.
+  **No real agent, external MCP target, automatic feedback submission,
+  security review or independent beta execution is claimed.** Owner gates
+  [#21](../../issues/21), [#43](../../issues/43), and [#59](../../issues/59)
+  remain OPEN.
 
 ## M12-P/Q/R — exact first-party incoming SSE request headers (engineering accepted)
 
