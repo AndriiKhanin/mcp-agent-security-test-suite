@@ -42,7 +42,30 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M15 — Owned deliberately vulnerable MCP lab** | Differential intentionally susceptible/guarded toy agent and local server, observed effects | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#263](../../issues/263), [PR #264](../../pull/264), [main CI #40857820827](../../actions/runs/40857820827), [guide](.github/M15_OWNED_REDTEAM_LAB.md) | One synthetic unsafe effect witnessed + both defenses; real-agent tests remain separate |
 | **M16 — Owned authority/replay/response-tamper differential** | Four owned attack-family and permission-grant differential controls | **M16-A through M16-G ENGINEERING ACCEPTED; no real agent** | [#266](../../issues/266), [#270](../../issues/270), [PR #271](../../pull/271), [main CI #40875297476](../../actions/runs/40875297476) | 7/7 earlier attack witnesses + 9/9 guarded/permissive grant comparisons; independently verified 4/4 CI |
 
+| **M17 — Concurrent replay race on owned MCP-shaped HTTP** | Deterministic two-request overlap exposes check-then-commit double effect and proves per-key pre-effect reservation | **M17-A/B/C IN PROGRESS — CI PENDING** | [#273](../../issues/273), [guide](.github/M17_CONCURRENT_REPLAY_RACE.md) | 3/3 real localhost witnesses + independent mutations, 4/4 PR CI and matched main CI |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M17-A/B/C — deterministic concurrent replay race (engineering in progress)
+
+- [Issue #273](../../issues/273): `node tools/m17-concurrent-replay-lab.mjs`
+  creates **three separate first-party ephemeral IPv4 loopback servers**
+  and sends two concurrent `tools/call` requests per scenario. The
+  server holds both responses until it has received both complete request
+  bodies, witnessing **actual overlap**, not a sequential imitation.
+- **M17-A:** deliberately vulnerable check-then-commit admits two effects
+  for the same operation key; guarded pre-effect reservation admits one
+  and returns HTTP 409 on the duplicate. A different-key positive control
+  admits both. No remote MCP service or actual database is involved.
+- **M17-B:** verify exact reply IDs/statuses, side-effect counters, duplicate
+  detection, two socket connections and full close, and no-early-response
+  rendezvous. Independent mutation cases fail on fabricated overlap,
+  lost unsafe effects, missed guarded denials or false-positive denials.
+- **M17-C:** [guide](.github/M17_CONCURRENT_REPLAY_RACE.md),
+  source-only command, README and frozen npm 80-file candidate.
+  **M17 cannot prove real-agent, real-user or remote-server security**.
+  Gates #21/#43/#59 stay OPEN. Require Windows/Ubuntu Node20/22
+  PR CI **4/4** and separately verified post-merge main CI **4/4**.
 
 ## M16-E/F/G — isolated permission-grant scope and replay differential (engineering accepted)
 

@@ -595,6 +595,30 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Concurrent first-party replay race (M17, source only)
+
+From a **reviewed source checkout**, run:
+
+```sh
+node tools/m17-concurrent-replay-lab.mjs
+```
+
+This optional, fixed test checks what **serial replay tests cannot**:
+two genuinely overlapping MCP-shaped `tools/call` requests with the same
+fictional operation key. Three independent ephemeral `127.0.0.1` mock
+servers deliberately synchronize both requests before replying. The
+unsafe *check-then-commit* mock witnesses **two** in-memory protected
+effects; atomic pre-effect reservation permits **one**, denying the duplicate
+with HTTP 409; a different-key positive control allows both.
+
+`3/3 PASS` means the unsafe race was **actually detected**, both guarded
+controls matched and response/socket cleanup was observed. It does **not**
+mean the intentionally vulnerable mock, real LLMs or customer MCP servers
+are secure. The command accepts no targets, secrets or arguments and does
+not access real files, external services or Stable Bridge.
+See [M17 guide](.github/M17_CONCURRENT_REPLAY_RACE.md).
+This source helper is outside the unpublished 80-file npm candidate.
+
 ## Additional owned permission-grant differential lab (M16-E/F/G, source only)
 
 In a reviewed first-party source checkout, run:
