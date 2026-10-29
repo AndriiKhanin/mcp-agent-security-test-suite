@@ -40,11 +40,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M13 — Self-service fictional beta handoff** | Frozen source revision, correct combined review card and pinned volunteer instructions | **M13-A/B/C ENGINEERING ACCEPTED; independent beta still OPEN** | [#258](../../issues/258), [PR #259](../../pull/259), [handoff](.github/BETA_VOLUNTEER_HANDOFF.md) | Matched 4/4 PR and main CI; independent consenting tester report remains [#59](../../issues/59) |
 | **M14 — Optional first-party capability tour** | Four deeper synthetic demonstrations for volunteers | **ENGINEERING ACCEPTED — first-party source only** | [#261](../../issues/261), [PR #262](../../pull/262), [main CI #40846079531](../../actions/runs/40846079531) | PR and main CI 4/4; genuine beta #59 separate |
 | **M15 — Owned deliberately vulnerable MCP lab** | Differential intentionally susceptible/guarded toy agent and local server, observed effects | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#263](../../issues/263), [PR #264](../../pull/264), [main CI #40857820827](../../actions/runs/40857820827), [guide](.github/M15_OWNED_REDTEAM_LAB.md) | One synthetic unsafe effect witnessed + both defenses; real-agent tests remain separate |
-| **M16 — Owned authority/replay/response-tamper differential** | Three independent deliberately vulnerable mock/client pairs with exact observed boundaries | **IN PROGRESS — PR/CI not accepted yet** | [#266](../../issues/266), [guide](.github/M16_OWNED_ATTACK_MATRIX.md) | Seven fixed real localhost cases; 3 unsafe effects, 3 guarded outcomes, 1 fresh-key acceptance; PR/main CI 4/4 |
+| **M16 — Owned authority/replay/response-tamper differential** | Three unsafe/guarded attack pairs and one distinct-key acceptance control on owned HTTP | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#266](../../issues/266), [PR #267](../../pull/267), [PR #268](../../pull/268), [main CI #40872142693](../../actions/runs/40872142693), [guide](.github/M16_OWNED_ATTACK_MATRIX.md) | 7/7 local witnesses: 3 unsafe, 3 guarded, 1 fresh-key allowance; no real-agent claim |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M16-A/B/C — owned authority, replay and reply-tamper matrix (engineering in progress)
+## M16-A/B/C/D — owned authority, replay and reply-tamper matrix (engineering accepted)
 
 - [Issue #266](../../issues/266): `node tools/owned-attack-matrix.mjs`
   runs seven first-party real HTTP checks over fresh ephemeral
@@ -69,7 +69,13 @@ We will not claim a release is production-ready merely because a synthetic test 
   historical. The merged `8e306334cfb48e87ac60c0977ba1495ae9cc4310`
   passed independently triggered
   [main CI #40870920568](../../actions/runs/40870920568) **4/4**.
-  The M16-D key-sensitive follow-up still requires its own PR/main 4/4.
+  M16-D keyed replay and fresh-key admission shipped via
+  [PR #268](../../pull/268):
+  [PR CI #40871592873](../../actions/runs/40871592873) **4/4 PASS**;
+  merge SHA `7587cb380c828df51d0d68cb6992f76e880433a8`;
+  independently triggered [main CI #40872142693](../../actions/runs/40872142693)
+  **4/4 PASS** on that exact SHA. Engineering acceptance only; no real
+  agent, user server, external authority, independent beta or audit.
 
 ## M15-A/B/C — intentionally vulnerable owned MCP differential lab (engineering accepted)
 

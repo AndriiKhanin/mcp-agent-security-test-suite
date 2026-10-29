@@ -48,6 +48,20 @@ evidence, or a security audit.
 This is entirely separate from M15, the original five-case voluntary
 M5 beta protocol and the unshipped 80-path npm candidate. The external
 approval/review gates [#21](../issues/21), [#43](../issues/43) and
-[#59](../issues/59) remain open. Acceptance requires PR CI and a
-separately verified post-merge main CI each to pass **4/4**
-(Ubuntu/Windows × Node.js 20/22).
+[#59](../issues/59) remain open. Engineering acceptance confirmed on 2026-10-29, after two bounded PRs:
+
+- [PR #267](../pull/267) initially accepted six cases, with [PR CI
+  #40869476641](../actions/runs/40869476641) **4/4 PASS** on rerun
+  attempt 2 (the first attempt failed unrelated Windows Node22 M6
+  offline npm packaging checks; the failure remains visible), and
+  independently verified [main push CI #40870920568](../actions/runs/40870920568)
+  **4/4 PASS** at commit `8e306334cfb48e87ac60c0977ba1495ae9cc4310`.
+- [PR #268](../pull/268) fixed request-order-only replay refusal by
+  using a **per-listener operation-key set** and adding a seventh positive
+  control with two distinct keys. [PR CI #40871592873](../actions/runs/40871592873)
+  **4/4 PASS**; independent [main CI #40872142693](../actions/runs/40872142693)
+  **4/4 PASS** on exact merged commit
+  `7587cb380c828df51d0d68cb6992f76e880433a8`.
+
+These results prove only owned synthetic source contracts, not security
+of actual models/third-party MCP servers or independent beta acceptance.
