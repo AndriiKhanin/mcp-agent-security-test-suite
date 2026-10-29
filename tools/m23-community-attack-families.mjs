@@ -17,9 +17,9 @@ const ALTERED_TOOL=Object.freeze({
 });
 // These are *fabricated strings*, not values obtained from any runtime system.
 const SYNTHETIC_ERROR_CONTEXT=Object.freeze({
-  ENV:'SYNTHETIC_ENV_CANARY_NEVER_REAL',
-  PATH:'SYNTHETIC_PATH_CANARY_NEVER_REAL',
-  HEADERS:'SYNTHETIC_HEADERS_CANARY_NEVER_REAL'
+  ENV:'MOCK_SETTING=SYNTHETIC_ENV_CANARY_NEVER_REAL',
+  PATH:'/fictional/workspace/SYNTHETIC_PATH_CANARY_NEVER_REAL.txt',
+  HEADERS:'x-fictional-request: demo; authorization: FictionalOnly; x-fictional-context: SYNTHETIC_HEADERS_CANARY_NEVER_REAL'
 });
 const SAFE_ERROR='FICTIONAL_OPERATION_FAILED';
 const CASES=Object.freeze([
@@ -113,10 +113,17 @@ function executeToyScenario(spec,mode) {
     if(!guarded&&Object.prototype.hasOwnProperty.call(
       SYNTHETIC_ERROR_CONTEXT,spec.variant
     ))rendered='SYNTHETIC_FAILURE: '+SYNTHETIC_ERROR_CONTEXT[spec.variant];
-    // This separately observed sink checks actual output of the two
-    // source-owned toy renderers. Raw strings are NEVER returned in reports.
+    // A tool result is represented as a *fictional JSON-RPC error*,
+    // distinct from normal success data. The sink observes the serialized
+    // error payload; no actual HTTP headers or environment were sampled.
+    const fictionalToolError=Object.freeze({
+      jsonrpc:'2.0',id:'synthetic-error-only',
+      error:{code:-32000,message:rendered}
+    });
+    const serialized=JSON.stringify(fictionalToolError);
     const leak=Object.values(SYNTHETIC_ERROR_CONTEXT)
-      .some(marker=>rendered.includes(marker));
+      .some(marker=>serialized.includes(marker));
+    // Raw fictional error strings and mock canaries are never emitted.
     return row(1,0,0,0,Number(leak));
   }
   throw Error('FIXED_CASE_UNAVAILABLE');
