@@ -38,8 +38,26 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-U ENGINEERING ACCEPTED; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
 | **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-R ENGINEERING ACCEPTED; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [#255](../../issues/255), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
 | **M13 — Self-service fictional beta handoff** | Frozen source revision, correct combined review card and pinned volunteer instructions | **M13-A/B/C ENGINEERING ACCEPTED; independent beta still OPEN** | [#258](../../issues/258), [PR #259](../../pull/259), [handoff](.github/BETA_VOLUNTEER_HANDOFF.md) | Matched 4/4 PR and main CI; independent consenting tester report remains [#59](../../issues/59) |
+| **M14 — Optional first-party capability tour** | Four deeper synthetic demonstrations for volunteers | **IN PROGRESS — SOURCE ONLY** | [#261](../../issues/261) | PR 4/4 + post-merge 4/4; genuine beta #59 separate |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M14-A/B/C — optional broader first-party beta tour (engineering in progress)
+
+- [Issue #261](../../issues/261): make newer first-party capabilities
+  visible in an opt-in **source-only**, zero-argument demo. Four fixed
+  checks cover adapter kits for both inert transports, M9 fictional
+  tool-result policy, M12 accepted SSE, and M12 rejection of an
+  unreviewed Authorization header before toy-gateway delivery.
+- Strict witness checks require exact observed local HTTP acceptance/denial,
+  on-wire response/socket close, gateway delivery counts, zero protected
+  fictional effects, no external MCP contact and no real-agent claims.
+- Fixed output cannot echo fixture texts, commands, URLs, credentials or
+  arbitrary report fields. The **five-case M5 beta protocol is unchanged**,
+  as are the unpublished 80-path candidate and external gates #21/#43/#59.
+- Acceptance pending PR CI **4/4** and independent post-merge main CI
+  **4/4**; do not claim independent user beta acceptance from author CI.
+
 
 ## M13-A/B/C — self-service pinned fictional beta handoff (engineering accepted)
 

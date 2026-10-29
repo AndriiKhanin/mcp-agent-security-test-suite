@@ -2,6 +2,38 @@
 
 **Status:** engineering protocol for candidate `0.0.10-rc.1`. This document does **not** prove that an independent tester has run it. No real MCP servers, customer events, credentials, proprietary code, registry publication or external network tests are approved.
 
+## M14 — optional capability tour
+
+For a **reviewed M14-or-later source checkout**, the following zero-argument
+command demonstrates newer first-party features beyond the five fixed M5
+beta checks:
+
+```sh
+node tools/beta-capability-tour.mjs
+```
+
+The script runs source-owned inert adapter smoke for both transports,
+then four fixed in-memory fictional tool-result policy probes, a successful
+request-scoped modern SSE result, and a rejected extra Authorization request
+header. The last two use an ephemeral **IPv4 127.0.0.1** listener,
+so this is *local loopback traffic*, not a zero-network operation.
+Expected report: `status: "PASS"`, `checked: 4`, `matched: 4`,
+`failed: 0`, `ruleCode: "ALL_FICTIONAL_CAPABILITIES_MATCH"`, exit 0.
+Any mismatched observed witness returns `FAIL` / exit 1; forbidden
+arguments or unavailable execution return `ERROR` / exit 2.
+The output includes only source-authored symbolic case identifiers and
+booleans, not the source fixture's embedded instruction, payloads or paths.
+
+**Important version distinction:** the fixed M13 volunteer baseline
+`2ad680ed2e4c322374fdabf3c2007e396f893a59` predates this optional
+command. Do not claim it contains M14, and do not run unreviewed floating
+`main` just to find it. A separately pinned M14 revision will be recorded
+after its own PR and post-merge 4/4 CI complete. The original five-case
+`node tools/beta-review.mjs` is still the **only** fixed M5 beta acceptance
+protocol. The optional tour cannot verify independent participation, real
+LLM injection resilience, external MCP server security or operator rights.
+No release/real-target authorization is implied.
+
 ## M13-A/B/C — frozen self-service beta source snapshot and accurate combined report
 
 Independent volunteers may use the explicitly pinned public commit

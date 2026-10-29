@@ -42,6 +42,19 @@ must both equal the complete pinned revision above. The local Git SHA is
 and manually compare it. If any SHA differs, stop and do not report a PASS.
 Its five checks can detect expected fictional failures. PASS is not an MCP security assessment or confirmation of independent reviewer provenance.
 
+## Optional deeper first-party tour (M14 source revisions only)
+
+The pinned M13 baseline above deliberately contains the original **five**
+fictional beta checks, not the later optional M14 tool. If you independently
+review a newer **M14-or-later** public revision, you may additionally run
+`node tools/beta-capability-tour.mjs`. It exercises two inert adapter
+profiles, a fixed fictional tool-result policy, one accepted and one
+rejected modern SSE reply over **ephemeral 127.0.0.1 only**. The optional
+result should be **4/4 MATCH** with one expected synthetic denial, and
+prints no fixture instructions or private payloads. It neither substitutes
+for the five-case beta protocol nor constitutes independent security evidence.
+Do not silently swap the pinned baseline or supply real URLs/credentials.
+
 ## Optional synthetic fixture contribution (separate from beta evidence)
 
 A volunteer may also submit a **fixture-only PR** independently of runner
