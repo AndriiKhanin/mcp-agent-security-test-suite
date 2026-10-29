@@ -58,7 +58,35 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M24 — Stdin-only adopter adapter preflight** | No-file shell pipeline for validating portable stdio/HTTPS project descriptors and five built-in fictional controls | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#293](../../issues/293), [PR #294](../../pull/294), [main CI #40945169177](../../actions/runs/40945169177), [guide](.github/M24_STDIN_ADAPTER_PREFLIGHT.md) | 1281/1281 Windows20 PR tests; 4/4 PR + exact main CI; no real target contact |
 
+| **M25 — Policy-version drift + logical gate restart** | Community request: stale approval cannot authorize delayed execution after policy change or gate-generation replacement | **IN PROGRESS — PR CI PENDING** | [#296](../../issues/296), [guide](.github/M25_APPROVAL_POLICY_EPOCH.md) | 5/5 owned-wire guarded/vulnerable comparisons, fresh reapproval controls, PR/main 4/4 CI |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M25-A/B/C — community policy-version and logical restart TOCTOU (engineering in progress)
+
+- [Issue #296](../../issues/296), based on concrete scenarios proposed
+  by **TheAsymmetricMind**: approve, then change policy before the action
+  executes; restart the gate while approval is still pending. A stale
+  authorization must **not** survive either boundary.
+- **M25-A:** source-only `node tools/m25-policy-epoch-restart.mjs` uses
+  real ephemeral IPv4 127.0.0.1 HTTP with an explicit admission barrier.
+  Compare five cases: unchanged positive, policy drift deny, pending
+  restart deny, and new-grant positives after each invalidation. Guard
+  must recheck **both** server-owned policy version and logical gate
+  generation immediately before any simulated commit. Deliberately
+  vulnerable comparison must expose stale-approval execution.
+- **M25-B:** independent fixed oracle verifies exact 14 local requests
+  across 10 disposable servers, before-effect change/invalidation
+  counters, HTTP status/response bodies, fictional effect totals,
+  closed responses/sockets and no remaining pending approvals. Negative
+  mutations detect false stale acceptance, false fresh denial, fake
+  invalidation and forged observations without echoing test data.
+- **M25-C:** [scope guide](.github/M25_APPROVAL_POLICY_EPOCH.md),
+  README and Windows/Ubuntu Node20/22 PR + post-merge main CI **4/4**.
+  This is a **logical in-process restart**, not an OS process crash or
+  durable recovery test; NOT real authorization, external MCP, LLM
+  execution or certification. Stable Bridge untouched, 80-file
+  unpublished npm candidate unchanged; #21/#43/#59 remain OPEN.
 
 ## M24-A/B/C — privacy-minimal user adapter stdin preflight (engineering accepted)
 
