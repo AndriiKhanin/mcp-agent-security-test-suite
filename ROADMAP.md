@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-28 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
+> **Last reviewed:** 2026-10-29 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -36,9 +36,27 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
 | **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-U ENGINEERING ACCEPTED; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
-| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-O ENGINEERING ACCEPTED; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
+| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-O ENGINEERING ACCEPTED; M12-P/Q/R IN PROGRESS; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [#255](../../issues/255), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M12-P/Q/R — exact first-party incoming SSE request headers (PR CI pending)
+
+- [Issue #255](../../issues/255) extends the completed M12-M/N/O
+  response header gate to **incoming** first-party modern `tools/call` POST.
+- **M12-P:** require the exact reviewed set of HTTP request headers,
+  case-insensitive no-duplicates, and `Connection: close`, in addition to
+  existing request body, Origin, version, method and tool-name checks.
+  Unknown or synthetic asserted authority is denied before returning SSE.
+- **M12-Q:** 10 new request-denial modes cover fictitious proxy auth,
+  synthetic session/parameter/owner grants, extra headers, User-Agent,
+  keep-alive, Cookie, Authorization and duplicate Accept. Require
+  HTTP 400, observed denial, response/socket closure and zero toy
+  gateway deliveries. M12 total: **60** (4 accepted, 56 denied).
+- **M12-R:** docs and tests only in existing source files; preserve
+  unpublished **80-path** npm candidate, M6-J complete SHA-256 custody,
+  and external authorization/audit/beta blocks #21/#43/#59.
+  Accept only with 4/4 PR CI and independently observed main push CI.
 
 ## M6-J CI reliability — source-digest fast rejection (engineering accepted)
 

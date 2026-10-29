@@ -28,6 +28,18 @@ const BAD_RESPONSE=[
   'response-cache-public','response-buffering-enabled',
   'response-connection-keepalive','response-duplicate-content-type',
   'response-refresh'
+ ];
+const BAD_REQUEST=[
+  'request-proxy-auth',
+  'request-session-id',
+  'request-mcp-param',
+  'request-owner-approved',
+  'request-extra-header',
+  'request-user-agent',
+  'request-bad-connection',
+  'request-cookie',
+  'request-authorization',
+  'request-duplicate-accept'
 ];
 
 test('M12-G: real fragmented SSE byte stream has exact progress and final result',async()=>{
@@ -112,6 +124,28 @@ test('M12-N: unexpected HTTP response metadata denies otherwise valid SSE bytes'
     assert.equal(r.protectedFictionalEffectsCommitted,0,fault);
     assert.equal(r.actualExternalMcpContacted,false,fault);
     assert.ok(!JSON.stringify(r).includes('FICTIONAL-NO-AUTHORITY'));
+  }
+});
+
+test('M12-Q: ten forged or extra request headers fail before tools/call',async()=>{
+  assert.equal(BAD_REQUEST.length,10);
+  for(const fault of BAD_REQUEST){
+    const r=await runOwnedModernSse(fixture,{fault});
+    assert.equal(r.status,'FAIL',fault);
+    assert.equal(r.exitCode,1,fault);
+    assert.equal(r.ruleCode,'M12_SSE_REQUEST_REJECTED',fault);
+    assert.equal(r.rejectedHttpStatus,400,fault);
+    assert.equal(r.httpRequestsObserved,1,fault);
+    assert.equal(r.httpRequestsAccepted,0,fault);
+    assert.equal(r.httpRequestsDenied,1,fault);
+    assert.equal(r.httpResponsesClosed,1,fault);
+    assert.equal(r.tcpSocketsClosed,1,fault);
+    assert.equal(r.socketCleanupConfirmed,true,fault);
+    assert.equal(r.toyGatewayDeliveries,0,fault);
+    assert.equal(r.protectedFictionalEffectsCommitted,0,fault);
+    assert.equal(r.actualExternalMcpContacted,false,fault);
+    assert.equal(r.embeddedInstructionExecuted,false,fault);
+    assert.ok(!JSON.stringify(r).includes('FICTIONAL-NO-TOKEN'),fault);
   }
 });
 
@@ -249,16 +283,16 @@ test('M12-H: no arbitrary target, host, process or unsafe options accepted',asyn
       /INVALID_M12_SSE_SOURCE_OPTIONS/);
 });
 
-test('M12-I: zero-argument selftest checks 4 positive and 46 expected negative controls',async()=>{
+test('M12-I: zero-argument selftest checks 4 positive and 56 expected negative controls',async()=>{
   const r=await runFixedModernSseSelftest();
   assert.equal(r.status,'PASS');
   assert.equal(r.exitCode,0);
   assert.equal(r.ruleCode,'M12_SSE_FIXED_CONTROLS_MATCH');
-  assert.equal(r.checked,50);
-  assert.equal(r.matched,50);
+  assert.equal(r.checked,60);
+  assert.equal(r.matched,60);
   assert.equal(r.expectedPositiveControls,4);
-  assert.equal(r.expectedNegativeControls,46);
-  assert.equal(r.negativeControlsMatched,46);
+  assert.equal(r.expectedNegativeControls,56);
+  assert.equal(r.negativeControlsMatched,56);
   assert.ok(r.cases.every(x=>x.matched));
   assert.ok(Object.isFrozen(r));
   assert.ok(Object.isFrozen(r.cases));
@@ -275,7 +309,7 @@ test('M12-I: zero-argument CLI rejects attempts to supply target or file',()=>{
   assert.equal(good.stderr,'');
   const report=JSON.parse(good.stdout);
   assert.equal(report.status,'PASS');
-  assert.equal(report.checked,50);
+  assert.equal(report.checked,60);
   for(const arg of [
     '--url=https://private.invalid','../../secret.json','PRIVATE_CANARY'
   ]){
