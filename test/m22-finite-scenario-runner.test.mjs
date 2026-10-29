@@ -146,6 +146,10 @@ test('M22-B: independent witness mutations reject missed unsafe effects or forge
   const contradicted=clone(scenarios);
   contradicted[1].expected.guardedRuleCode='TOOL_RESULT_AUTHORITY_SPOOF_DENIED';
   assert.equal(runFiniteScenarioSet(contradicted).status,'FAIL');
+  const wrongPermissive=clone(scenarios);
+  wrongPermissive[1].expected.permissiveDecision='DENY';
+  assert.equal(runFiniteScenarioSet(wrongPermissive).status,'FAIL');
+  assert.equal(runFiniteScenarioSet(wrongPermissive).matched,7);
   const invisible=baseline.map(clone);
   delete invisible[1];
   assert.equal(auditFiniteWitnesses(scenarios,invisible).status,'FAIL');
