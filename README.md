@@ -595,6 +595,26 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Additional owned permission-grant differential lab (M16-E/F/G, source only)
+
+In a reviewed first-party source checkout, run:
+
+```sh
+node tools/m16-permission-replay-lab.mjs
+```
+
+Nine independent synthetic cases compare a source-owned **guarded** grant to a
+deliberately permissive policy over 18 ephemeral IPv4 `127.0.0.1` servers
+(20 fixed HTTP requests). In addition to valid one-time use and replay,
+the checks deliberately exercise wrong project/tool/resource, expiry,
+revocation, forged token and forged approval. A guarded failure must deny
+the action **without an in-memory effect**; a deliberately permissive
+counterpart must expose it. `9/9 PASS` means this differential was
+observed, **not that the permissive policy is safe**. No real bearer token,
+agent, external MCP target, user code, real files, telemetry or Stable Bridge.
+See [M16 extension guide](.github/M16_PERMISSION_REPLAY_LAB.md). The helper
+is source-only and excluded from the unpublished npm candidate.
+
 ## Additional owned attack-family matrix (M16, source only)
 
 Run `node tools/owned-attack-matrix.mjs` from a **reviewed source checkout**
