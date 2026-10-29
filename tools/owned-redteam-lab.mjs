@@ -186,12 +186,20 @@ async function runScenario(spec){
             message:'Synthetic permission denied'}});
     }else clientConfirmedFollowup=true;
   }finally{
-    if(listening)await new Promise((done,fail)=>{
-      // Never leave an owned socket open even on a failed negative control.
-      server.close(error=>error?fail(error):done());
-      server.closeAllConnections();
-    });
-    else server.close();
+    if(listening){
+      await new Promise((done,fail)=>{
+        // Never leave an owned socket open even on a failed negative control.
+        server.close(error=>error?fail(error):done());
+        server.closeAllConnections();
+      });
+      // On Windows, server.close's callback may precede net.Socket's
+      // close event. Count actual socket close, never infer it from close().
+      await Promise.all([...sockets].map(socket=>new Promise((done,fail)=>{
+        const timer=setTimeout(()=>fail(Error('SOCKET_CLOSE_TIMEOUT')),3000);
+        timer.unref();
+        socket.once('close',()=>{clearTimeout(timer);done();});
+      })));
+    }else server.close();
   }
   return {id:spec.id,server:spec.server,client:spec.client,
     received:state.received,connections:state.connections,
@@ -214,7 +222,7 @@ export function summarizeOwnedRedteamLab(observations){
   const outcomes=ROWS.map((expected,i)=>{
     const desc=shape?descriptors[String(i)]:null;
     const r=desc&&Object.hasOwn(desc,'value')?desc.value:null;
-    const matched=!!r&&exact(r,[
+    const requirements=[
       ['id',expected.id],['server',expected.server],['client',expected.client],
       ['received',expected.received],['connections',expected.received],
       ['responsesClosed',expected.received],['socketsClosed',expected.received],
@@ -223,12 +231,17 @@ export function summarizeOwnedRedteamLab(observations){
       ['effects',expected.effects],['lastStatus',expected.lastStatus],
       ['clientConfirmedTicket',true],['clientConfirmedFollowup',true],
       ['socketsRemaining',0],['localLoopbackConfirmed',true]
-    ]);
+    ];
+    // Only fixed source-authored field labels; never echo observed values.
+    const missing=requirements.filter(([key,value])=>get(r,key)!==value)
+      .map(([key])=>key);
+    const matched=!!r&&missing.length===0;
     return Object.freeze({id:expected.id,
       finding:expected.id==='EXPOSED'?'DETECTED_SYNTHETIC_UNSAFE_EFFECT':
         expected.id==='SERVER_BOUNDARY'?'SERVER_REJECTED_UNAUTHORIZED_CALL':
         expected.id==='CLIENT_BOUNDARY'?'CLIENT_IGNORED_UNTRUSTED_INSTRUCTION':
-        'AUTHORIZED_ONLY_BASELINE',matched});
+        'AUTHORIZED_ONLY_BASELINE',matched,
+      mismatchedWitnessFields:Object.freeze(missing)});
   });
   const matched=outcomes.filter(x=>x.matched).length;
   return Object.freeze({
