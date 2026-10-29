@@ -32,7 +32,8 @@ const MODES=Object.freeze([
   'redirect','hang','wrong-origin','wrong-method',
   'duplicate-progress','missing-progress','progress-extra-params','progress-negative','wrong-jsonrpc-version','missing-is-error','extra-result-content','wrong-server-info',
   'wrong-result-text','duplicate-event-field','sse-id-field','sse-retry-field','lone-cr','blank-final-data','trailing-comment','extra-data-field',
-  'response-set-cookie','response-session-id','response-authorization','response-content-encoding','response-content-disposition','response-cache-public','response-buffering-enabled','response-connection-keepalive','response-duplicate-content-type','response-refresh'
+  'response-set-cookie','response-session-id','response-authorization','response-content-encoding','response-content-disposition','response-cache-public','response-buffering-enabled','response-connection-keepalive','response-duplicate-content-type','response-refresh',
+  'request-proxy-auth','request-session-id','request-mcp-param','request-owner-approved','request-extra-header','request-user-agent','request-bad-connection','request-cookie','request-authorization','request-duplicate-accept'
 ]);
 const positives=new Set(['fragmented','crlf','comments','multiline']);
 const invalid=()=>{throw new TypeError('INVALID_M12_SSE_SOURCE_OPTIONS');};
@@ -218,18 +219,19 @@ function parseOwnedSse(bytes,fixture){
     throw Error('UNTRUSTED_TOOL_RESULT_MISMATCH');
   return toolResult;
 }
-function duplicateHeaders(req){
-  const seen=new Set(),sensitive=new Set([
-    'host','origin','content-type','content-length','accept',
-    'mcp-protocol-version','mcp-method','mcp-name','authorization',
-    'cookie','proxy-authorization','transfer-encoding'
+/** Fixed mock request envelope; no unreviewed or repeated authority fields. */
+function validOwnedSseRequestHeaders(req){
+  const names=new Set([
+    'host','origin','content-type','accept','mcp-protocol-version',
+    'mcp-method','mcp-name','content-length','connection'
   ]);
+  const seen=new Set();
   for(let i=0;i<req.rawHeaders.length;i+=2){
-    const key=req.rawHeaders[i].toLowerCase();
-    if(sensitive.has(key)&&seen.has(key))return true;
-    seen.add(key);
+    const name=req.rawHeaders[i].toLowerCase();
+    if(!names.has(name)||seen.has(name))return false;
+    seen.add(name);
   }
-  return false;
+  return seen.size===names.size&&req.headers.connection==='close';
 }
 /** Strict first-party response contract; not a general-purpose SSE client. */
 function validOwnedSseResponseHeaders(res){
@@ -287,7 +289,7 @@ function serve(fixture,fault,port,counts){
         req.headers.cookie===undefined&&
         req.headers['transfer-encoding']===undefined&&
         req.headers['content-length']===String(size)&&
-        !duplicateHeaders(req)&&isDeepStrictEqual(parsed,REQUEST);
+        validOwnedSseRequestHeaders(req)&&isDeepStrictEqual(parsed,REQUEST);
       if(!valid){
         counts.denied++;
         sendError(res,originValid?400:403);return;
@@ -347,6 +349,26 @@ function exchange(port,fixture,fault,deadlineMs){
     'mcp-protocol-version':VERSION,
     'mcp-method':fault==='wrong-method'?'resources/read':METHOD,
     'mcp-name':TOOL,'content-length':String(Buffer.byteLength(body))};
+  if(fault==='request-proxy-auth')
+    headers['proxy-authorization']='Basic FICTIONAL-NO-CREDENTIAL';
+  if(fault==='request-session-id')
+    headers['mcp-session-id']='fictional-forged-session';
+  if(fault==='request-mcp-param')
+    headers['mcp-param-owner']='fictional-owner';
+  if(fault==='request-owner-approved')
+    headers['x-owner-approved']='true';
+  if(fault==='request-extra-header')
+    headers['x-source-grant']='fictional-approved';
+  if(fault==='request-user-agent')
+    headers['user-agent']='fictional-unreviewed-client';
+  if(fault==='request-bad-connection')
+    headers.connection='keep-alive';
+  if(fault==='request-cookie')headers.cookie='fictional=1';
+  if(fault==='request-authorization')
+    headers.authorization='Bearer FICTIONAL-NO-TOKEN';
+  if(fault==='request-duplicate-accept')
+    headers.accept=['application/json, text/event-stream',
+      'application/json, text/event-stream'];
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),deadlineMs);
   return new Promise(resolve=>{
@@ -497,7 +519,9 @@ const CASES=Object.freeze([
   ['redirect','FAIL','M12_SSE_RESPONSE_REJECTED',1,0,302,0],
   ['hang','FAIL','M12_SSE_REQUEST_TIMEOUT',1,0,0,0],
   ['wrong-origin','FAIL','M12_SSE_REQUEST_REJECTED',0,1,403,0],
-  ['wrong-method','FAIL','M12_SSE_REQUEST_REJECTED',0,1,400,0]
+  ['wrong-method','FAIL','M12_SSE_REQUEST_REJECTED',0,1,400,0],
+  ...['request-proxy-auth','request-session-id','request-mcp-param','request-owner-approved','request-extra-header','request-user-agent','request-bad-connection','request-cookie','request-authorization','request-duplicate-accept'].map(x=>
+    [x,'FAIL','M12_SSE_REQUEST_REJECTED',0,1,400,0])
 ]);
 const UNAVAILABLE=Object.freeze({
   reportSchemaVersion:1,status:'ERROR',exitCode:2,
