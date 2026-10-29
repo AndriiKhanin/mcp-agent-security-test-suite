@@ -155,7 +155,7 @@ test('M24-B: no filesystem effects from a syntactically inert stdio command',()=
   }finally{rmSync(dir,{recursive:true,force:true});}
 });
 
-test('M24-B: direct JS caller getters/proxies are not evaluated',async()=>{
+test('M24-B: direct JS accessor and foreign-prototype inputs reject without invoking getters',async()=>{
   const input=fixture('stdio');
   let reads=0;
   Object.defineProperty(input.transport,'command',{
