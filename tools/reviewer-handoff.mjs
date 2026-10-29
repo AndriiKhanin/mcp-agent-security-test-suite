@@ -199,8 +199,50 @@ function readPacket(path){
   validateHandoff(value);
   return value;
 }
+/**
+ * A bounded read-only source fingerprint, without npm pack/install. This is
+ * only a negative fast path: a matching packet STILL requires buildHandoff()
+ * to recheck the archive, installed files and every excluded source byte.
+ */
+function quickLocalSourceFingerprint(){
+  const indexPath=join(root,'test','expected-package-files.json');
+  const indexStat=lstatSync(indexPath);
+  if(!indexStat.isFile()||indexStat.isSymbolicLink()||
+     indexStat.size<1||indexStat.size>8192)denied();
+  const paths=JSON.parse(decoder.decode(readFileSync(indexPath)));
+  if(!Array.isArray(paths)||paths.length!==80||
+     !paths.every(p=>typeof p==='string'&&p.length<256&&
+       p.split('/').every(safeName))||
+     !exact(paths,[...new Set(paths)].sort()))denied();
+  let total=0;
+  const files=paths.map(path=>{
+    let location=root;
+    const bits=path.split('/');
+    for(let i=0;i<bits.length;i++){
+      location=join(location,bits[i]);
+      const st=lstatSync(location);
+      if(st.isSymbolicLink()||
+         (i===bits.length-1?!st.isFile():!st.isDirectory()))denied();
+      if(i===bits.length-1&&(st.size<0||st.size>MAX_FILE_BYTES))
+        denied();
+    }
+    const bytes=readFileSync(location);
+    if(bytes.length>MAX_FILE_BYTES)denied();
+    total+=bytes.length;
+    if(total>MAX_TOTAL_BYTES)denied();
+    return {path,byteLength:bytes.length,sha256:sha(bytes)};
+  });
+  return {
+    fileCount:files.length,rawBytesTotal:total,
+    indexSha256:sha(Buffer.from(JSON.stringify(files),'utf8'))
+  };
+}
 export function verifyHandoff(value){
   validateHandoff(value);
+  // Do not run three isolated npm operations for a provably stale packet.
+  // The positive path still executes every original independent check.
+  if(!exact(value.packagedSource,quickLocalSourceFingerprint())||
+     !exact(value.excludedReview,excludedFileIndex()))return false;
   return canonical(value)===canonical(buildHandoff());
 }
 const reply=(status,code)=>JSON.stringify({
