@@ -77,5 +77,11 @@ file with strict upper bounds; neither the shipping package nor
 release gates are modified. External target approval
 [#21](../issues/21), independent security audit [#43](../issues/43)
 and independent beta [#59](../issues/59) remain OPEN.
-Engineering acceptance requires 4/4 Windows/Ubuntu Node20/22 PR CI and
-separate 4/4 matched post-merge main CI.
+Engineering acceptance (2026-10-29): [PR #289](../pull/289) passed
+[PR CI #40930112479](../actions/runs/40930112479) **4/4**
+on Windows/Ubuntu Node20/22, then merged as exact main SHA
+`713092bb51ef182c26d1c60dfd56b37dc6b1630f`.
+Independent [main CI #40930780325](../actions/runs/40930780325)
+also passed **4/4 on that exact SHA**. This is first-party
+engineering acceptance only — not independent beta, verified real-world
+attack detection, real credential-leak evaluation or a release.
