@@ -40,9 +40,30 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M13 — Self-service fictional beta handoff** | Frozen source revision, correct combined review card and pinned volunteer instructions | **M13-A/B/C ENGINEERING ACCEPTED; independent beta still OPEN** | [#258](../../issues/258), [PR #259](../../pull/259), [handoff](.github/BETA_VOLUNTEER_HANDOFF.md) | Matched 4/4 PR and main CI; independent consenting tester report remains [#59](../../issues/59) |
 | **M14 — Optional first-party capability tour** | Four deeper synthetic demonstrations for volunteers | **ENGINEERING ACCEPTED — first-party source only** | [#261](../../issues/261), [PR #262](../../pull/262), [main CI #40846079531](../../actions/runs/40846079531) | PR and main CI 4/4; genuine beta #59 separate |
 | **M15 — Owned deliberately vulnerable MCP lab** | Differential intentionally susceptible/guarded toy agent and local server, observed effects | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#263](../../issues/263), [PR #264](../../pull/264), [main CI #40857820827](../../actions/runs/40857820827), [guide](.github/M15_OWNED_REDTEAM_LAB.md) | One synthetic unsafe effect witnessed + both defenses; real-agent tests remain separate |
-| **M16 — Owned authority/replay/response-tamper differential** | Three unsafe/guarded attack pairs and one distinct-key acceptance control on owned HTTP | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#266](../../issues/266), [PR #267](../../pull/267), [PR #268](../../pull/268), [main CI #40872142693](../../actions/runs/40872142693), [guide](.github/M16_OWNED_ATTACK_MATRIX.md) | 7/7 local witnesses: 3 unsafe, 3 guarded, 1 fresh-key allowance; no real-agent claim |
+| **M16 — Owned authority/replay/response-tamper differential** | Existing unsafe/guarded attack pairs and new independent permission-grant binding extension | **M16-A/B/C/D ACCEPTED; M16-E/F/G IN PROGRESS** | [#266](../../issues/266), [#270](../../issues/270), [PR #267](../../pull/267), [PR #268](../../pull/268), [main CI #40872142693](../../actions/runs/40872142693) | Existing 7/7 witnessed; 9 new guarded/permissive comparisons require 4/4 CI |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M16-E/F/G — isolated permission-grant scope and replay differential (in progress)
+
+- [Issue #270](../../issues/270): new source-only
+  `node tools/m16-permission-replay-lab.mjs` exercises nine independent
+  permission scenarios and a deliberately permissive counterpart over
+  **ephemeral IPv4 127.0.0.1 only**. These are fixed fictional token strings,
+  not real credentials, OAuth validation or user-server permissions.
+- **M16-E:** accept one valid request, then deny replay; independently reject
+  wrong project, tool, resource, expired grant, revoked grant and forged
+  token or approval. Each case uses a fresh server to avoid masking
+  independent policy failures through prior token consumption.
+- **M16-F:** verify real HTTP statuses, parent-observed in-memory effects,
+  responses and sockets closed, exact body witnesses, independent mutation
+  sensitivity and strict no-echo symbolic reporting. Expected `PASS` means
+  intentionally vulnerable behavior was exposed, not certified safe.
+- **M16-G:** [guide](.github/M16_PERMISSION_REPLAY_LAB.md), README and
+  Windows/Ubuntu Node 20/22 CI. Preserve the unpublished **80-path**
+  package candidate and owner/external gates #21/#43/#59. No Stable Bridge,
+  external MCP targets, real agent, real filesystem effects or telemetry.
+  Acceptance requires both PR **4/4** and matching main push **4/4**.
 
 ## M16-A/B/C/D — owned authority, replay and reply-tamper matrix (engineering accepted)
 
