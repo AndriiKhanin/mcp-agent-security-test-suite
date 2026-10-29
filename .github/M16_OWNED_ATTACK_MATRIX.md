@@ -7,7 +7,7 @@ node tools/owned-attack-matrix.mjs
 ```
 
 This optional, **source-only** fixed demonstration has no CLI options.
-Each of six scenarios starts a new ephemeral IPv4 `127.0.0.1` HTTP
+Each of seven scenarios starts a new ephemeral IPv4 `127.0.0.1` HTTP
 listener, sends one or two actual JSON-RPC-shaped `tools/call` POSTs,
 checks exact replies and observed in-memory effect counters, then closes
 responses/sockets. The only "archive" / "vault" / "ledger" are inert
@@ -21,12 +21,14 @@ or Stable Bridge operation.
 | Source-owned case | Intentionally unsafe behavior | Protected counterpart |
 | --- | --- | --- |
 | `FORGED_UNSAFE` / `FORGED_GUARDED` | A deterministic susceptible toy client treats a `ticket.get` tool-result `claimedOwner` as authorization and sends `vault.erase`; permissive server witnesses one protected fictional effect | Guarded server rejects the identical untrusted-authority call with HTTP 403; zero protected effects |
-| `REPLAY_UNSAFE` / `REPLAY_GUARDED` | The same already-authorized `ledger.commit` operation ID is sent twice. Permissive server witnesses **two** effects | Guarded server witnesses **one** effect and rejects the second request with HTTP 409 |
+| `REPLAY_UNSAFE` / `REPLAY_GUARDED` | The same already-authorized `ledger.commit` operation ID is sent twice. Permissive server witnesses **two** effects | Guarded server tracks the previously committed **operation key** and witnesses **one** effect; it rejects the duplicate with HTTP 409 |
+| `REPLAY_FRESH_GUARDED` | Positive control with **two distinct source-owned operation keys** on the same guarded listener | Both legitimate commits succeed (HTTP 200) and yield exactly **two** effects; proves the guard does not reject merely because a request is second |
 | `TAMPER_UNSAFE` / `TAMPER_GUARDED` | Fictional server intentionally sends a JSON-RPC reply with the wrong ID (`99` for request `1`) plus a forged owner claim. Susceptible client follows it and a permissive server witnesses one extra effect | Strict toy client checks the response ID, rejects the tampered reply and makes **no** second request |
 
-The report is `PASS` (6/6 matches) **only if all three intentionally
-unsafe effects are detected and all three protected cases exhibit their
-required observed denials/absence of unauthorized calls**. Thus a
+The report is `PASS` (7/7 matches) **only if all three intentionally
+unsafe effects are detected, the three matching protected cases exhibit
+required denials/absence of unauthorized calls, and the distinct-key
+positive control admits a second valid operation**. Thus a
 `PASS` does **not** mean the deliberately vulnerable clients or
 servers are safe. Negative mutation tests fail if an unsafe effect is
 missing, an expected guarded denial is absent, status codes differ,
