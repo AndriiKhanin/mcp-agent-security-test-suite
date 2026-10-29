@@ -46,7 +46,30 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M18 — Measurable symbolic classification QA** | Exhaustive authored profile/event combinations and separate rule oracle; three-way alert/clear/abstain confusion accounting | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#276](../../issues/276), [PR #277](../../pull/277), [main CI #40908374045](../../actions/runs/40908374045), [guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md) | 32/32 symbolic reference cases, TP/FP/FN/TN and bad baselines; no external-efficacy inference |
 
+| **M19 — Single first-party assessment summary** | Source-separated one-command integration of all owned-wire and symbolic evidence without falsely aggregating real attacks | **ENGINEERING IN PROGRESS — CI PENDING** | [#279](../../issues/279), [guide](.github/M19_ASSESSMENT_SUMMARY.md) | Five report gates / 23 wire + 32 symbolic source-owned cases; independent PR and main 4/4 CI |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M19-A/B/C — first-party one-command evidence assessment (engineering in progress)
+
+- **M19-A:** [Issue #279](../../issues/279) adds
+  `node tools/m19-assessment-summary.mjs` — a zero-argument source-only
+  command running five established checks: M15 (4), M16 attack matrix (7),
+  M16 permission scope (9), M17 concurrent replay (3), M18 symbolic
+  classifications (32). Counts remain **separate by evidence source**:
+  23 actual first-party localhost-wire cases and 32 author-supplied
+  symbolic cases, never 55 observed real attacks or real model results.
+- **M19-B:** independent source-authored case-ID/classification
+  expectations, checked/matched/failed consistency, observed case-row
+  validation, denied external/agent assertions, and M18 baseline/metric
+  checks. Fake nested `PASS`, false unsupported evidence, missing or
+  forged witness rows and accessor-bearing data must fail closed.
+- **M19-C:** [scope guide](.github/M19_ASSESSMENT_SUMMARY.md),
+  README, source-only test suite, 80-file unpublished package unchanged.
+  No Stable Bridge, user MCP server, LLM or new runtime dependency.
+  Independent beta #59, audit #43 and target authorization #21 stay
+  OPEN. Acceptance requires both PR CI **4/4** and exact post-merge
+  main CI **4/4** (Windows/Ubuntu Node20/22).
 
 ## M18-A/B/C — symbolic measurement and negative-control benchmark (engineering accepted)
 
