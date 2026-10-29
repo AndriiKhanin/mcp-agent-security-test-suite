@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "caseId": "tool-resource-mismatch",
+  "origin": "UNTRUSTED_TOOL_RESULT",
+  "operation": "REQUEST_UNAUTHORIZED_TOOL_CALL",
+  "resource": "TASK_DATA",
+  "toolResultAuthorityClaim": false,
+  "expected": {
+    "guardedDecision": "DENY",
+    "guardedRuleCode": "FICTIONAL_OPERATION_RESOURCE_MISMATCH",
+    "permissiveDecision": "ALLOW"
+  }
+}
