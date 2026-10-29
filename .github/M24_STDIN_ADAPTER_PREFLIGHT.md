@@ -79,6 +79,11 @@ No runtime dependency or published npm candidate update; the helper
 remains excluded from the pinned 80-file package. Independent beta
 [#59](../issues/59), source audit [#43](../issues/43) and real
 target/owner authorization [#21](../issues/21) remain open. Engineering
-acceptance requires 4/4 PR CI and **separate** exact post-merge main
-CI on Windows/Ubuntu with Node.js 20/22. Do not convert a preflight
-PASS into approval to run arbitrary user commands or make connections.
+acceptance completed (2026-10-29): [PR #294](../pull/294)
+passed [PR CI #40944605846](../actions/runs/40944605846) **4/4**
+on Windows/Ubuntu Node.js 20/22 and merged as exact main SHA
+`cba0a4ef1c5a09b245f03ee70cd6d53b93d41642`.
+Separate [main CI #40945169177](../actions/runs/40945169177)
+passed **4/4 on the same SHA**. This does not grant independent
+beta verification or permission to run arbitrary user commands
+or contact customer MCP servers.
