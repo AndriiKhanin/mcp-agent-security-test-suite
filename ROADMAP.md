@@ -52,11 +52,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M21 — Bounded multi-report beta triage** | Strict offline batch of 2–4 M20 categorical self-reports, repeated-pattern flags and conservative attribution | **M21-A/B/C ENGINEERING IN PROGRESS — PR CI pending** | [#285](../../issues/285), [guide](.github/M21_BETA_BATCH_TRIAGE.md) | No verified unique testers, no raw echo, source-only custody and PR/main 4/4 |
 
-| **M23 — Community-requested attack-family demonstration** | Fixed toy controls for tool-description rug pulls, multi-server authority crossing and error-channel leaks | **SOURCE-ONLY ENGINEERING IN PROGRESS — CI PENDING** | [#288](../../issues/288), [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md) | 10/10 independent toy comparisons, negative mutation controls, PR + main CI 4/4 |
+| **M23 — Community-requested attack-family demonstration** | Fixed toy controls for tool-description rug pulls, multi-server authority crossing and error-channel leaks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#288](../../issues/288), [PR #289](../../pull/289), [main CI #40930780325](../../actions/runs/40930780325), [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md) | 10/10 source-owned comparisons + negative mutations; no live MCP/model certification |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M23-A/B/C — community-requested trust-boundary scenarios (engineering in progress)
+## M23-A/B/C — community-requested trust-boundary scenarios (engineering accepted)
 
 - [Issue #288](../../issues/288) covers three X-suggested gaps:
   metadata changes **after tool registration**, cross-server claims of
@@ -79,8 +79,12 @@ We will not claim a release is production-ready merely because a synthetic test 
   rug-pull or multi-server tester; separate M22 [#287](../../issues/287)
   tracks future contributed finite-action cases.
   No user MCP targets, LLM, networking or Stable Bridge. Independent
-  beta #59, audit #43 and external approval #21 remain OPEN. Require
-  PR and post-merge main Windows/Ubuntu Node20/22 **4/4**.
+  beta #59, audit #43 and external approval #21 remain OPEN. [PR #289](../../pull/289)
+  passed [PR CI #40930112479](../../actions/runs/40930112479) **4/4**,
+  merged as exact SHA `713092bb51ef182c26d1c60dfd56b37dc6b1630f`,
+  and separate [main CI #40930780325](../../actions/runs/40930780325)
+  passed **4/4 on the same SHA** (Windows/Ubuntu Node20/22).
+  Engineering acceptance is **not** real-agent validation or independent beta.
 
 ## M21-A/B/C — privacy-minimal multi-report preflight (engineering in progress)
 
