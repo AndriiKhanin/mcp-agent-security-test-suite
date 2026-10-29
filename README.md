@@ -598,9 +598,10 @@ runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 ## Voluntary independent-beta instructions (M7-S/T/U)
 
 A short [volunteer handoff](.github/BETA_VOLUNTEER_HANDOFF.md)
-explains how an independent developer can opt in, use the clean-source
-`beta-review` command, manually verify the public commit and send only
-sanitized fictional feedback. A public opt-in volunteer invitation is now published in [Issue #195](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/195); no independent participant or real MCP security assessment is claimed.
+explains how an independent developer can opt in, use a **pinned, previously
+4/4-CI-verified public commit** (rather than guessing which revision to test),
+run the clean-source `beta-review` command, manually verify the public commit
+and send only sanitized fictional feedback. A public opt-in volunteer invitation is now published in [Issue #195](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/195); no independent participant or real MCP security assessment is claimed.
 Acceptance [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
 remains open.
 
