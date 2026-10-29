@@ -684,8 +684,9 @@ additional reviewed valid file is automatically included.
 A passing `8/8` means **fictional policy decisions and protected
 effect counters matched**. It is not an assessment of arbitrary
 natural-language prompt injections, real MCP servers, LLMs or
-user-contributed executable code. There is no real filesystem action,
-network contact, credential, external tool or Stable Bridge access.
+user-contributed executable code. The runner reads only approved JSON fixtures, and tests create disposable
+local copies; it never reads a protected unrelated file or contacts a
+network target, credential service, external tool or Stable Bridge.
 See [strict contribution guide](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md).
 The tool and scenario files are source-only and excluded from the
 unpublished 80-path npm candidate.
