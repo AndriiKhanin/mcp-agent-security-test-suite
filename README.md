@@ -595,6 +595,30 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Privacy-minimal volunteer beta report preflight (M20, source only)
+
+An independent, consenting beta tester can optionally check a **categorical,
+self-reported** fictional result *before* manually submitting it for
+review. From a reviewed public source checkout:
+
+```sh
+node tools/m20-beta-intake.mjs < public-fictional-beta-report.json
+```
+
+This reads only a **bounded 4096-byte UTF-8 JSON record from stdin**, not a
+user-selected filename. It rejects private text fields, extra properties,
+bad source/version/OS/Node format, inconsistent PASS/FAIL/ERROR counts and
+contradictory claimed exercises. It never echoes input, contacts external
+services, posts GitHub issues, calls an MCP server or uses Stable Bridge.
+
+A valid `PASS` result means **READY FOR MANUAL TRIAGE**, not that a
+tester is independently verified or that beta [#59](../../issues/59) is
+accepted. An unpinned public SHA or failed consistency check is reported
+without automatic approval; real provenance and volunteer ownership
+require separate human verification. See the
+[M20 beta intake format and example](.github/M20_BETA_INTAKE_PREFLIGHT.md).
+This utility is excluded from the unpublished 80-file npm candidate.
+
 ## One-command first-party assessment (M19, source only)
 
 To reproduce all **five** bounded first-party security evaluations from a
