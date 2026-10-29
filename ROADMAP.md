@@ -50,7 +50,33 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M20 — Privacy-minimal beta intake preflight** | Bounded stdin JSON; categorical consistency checks, no-echo and explicit human provenance requirement | **M20-A/B/C ENGINEERING ACCEPTED — PR/main CI 4/4** | [#282](../../issues/282), [PR #283](../../pull/283), [main CI #40919664479](../../actions/runs/40919664479), [guide](.github/M20_BETA_INTAKE_PREFLIGHT.md) | Human triage only, no independent beta claim; 4/4 PR + 4/4 main CI verified |
 
+| **M21 — Bounded multi-report beta triage** | Strict offline batch of 2–4 M20 categorical self-reports, repeated-pattern flags and conservative attribution | **M21-A/B/C ENGINEERING IN PROGRESS — PR CI pending** | [#285](../../issues/285), [guide](.github/M21_BETA_BATCH_TRIAGE.md) | No verified unique testers, no raw echo, source-only custody and PR/main 4/4 |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M21-A/B/C — privacy-minimal multi-report preflight (engineering in progress)
+
+- [Issue #285](../../issues/285) adds a source-only
+  `node tools/m21-beta-batch.mjs` entrypoint, reading at most
+  **16,384 bytes** of strict UTF-8 JSON from stdin, containing **2–4**
+  fully validated [M20](.github/M20_BETA_INTAKE_PREFLIGHT.md)
+  fictional self-reports. No user-selected paths, identities,
+  external MCP targets, credentials or network activity.
+- **M21-A:** reuse the exact M20 single-report policy for each record,
+  reject malformed/unsafe entries, calculate source-owned triage
+  categories and self-reported OS/Node coverage. No GitHub posting.
+- **M21-B:** label identical categorical patterns as **possible collisions**
+  without assigning tester identities, deduplicating evidence or treating
+  different patterns as different people. Every result explicitly has
+  `independentTestersVerified: 0` and
+  `independentBetaVerified: false`; contradictory or stale reports
+  still require separate manual review.
+- **M21-C:** [schema and limits](.github/M21_BETA_BATCH_TRIAGE.md),
+  README, regression/mutation/no-echo tests and source-only custody.
+  Preserve pinned M13 historical test instructions and unpublished
+  **80-path** npm candidate. Independent beta #59, audit #43 and
+  real-target approval #21 remain OPEN. Require PR and exact post-merge
+  main CI **4/4** (Windows/Ubuntu Node20/22).
 
 ## M20-A/B/C — safety-bounded voluntary beta intake preflight (engineering accepted)
 

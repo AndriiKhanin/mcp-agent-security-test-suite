@@ -595,6 +595,27 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Offline beta batch triage (M21, source only)
+
+For maintainers reviewing **two to four** voluntarily supplied, already
+sanitized **fictional** beta self-reports, an optional command can categorize
+them without echoing data or treating self-attestation as verification:
+
+```sh
+node tools/m21-beta-batch.mjs < sanitized-fictional-batch.json
+```
+
+It accepts a bounded (16 KiB), strict UTF-8 JSON array of complete
+[M20](.github/M20_BETA_INTAKE_PREFLIGHT.md) report records. It counts
+claimed outcomes and OS/Node combinations, flags identical categorical
+report *patterns* and rejects inconsistent or unsafe records. **Identical
+records do not prove the same person, and different records do not prove
+different people.** `independentTestersVerified` remains **0**, and
+`independentBetaVerified` remains **false** in every outcome. No network,
+real agent, credentials, uploads, arbitrary files or Stable Bridge.
+See [M21 guide](.github/M21_BETA_BATCH_TRIAGE.md). Source-only, outside
+the unpublished 80-file npm candidate.
+
 ## Privacy-minimal volunteer beta report preflight (M20, source only)
 
 An independent, consenting beta tester can optionally check a **categorical,
