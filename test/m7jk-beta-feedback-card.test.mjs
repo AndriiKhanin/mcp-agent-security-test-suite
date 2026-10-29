@@ -13,10 +13,19 @@ test('M7-J: a source-owned five-case PASS produces a bounded volunteer card',()=
  assert.match(card,/Fixed check matches: 5\/5/);
  assert.match(card,/Runner status: PASS/);
  assert.match(card,/Public Git commit SHA: \[fill manually/);
+ assert.match(card,/Commands used: node tools\/beta-feedback-card\.mjs/);
  assert.ok(BETA_CASES.every(x=>card.includes('- '+x.id+': MATCH')));
  assert.match(card,/not proof of independent origin/);
  assert.match(card,/No real MCP server was assessed/);
  assert.ok(!card.includes('https://'));
+});
+test('M13-B: reviewed combined card reports correct command and local-only SHA reference',()=>{
+ const card=buildBetaFeedbackCard(good(),'combined-review');
+ assert.match(card,/Commands used: node tools\/beta-review\.mjs/);
+ assert.match(card,/Public Git commit SHA: see local Git HEAD above \(independently verify\)/);
+ assert.ok(!card.includes('[fill manually from git rev-parse HEAD]'));
+ assert.ok(!card.includes('PRIVATE_CANARY'));
+ assert.throws(()=>buildBetaFeedbackCard(good(),'PRIVATE_CANARY'),/INVALID_FICTIONAL_BETA_CARD_INPUT/);
 });
 test('M7-K: expected fictional mismatch stays FAIL and shows only known rule',()=>{
  const outcomes=cases();outcomes[2].matched=false;
