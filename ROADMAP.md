@@ -58,11 +58,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M24 — Stdin-only adopter adapter preflight** | No-file shell pipeline for validating portable stdio/HTTPS project descriptors and five built-in fictional controls | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#293](../../issues/293), [PR #294](../../pull/294), [main CI #40945169177](../../actions/runs/40945169177), [guide](.github/M24_STDIN_ADAPTER_PREFLIGHT.md) | 1281/1281 Windows20 PR tests; 4/4 PR + exact main CI; no real target contact |
 
-| **M25 — Policy-version drift + logical gate restart** | Community request: stale approval cannot authorize delayed execution after policy change or gate-generation replacement | **IN PROGRESS — PR CI PENDING** | [#296](../../issues/296), [guide](.github/M25_APPROVAL_POLICY_EPOCH.md) | 5/5 owned-wire guarded/vulnerable comparisons, fresh reapproval controls, PR/main 4/4 CI |
+| **M25 — Policy-version drift + logical gate restart** | Community request: stale approval cannot authorize delayed execution after policy change or gate-generation replacement | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#296](../../issues/296), [PR #297](../../pull/297), [main CI #40950548884](../../actions/runs/40950548884), [guide](.github/M25_APPROVAL_POLICY_EPOCH.md) | 5/5 owned-wire scenarios, protected stale denial and fresh reapproval; no real OS restart claim |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M25-A/B/C — community policy-version and logical restart TOCTOU (engineering in progress)
+## M25-A/B/C — community policy-version and logical restart TOCTOU (engineering accepted)
 
 - [Issue #296](../../issues/296), based on concrete scenarios proposed
   by **TheAsymmetricMind**: approve, then change policy before the action
@@ -87,6 +87,14 @@ We will not claim a release is production-ready merely because a synthetic test 
   durable recovery test; NOT real authorization, external MCP, LLM
   execution or certification. Stable Bridge untouched, 80-file
   unpublished npm candidate unchanged; #21/#43/#59 remain OPEN.
+  [PR #297](../../pull/297) passed [PR CI #40950036873](../../actions/runs/40950036873)
+  **4/4** and merged as exact main SHA
+  `d1e7d0cddb11668df5e7d96325a8d9b283b58f32`. Separate
+  [main CI #40950548884](../../actions/runs/40950548884) passed
+  **4/4 on the same SHA**. Initial witness-semantics regression failed
+  and was repaired before merge, not waived. Engineering acceptance only;
+  an actual OS crash/relaunch and pending-approval persistence test
+  remains unverified.
 
 ## M24-A/B/C — privacy-minimal user adapter stdin preflight (engineering accepted)
 
