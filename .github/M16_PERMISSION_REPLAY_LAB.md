@@ -13,8 +13,8 @@ node tools/m16-permission-replay-lab.mjs
 ```
 
 The helper accepts **zero arguments**. It owns both ends of **18 ephemeral
-IPv4 \`127.0.0.1\` HTTP interactions** (9 cases, guarded and deliberately
-permissive configuration). The \`REPLAY\` case makes two calls per configuration;
+IPv4 `127.0.0.1` HTTP interactions** (9 cases, guarded and deliberately
+permissive configuration). The `REPLAY` case makes two calls per configuration;
 the other eight cases make one each, so **20 requests total**. All ports are
 kernel-assigned and closed before report generation. There are **no external
 destinations**, no Stable Bridge interaction, no user-submitted endpoint,
@@ -40,7 +40,7 @@ The guarded policy compares a request against a **source-owned fictional
 grant**, checks the server-owned logical tick and revocation flag, and
 consumes the grant on successful use. The permissive policy is intentionally
 wrong: it admits all source-owned well-formed requests. Both produce only
-in-memory effect counters. The literal \`FICTIONAL-CAPABILITY-ONLY\` is a
+in-memory effect counters. The literal `FICTIONAL-CAPABILITY-ONLY` is a
 test string, not a bearer credential or authorization proof.
 
 The independent report oracle demands exact HTTP status sequences, server
@@ -51,8 +51,8 @@ arrays and accessor-bearing input. The CLI report only emits fixed case
 identifiers and symbolic witness field names; no mock token, payload, paths
 or listener URLs.
 
-**Expected result:** JSON \`status: "PASS"\`, \`checked: 9\`,
-\`matched: 9\`, \`expectedUnsafeCases: 8\`. This means all **deliberately
+**Expected result:** JSON `status: "PASS"`, `checked: 9`,
+`matched: 9`, `expectedUnsafeCases: 8`. This means all **deliberately
 vulnerable** behaviors were witnessed and all guarded equivalents behaved as
 expected. It emphatically **does not mean the permissive server is secure**.
 
@@ -67,5 +67,14 @@ MCP deployments or demonstrate resistance by arbitrary LLMs.
 
 No production registry publication or 80-file npm package changes.
 Owner authorization #21, independent audit #43 and independent beta #59
-remain open. PR CI must pass Windows/Ubuntu Node 20/22 (4/4), followed by
-separate matched main-push 4/4 acceptance.
+remain open.
+
+**Engineering acceptance (2026-10-29):** [PR #271](../pull/271) passed
+[PR CI #40874846038](../actions/runs/40874846038) **4/4** and merged
+as exact commit `9e53becf1d0413c1ca9292ad95d0b4524cb84146`.
+The separate [post-merge main CI #40875297476](../actions/runs/40875297476)
+passed **4/4 on attempt 2** at that exact SHA. The first attempt was
+**cancelled**, with three successful jobs and Windows Node22 cancelled;
+the cancelled Windows job was rerun successfully. This is author-run
+engineering evidence, not actual agent, independent beta, external-target
+approval or security certification.
