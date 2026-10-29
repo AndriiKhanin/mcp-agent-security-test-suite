@@ -253,8 +253,11 @@ async function scenario(spec,policy){
       const expected=reply.status===200?allowed(id):blocked(id,reply.status);
       bodyMatched=bodyMatched&&isDeepStrictEqual(reply.body,expected)&&
         [200,409,410].includes(reply.status);
-      state.lastRoundHadEffect=(state.effects-effectsBefore)===
-        Number(reply.status===200);
+      const effectDelta=state.effects-effectsBefore;
+      state.lastRoundHadEffect=effectDelta===1;
+      // Separately verify that the observed effect matches the HTTP result.
+      // A denied request must commit zero effects; a 200 must commit one.
+      bodyMatched=bodyMatched&&effectDelta===Number(reply.status===200);
     };
     await runRound(1);
     if(spec.reissue)await runRound(2);
