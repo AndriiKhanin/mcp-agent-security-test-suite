@@ -595,6 +595,27 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## One-command first-party assessment (M19, source only)
+
+To reproduce all **five** bounded first-party security evaluations from a
+reviewed source checkout, run:
+
+```sh
+node tools/m19-assessment-summary.mjs
+```
+
+The report separately records **23 first-party localhost-wire test cases**
+(M15, M16, M17) and **32 source-authored symbolic cases** (M18).
+An independent fixed-source gate checks actual cases, classifications,
+negative controls, provenance and false security claims — a nested
+`PASS` alone cannot certify the aggregate. **55 source-owned test
+cases are not 55 real attacks, real-world accuracy or independent beta.**
+The helper accepts no arguments or network target; it uses only
+first-party ephemeral loopback mocks and a fixed checked-in fictional
+fixture. No external MCP, real LLM, credentials, data collection or
+Stable Bridge. See [M19 guide](.github/M19_ASSESSMENT_SUMMARY.md).
+The unpublished 80-file npm candidate is unchanged.
+
 ## Symbolic classification benchmark (M18, source only)
 
 From a reviewed first-party source checkout run:
