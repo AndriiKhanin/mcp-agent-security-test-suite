@@ -51,9 +51,12 @@ function adapterMatches(a){
     Array.isArray(rows)&&Object.getPrototypeOf(rows)===Array.prototype&&
     rows.length===2&&
     Reflect.ownKeys(Object.getOwnPropertyDescriptors(rows)).length===3&&
-    [0,1].every(i=>Object.hasOwn(rows,String(i))&&
-      eq(get(rows,String(i)),[['transport',['stdio','streamable-http'][i]],
-        ['matched',true],['code','FICTIONAL_KIT_AND_QUICKSTART_MATCH']]));
+    [0,1].every(i=>{
+      const slot=Object.getOwnPropertyDescriptor(rows,String(i));
+      return slot&&slot.enumerable&&Object.hasOwn(slot,'value')&&
+      eq(slot.value,[['transport',['stdio','streamable-http'][i]],
+        ['matched',true],['code','FICTIONAL_KIT_AND_QUICKSTART_MATCH']]);
+    });
 }
 function policyMatches(p){
   return eq(p,[['reportSchemaVersion',1],['status','PASS'],['exitCode',0],
