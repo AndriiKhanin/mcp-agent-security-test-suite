@@ -26,6 +26,10 @@ test('M7-P: one local command prints full SHA and all five fixed checks',()=>{
  assert.match(r.stdout,/Local Git HEAD \(not independently verified\): [0-9a-f]{40}/);
  assert.match(r.stdout,/Fixed check matches: 5\/5/);
  assert.match(r.stdout,/Public source identity: NOT VERIFIED/);
+ assert.match(r.stdout,/Commands used: node tools\/beta-review\.mjs/);
+ assert.match(r.stdout,/Public Git commit SHA: see local Git HEAD above \(independently verify\)/);
+ assert.ok(!r.stdout.includes('[fill manually from git rev-parse HEAD]'));
+ assert.ok(!r.stdout.includes('Commands used: node tools/beta-feedback-card.mjs'));
  assert.match(r.stdout,/Real MCP target assessment: NOT PERFORMED/);
  assert.ok(!r.stdout.includes('https://'));
 });
@@ -49,6 +53,7 @@ test('M7-Q: known synthetic failure stays visible but is not security approval',
  assert.match(text,/Runner status: FAIL/);
  assert.match(text,/Fixed check matches: 4\/5/);
  assert.match(text,/NOT VERIFIED/);
+ assert.match(text,/Commands used: node tools\/beta-review\.mjs/);
 });
 test('M7-Q: no argument, URL or path accepted from CLI',()=>{
  for(const arg of ['PRIVATE_CANARY','https://private.example.org','--connect']){

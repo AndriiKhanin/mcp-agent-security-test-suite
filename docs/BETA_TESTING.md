@@ -2,6 +2,25 @@
 
 **Status:** engineering protocol for candidate `0.0.10-rc.1`. This document does **not** prove that an independent tester has run it. No real MCP servers, customer events, credentials, proprietary code, registry publication or external network tests are approved.
 
+## M13-A/B/C — frozen self-service beta source snapshot and accurate combined report
+
+Independent volunteers may use the explicitly pinned public commit
+`88212759fd5ba8e8431d028c466b33028e3a2c9b` (four-job [main CI #40838819933](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40838819933): **4/4 PASS**).
+After reviewing and cloning the **public source**, use
+`git switch --detach 88212759fd5ba8e8431d028c466b33028e3a2c9b`, verify the exact full SHA with
+`git rev-parse HEAD`, then run `node tools/beta-review.mjs` without
+arguments. The [volunteer handoff](../.github/BETA_VOLUNTEER_HANDOFF.md)
+contains the short copyable sequence. The historical pin is deliberate:
+**do not silently substitute a floating `main`** or infer provenance from
+local Git metadata. A different commit requires explicit revision review.
+
+The combined Markdown report correctly names `beta-review.mjs` and refers
+to the locally printed SHA; the separate `beta-feedback-card.mjs` retains
+a manual SHA placeholder. Neither automatically submits feedback. This
+stage improves developer ergonomics only, not beta evidence or real security.
+Independent gate [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+remains OPEN pending a genuine consenting tester report.
+
 ## M7-P/Q/R — one-command local fictional beta review
 
 A volunteer may run `node tools/beta-review.mjs` in a **clean public
