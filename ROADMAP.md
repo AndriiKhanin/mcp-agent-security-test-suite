@@ -36,11 +36,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M9 — Symbolic prompt-injection contract evaluation** | First-party inert evaluator and separately labeled author-supplied event traces | **ENGINEERING DONE M9-A through M9-L; no real agent observed** | [#204](../../issues/204), [RFC](.github/M9_SYMBOLIC_INJECTION_RFC.md) | 4/4 CI and independently reviewed boundary; real-agent execution not authorized |
 | **M10 — First-party toy-agent method-call evaluation** | Deterministic in-memory agent/gateway, state and method-call witness, not real LLM execution | **ENGINEERING ACCEPTED M10-A through M10-I; not a real agent** | [Issue #221](../../issues/221), [Guide](.github/M10_TOY_AGENT_EXCHANGE.md) | Four-job PR CI and real in-memory deny evidence; no real external MCP testing |
 | **M11 — Owned loopback tool-result trust boundary** | Separate first-party discovery and disposable MCP-shaped tool response over real IPv4 loopback, then stateful toy gateway | **M11-A through M11-U ENGINEERING ACCEPTED; no external MCP or real agent** | [#228](../../issues/228), [#230](../../issues/230), [#232](../../issues/232), [#234](../../issues/234), [#236](../../issues/236), [#238](../../issues/238), [#240](../../issues/240), [guide](.github/M11_INFLIGHT_REVOCATION.md) | Exact local wire/deny controls, socket cleanup, 4/4 CI and independently verified push CI |
-| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-L ACCEPTED; M12-M/N/O IN PROGRESS; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
+| **M12 — Source-owned modern MCP protocol subset** | First-party 2026-07-28 metadata/header and tools/list/call wire safety | **M12-A through M12-O ENGINEERING ACCEPTED; no external targets or real agent** | [#242](../../issues/242), [#244](../../issues/244), [#246](../../issues/246), [#248](../../issues/248), [#250](../../issues/250), [guide](.github/M12_MODERN_MCP_SMOKE.md) | Strict modern header/body checks, 4/4 CI + main push acceptance; **not full MCP conformance** |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M6-J CI reliability — source-digest fast rejection (repair pending)
+## M6-J CI reliability — source-digest fast rejection (engineering accepted)
 
 - [Issue #252](../../issues/252) addresses the independently observed
   [main CI #40834843057](../../actions/runs/40834843057) failure:
@@ -51,14 +51,25 @@ We will not claim a release is production-ready merely because a synthetic test 
   before costly offline npm pack/install when the packet cannot match.
   Still perform the complete two-pack/install verification on a match;
   no external contact, release authority or changes to 80-path package.
-  **M12-M/N/O remains pending independent 4/4 main CI until repaired.**
+  Repaired in [PR #253](../../pull/253), independently verified
+  [post-merge main CI #40836248131](../../actions/runs/40836248131)
+  **4/4 PASS**. This does not erase the original failed run.
 
-## M12-M/N/O — strict first-party modern SSE response-header gate (PR validation pending)
+## M12-M/N/O — strict first-party modern SSE response-header gate (engineering accepted)
 
 - [Issue #250](../../issues/250): reject missing, unexpected or duplicate HTTP response fields even when body SSE data is valid; strict source-owned Node 20/22 header allowlist, not a complete HTTP/MCP conformance rule.
 - Add ten fixed negative modes covering cookie/session/authorization, response encoding/disposition/refresh, altered cache/buffering/connection and duplicate content type; require rejection before M10 delivery and exact HTTP/TCP close witnesses.
 - M12 selftest: **50** controls (4 accepted, 46 rejected). Preserve the unpublished **80-path** candidate and complete SHA-256 excluded-source custody. External gates #21/#43/#59 stay open.
-- Require 4/4 PR CI and independent 4/4 post-merge main CI before engineering acceptance.
+- **Engineering accepted:** [PR #251](../../pull/251),
+  [PR CI #40834338360](../../actions/runs/40834338360) **4/4 PASS**.
+  Initial [main CI #40834843057](../../actions/runs/40834843057)
+  was **3/4** due to pre-existing M6-J reviewer handoff slow-path
+  mismatch/invalid classification (Windows Node22, 1187/1188).
+  [M6-J repair PR #253](../../pull/253) passed
+  [PR CI #40835857787](../../actions/runs/40835857787)
+  **4/4**, merged as `704d4a3c`; independently checked
+  [main CI #40836248131](../../actions/runs/40836248131) **4/4 PASS**.
+  External gates #21/#43/#59 remain OPEN.
 
 ## M12-J/K/L — fail-closed SSE frame and result hardening (engineering accepted)
 
