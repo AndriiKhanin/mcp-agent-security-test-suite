@@ -612,7 +612,7 @@ contradictory claimed exercises. It never echoes input, contacts external
 services, posts GitHub issues, calls an MCP server or uses Stable Bridge.
 
 A valid `PASS` result means **READY FOR MANUAL TRIAGE**, not that a
-tester is independently verified or that beta [#59](../../issues/59) is
+tester is independently verified or that beta [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) is
 accepted. An unpinned public SHA or failed consistency check is reported
 without automatic approval; real provenance and volunteer ownership
 require separate human verification. See the
