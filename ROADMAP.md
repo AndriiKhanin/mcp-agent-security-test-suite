@@ -56,7 +56,31 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M23 — Community-requested attack-family demonstration** | Fixed toy controls for tool-description rug pulls, multi-server authority crossing and error-channel leaks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#288](../../issues/288), [PR #289](../../pull/289), [main CI #40930780325](../../actions/runs/40930780325), [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md) | 10/10 source-owned comparisons + negative mutations; no live MCP/model certification |
 
+| **M24 — Stdin-only adopter adapter preflight** | No-file shell pipeline for validating portable stdio/HTTPS project descriptors and five built-in fictional controls | **M24-A/B/C ENGINEERING IN PROGRESS — PR/main CI pending** | [#293](../../issues/293), [guide](.github/M24_STDIN_ADAPTER_PREFLIGHT.md) | Source-only bounded 4 KiB JSON stdin, no-echo and no target contact; 4/4 PR + main CI |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M24-A/B/C — privacy-minimal user adapter stdin preflight (engineering in progress)
+
+- [Issue #293](../../issues/293): source-only
+  `node tools/m24-stdin-adapter-preflight.mjs` reads one strictly parsed,
+  **maximum 4,096-byte** descriptor from noninteractive stdin without a
+  user-selected file path, executable or remote MCP contact.
+- **M24-A:** reuse current hardened `inspectProjectAdapter` and
+  `previewOfflineAdapterQuickstart` validators in fail-closed order.
+  Five *fixed first-party* fictional controls remain independent of
+  arbitrary real project data. Generic status shows transport category
+  and version only — never names, endpoints, command, arguments or tokens.
+- **M24-B:** tests prove both inert transports, strict UTF-8 and JSON
+  duplicate-key rejection, active permission denial, bounded/no-echo
+  stdin behavior, no arbitrary CLI args, accessor-bearing JS denial,
+  no process execution and frozen 80-path unpublished candidate.
+- **M24-C:** [Windows/Linux instructions](.github/M24_STDIN_ADAPTER_PREFLIGHT.md),
+  README and regression CI (Ubuntu/Windows Node20/22, PR **4/4** then
+  separately verified main **4/4**). Descriptor preflight does not
+  perform DNS, network, subprocess, identity/consent authorization
+  or *actual real-agent/real-project* security evaluation. Stable
+  Bridge excluded; gates #21/#43/#59 remain open.
 
 ## M22-A/B/C — reviewed finite-action contributor scenarios (engineering accepted)
 
