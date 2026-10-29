@@ -20,20 +20,54 @@ Nested duplicate JSON keys, unknown fields, malicious JS accessors,
 extra array entries, sparse indices and malformed input fail closed.
 There are no user-defined URLs, paths, identities, credentials or logs.
 
-Example of the envelope shape (fill with reviewed **fictional public**
-M20 records and omit all personal data):
+Complete, **fictional illustrative** batch (not a real beta report, not
+evidence of two people). Values are invented except the historical
+**public** revision used by the published M13 beta protocol:
 
 ```json
 [
-  {"schemaVersion":1, "publicSourceSha":"<public SHA>"},
-  {"schemaVersion":1, "publicSourceSha":"<public SHA>"}
+  {
+    "schemaVersion":1,
+    "publicSourceSha":"2ad680ed2e4c322374fdabf3c2007e396f893a59",
+    "candidateVersion":"0.0.10-rc.1",
+    "operatingSystem":"UBUNTU",
+    "nodeMajor":20,
+    "runnerStatus":"PASS",
+    "matchedControls":5,
+    "evaluationPath":"SOURCE_RUNNER_ONLY",
+    "archiveOutcome":"NOT_ATTEMPTED",
+    "symbolicExitCodes":"NOT_CHECKED",
+    "guideClarity":"CLEAR",
+    "usabilityFinding":"NONE",
+    "personallyRanProtocol":true,
+    "fictionalOnlyConfirmed":true,
+    "noSensitiveMaterialConfirmed":true
+  },
+  {
+    "schemaVersion":1,
+    "publicSourceSha":"2ad680ed2e4c322374fdabf3c2007e396f893a59",
+    "candidateVersion":"0.0.10-rc.1",
+    "operatingSystem":"WINDOWS",
+    "nodeMajor":22,
+    "runnerStatus":"FAIL",
+    "matchedControls":4,
+    "evaluationPath":"SOURCE_RUNNER_AND_SMOKE",
+    "archiveOutcome":"NOT_ATTEMPTED",
+    "symbolicExitCodes":"MISMATCH",
+    "guideClarity":"NEEDS_CLARIFICATION",
+    "usabilityFinding":"CASE_MISMATCH",
+    "personallyRanProtocol":true,
+    "fictionalOnlyConfirmed":true,
+    "noSensitiveMaterialConfirmed":true
+  }
 ]
 ```
 
-The two shortened objects above illustrate the **array envelope only**:
-they intentionally lack required M20 fields and will **not** pass.
-For a valid input, supply two to four complete M20 records; consult
-the linked guide. No report generator, uploader or telemetry is installed.
+The example has a consistent reported deviation and should return
+`BETA_BATCH_READY_FOR_MANUAL_TRIAGE`, not an independently verified
+success. Replace examples only with reviewed, sanitized reports
+voluntarily supplied by real contributors; never use the sample to
+close an independent-beta gate. No report uploader or telemetry exists.
 
 ## Categories and interpretations
 
