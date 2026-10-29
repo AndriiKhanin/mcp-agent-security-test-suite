@@ -55,7 +55,10 @@ the test harness, not independently audited external software.
 It is a source-only helper, **excluded from the unpublished 80-path npm
 candidate**. Real-target authorization [#21](../issues/21),
 independent audit [#43](../issues/43) and beta evidence [#59](../issues/59)
-remain OPEN. Engineering acceptance requires GitHub Actions
-Windows/Ubuntu with Node.js 20/22 **4/4 PASS** on the PR, then a **separate
-4/4 PASS on the exact post-merge main commit**. A green synthetic result
-does not claim an independently operated beta or a release.
+remain OPEN. Engineering acceptance (2026-10-29): [PR #274](../pull/274) passed
+[PR CI #40885722243](../actions/runs/40885722243) **4/4** on
+Windows/Ubuntu Node20/22, then merged as exact main SHA
+`472fc64efc4ec18a6dbaac54b4f3de36896657ae`.
+Independent [main CI #40886331660](../actions/runs/40886331660)
+passed **4/4 on the same SHA**. A green synthetic result does not claim
+an independently operated beta or a release.
