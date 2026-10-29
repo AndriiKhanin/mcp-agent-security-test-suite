@@ -115,6 +115,11 @@ The CLI makes **zero external network calls**; it performs no MCP,
 LLM, Stable Bridge, filesystem-read, subprocess or real-tool operation.
 It is source-only, outside the unpublished 80-path npm candidate.
 Real-target authorization [#21](../issues/21), audit [#43](../issues/43)
-and independent beta [#59](../issues/59) remain open. CI must pass
-Windows/Ubuntu with Node20/22 (4/4 PR and separate post-merge 4/4
-on exact SHA) before this engineering step is accepted.
+and independent beta [#59](../issues/59) remain open. Engineering acceptance (2026-10-29): [PR #283](../pull/283)
+passed [PR CI #40919148260](../actions/runs/40919148260)
+**4/4** (Ubuntu/Windows Node20/22), then merged as
+`5f07ef308f05106e15313a614460e577e6a72e14`.
+Separate [main-push CI #40919664479](../actions/runs/40919664479)
+also passed **4/4 on that exact SHA**. This is first-party
+engineering repeatability only, **not** evidence of an independently
+operated beta, authenticated reviewer identity or completed external audit.
