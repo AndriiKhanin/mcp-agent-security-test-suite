@@ -661,6 +661,31 @@ fixture. No external MCP, real LLM, credentials, data collection or
 Stable Bridge. See [M19 guide](.github/M19_ASSESSMENT_SUMMARY.md).
 The unpublished 80-file npm candidate is unchanged.
 
+## Community-requested rug-pull, multi-server and error-leak cases (M23)
+
+From a **reviewed source checkout**, run this fixed source-only
+demonstration:
+
+```sh
+node tools/m23-community-attack-families.mjs
+```
+
+Ten **first-party deterministic toy** cases compare intentionally
+vulnerable and guarded policies for tool-description changes after
+registration, cross-server resource ownership, and error responses
+echoing fabricated environment-, path- and header-like markers.
+A matching `10/10 PASS` means the deliberately unsafe effects/leaks
+were **observed in the toy** and guarded controls matched, **not**
+that real servers or AI agents are secure.
+
+No real environment variables, filesystem content, HTTP headers,
+user targets, network access, model execution, credentials, telemetry
+or Stable Bridge. This is **not** an M8 contributor JSON schema:
+those fixtures specifically represent untrusted tool-result text.
+See the [M23 scope guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md)
+and [separate M22 finite-action contribution plan](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/287).
+The helper remains outside the unpublished 80-path npm candidate.
+
 ## Symbolic classification benchmark (M18, source only)
 
 From a reviewed first-party source checkout run:
