@@ -595,6 +595,29 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Symbolic classification benchmark (M18, source only)
+
+From a reviewed first-party source checkout run:
+
+```sh
+node tools/m18-symbolic-evaluation.mjs
+```
+
+This **offline** author-controlled benchmark tests **32** combinations of
+fictional trace profiles and symbolic event sets against the existing M9
+evaluator. A separately written oracle distinguishes **28 attack-labelled,
+2 benign and 2 insufficient-evidence** cases. It reports TP/FP/FN/TN,
+precision/recall/FPR/FNR and abstentions, and exposes deliberately
+ineffective `alwaysClear`, `alwaysAlert` and `FAIL-is-attack`
+reference baselines. Passing `32/32` confirms only that this
+**source-authored symbolic classifier** matches its reference rules;
+it **does not establish accuracy on real prompt injections, agent outputs
+or user servers**, nor justify claiming 100% real-world detection.
+No external network, credentials, real agent, filesystem scan,
+Stable Bridge or user-supplied arguments. See the
+[M18 evaluation guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md).
+This command is source-only and excluded from the unpublished npm candidate.
+
 ## Concurrent first-party replay race (M17, source only)
 
 From a **reviewed source checkout**, run:
