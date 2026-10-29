@@ -56,11 +56,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M23 — Community-requested attack-family demonstration** | Fixed toy controls for tool-description rug pulls, multi-server authority crossing and error-channel leaks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#288](../../issues/288), [PR #289](../../pull/289), [main CI #40930780325](../../actions/runs/40930780325), [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md) | 10/10 source-owned comparisons + negative mutations; no live MCP/model certification |
 
-| **M24 — Stdin-only adopter adapter preflight** | No-file shell pipeline for validating portable stdio/HTTPS project descriptors and five built-in fictional controls | **M24-A/B/C ENGINEERING IN PROGRESS — PR/main CI pending** | [#293](../../issues/293), [guide](.github/M24_STDIN_ADAPTER_PREFLIGHT.md) | Source-only bounded 4 KiB JSON stdin, no-echo and no target contact; 4/4 PR + main CI |
+| **M24 — Stdin-only adopter adapter preflight** | No-file shell pipeline for validating portable stdio/HTTPS project descriptors and five built-in fictional controls | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#293](../../issues/293), [PR #294](../../pull/294), [main CI #40945169177](../../actions/runs/40945169177), [guide](.github/M24_STDIN_ADAPTER_PREFLIGHT.md) | 1281/1281 Windows20 PR tests; 4/4 PR + exact main CI; no real target contact |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M24-A/B/C — privacy-minimal user adapter stdin preflight (engineering in progress)
+## M24-A/B/C — privacy-minimal user adapter stdin preflight (engineering accepted)
 
 - [Issue #293](../../issues/293): source-only
   `node tools/m24-stdin-adapter-preflight.mjs` reads one strictly parsed,
@@ -81,6 +81,12 @@ We will not claim a release is production-ready merely because a synthetic test 
   perform DNS, network, subprocess, identity/consent authorization
   or *actual real-agent/real-project* security evaluation. Stable
   Bridge excluded; gates #21/#43/#59 remain open.
+  [PR #294](../../pull/294) passed
+  [PR CI #40944605846](../../actions/runs/40944605846) **4/4**,
+  merged as exact SHA `cba0a4ef1c5a09b245f03ee70cd6d53b93d41642`,
+  and independent [main CI #40945169177](../../actions/runs/40945169177)
+  passed **4/4 on the identical SHA**. This is *engineering acceptance*
+  of an inert descriptor preflight only, not independent beta or live MCP testing.
 
 ## M22-A/B/C — reviewed finite-action contributor scenarios (engineering accepted)
 
