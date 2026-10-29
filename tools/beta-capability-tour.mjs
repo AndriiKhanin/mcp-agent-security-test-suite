@@ -28,11 +28,6 @@ const get=(o,k)=>{
   return d&&Object.hasOwn(d,'value')?d.value:undefined;
 };
 const eq=(o,fields)=>fields.every(([k,v])=>get(o,k)===v);
-const FALSE=Object.freeze([
-  'externalMcpContacted','actualAgentBehaviorObserved',
-  'realProjectAssessed','independentBetaVerified','securityCertified',
-  'stableReleaseAuthorized'
-]);
 const error=(code)=>Object.freeze({
   reportSchemaVersion:1,profile:'first-party-fictional-capability-tour-v1',
   status:'ERROR',exitCode:2,ruleCode:code,scope:SCOPE,
@@ -53,9 +48,12 @@ function adapterMatches(a){
     ['externalMcpContacted',false],['projectCodeExecuted',false],
     ['actualProjectAssessed',false],['independentBetaVerified',false],
     ['securityCertified',false],['stableReleaseAuthorized',false]]) &&
-    Array.isArray(rows)&&rows.length===2 &&
-    rows.every((row,i)=>eq(row,[['transport',['stdio','streamable-http'][i]],
-      ['matched',true],['code','FICTIONAL_KIT_AND_QUICKSTART_MATCH']]));
+    Array.isArray(rows)&&Object.getPrototypeOf(rows)===Array.prototype&&
+    rows.length===2&&
+    Reflect.ownKeys(Object.getOwnPropertyDescriptors(rows)).length===3&&
+    [0,1].every(i=>Object.hasOwn(rows,String(i))&&
+      eq(get(rows,String(i)),[['transport',['stdio','streamable-http'][i]],
+        ['matched',true],['code','FICTIONAL_KIT_AND_QUICKSTART_MATCH']]));
 }
 function policyMatches(p){
   return eq(p,[['reportSchemaVersion',1],['status','PASS'],['exitCode',0],
