@@ -48,7 +48,32 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M19 — Single first-party assessment summary** | Source-separated one-command integration of all owned-wire and symbolic evidence without falsely aggregating real attacks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#279](../../issues/279), [PR #280](../../pull/280), [main CI #40912510667](../../actions/runs/40912510667), [guide](.github/M19_ASSESSMENT_SUMMARY.md) | Five verified report gates / 23 wire + 32 symbolic source-owned cases; independent beta pending |
 
+| **M20 — Privacy-minimal beta intake preflight** | Bounded stdin JSON; categorical consistency checks, no-echo and explicit human provenance requirement | **M20-A/B/C IN PROGRESS — CI PENDING** | [#282](../../issues/282), [guide](.github/M20_BETA_INTAKE_PREFLIGHT.md) | Real volunteers can self-check without credentials or raw logs; no automatic beta approval; 4/4 PR and main CI |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M20-A/B/C — safety-bounded voluntary beta intake preflight (engineering in progress)
+
+- **M20-A:** [Issue #282](../../issues/282) adds the source-only,
+  argument-free `node tools/m20-beta-intake.mjs`. It accepts one
+  **max-4096-byte UTF-8 JSON** report over stdin, never an arbitrary path.
+  Exact schema and categorical allowlists cover public candidate SHA,
+  version, OS/Node, five fictional fixed-control results, exercise scope,
+  optional archive and usability categories. No freeform user text,
+  credentials, tool results, raw logs or network requests.
+- **M20-B:** malformed/duplicate-key/inconsistent results fail closed;
+  source SHA mismatch requires **manual review**, not automatic acceptance.
+  User-asserted independent execution, fictional-only scope and
+  no-sensitive-data statements remain unverified declarations, **never
+  authenticated provenance**. Even a syntactically valid `PASS` is
+  `READY_FOR_MANUAL_TRIAGE` and cannot close [beta #59](../../issues/59),
+  real-target authorization #21 or independent audit #43.
+- **M20-C:** [strict input format](.github/M20_BETA_INTAKE_PREFLIGHT.md),
+  source-only mutation tests, no-echo and zero external-MCP/no Stable Bridge
+  controls. The original publicly pinned M13 volunteer procedure and
+  **unpublished 80-path npm candidate** remain unchanged. Acceptance
+  requires Windows/Ubuntu Node20/22 PR CI **4/4** and separate matching
+  post-merge main-push CI **4/4**.
 
 ## M19-A/B/C — first-party one-command evidence assessment (engineering accepted)
 
