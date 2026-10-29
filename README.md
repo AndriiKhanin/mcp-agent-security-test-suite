@@ -601,10 +601,12 @@ Run `node tools/owned-attack-matrix.mjs` from a **reviewed source checkout**
 to reproduce three distinct *intentionally unsafe* MCP-shaped behaviors:
 a forged owner claim inside untrusted tool-result data, a replayed
 fictional ledger operation, and a wrong-ID JSON-RPC reply. A second guarded
-case for each attack proves the matching server/client boundary. Six
-ephemeral `127.0.0.1` servers exchange fixed requests with a deterministic
-toy client. `6/6 PASS` means all three *synthetic* unsafe effects were
-actually witnessed and all three protected variants behaved as expected;
+case for each attack proves the matching server/client boundary. An
+additional **distinct-key positive control** verifies the guarded replay
+server admits a new operation instead of blindly rejecting request #2.
+Seven ephemeral `127.0.0.1` servers exchange fixed requests with a
+deterministic toy client. `7/7 PASS` means all three *synthetic* unsafe
+effects, three protected variants and the fresh-key allowance were witnessed;
 it is **not** real-agent or external-server security evidence. No real
 file access, user target, model, credentials or Stable Bridge. Source-only,
 not part of the unpublished npm candidate. See

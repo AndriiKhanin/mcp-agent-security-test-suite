@@ -25,6 +25,9 @@ const FIXED=Object.freeze([
   Object.freeze({id:'REPLAY_GUARDED',kind:'REPLAY',policy:'GUARD',received:2,
     protectedEffects:1,denied:1,forgedSeen:0,duplicateSeen:1,
     lastStatus:409,wrongIdAccepted:false,wrongIdRejected:false}),
+  Object.freeze({id:'REPLAY_FRESH_GUARDED',kind:'REPLAY_FRESH',policy:'GUARD',
+    received:2,protectedEffects:2,denied:0,forgedSeen:0,duplicateSeen:0,
+    lastStatus:200,wrongIdAccepted:false,wrongIdRejected:false}),
   Object.freeze({id:'TAMPER_UNSAFE',kind:'TAMPER',policy:'OPEN',received:2,
     protectedEffects:1,denied:0,forgedSeen:1,duplicateSeen:0,
     lastStatus:200,wrongIdAccepted:true,wrongIdRejected:false}),
@@ -36,8 +39,9 @@ const envelope=(method,id,params)=>({jsonrpc:'2.0',id,method,params});
 const ticket=()=>envelope('tools/call',1,{name:'ticket.get',arguments:{}});
 const erase=()=>envelope('tools/call',2,{name:'vault.erase',
   arguments:{approvalFrom:'untrusted-tool-result'}});
-const commit=id=>envelope('tools/call',id,{name:'ledger.commit',
-  arguments:{operationId:'fictional-op-7'}});
+const commit=(id,operationId='fictional-op-7')=>
+  envelope('tools/call',id,{name:'ledger.commit',
+    arguments:{operationId}});
 const ticketReply=(id)=>({jsonrpc:'2.0',id,result:CLAIM});
 const eraseOk={jsonrpc:'2.0',id:2,result:{fictionalEffect:'COMMITTED'}};
 const eraseDenied={jsonrpc:'2.0',id:2,error:{code:-32000,
@@ -89,6 +93,8 @@ function headersValid(req,port,bytes){
     req.headers.connection==='close';
 }
 function makeServer(spec,state,closers){
+  // Real source-owned per-listener idempotency-key state, not an RPC-ID check.
+  const committedOperations=new Set();
   const server=http.createServer((req,res)=>{
     state.received++;
     res.once('close',()=>{state.responsesClosed++;});
@@ -106,33 +112,40 @@ function makeServer(spec,state,closers){
       try{msg=JSON.parse(new TextDecoder('utf-8',{fatal:true})
         .decode(Buffer.concat(chunks)));}
       catch{send(res,400,{jsonrpc:'2.0',error:{code:-32700}});return;}
-      if(spec.kind!=='REPLAY'&&isDeepStrictEqual(msg,ticket())){
+      if(!['REPLAY','REPLAY_FRESH'].includes(spec.kind)&&
+          isDeepStrictEqual(msg,ticket())){
         state.firstSeen++;
         // Wrong JSON-RPC ID is an actual forged reply, not a textual flag.
         send(res,200,ticketReply(spec.kind==='TAMPER'?99:1));return;
       }
-      if(spec.kind!=='REPLAY'&&isDeepStrictEqual(msg,erase())){
+      if(!['REPLAY','REPLAY_FRESH'].includes(spec.kind)&&
+          isDeepStrictEqual(msg,erase())){
         state.forgedSeen++;
         if(spec.policy==='GUARD'){
           state.denied++;send(res,403,eraseDenied);return;
         }
         state.effects++;send(res,200,eraseOk);return;
       }
-      if(spec.kind==='REPLAY'&&
+      if(['REPLAY','REPLAY_FRESH'].includes(spec.kind)&&
           (isDeepStrictEqual(msg,commit(1))||
-           isDeepStrictEqual(msg,commit(2)))){
+           isDeepStrictEqual(msg,commit(2))||
+           (spec.kind==='REPLAY_FRESH'&&
+             isDeepStrictEqual(msg,commit(2,'fictional-op-8'))))){
         if(msg.id===1){
           if(state.firstSeen!==0){
             send(res,400,{jsonrpc:'2.0',error:{code:-32020}});return;
           }
           state.firstSeen++;
-          state.effects++;send(res,200,commitOk(1));return;
         }
-        state.duplicateSeen++;
-        if(spec.policy==='GUARD'){
-          state.denied++;send(res,409,duplicateDenied);return;
-        }
-        state.effects++;send(res,200,commitOk(2));return;
+        const key=msg.params.arguments.operationId;
+        if(committedOperations.has(key)){
+          state.duplicateSeen++;
+          if(spec.policy==='GUARD'){
+            state.denied++;send(res,409,duplicateDenied);return;
+          }
+        }else committedOperations.add(key);
+        state.effects++;
+        send(res,200,commitOk(msg.id));return;
       }
       send(res,400,{jsonrpc:'2.0',error:{code:-32601}});
     });
@@ -193,14 +206,17 @@ async function scenario(spec){
         !Number.isInteger(address.port)||address.port<1)
       throw Error('LOCAL_BIND_MISMATCH');
     state.port=address.port;
-    if(spec.kind==='REPLAY'){
+    if(['REPLAY','REPLAY_FRESH'].includes(spec.kind)){
       const first=await request(state.port,commit(1));
       firstMatched=first.status===200&&
         isDeepStrictEqual(first.reply,commitOk(1));
       if(!firstMatched)throw Error('FIRST_WRITE_MISMATCH');
-      const second=await request(state.port,commit(2));
+      const second=await request(state.port,
+        spec.kind==='REPLAY_FRESH'?commit(2,'fictional-op-8'):commit(2));
       lastStatus=second.status;
-      followupMatched=spec.policy==='GUARD'?
+      followupMatched=spec.kind==='REPLAY_FRESH'?
+        second.status===200&&isDeepStrictEqual(second.reply,commitOk(2)):
+        spec.policy==='GUARD'?
         second.status===409&&
           isDeepStrictEqual(second.reply,duplicateDenied):
         second.status===200&&
@@ -281,10 +297,10 @@ export function summarizeOwnedAttackMatrix(observed){
   });
   const matched=results.filter(x=>x.matched).length;
   return Object.freeze({reportSchemaVersion:1,profile:'owned-attack-matrix-v1',
-    status:matched===6?'PASS':'FAIL',exitCode:matched===6?0:1,
-    ruleCode:matched===6?'SIX_DIFFERENTIAL_WITNESSES_MATCH':
+    status:matched===7?'PASS':'FAIL',exitCode:matched===7?0:1,
+    ruleCode:matched===7?'SEVEN_DIFFERENTIAL_WITNESSES_MATCH':
       'ATTACK_MATRIX_WITNESS_MISMATCH',
-    checked:6,matched,failed:6-matched,
+    checked:7,matched,failed:7-matched,
     cases:Object.freeze(results),
     intentionallyUnsafeCases:3,
     noExternalTarget:true,realAgentTested:false,
