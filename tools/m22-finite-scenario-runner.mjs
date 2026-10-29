@@ -208,7 +208,7 @@ export function runFiniteScenarioSet(scenarios){
   const observations=cases.map(runOne);
   return auditFiniteWitnesses(scenarios,observations);
 }
-async function readOne(source,filename){
+async function readOne(filename){
   if(!NAME.test(filename))reject();
   const path=join(ROOT,filename);
   const before=await lstat(path);
@@ -243,7 +243,7 @@ async function fixedDirectory(){
   }
   const names=entries.map(e=>e.name).sort();
   const fixtures=[];
-  for(const name of names)fixtures.push(await readOne(ROOT,name));
+  for(const name of names)fixtures.push(await readOne(name));
   return fixtures;
 }
 export async function runFixedFiniteScenarioDirectory(args=[]){
