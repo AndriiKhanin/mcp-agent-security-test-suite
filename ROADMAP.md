@@ -40,6 +40,19 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
+## M6-J CI reliability — source-digest fast rejection (repair pending)
+
+- [Issue #252](../../issues/252) addresses the independently observed
+  [main CI #40834843057](../../actions/runs/40834843057) failure:
+  Windows Node.js 22 returned `INVALID` (2) instead of `MISMATCH` (1)
+  for an intentionally tampered M6-J reviewer handoff; other 3/4
+  platforms passed, and the failing job passed 1187/1188 tests.
+- Verify strictly bounded source and excluded-source SHA-256 bytes
+  before costly offline npm pack/install when the packet cannot match.
+  Still perform the complete two-pack/install verification on a match;
+  no external contact, release authority or changes to 80-path package.
+  **M12-M/N/O remains pending independent 4/4 main CI until repaired.**
+
 ## M12-M/N/O — strict first-party modern SSE response-header gate (PR validation pending)
 
 - [Issue #250](../../issues/250): reject missing, unexpected or duplicate HTTP response fields even when body SSE data is valid; strict source-owned Node 20/22 header allowlist, not a complete HTTP/MCP conformance rule.
