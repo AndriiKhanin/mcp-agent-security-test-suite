@@ -32,7 +32,7 @@ export function buildBetaReview(receipt,beta){
      receipt.betaGateSatisfied!==false ||
      receipt.releaseAuthorized!==false)
     throw new TypeError('INVALID_FICTIONAL_BETA_REVIEW_INPUT');
-  const card=buildBetaFeedbackCard(beta); // exact fixed-source symbolic case checker
+  const card=buildBetaFeedbackCard(beta,'combined-review'); // exact fixed-source symbolic case checker
   return [
     '# Offline fictional beta review — local source only',
     '',
