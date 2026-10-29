@@ -193,7 +193,7 @@ test('M21-C: fixed stdin CLI emits safe categories, never input records',()=>{
   assert.equal(result.exactCategoryPatternPairs,1);
   noAuthority(result);
   for(const prohibited of [PIN,'PRIVATE_CANARY','http://','127.0.0.1',
-    'candidateVersion','personallyRanProtocol','sourceRevision']){
+    'candidateVersion','personallyRanProtocol','2ad680ed']){
     assert.ok(!good.stdout.includes(prohibited),prohibited);
   }
   for(const arg of [
