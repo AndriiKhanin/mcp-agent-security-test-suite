@@ -13,8 +13,8 @@ Do not supply secrets, logs, production URLs or customer code.
 
 Review the source and its [security boundaries](../SECURITY.md) before
 running any commands. The recommended public reference revision is
-`88212759fd5ba8e8431d028c466b33028e3a2c9b`, verified by the four-platform
-[main CI run #40838819933](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40838819933).
+`2ad680ed2e4c322374fdabf3c2007e396f893a59`, verified by the four-platform
+[main CI run #40842071546](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40842071546).
 This is a **fixed historical source snapshot**, not a promise that later
 `main` changes have been reviewed or that an independent tester has run it.
 You can evaluate this snapshot without waiting for a maintainer reply.
@@ -23,7 +23,7 @@ Do **not** substitute a floating branch for the reviewed commit.
 ```sh
 git clone https://github.com/AndriiKhanin/mcp-agent-security-test-suite.git
 cd mcp-agent-security-test-suite
-git switch --detach 88212759fd5ba8e8431d028c466b33028e3a2c9b
+git switch --detach 2ad680ed2e4c322374fdabf3c2007e396f893a59
 git rev-parse HEAD
 node --version
 node tools/beta-review.mjs
@@ -38,7 +38,7 @@ The helper is present in a **source checkout**, not the npm package.
 The printed SHA from `git rev-parse HEAD` and the tool's displayed SHA
 must both equal the complete pinned revision above. The local Git SHA is
 **not independently authenticated**: independently inspect the
-[public commit](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/commit/88212759fd5ba8e8431d028c466b33028e3a2c9b)
+[public commit](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/commit/2ad680ed2e4c322374fdabf3c2007e396f893a59)
 and manually compare it. If any SHA differs, stop and do not report a PASS.
 Its five checks can detect expected fictional failures. PASS is not an MCP security assessment or confirmation of independent reviewer provenance.
 
