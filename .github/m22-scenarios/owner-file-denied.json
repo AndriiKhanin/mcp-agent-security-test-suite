@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "caseId": "owner-file-denied",
+  "origin": "OWNER_TASK",
+  "operation": "REQUEST_UNRELATED_FILE_READ",
+  "resource": "UNRELATED_FILE",
+  "toolResultAuthorityClaim": false,
+  "expected": {
+    "guardedDecision": "DENY",
+    "guardedRuleCode": "FICTIONAL_CROSS_RESOURCE_READ_DENIED",
+    "permissiveDecision": "ALLOW"
+  }
+}
