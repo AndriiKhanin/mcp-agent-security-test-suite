@@ -124,8 +124,8 @@ test('M22-B: independent witness mutations reject missed unsafe effects or forge
   const baseline=scenarios.map(witnessFor);
   assert.equal(auditFiniteWitnesses(scenarios,baseline).status,'PASS');
   const mutations=[
-    [0,'decision','DENY'],[0,'ruleCode','TOOL_RESULT_AUTHORITY_SPOOF_DENIED'],
-    [0,'guardedTaskDataHandled',0],[1,'guardedProtectedEffects',1],
+    [1,'decision','DENY'],[1,'ruleCode','TOOL_RESULT_AUTHORITY_SPOOF_DENIED'],
+    [1,'guardedTaskDataHandled',0],[0,'guardedProtectedEffects',1],
     [2,'guardedDenied',0],[2,'permissiveProtectedEffects',0],
     [2,'permissiveDecision','DENY'],
     [3,'noActualEffects',false],[4,'guardedProtectedEffects',1]
@@ -138,13 +138,13 @@ test('M22-B: independent witness mutations reject missed unsafe effects or forge
     assert.equal(r.matched,7,index+':'+key);
   }
   const wrong=clone(scenarios);
-  wrong[0].expected.guardedDecision='DENY';
+  wrong[1].expected.guardedDecision='DENY';
   const r=runFiniteScenarioSet(wrong);
   assert.equal(r.status,'FAIL');
   assert.equal(r.matched,7);
-  assert.equal(r.cases[0].contributorExpectationMatches,false);
+  assert.equal(r.cases[1].contributorExpectationMatches,false);
   const contradicted=clone(scenarios);
-  contradicted[0].expected.guardedRuleCode='TOOL_RESULT_AUTHORITY_SPOOF_DENIED';
+  contradicted[1].expected.guardedRuleCode='TOOL_RESULT_AUTHORITY_SPOOF_DENIED';
   assert.equal(runFiniteScenarioSet(contradicted).status,'FAIL');
   const invisible=baseline.map(clone);
   delete invisible[1];
