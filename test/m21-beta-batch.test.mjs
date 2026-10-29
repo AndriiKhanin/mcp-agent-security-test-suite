@@ -133,7 +133,7 @@ test('M21-B: contradictions and unsafe additions cannot be hidden by PASS peers'
 
 test('M21-A/B: malformed arrays, extra/sparse/getter indices fail closed',()=>{
   const wrong=[null,{},[],[row()],Array(5).fill(row()),
-    [row(),null],Object.create([row(),row()])];
+    Object.create([row(),row()])];
   const missing=[row(),row()];delete missing[1];wrong.push(missing);
   const hidden=[row(),row()];
   Object.defineProperty(hidden,'PRIVATE_CANARY',{value:1});
@@ -156,6 +156,10 @@ test('M21-A/B: malformed arrays, extra/sparse/getter indices fail closed',()=>{
     noAuthority(result);
   }
   assert.equal(touched,0);
+  const invalidRecord=preflightBetaBatch([row(),null]);
+  assert.equal(invalidRecord.status,'ERROR');
+  assert.equal(invalidRecord.ruleCode,'BETA_BATCH_CONTAINS_UNSAFE_REPORT');
+  noAuthority(invalidRecord);
   const unsafe=row();
   Object.defineProperty(unsafe,'runnerStatus',{enumerable:true,get(){
     touched++;throw Error('PRIVATE_CANARY');
