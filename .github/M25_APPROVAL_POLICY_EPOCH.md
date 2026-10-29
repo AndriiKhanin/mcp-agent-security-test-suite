@@ -38,4 +38,10 @@ This models a gate **generation replacement inside a single running test process
 
 For production use, a durable gate would need explicit transaction/commit semantics, real provenance and monotonic versions, fail-closed generation cutovers, independent effect witnessing and crash/recovery tests. No such functionality is claimed here.
 
-Preserve external gate approvals [#21](../issues/21), [#43](../issues/43), independent beta [#59](../issues/59) and the unpublished fixed 80-file npm package. This test is **source-only**, not a release qualification or real-target security attestation. Engineering acceptance requires 4/4 GitHub PR CI (Windows/Ubuntu × Node20/22) followed by a separate 4/4 run on the exact merged main SHA.
+Preserve external gate approvals [#21](../issues/21), [#43](../issues/43), independent beta [#59](../issues/59) and the unpublished fixed 80-file npm package. This test is **source-only**, not a release qualification or real-target security attestation. Engineering acceptance (2026-10-29): [PR #297](../pull/297) passed
+[PR CI #40950036873](../actions/runs/40950036873) **4/4** on
+Windows/Ubuntu Node20/22, then merged as exact main SHA
+`d1e7d0cddb11668df5e7d96325a8d9b283b58f32`.
+Independent [main CI #40950548884](../actions/runs/40950548884)
+passed **4/4 on the same SHA**. This does not count as independent
+beta, a real process crash/recovery validation or a production release.
