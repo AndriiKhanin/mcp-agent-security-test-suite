@@ -86,5 +86,12 @@ external MCP targets, LLMs, telemetry or Stable Bridge are involved.
 The new helper and tests are excluded from the **unpublished fixed 80-path
 npm package**. Independent beta [#59](../issues/59), audit [#43](../issues/43)
 and real-target approval [#21](../issues/21) remain open. Engineering
-acceptance requires 4/4 PR CI and a separately matched post-merge
-main-push 4/4 CI on Windows/Ubuntu × Node20/22.
+acceptance (2026-10-29): [PR #277](../pull/277) passed
+[PR CI #40907812910](../actions/runs/40907812910) **4/4**,
+merged as exact main SHA `e10da27f12c9419658f79bcb281273f63db513cc`,
+and independently triggered [main CI #40908374045](../actions/runs/40908374045)
+passed **4/4 on that SHA** (Windows/Ubuntu × Node20/22).
+The originally overfull M6-J custody inventory was repaired with a bounded
+192-file limit, **all files still hashed** and overflow rejected; the
+unpublished 80-path package remained unchanged. This is **engineering**
+acceptance, not proof of independently evaluated attack resistance.
