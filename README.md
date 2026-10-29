@@ -595,6 +595,27 @@ verification, independent beta/audit evidence and stable release
 authorization have **not** occurred. It requires Node.js 20+ and no
 runtime dependencies. See [Getting Started](docs/GETTING_STARTED.md).
 
+## Intentionally vulnerable MCP-shaped red-team lab (M15, source only)
+
+In a **reviewed first-party source checkout**, try the fixed differential
+experiment:
+
+```sh
+node tools/owned-redteam-lab.mjs
+```
+
+Four ephemeral `127.0.0.1` servers reproduce a fictional ticket response
+containing lower-trust text. A deliberately susceptible **deterministic toy
+client** makes an unauthorized second tool call; a deliberately permissive
+mock **accepts it** and records one synthetic protected in-memory effect.
+Separate server-guarded and client-guarded runs block the same effect.
+Expected `4/4 PASS` means **the intentional synthetic vulnerability was
+actually witnessed and the fixed defenses worked**, not that the vulnerable
+client or real models are safe. No real files, models, remote MCP server,
+credentials, telemetry or Stable Bridge are used. This helper is source-only,
+not part of the unpublished npm package or the independent five-case beta
+protocol. See [lab guide](.github/M15_OWNED_REDTEAM_LAB.md).
+
 ## Optional first-party capability tour (M14-A/B/C)
 
 In an **M14 or later reviewed public source checkout** (not the older
