@@ -52,13 +52,13 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M21 — Bounded multi-report beta triage** | Strict offline batch of 2–4 M20 categorical self-reports, repeated-pattern flags and conservative attribution | **ENGINEERING ACCEPTED — PR/main CI 4/4; beta not independently verified** | [#285](../../issues/285), [PR #286](../../pull/286), [main CI #40926082743](../../actions/runs/40926082743), [guide](.github/M21_BETA_BATCH_TRIAGE.md) | Categorically scoped triage, no verified unique testers, no untrusted input echo |
 
-| **M22 — Finite-action contributed security scenarios** | Reviewed, constrained enum-only JSON files auto-discovered by a fixed source-only runner | **ENGINEERING IN PROGRESS — PR/main CI required** | [#287](../../issues/287), [guide](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md) | 8 initial source-owned cases; contributor ninth auto-discovered, forged expectations and unsafe files fail closed |
+| **M22 — Finite-action contributed security scenarios** | Reviewed enum-only JSON fixtures auto-discovered by a fixed source-only runner | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#287](../../issues/287), [PR #291](../../pull/291), [main CI #40941967881](../../actions/runs/40941967881), [guide](.github/M22_FINITE_SCENARIO_CONTRIBUTIONS.md) | 8/8 source-owned cases, ninth auto-discovered, forged expected decisions and malformed files fail closed |
 
 | **M23 — Community-requested attack-family demonstration** | Fixed toy controls for tool-description rug pulls, multi-server authority crossing and error-channel leaks | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#288](../../issues/288), [PR #289](../../pull/289), [main CI #40930780325](../../actions/runs/40930780325), [guide](.github/M23_COMMUNITY_ATTACK_FAMILIES.md) | 10/10 source-owned comparisons + negative mutations; no live MCP/model certification |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M22-A/B/C — reviewed finite-action contributor scenarios (engineering in progress)
+## M22-A/B/C — reviewed finite-action contributor scenarios (engineering accepted)
 
 - [Issue #287](../../issues/287): `node tools/m22-finite-scenario-runner.mjs`
   reads only the fixed `.github/m22-scenarios/` directory, **5–12**
@@ -85,8 +85,13 @@ We will not claim a release is production-ready merely because a synthetic test 
   40 KiB canonical packet and 2 MB reviewed-source cap. This is *not*
   independent model/agent testing or semantic prompt-injection coverage.
   No external MCP, Stable Bridge, real files, secrets or telemetry;
-  owner/independent gates #21/#43/#59 remain OPEN. Require
-  Windows/Ubuntu Node20/22 PR **4/4** and exact main CI **4/4**.
+  owner/independent gates #21/#43/#59 remain OPEN. [PR #291](../../pull/291)
+  passed [PR CI #40941191039](../../actions/runs/40941191039)
+  **4/4** on Windows/Ubuntu Node20/22 and merged as
+  `5d4c7f81ead97183184f33142dc14b8d62a782e1`.
+  Independent [main CI #40941967881](../../actions/runs/40941967881)
+  passed **4/4 on that same SHA**. These are first-party engineering
+  results, not independent user beta or live-agent validation.
 
 ## M23-A/B/C — community-requested trust-boundary scenarios (engineering accepted)
 
