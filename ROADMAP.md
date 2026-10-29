@@ -44,11 +44,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M17 — Concurrent replay race on owned MCP-shaped HTTP** | Deterministic two-request overlap exposes check-then-commit double effect and proves per-key pre-effect reservation | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#273](../../issues/273), [PR #274](../../pull/274), [main CI #40886331660](../../actions/runs/40886331660), [guide](.github/M17_CONCURRENT_REPLAY_RACE.md) | 3/3 first-party witnesses, 4/4 PR + 4/4 main CI; real-agent evidence separate |
 
-| **M18 — Measurable symbolic classification QA** | Exhaustive authored profile/event combinations and separate rule oracle; three-way alert/clear/abstain confusion accounting | **M18-A/B/C IN PROGRESS — CI PENDING** | [#276](../../issues/276), [guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md) | 32/32 symbolic rule/class agreement; bad baselines with meaningful FP/FN; 4/4 PR and main CI |
+| **M18 — Measurable symbolic classification QA** | Exhaustive authored profile/event combinations and separate rule oracle; three-way alert/clear/abstain confusion accounting | **ENGINEERING ACCEPTED — PR + main CI 4/4** | [#276](../../issues/276), [PR #277](../../pull/277), [main CI #40908374045](../../actions/runs/40908374045), [guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md) | 32/32 symbolic reference cases, TP/FP/FN/TN and bad baselines; no external-efficacy inference |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M18-A/B/C — symbolic measurement and negative-control benchmark (engineering in progress)
+## M18-A/B/C — symbolic measurement and negative-control benchmark (engineering accepted)
 
 - [Issue #276](../../issues/276): fixed source-only
   `node tools/m18-symbolic-evaluation.mjs` tests **32** profile ×
@@ -66,10 +66,16 @@ We will not claim a release is production-ready merely because a synthetic test 
   Strict negative mutations reject hidden attacks, false classifications,
   corrupt verdicts, source gettors, missing rows and forged evidence.
 - **M18-C:** [scope and limitations](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md),
-  README and 4/4 Windows/Ubuntu Node20/22 PR and separate post-merge
-  main CI. No user MCP server, LLM, external tool, arbitrary file,
-  credential, Stable Bridge or actual attack effectiveness measured.
-  Unpublished 80-path npm candidate and #21/#43/#59 gates unchanged.
+  README and Windows/Ubuntu Node20/22 CI. [PR #277](../../pull/277)
+  passed [PR CI #40907812910](../../actions/runs/40907812910) **4/4**,
+  merged as `e10da27f12c9419658f79bcb281273f63db513cc`,
+  and separately triggered [main CI #40908374045](../../actions/runs/40908374045)
+  passed **4/4 on that exact SHA**. M6-J excluded-source index capacity
+  increased in a bounded, fully hashed manner from 176 to 192 files
+  (193 rejected), without touching the **80-path unpublished** npm candidate.
+  No user MCP server, LLM, external tool, arbitrary file, credential,
+  Stable Bridge or actual attack effectiveness measured. Owner/external
+  gates #21/#43/#59 remain OPEN.
 
 ## M17-A/B/C — deterministic concurrent replay race (engineering accepted)
 
