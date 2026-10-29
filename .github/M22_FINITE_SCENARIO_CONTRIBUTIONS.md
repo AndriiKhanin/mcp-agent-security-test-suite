@@ -86,7 +86,9 @@ an unauthorized fictional tool, spoof tool-result authority, or mismatch
 an operation/resource must be denied by the guarded oracle; the
 intentionally wrong `ALLOW_ALL` toy instead commits exactly **one
 fictional in-memory protected effect**. This is a counter, not actual
-file access, process execution, network traffic or database change.
+protected unrelated-file access, process execution, network traffic or
+database change. The runner necessarily reads the fixed reviewed JSON
+fixtures, and the test suite uses disposable temporary fixture files.
 The test independently checks denial and counter values. `PASS`
 means the **intentional difference** was observed; it does not mean
 the permissive toy is safe.
