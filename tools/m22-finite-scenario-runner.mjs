@@ -33,7 +33,7 @@ const reject=()=>{throw new TypeError(INVALID);};
 const errorReport=Object.freeze({
   reportSchemaVersion:1,profile:'m22-first-party-finite-action-contributors',
   status:'ERROR',exitCode:2,ruleCode:'M22_INVALID_OR_UNREADABLE_SCENARIOS',
-  sourceOwnedFiniteActionsOnly:true,realAgentBehaviorObserved:false,
+  sourceOwnedFiniteActionsOnly:true,actualAgentBehaviorObserved:false,
   realFilesystemEffectObserved:false,externalMcpContacted:false,
   independentBetaVerified:false,securityCertified:false
 });
