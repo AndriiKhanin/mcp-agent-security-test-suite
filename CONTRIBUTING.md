@@ -27,6 +27,31 @@ Before editing a scanner rule, independently reproduce the relevant case,
 record the scanner version, and understand its intended detection policy.
 Never publish private output or credentials.
 
+## M43: interpreting independent volunteer reports
+
+The first version-pinned third-party reports are from the maintainer of
+[Firstwatch](https://github.com/dave8172/firstwatch): [v0.2.0](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329#issuecomment-6529063336)
+and [v0.3.0](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329#issuecomment-6529886202).
+For **each version**, the contributor reports two clean cases correctly
+not flagged (2 TN) and two author-labeled injection cases not flagged
+(2 FN), with zero TP/FP/errors. These are the volunteer's own reported
+observations; our test suite **did not run, certify, or independently
+reproduce** the scanner or confirm its protection of an AI agent.
+
+Do **not** interpret two releases of the same scanner as two independently
+developed detectors. When comparing versions of the same implementation,
+report each version separately and keep its exact commit pinned. An M39
+batch can distinguish sanitized aliases, but it cannot authenticate the
+underlying scanner family, release, installation or provenance.
+
+The missed cases illustrate a detection tradeoff: broad task-switch
+language can appear in benign human conversation as well as in tool-result
+injections. Add separately reviewed benign controls and explicit AI-addressed
+variants rather than changing the original four fixed M38 cases or
+optimizing a rule only to known examples. Check action-authorization and
+side-effect prevention separately from detection. Follow-up is tracked
+in [#345](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/345).
+
 ## M41: compare fictional scanner disagreements
 
 Using the same local `detector-batch.json` from M39, run:

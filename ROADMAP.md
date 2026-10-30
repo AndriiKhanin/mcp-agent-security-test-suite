@@ -79,8 +79,34 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
 | **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **ENGINEERING ACCEPTED — PR/main CI 4/4; release blocked** | [#330](../../issues/330), [PR #331](../../pull/331), [main CI #41036858127](../../actions/runs/41036858127), [readiness](docs/RELEASE_READINESS.md) | 80 packaged + 240 fully hashed excluded files, 1353/1353 Ubuntu20; no publication approval |
 | **M37 — One-command source-only first run** | M8 two-transport synthetic smoke + M35 two-format fictional importer, readable text/JSON and private next-step instructions | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#335](../../issues/335), [PR #336](../../pull/336), [main CI #41050360958](../../actions/runs/41050360958), [getting started](docs/GETTING_STARTED.md) | 1358/1358 Ubuntu20; no real MCP/user config; 240/240 M6-J custody; exact 4/4 PR and main CI |
-| **M38 — Independent fictional scanner comparisons** | Export two fixed clean/mixed tool-result pairs and classify self-reported third-party rule detector outcomes | **ENGINEERING ACCEPTED — PR/main CI 4/4; external results pending** | [#338](../../issues/338), [PR #339](../../pull/339), [main CI #41061833450](../../actions/runs/41061833450), [volunteer #329](../../issues/329), [guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) | Four fixed fictional cases; 1363/1363 Ubuntu20; exact 4/4 PR/main; no scanner execution or beta claim |
+| **M38 — Independent fictional scanner comparisons** | Export two fixed clean/mixed tool-result pairs and classify self-reported third-party rule detector outcomes | **ENGINEERING ACCEPTED — PR/main CI 4/4; first external scanner self-reports received (v0.2.0/v0.3.0), not reproduced** | [#338](../../issues/338), [PR #339](../../pull/339), [main CI #41061833450](../../actions/runs/41061833450), [volunteer #329](../../issues/329), [guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) | Four fixed fictional cases; 1363/1363 Ubuntu20; exact 4/4 PR/main; no scanner execution or beta claim |
 
+
+## M43 — first external M38 scanner feedback (reported, not independently reproduced)
+
+- [Firstwatch v0.2.0 report](../../issues/329#issuecomment-6529063336) and
+  [v0.3.0 follow-up](../../issues/329#issuecomment-6529886202) from
+  external maintainer `dave8172` report the **same four fixed M38 cases**
+  at source SHA `39e411a7926a5acf6e5abf392fcdfa0de2db59ec`.
+- For **each** reported version separately, author-label comparison is
+  **TP=0, FP=0, FN=2, TN=2, ERROR=0**. Both clean rows were classified clean;
+  both mixed (injection-labeled) rows were also classified clean.
+  This is **external contributor self-report**, not our execution, verification,
+  independent beta #59, or population-level accuracy evidence.
+- Version pins: [firstwatch 0.2.0](https://github.com/dave8172/firstwatch/commit/6bc3093a5f2731e2136515470bb14059507bda95)
+  and [firstwatch 0.3.0](https://github.com/dave8172/firstwatch/commit/719f8264bde20b290c42db19907a47098a67e75c).
+  The contributor reports follow-up rule changes, JSON value scanning, a
+  careful action-confirmation mode and inclusion of both source fixtures in
+  their own regression scorecard; these product claims remain attributed.
+- **Methodological guardrail:** two versions of the *same scanner* are not
+  two independent detectors. Do not feed them as two unrelated scanner IDs
+  into M39–M42 and interpret repeated misses as cross-product agreement.
+- [Follow-up #345](../../issues/345): explicit-agent-addressed variants,
+  benign business-text negatives, JSON tool-result representation and
+  detection-versus-action-authorization should be reviewed separately.
+  Original M38 four-case baseline must remain unchanged.
+- M43 source regression replays the **published four classifications** through
+  the existing local evaluator. It does not install or execute Firstwatch.
 
 ## M40 — local reviewer queue for independent fictional detector feedback (engineering in PR)
 
@@ -130,9 +156,10 @@ We will not claim a release is production-ready merely because a synthetic test 
   stdout has only categorical findings, never user input.
 - **M38-C:** contribution guide, README, CONTRIBUTING and roadmap
   include local Windows/Linux/macOS commands and voluntary sanitized
-  independent feedback instructions. External tester results are
-  **NOT observed**, and self-reported scanner output is **NOT
-  authenticated** or a population-level effectiveness estimate.
+  independent feedback instructions. At initial M38 engineering acceptance,
+  no external results had been observed; later Firstwatch self-reports are
+  documented under M43. Scanner output remains **not authenticated**, and
+  four author-labeled samples are not population-level effectiveness evidence.
 - **Source custody:** existing tool/test/docs modified only, no
   new file paths at M6-J 240/240 SHA-256 custody cap; 241st file
   denied. Unpublished npm candidate remains frozen 80 paths.
