@@ -1,5 +1,17 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Deterministic OS path-swap evidence race (M32)
+
+From a reviewed source checkout, run `node tools/m32-path-swap-lab.mjs`.
+Eight first-party OS temp-directory cases use a **real child IPC barrier**
+to replace or remove an inert marker **between parent metadata and later
+file reads**. A size-only check misses same-length replacement and an
+unexpected extra directory entry; six cases detect changed/invalid
+evidence. The defended rule remains `QUARANTINE` in all eight cases.
+This is **not an authenticated effect receipt**, atomic OS transaction,
+external MCP test or exactly-once guarantee. See the
+[M32 evidence scope](.github/M32_OS_PATH_SWAP_TOCTOU.md).
+
 ## Parent-read OS marker evidence versus deceptive child claims (M31)
 
 From a reviewed source checkout, run `node tools/m31-os-effect-witness.mjs`.

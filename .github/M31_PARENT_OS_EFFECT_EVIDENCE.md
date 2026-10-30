@@ -75,3 +75,13 @@ x Node20/22 **4/4 PR CI**, followed by **separate 4/4 main-push CI
 on exact merged SHA**. Independent real-user beta
 [#59](../issues/59), third-party audit [#43](../issues/43) and
 external-target authorization [#21](../issues/21) remain open.
+
+## Engineering acceptance (2026-10-30)
+
+[PR #319](../pull/319) passed [PR CI #41025402415](../actions/runs/41025402415)
+**4/4** (Windows/Ubuntu Node.js 20/22), merged at exact SHA
+`631ac0e5bcc4af94ef5dbeb928d4494937eb6ef9`, and separately
+[main CI #41025873482](../actions/runs/41025873482) passed **4/4
+on that same SHA**. [#317](../issues/317) closed for first-party
+engineering scope. This remains neither authenticated business-effect
+truth nor real-world recovery authorization; #21/#43/#59 stay open.
