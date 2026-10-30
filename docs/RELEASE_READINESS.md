@@ -15,7 +15,7 @@ disposable local offline npm package + install checks and full local
 source-byte SHA-256 custody: exact **80 packaged paths** and at most
 **240 excluded .github/test/tools paths**. It returns a JSON v1 report
 with locally computed package source index, excluded source index,
-temporary raw archive SHA-256 and installed-file index. It never
+temporary raw archive SHA-256, SHA-512, matching npm `sha512-` integrity and installed-file index. These hashes are all self-computed, not signed or independently anchored. It never
 copies the excluded test/tool source into the package, publishes an
 artifact, contacts the registry or invokes a user MCP server.
 
