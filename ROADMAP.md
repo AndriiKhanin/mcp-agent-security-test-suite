@@ -200,6 +200,15 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - This confirms **real first-party temporary file I/O only**, not an OS sandbox, LLM safety, MCP call authorization, user ownership authentication, or external scanner effectiveness. Existing M10/M45/M46 flows remain unchanged.
 - Engineering acceptance pending PR CI on Windows/Ubuntu Node 20/22; external target authorization [#21](../../issues/21), beta [#59](../../issues/59) and audit [#43](../../issues/43) remain open.
 
+## M49 — owned loopback MCP-shaped tool calls with independent OS-file readback (engineering in PR)
+
+- Add *test-only* first-party ephemeral IPv4 `127.0.0.1` MCP-shaped `tools/call` server inside the existing staging test file. The packaged `staging-selftest` server remains strictly `server/discover`-only. No new packaged code, CLI commands, files, remote endpoints, secrets or user-selected destinations.
+- Six fixed scenarios: a first-party owner with `WRITE_TASK_STATUS` grant writes one fictional temporary task file; an owner with read-only scope, untrusted tool-result inputs (including forged `OWNER_EXPLICIT` / `NOT_FLAGGED` assertions), and human-email inputs are denied.
+- The independent parent-side OS witness enumerates real temporary directory contents and reads the authorized file bytes, checking exactly one allow-effect versus zero effects for each denied case.
+- A deliberate test-only negative fault returns HTTP 403 but creates an unauthorized fictional file; disk readback must detect the discrepancy even if handler counters claim `DENY`.
+- Test-owned temp directories and local TCP sockets must be closed and cleaned, with no paths, ports or data reflected. Only strictly fixed request metadata and short bounded bodies; no real AI/LLM, independently authenticated owner, external scanner, arbitrary MCP tools, remote network contact or OS sandbox.
+- CI acceptance requires four Windows/Ubuntu Node 20/22 jobs plus separately verified post-merge `main` CI. External-target authorization [#21](../../issues/21), beta [#59](../../issues/59), and audit [#43](../../issues/43) are unchanged.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)

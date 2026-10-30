@@ -1,10 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { dirname,resolve } from 'node:path';
+import http from 'node:http';
+import {mkdtemp,readdir,readFile,writeFile,rm,lstat} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import { dirname,resolve,join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runFirstPartyStagingSelftest } from '../src/first-party-staging-mcp.mjs';
 import { observeFirstPartyMockAttempts } from '../src/mock-attempt-observer.mjs';
+import { parseStrictJson } from '../src/strict-json.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const cli=(...args)=>spawnSync(process.execPath,['src/cli.mjs',...args],{
@@ -177,4 +181,225 @@ test('M4-B6-A: repeated and parallel isolated staging lifecycles clean up resour
   ]);
   assert.equal(a.status,'PASS');
   assert.equal(b.status,'PASS');
+});
+
+
+/**
+ * M49: independent parent-side OS-file witness for real 127.0.0.1 MCP-shaped
+ * tool calls. Separate test-only server: the packaged discovery-only
+ * staging-selftest is NOT widened to allow tools/call.
+ *
+ * All plans, ingresses and grants are source-authored. Claims in the wire
+ * body are data only, never credentials. This is not a real authenticated
+ * owner, adversarial-process sandbox or deployed MCP server.
+ */
+const WIRE_HOST='127.0.0.1';
+const WIRE_VERSION='2026-07-28';
+const WIRE_FILE='fixed-task-status.json';
+const WIRE_BYTES='{"status":"fictional-approved"}\n';
+const WIRE_PLANS=Object.freeze([
+  Object.freeze({id:'owner-write-granted',source:'OWNER_DIRECT',
+    grant:'WRITE_TASK_STATUS',args:Object.freeze({}),expectedStatus:200}),
+  Object.freeze({id:'owner-read-grant-only',source:'OWNER_DIRECT',
+    grant:'READ_TASK_ONLY',args:Object.freeze({}),expectedStatus:403}),
+  Object.freeze({id:'tool-result-owner-claim',source:'TOOL_RESULT',
+    grant:'NONE',args:Object.freeze({claimedAuthority:'OWNER_EXPLICIT'}),
+    expectedStatus:403}),
+  Object.freeze({id:'tool-result-scanner-clearance',source:'TOOL_RESULT',
+    grant:'NONE',args:Object.freeze({scannerObservation:'NOT_FLAGGED'}),
+    expectedStatus:403}),
+  Object.freeze({id:'email-owner-claim',source:'HUMAN_EMAIL',
+    grant:'NONE',args:Object.freeze({claimedAuthority:'OWNER_EXPLICIT'}),
+    expectedStatus:403}),
+  Object.freeze({id:'tool-result-no-claim',source:'TOOL_RESULT',
+    grant:'NONE',args:Object.freeze({}),expectedStatus:403})
+]);
+const WIRE_META=Object.freeze({
+  'io.modelcontextprotocol/protocolVersion':WIRE_VERSION
+});
+async function ownedWireEffectTrial(plan,{forceUnauthorizedEffect=false}={}){
+  const directory=await mkdtemp(join(tmpdir(),'mcp-m49-wire-'));
+  const effectPath=join(directory,WIRE_FILE);
+  const granted=plan.source==='OWNER_DIRECT'&&
+    plan.grant==='WRITE_TASK_STATUS';
+  let received=0,accepted=0,denied=0,closedSockets=0;
+  let responseStatus=null,observedFiles=null,observedBytes=false;
+  let cleanupVerified=false,socketCloseVerified=false;
+  const server=http.createServer();
+  const socketAcks=[];
+  server.on('connection',socket=>{
+    socketAcks.push(new Promise(resolve=>{
+      socket.once('close',()=>{closedSockets++;resolve();});
+    }));
+  });
+  try{
+    server.on('request',(req,res)=>{
+      received++;
+      const reject=(code=403)=>{
+        denied++;res.writeHead(code,{'content-type':'application/json',
+          connection:'close'});res.end('{"error":"DENIED"}');
+      };
+      const raw=[];
+      let size=0,oversized=false;
+      req.on('data',chunk=>{
+        size+=chunk.length;
+        if(size>4096){oversized=true;raw.length=0;}
+        else if(!oversized)raw.push(chunk);
+      });
+      req.on('end',async()=>{
+        try{
+          const parsed=oversized?null:parseStrictJson(
+            new TextDecoder('utf-8',{fatal:true}).decode(Buffer.concat(raw)));
+          const params=parsed?.params;
+          const args=params?.arguments;
+          const fields=args&&typeof args==='object'&&!Array.isArray(args)?
+            Object.keys(args):[];
+          const validClaims=fields.every(key=>
+            (key==='claimedAuthority'&&args[key]==='OWNER_EXPLICIT')||
+            (key==='scannerObservation'&&args[key]==='NOT_FLAGGED'));
+          const valid=received===1&&req.socket.remoteAddress===WIRE_HOST&&
+            req.method==='POST'&&req.url==='/mcp'&&
+            req.headers.origin==='http://127.0.0.1'&&
+            req.headers.host===WIRE_HOST+':'+server.address().port&&
+            req.headers['content-type']==='application/json'&&
+            req.headers['mcp-protocol-version']===WIRE_VERSION&&
+            req.headers['mcp-method']==='tools/call'&&
+            parsed?.jsonrpc==='2.0'&&parsed?.id===1&&
+            parsed?.method==='tools/call'&&
+            params?.name==='fictional.writeTaskStatus'&&
+            params?._meta?.['io.modelcontextprotocol/protocolVersion']===
+              WIRE_VERSION&&validClaims&&
+            Object.keys(params).length===3&&size<=4096;
+          if(!valid){reject();return;}
+          if(!granted){
+            // Test-only negative control: the server reports DENY yet
+            // incorrectly writes a file. Parent readback must detect it.
+            if(forceUnauthorizedEffect)
+              await writeFile(effectPath,WIRE_BYTES,{flag:'wx',mode:0o600});
+            reject();return;
+          }
+          await writeFile(effectPath,WIRE_BYTES,{flag:'wx',mode:0o600});
+          accepted++;
+          res.writeHead(200,{'content-type':'application/json',
+            connection:'close'});
+          res.end('{"jsonrpc":"2.0","id":1,"result":{"ok":true}}');
+        }catch{
+          reject(400);
+        }
+      });
+      req.on('error',()=>{if(!res.writableEnded)reject(400);});
+    });
+    await new Promise((resolve,reject)=>{
+      server.once('error',reject);
+      server.listen({host:WIRE_HOST,port:0,exclusive:true},()=>{
+        server.off('error',reject);resolve();
+      });
+    });
+    const port=server.address().port;
+    const body=JSON.stringify({jsonrpc:'2.0',id:1,
+      method:'tools/call',params:{name:'fictional.writeTaskStatus',
+        arguments:plan.args,_meta:WIRE_META}});
+    responseStatus=await new Promise((resolve,reject)=>{
+      const req=http.request({hostname:WIRE_HOST,port,path:'/mcp',
+        method:'POST',agent:false,headers:{
+          host:WIRE_HOST+':'+port,origin:'http://127.0.0.1',
+          'content-type':'application/json',
+          'mcp-method':'tools/call','mcp-protocol-version':WIRE_VERSION,
+          'content-length':Buffer.byteLength(body)
+        }},res=>{
+          res.resume();
+          res.once('end',()=>resolve(res.statusCode));
+          res.once('error',reject);
+        });
+      req.setTimeout(3000,()=>req.destroy(new Error('FIXED_WIRE_TIMEOUT')));
+      req.once('error',reject);
+      req.end(body);
+    });
+    // This is independently derived from actual OS state, not the HTTP
+    // status, server-owned counters or the permission decision.
+    observedFiles=(await readdir(directory)).sort();
+    observedBytes=observedFiles.length===1&&
+      observedFiles[0]===WIRE_FILE&&
+      await readFile(effectPath,'utf8')===WIRE_BYTES;
+  }finally{
+    if(server.listening){
+      const done=new Promise(resolve=>server.close(resolve));
+      server.closeAllConnections();
+      await done;
+    }
+    let timer;
+    try{
+      socketCloseVerified=await Promise.race([
+        Promise.all(socketAcks).then(()=>true),
+        new Promise(resolve=>{timer=setTimeout(()=>resolve(false),1000);})
+      ]);
+    }finally{clearTimeout(timer);}
+    await rm(directory,{recursive:true,force:true});
+    try{await lstat(directory);}catch(error){
+      cleanupVerified=error?.code==='ENOENT';
+    }
+  }
+  const actualCount=observedFiles?.length??-1;
+  const expectedCount=granted?1:0;
+  return Object.freeze({
+    caseId:plan.id,sourceContext:plan.source,sourceBoundGrant:plan.grant,
+    untrustedClaimIgnored:Object.keys(plan.args).length>0,
+    expectedHttpStatus:plan.expectedStatus,observedHttpStatus:responseStatus,
+    received,accepted,denied,actualFilesReadBack:actualCount,
+    approvedBytesReadBack:granted&&observedBytes,
+    unauthorizedFilesReadBack:granted?0:actualCount,
+    cleanupVerified,socketCloseVerified,closedSockets,
+    matched:responseStatus===plan.expectedStatus&&received===1&&
+      accepted===(granted?1:0)&&denied===(granted?0:1)&&
+      actualCount===expectedCount&&
+      (!granted||observedBytes)&&cleanupVerified&&
+      socketCloseVerified&&closedSockets===1,
+    realLocalHttpObserved:true,realTempFileReadbackObserved:true,
+    externalMcpTargetContacted:false,realOwnerAuthenticated:false
+  });
+}
+
+test('M49: owned MCP-shaped tools/call wire permits scoped write, denies forged grants',async()=>{
+  const reports=[];
+  for(const plan of WIRE_PLANS){
+    reports.push(await ownedWireEffectTrial(plan));
+  }
+  assert.equal(reports.length,6);
+  assert.deepEqual(reports.map(r=>r.observedHttpStatus),
+    [200,403,403,403,403,403]);
+  assert.deepEqual(reports.map(r=>r.actualFilesReadBack),
+    [1,0,0,0,0,0]);
+  assert.deepEqual(reports.map(r=>r.accepted),[1,0,0,0,0,0]);
+  assert.deepEqual(reports.map(r=>r.denied),[0,1,1,1,1,1]);
+  for(const report of reports){
+    assert.equal(report.matched,true,report.caseId);
+    assert.equal(report.cleanupVerified,true);
+    assert.equal(report.socketCloseVerified,true);
+    assert.equal(report.closedSockets,1);
+    assert.equal(report.realLocalHttpObserved,true);
+    assert.equal(report.realTempFileReadbackObserved,true);
+    assert.equal(report.externalMcpTargetContacted,false);
+    assert.equal(report.realOwnerAuthenticated,false);
+    assert.equal(Object.isFrozen(report),true);
+  }
+  assert.equal(reports[0].approvedBytesReadBack,true);
+  assert.equal(reports[2].untrustedClaimIgnored,true);
+  assert.equal(reports[3].untrustedClaimIgnored,true);
+  assert.equal(reports[4].untrustedClaimIgnored,true);
+  const output=JSON.stringify(reports);
+  assert.doesNotMatch(output,/mcp-m49-wire-|fixed-task-status\.json/);
+  assert.doesNotMatch(output,/fictional-approved|127\.0\.0\.1|PRIVATE_CANARY/);
+});
+
+test('M49: independent disk witness FAILS a deliberately denied-but-committed wire effect',async()=>{
+  const result=await ownedWireEffectTrial(
+    WIRE_PLANS[2],{forceUnauthorizedEffect:true});
+  assert.equal(result.observedHttpStatus,403);
+  assert.equal(result.denied,1);
+  assert.equal(result.accepted,0);
+  assert.equal(result.actualFilesReadBack,1);
+  assert.equal(result.unauthorizedFilesReadBack,1);
+  assert.equal(result.matched,false);
+  assert.equal(result.cleanupVerified,true);
+  assert.equal(result.socketCloseVerified,true);
 });
