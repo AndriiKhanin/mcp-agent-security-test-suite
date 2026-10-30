@@ -13,7 +13,7 @@ import {tmpdir} from 'node:os';
 import {dirname,resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
-  buildHandoff,validateHandoff,verifyHandoff,canonical
+  buildHandoff,validateHandoff,verifyHandoff,canonical,runDistributionDoctor
 } from '../tools/reviewer-handoff.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -41,6 +41,126 @@ function expectedReply(runResult,status,exit,code){
     independentAuditCompleted:false,releaseApproved:false
   });
 }
+test('M36-A: direct doctor proves local package/install custody but blocks distribution',()=>{
+  const report=runDistributionDoctor([]);
+  assert.equal(report.reportSchemaVersion,1);
+  assert.equal(report.profile,'m36-local-distribution-doctor-v1');
+  assert.equal(report.status,'PASS');
+  assert.equal(report.exitCode,0);
+  assert.equal(report.ruleCode,'M36_LOCAL_ARCHIVE_AND_SOURCE_CUSTODY_MATCH');
+  assert.equal(report.candidateName,'mcp-agent-security-test-suite');
+  assert.equal(report.candidateVersion,'0.0.10-rc.1');
+  assert.equal(report.evidenceKind,'FIRST_PARTY_LOCAL_DISTRIBUTION_PRECHECK_ONLY');
+  assert.equal(report.packagePathCount,80);
+  assert.equal(report.excludedSourcePathCount,240);
+  assert.equal(report.excludedSourceLimit,240);
+  for(const key of ['packageSourceIndexSha256','excludedSourceIndexSha256',
+    'localArchiveSha256','localInstalledIndexSha256'])
+    assert.match(report[key],/^[0-9a-f]{64}$/u,key);
+  assert.equal(report.localArchivePackedAndInstalled,true);
+  assert.equal(report.sourceAndInstalledBytesComparedLocally,true);
+  assert.equal(report.excludedSourcesCompletelyHashed,true);
+  assert.equal(report.distributionDecision,
+    'BLOCKED_PENDING_INDEPENDENT_GATES_AND_OWNER');
+  assert.deepEqual(report.nextGates,[
+    'INDEPENDENT_BETA_ISSUE_59',
+    'INDEPENDENT_SECURITY_AUDIT_ISSUE_43',
+    'REAL_TARGET_AUTHORIZATION_ISSUE_21',
+    'EXPLICIT_OWNER_RELEASE_DECISION'
+  ]);
+  for(const key of ['releaseReady','releaseApproved','published',
+    'externalTargetAuthorized','independentAuditVerified',
+    'independentBetaVerified','checkoutCleanlinessVerified',
+    'gitSourceIndependentlyVerified','artifactSignatureVerified',
+    'externalMcpContacted','actualAgentObserved'])
+    assert.equal(report[key],false,key);
+  const serialized=JSON.stringify(report);
+  assert.ok(Buffer.byteLength(serialized)<4096);
+  assert.ok(!serialized.includes(process.cwd()));
+  assert.ok(!serialized.includes('PRIVATE_CANARY'));
+  assert.ok(!serialized.includes('READY_TO_PUBLISH'));
+  assert.ok(!serialized.includes('"realMcpTargetAuthorized":true'));
+  assert.throws(()=>{report.status='RELEASE_APPROVED';},TypeError);
+});
+test('M36-B: doctor CLI only accepts the literal no-arg operation',()=>{
+  const output=run('doctor');
+  assert.equal(output.error,undefined);
+  assert.equal(output.status,0,output.stderr);
+  assert.equal(output.stderr,'');
+  assert.equal(output.stdout,canonical(JSON.parse(output.stdout)));
+  const report=JSON.parse(output.stdout);
+  assert.equal(report.ruleCode,'M36_LOCAL_ARCHIVE_AND_SOURCE_CUSTODY_MATCH');
+  assert.equal(report.packagePathCount,80);
+  assert.equal(report.excludedSourcePathCount,240);
+  assert.equal(report.releaseApproved,false);
+  assert.equal(report.externalTargetAuthorized,false);
+  assert.equal(report.independentAuditVerified,false);
+  assert.equal(report.independentBetaVerified,false);
+  assert.equal(report.localArchivePackedAndInstalled,true);
+  assert.equal(report.gitSourceIndependentlyVerified,false);
+  assert.equal(report.artifactSignatureVerified,false);
+  assert.equal(report.published,false);
+  const bad=[
+    ['doctor','--publish'],['doctor','--release'],
+    ['doctor','--PRIVATE_CANARY'],['doctor','--target=PRIVATE_CANARY'],
+    ['doctor','../PRIVATE_CANARY'],['doctor','snapshot'],
+    ['doctor','--approved=true'],['doctor','--json'],
+    ['doctor','--allow-network'],['doctor','--token=PRIVATE_CANARY']
+  ];
+  const expected={
+    reportSchemaVersion:1,
+    profile:'m36-local-distribution-doctor-v1',
+    status:'ERROR',exitCode:2,
+    ruleCode:'M36_OFFLINE_DISTRIBUTION_PRECHECK_UNAVAILABLE',
+    releaseReady:false,releaseApproved:false,published:false,
+    externalTargetAuthorized:false,independentAuditVerified:false,
+    independentBetaVerified:false,checkoutCleanlinessVerified:false,
+    gitSourceIndependentlyVerified:false,artifactSignatureVerified:false,
+    externalMcpContacted:false,actualAgentObserved:false
+  };
+  for(const args of bad){
+    const failed=run(...args);
+    assert.equal(failed.error,undefined);
+    assert.equal(failed.status,2,failed.stderr);
+    assert.equal(failed.stderr,'');
+    assert.deepEqual(JSON.parse(failed.stdout),expected);
+    assert.ok(!failed.stdout.includes('PRIVATE_CANARY'));
+  }
+  for(const args of [
+    ['--publish'],['--target=PRIVATE_CANARY'],
+    Object.create(null),Object.create([]),
+    Array(1),['doctor']
+  ])assert.deepEqual(runDistributionDoctor(args),expected);
+  const getter=[];
+  let invoked=0;
+  Object.defineProperty(getter,'polluted',{
+    enumerable:true,get(){invoked++;throw Error('PRIVATE_CANARY');}
+  });
+  assert.deepEqual(runDistributionDoctor(getter),expected);
+  assert.equal(invoked,0);
+});
+test('M36-C: source-only doctor does not enter frozen package or relax M6-J custody',()=>{
+  const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
+  const expectedPack=JSON.parse(readFileSync(
+    join(root,'test/expected-package-files.json'),'utf8'));
+  assert.equal(pkg.version,'0.0.10-rc.1');
+  assert.equal(expectedPack.length,80);
+  assert.ok(!expectedPack.includes('tools/reviewer-handoff.mjs'));
+  assert.ok(!expectedPack.includes('test/m6j-assessor-handoff.test.mjs'));
+  for(const name of ['dependencies','devDependencies','optionalDependencies',
+    'peerDependencies'])
+    assert.equal(Object.keys(pkg[name]??{}).length,0);
+  for(const hook of ['preinstall','postinstall','prepare','prepack','postpack',
+    'prepublish','prepublishOnly','publish'])
+    assert.equal(Object.hasOwn(pkg.scripts??{},hook),false);
+  const source=readFileSync(join(root,'tools/reviewer-handoff.mjs'),'utf8');
+  assert.match(source,/const MAX_EXCLUDED_FILES=240;/);
+  assert.match(source,/if\(files.length>MAX_EXCLUDED_FILES\)denied\(\)/);
+  assert.match(source,/return canonical\(value\)===canonical\(buildHandoff\(\)\)/);
+  assert.match(source,/checkoutCleanlinessVerified:false/);
+  assert.match(source,/distributionDecision:'BLOCKED_PENDING_INDEPENDENT_GATES_AND_OWNER'/);
+});
+
 test('M6-J: local handoff includes shipped source, actual temporary archive and excluded code',()=>{
   const s=sample();
   assert.equal(s.handoffSchemaVersion,1);
