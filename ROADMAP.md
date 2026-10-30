@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-29 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
+> **Last reviewed:** 2026-10-30 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -82,7 +82,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M38 — Independent fictional scanner comparisons** | Export two fixed clean/mixed tool-result pairs and classify self-reported third-party rule detector outcomes | **ENGINEERING ACCEPTED — PR/main CI 4/4; first external scanner self-reports received (v0.2.0/v0.3.0), not reproduced** | [#338](../../issues/338), [PR #339](../../pull/339), [main CI #41061833450](../../actions/runs/41061833450), [volunteer #329](../../issues/329), [guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) | Four fixed fictional cases; 1363/1363 Ubuntu20; exact 4/4 PR/main; no scanner execution or beta claim |
 
 
-## M43 — first external M38 scanner feedback (reported, not independently reproduced)
+## M43 — first external M38 scanner feedback (PR #346 merged, CI 4/4; self-reported external results)
 
 - [Firstwatch v0.2.0 report](../../issues/329#issuecomment-6529063336) and
   [v0.3.0 follow-up](../../issues/329#issuecomment-6529886202) from
@@ -108,38 +108,50 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - M43 source regression replays the **published four classifications** through
   the existing local evaluator. It does not install or execute Firstwatch.
 
-## M40 — local reviewer queue for independent fictional detector feedback (engineering in PR)
+## M39 — multi-detector self-reported fictional classification (PR #341 merged; CI 4/4)
+
+- Local `--compare-detector-batch` accepts 1–8 sanitized scanner aliases and strict 16 KiB JSON with the four existing M38 cases; reports per-detector/per-case TP/FP/FN/TN/ERROR relative only to author labels.
+- [PR #341](../../pull/341) merged after 4/4 PR CI; no new scanner runs, real targets or provenance attestation. Two versions of the same scanner are not two independent vendors or detectors. Post-merge `main` CI not independently verified.
+
+## M40 — local reviewer queue for independent fictional detector feedback (PR #342 merged; CI 4/4)
 
 - Extend the existing M39 strict four-case, 1–8-scanner batch format with `--review-detector-batch`; no new network, files, scanner process or real MCP target.
 - Emit categorized FN/FP/ERROR review actions with the approved case IDs and sanitized scanner aliases; retain overall TP/FP/FN/TN/ERROR counts.
 - Reuse source-owned M38 labels and M39 validation; reject duplicate keys, malformed/oversized stdin and unsupported CLI arguments without reflecting input.
 - Add CLI and source tests plus a contributor walkthrough; independent scanner execution, real-world assurance and publication remain unverified.
-- **Acceptance pending:** PR CI 4/4 and matched post-merge CI on `main`.
+- **Engineering merged:** [PR #342](../../pull/342), PR CI 4/4. Post-merge `main` CI was not independently verified for this milestone; no real scanner or beta conclusion.
 
-## M41 — comparison of self-reported detector disagreements (engineering pending)
+## M41 — comparison of self-reported detector disagreements (PR #343 merged; CI PASS)
 
 - Source-only `--analyze-detector-disagreements` consumes the existing M39 strict batch JSON and returns per-case FLAGGED/NOT_FLAGGED/ERROR votes, split decisions, and repeated injection misses.
 - ERROR observations abstain. Consensus is a vote count, not a ground truth judgment. A `REPEATED_MISS` occurs when at least two self-reported scanners did not flag an author-labeled injection.
 - The fixed four fictional cases, one-to-eight scanner aliases, bounded 16 KiB stdin, no scanner execution, no target contact and no new packaged assets remain unchanged.
 - New tests cover split votes, tie, repeated misses, single-detector case, malformed JSON, invalid UTF-8, and CLI argument denial.
-- Engineering acceptance requires PR 4/4 and matched post-merge CI; external scanner results, beta, audit, and authorization remain separate.
+- Engineering merged: [PR #343](../../pull/343), PR CI success. Post-merge `main` CI not independently verified; external scanner results, beta, audit and authorization remain separate.
 
-## M42 — deterministic fictional-detector issue priorities (engineering in PR)
+## M42 — deterministic fictional-detector issue priorities (PR #344 merged; CI 4/4)
 
 - Implement `--prioritize-detector-issues` on the same strict, offline M39 four-case batch.
 - Prioritize repeated self-reported injection misses (two or more), single misses, false positives, and scanner-error-only cases, with deterministic tie breaks and stable approved case IDs.
 - Output only categorized local-review recommendations; these are **review-order priorities**, not real vulnerability severity, external efficacy measurements or verified results.
 - Preserve existing 16 KiB bounded stdin, strict duplicate-free JSON, scanner-count/case-order controls, zero target contact, and frozen package/source custody.
 - Source/CLI regression covers repeated misses, counts, deterministic sorting, error precedence, no-findings case, malformed JSON, invalid UTF-8 and extra-flag denial.
-- Acceptance requires exact PR 4/4 and post-merge `main` CI; independent beta, external execution and publication remain separate.
+- Engineering merged: [PR #344](../../pull/344), PR CI 4/4. Post-merge `main` CI not separately verified; independent beta, external execution and publication remain separate.
 
-## M44 — new public contextual scanner contrasts (engineering in PR)
+## M44 — new public contextual scanner contrasts (PR #347 merged; CI 4/4)
 
 - Extend the source-only, opt-in fictional-detector fixture workflow with a **separate six-row** contextual contrast profile: normal human-to-human email instructions, explicit AI-addressed tool-result task switches and prerequisites, and clean/mixed JSON tool results.
 - Export via `--export-context-contrasts`; accept strict six-row, 4096-byte UTF-8 report via `--triage-context-contrasts` and calculate TP/FP/FN/TN/ERROR **only relative to author-written labels**.
 - M38 original four cases and M39–M42 formats remain unchanged. M44 is a public reviewed test set, **not held-out**, a scanner execution, a proof of prevented tool calls, or an independent security beta.
 - Zero real targets, credentials, network, remote scanner calls or additional source paths; use current source-only script and test files.
-- Engineering acceptance pending exact PR CI 4/4 and merged-main verification. Follow-up [#345](../../issues/345) retains separate detection-vs-enforcement investigation.
+- Engineering merged: [PR #347](../../pull/347), PR CI 4/4. Post-merge `main` CI not separately verified. Follow-up [#345](../../issues/345) retains separate detection-vs-enforcement investigation.
+
+## M45 — authorization independent of hypothetical detector outcomes (PR #348 merged; CI 4/4)
+
+- `node tools/toy-agent-exchange.mjs --blindspot-gate-matrix` adds **15 deterministic first-party in-memory trials** (3 hypothetical detector labels × 5 fixed toy-agent gateway modes). The detector labels are **source-owned hypotheses**, not output from Firstwatch or any independent scanner.
+- All forbidden toy method calls are observed and denied by the parent-owned in-memory gateway in each hypothesis; the report checks that gateway decisions are invariant to the detector label and fictional protected effects remain zero. A fault-mode `FAIL` means a denied forbidden call was detected, not a protected side effect.
+- [PR #348](../../pull/348) merged after PR CI 4/4. This is **not a real LLM, third-party agent, filesystem permission boundary, authorized external MCP test, real scanner accuracy result or product certification**. Post-merge `main` CI not separately verified.
+- Next product gate: separately approved and isolated evaluation with genuine agent/tool execution and independent side-effect observation. Owner authorization and first-party staging controls must be established before expanding external contact; see [#21](../../issues/21), [#59](../../issues/59) and [#345](../../issues/345).
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
