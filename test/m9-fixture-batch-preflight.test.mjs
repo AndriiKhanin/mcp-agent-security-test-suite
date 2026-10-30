@@ -15,7 +15,9 @@ import {
   runFictionalDetectorReviewStdin,
   analyzeFictionalDetectorDisagreements,
   analyzeFictionalDetectorDisagreementsJson,
-  runFictionalDetectorDisagreementsStdin
+  runFictionalDetectorDisagreementsStdin,
+  prioritizeFictionalDetectorIssues,prioritizeFictionalDetectorIssuesJson,
+  runFictionalDetectorPrioritiesStdin
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -578,4 +580,59 @@ test('M41: independent vote split, repeated injection misses and error abstentio
   assert.equal(m38Cli(['--analyze-detector-disagreements'],
     Buffer.from([0xff])).status,2);
   assert.equal(m38Cli(['--analyze-detector-disagreements','--target'],data).status,2);
+});
+
+test('M42: priority order is stable and represents review urgency, never severity',async()=>{
+  const observations=[
+    ['FLAGGED','NOT_FLAGGED','NOT_FLAGGED','ERROR'],
+    ['NOT_FLAGGED','NOT_FLAGGED','FLAGGED','NOT_FLAGGED'],
+    ['NOT_FLAGGED','FLAGGED','ERROR','NOT_FLAGGED']
+  ];
+  const input={reportSchemaVersion:1,sourceProfile:'m38-fictional-detector-cases-v1',
+    scanners:observations.map((o,i)=>({
+      scannerId:'scanner-'+(i+1),results:m38Input(o).results
+    }))
+  };
+  const r=prioritizeFictionalDetectorIssues(input);
+  assert.equal(r.status,'PASS');
+  assert.deepEqual(r.counts,{
+    missedInjections:4,falsePositives:2,scannerErrors:2,casesNeedingReview:4
+  });
+  assert.deepEqual(r.findings.map(x=>x.caseId),[
+    'mixed-tool-result-file-read:mixed',
+    'ticket-status-prerequisite-file-read:mixed',
+    'mixed-tool-result-file-read:clean',
+    'ticket-status-prerequisite-file-read:clean'
+  ]);
+  assert.deepEqual(r.findings.map(x=>x.priority),[
+    'P1_REPEATED_INJECTION_MISS','P1_REPEATED_INJECTION_MISS',
+    'P3_FALSE_POSITIVE','P3_FALSE_POSITIVE'
+  ]);
+  assert.equal(r.findings[0].missedInjectionCount,2);
+  assert.equal(r.findings[1].missedInjectionCount,2);
+  assert.equal(r.priorityMeaning,'REVIEW_ORDER_ONLY_NOT_REAL_WORLD_SEVERITY');
+  assert.equal(r.independentReproductionConfirmed,false);
+  assert.equal(r.limits.scannerExecuted,false);
+  const json=JSON.stringify(input);
+  const cli=m38Cli(['--prioritize-detector-issues'],json);
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),r);
+  assert.ok(!cli.stdout.includes('Fictional order Q17'));
+  assert.ok(!cli.stdout.includes('Fictional ticket T42'));
+  assert.deepEqual(await runFictionalDetectorPrioritiesStdin([],
+    Readable.from([Buffer.from(json)])),r);
+  const clean={reportSchemaVersion:1,sourceProfile:input.sourceProfile,
+    scanners:[{scannerId:'no-issues',results:m38Input([
+      'NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED'
+    ]).results}]};
+  assert.equal(prioritizeFictionalDetectorIssues(clean).findings.length,0);
+  for(const invalid of [
+    '', '{"reportSchemaVersion":1,"reportSchemaVersion":1}',
+    JSON.stringify({...input,authority:'VERIFIED'}),
+    JSON.stringify({...input,scanners:[input.scanners[0],input.scanners[0]]}),
+    ' '.repeat(16385)
+  ])assert.equal(prioritizeFictionalDetectorIssuesJson(invalid).status,'ERROR');
+  assert.equal(m38Cli(['--prioritize-detector-issues'],
+    Buffer.from([0xff])).status,2);
+  assert.equal(m38Cli(['--prioritize-detector-issues','--real'],json).status,2);
 });
