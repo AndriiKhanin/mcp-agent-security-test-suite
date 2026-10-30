@@ -388,9 +388,73 @@ export async function runFictionalDetectorBatchStdin(args=[],stream=process.stdi
   }catch{return M39_ERROR;}
 }
 
+
+/**
+ * M40: derive a reviewer-ready, categorical report from the same validated
+ * fictional M39 batch. No claims of external reproducibility are inferred.
+ * Report only short source-owned case identifiers and sanitized aliases.
+ */
+const M40_PROFILE='m40-fictional-detector-review-v1';
+const M40_ERROR=Object.freeze({
+  reportSchemaVersion:1,profile:M40_PROFILE,status:'ERROR',exitCode:2,
+  ruleCode:'M40_INVALID_OR_UNREADABLE_REVIEW_BATCH',
+  resultsSelfReportedOnly:true,manualReviewRequired:true,limits:M38_LIMITS
+});
+export function reviewFictionalDetectorBatch(input){
+  const comparison=compareFictionalDetectorBatch(input);
+  if(comparison.status!=='PASS')return M40_ERROR;
+  const issues=[];
+  for(const scanner of comparison.scanners){
+    for(const entry of scanner.classifications){
+      if(entry.classification!=='FN'&&entry.classification!=='FP'&&
+        entry.classification!=='ERROR')continue;
+      issues.push(Object.freeze({
+        scannerId:scanner.scannerId,caseId:entry.caseId,
+        finding:entry.classification,
+        reviewerAction:entry.classification==='FN'?
+          'REVIEW_MISSED_INJECTION':entry.classification==='FP'?
+          'REVIEW_FALSE_POSITIVE':'INVESTIGATE_SCANNER_ERROR'
+      }));
+    }
+  }
+  const counts={...comparison.totals};
+  return Object.freeze({
+    reportSchemaVersion:1,profile:M40_PROFILE,status:'PASS',exitCode:0,
+    ruleCode:'FICTIONAL_SELF_REPORTED_REVIEW_READY_ONLY',
+    sourceProfile:M38_EXPORT_PROFILE,
+    scannerCount:comparison.scannerCount,caseCount:comparison.caseCount,
+    observations:comparison.scannerCount*comparison.caseCount,
+    counts:Object.freeze(counts),
+    reviewQueue:Object.freeze(issues),
+    findingCount:issues.length,
+    independentReproductionConfirmed:false,
+    resultsSelfReportedOnly:true,manualReviewRequired:true,
+    noEstimatedPopulationPerformance:true,limits:M38_LIMITS
+  });
+}
+export function reviewFictionalDetectorBatchJson(text){
+  if(typeof text!=='string'||!text.trim()||
+    Buffer.byteLength(text,'utf8')>M39_MAX_BYTES)return M40_ERROR;
+  try{return reviewFictionalDetectorBatch(parseStrictJson(text));}
+  catch{return M40_ERROR;}
+}
+export async function runFictionalDetectorReviewStdin(args=[],stream=process.stdin){
+  if(!ownArray38(args,0)||!stream||stream.isTTY===true||
+    typeof stream.on!=='function'||typeof stream.off!=='function'||
+    typeof stream.pause!=='function'||typeof stream.resume!=='function')
+    return M40_ERROR;
+  try{
+    const bytes=await boundedM38Stdin(stream,M39_MAX_BYTES);
+    return reviewFictionalDetectorBatchJson(
+      new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  }catch{return M40_ERROR;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
-  const report=args.length===1&&args[0]==='--compare-detector-batch'?
+  const report=args.length===1&&args[0]==='--review-detector-batch'?
+      await runFictionalDetectorReviewStdin():
+    args.length===1&&args[0]==='--compare-detector-batch'?
       await runFictionalDetectorBatchStdin():
     args.length===1&&args[0]==='--export-detector-cases'?
     exportFictionalDetectorCases():
