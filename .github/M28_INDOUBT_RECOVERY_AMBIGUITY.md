@@ -120,3 +120,14 @@ M29 code/tests are source-only and excluded from the frozen 80-file
 package. The M6-J excluded-source handoff continues to hash both added
 files. Independent beta #59, independent audit #43 and real-target
 authorization #21 remain open.
+
+
+**M29 engineering acceptance (2026-10-30):** [PR #312](../pull/312)
+passed [PR CI #41019901819](../actions/runs/41019901819)
+**4/4** on Ubuntu/Windows Node20/22 and merged as exact main SHA
+`2ff47013ffb1e8cb74923863fce8a03d58a183c9`. Separately
+[main CI #41020234312](../actions/runs/41020234312) passed
+**4/4 on the same SHA**. Both runs are first-party source tests, not
+external identity verification, authentic effect provenance, production
+reconciliation or certification. M29 [#311](../issues/311) covers
+engineering only; #21/#43/#59 remain open.
