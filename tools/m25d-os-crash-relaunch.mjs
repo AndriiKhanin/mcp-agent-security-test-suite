@@ -155,6 +155,14 @@ async function post(port,id,grant,mode){
     req.end(data);
   });
 }
+async function syncEffects(w,id){
+  const receipt=wait(w,'SYNCED',id);
+  w.child.send({type:'SYNC',id});
+  const r=await receipt;
+  // IPC message ordering is established by the worker-owned FIFO stream.
+  // The worker receipt must agree with separately counted EFFECT messages.
+  if(r?.effects!==w.effects.length)throw Error('EFFECT_IPC_NOT_RECONCILED');
+}
 async function terminate(w,force){
   if(w.exit)return w.exit;
   if(force){
@@ -176,6 +184,7 @@ async function baseline(){
     w=await ready('GUARDED');
     const grant=await issue(w,1);
     const reply=await post(w.port,1,grant,'EXEC');
+    await syncEffects(w,1);
     const matched=reply.status===200&&
       isDeepStrictEqual(reply.body,allowed(1));
     const effects=w.effects.length;
@@ -209,11 +218,13 @@ async function crash(policy){
     const policyVersionSame=newWorker.policyVersion===old.policyVersion;
     const effectsBeforeStale=newWorker.effects.length;
     const stale=await post(newWorker.port,2,oldGrant,'EXEC');
+    await syncEffects(newWorker,2);
     const staleEffects=newWorker.effects.length-effectsBeforeStale;
     const freshGrant=await issue(newWorker,3);
     const newGrantBound=freshGrant.gateGeneration===newWorker.generation;
     const effectsBeforeFresh=newWorker.effects.length;
     const fresh=await post(newWorker.port,3,freshGrant,'EXEC');
+    await syncEffects(newWorker,3);
     const freshEffects=newWorker.effects.length-effectsBeforeFresh;
     const totalEffects=newWorker.effects.length;
     const exit2=await terminate(newWorker,false);
