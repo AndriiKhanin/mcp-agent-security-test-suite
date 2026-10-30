@@ -75,8 +75,32 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M32 — Deterministic OS path-swap TOCTOU** | Eight first-party IPC-barrier marker-swap/absence/anomaly cases exposing size-only false confidence | **ENGINEERING ACCEPTED — PR/main 4/4** | [#320](../../issues/320), [PR #321](../../pull/321), [main CI #41027413776](../../actions/runs/41027413776), [guide](.github/M32_OS_PATH_SWAP_TOCTOU.md) | 8/8 first-party OS cases; 1337/1337 Ubuntu20 tests; PR and exact main CI 4/4, no external effect proof |
 
+| **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING IN PR — CI/acceptance pending** | [#323](../../issues/323), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, 4/4 PR + matched main CI |
+
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M34-A/B/C — common MCP client config to inert descriptor (engineering in PR)
+
+- [Issue #323](../../issues/323): source-only stdin bridge
+  `node tools/m34-client-config-bridge.mjs` converts exactly one narrowly
+  supported `mcpServers` or `servers` entry into an inert stdio/HTTPS
+  `validate-only` descriptor, then invokes M24 preflight and five
+  first-party fictional controls.
+- **M34-A:** strict 4 KiB/8-second stdin, UTF-8 and duplicate-key deny,
+  no input file read, zero target/process contact, no env/headers/
+  credentials/active permissions, generic no-echo default report.
+- **M34-B:** exact `--emit-descriptor` opt-in emits locally supplied
+  nonsecret data to stdout for private user-controlled redirection.
+  Cross-transport M24 roundtrip, schema and injection negatives,
+  getter/hole/unknown-field refusals, no real-agent conclusions.
+- **M34-C:** [scope and copy/paste](.github/M34_CLIENT_CONFIG_IMPORT.md)
+  and README, source-only code outside unpublished 80-path npm
+  candidate; M6-J full indexed SHA-256 excluded-source inventory and
+  241st-entry overflow denial preserved.
+- **Pending:** PR CI Windows/Ubuntu Node20/22 **4/4**, then independent
+  post-merge main-push **4/4 on exact SHA** before acceptance. Independent
+  beta #59, external target approval #21, audit #43 remain open.
 
 ## M32-A/B/C — deterministic first-party path-swap before read (engineering accepted)
 
