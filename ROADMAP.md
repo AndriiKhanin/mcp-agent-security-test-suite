@@ -226,11 +226,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
   not verified; beta #59, audit #43, target authority #21 and owner
   release decision remain open.
 
-## M51 — read-only FD denial with same-user path-reopen counterexample (PR CI pending)
+## M51 — read-only FD denial with same-user path-reopen counterexample (PR #361 merged; CI 4/4)
 
 - Existing nonpackaged M32 process lab: 3 source-owned child cases on actual Windows/Linux OS temp files. Parent observes read-only `r` write denied and unchanged bytes, `r+` positive write, and the same child reopening the known path in `r+` after the denial to write successfully. Private negative fault falsely claims no write; parent readback catches it.
 - OS handle restriction **does not mean process isolation**: `osSandboxed:false`; no real MCP/LLM, user paths, credentials, remote targets, extra files or package changes. M10 and M6-J 240-file/2MB custody limits unchanged.
-- PR acceptance 4/4 on Windows/Ubuntu Node20/22; separate main-push CI. Real confinement, beta #59, audit #43, target authority #21 and owner release remain open.
+- [PR #361](../../pull/361) merged at `5daa5e524ad4adef9f493a406cd02761da9af49f`: [PR CI #41123160999](../../actions/runs/41123160999) **4/4 PASS, 1392/1392 per job**, zero errors/skips. M6-J remains **240 files / 2,000,000 bytes max** (final Git-tree bytes 1,998,968); no npm changes. Separate post-merge main CI not verified. Real confinement, beta #59, audit #43, target authority #21 and owner release remain open.
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
