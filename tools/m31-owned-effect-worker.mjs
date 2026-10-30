@@ -70,14 +70,22 @@ process.on('message',msg=>{
       phase='ACTED';
       reply('ACTION_ACK');return;
     }
-    if(msg.type==='MUTATE'&&phase==='ACTED'&&
+    if(msg.type==='CLAIM'&&phase==='ACTED'&&
+      ['COMMITTED','ABSENT'].includes(msg.outcome)&&
+      Object.keys(msg).length===2){
+      // A worker's outcome is only its claim, never OS-effect proof.
+      phase='CLAIMED';
+      process.send({type:'OUTCOME_CLAIM',outcome:msg.outcome});
+      return;
+    }
+    if(msg.type==='MUTATE'&&phase==='CLAIMED'&&
       ['REMOVE','REWRITE'].includes(msg.action)&&
       Object.keys(msg).length===2){
       processAction(msg.action);
       phase='MUTATED';
       reply('MUTATE_ACK');return;
     }
-    if(msg.type==='CLOSE'&&phase!=='READY'&&
+    if(msg.type==='CLOSE'&&['CLAIMED','MUTATED'].includes(phase)&&
       Object.keys(msg).length===1){
       phase='CLOSED';
       process.send({type:'CLOSED'},()=>process.exit(0));
