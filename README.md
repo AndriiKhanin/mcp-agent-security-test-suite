@@ -817,6 +817,28 @@ MCP servers or Stable Bridge. See the
 [M25 test guide](.github/M25_APPROVAL_POLICY_EPOCH.md).
 The helper is source-only, outside the unpublished npm package.
 
+## In-doubt recovery decisions and identical pending markers (M28, source only)
+
+From a reviewed source checkout, run:
+
+```sh
+node tools/m28-recovery-ambiguity.mjs
+```
+
+Eight isolated **first-party fictional** cases show why an identical
+`IN_DOUBT` reservation marker cannot prove whether a preceding effect
+actually happened. Blind retry can **duplicate** a completed effect;
+blind assume-done can **lose** an uncompleted operation. Guarded
+quarantine avoids both automatic errors but necessarily leaves the
+operation **unresolved**. An unverified forged receipt claim cannot
+resolve it. The tool writes only fixed disposable scratch markers and
+counts synthetic effects in memory, with a separate fresh-key positive
+control in each case. `8/8 PASS` confirms the **safety-versus-liveness
+limitation**, not exactly-once recovery or real operational effects.
+The helper accepts no path, target or credentials, and does not use
+Stable Bridge. See the [M28 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md).
+Source-only, outside the unpublished 80-path npm candidate.
+
 ## Crash between reservation, effect and acknowledgement (M27, source only)
 
 Run only from a reviewed first-party source checkout:
