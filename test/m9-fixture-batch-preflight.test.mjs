@@ -17,7 +17,9 @@ import {
   analyzeFictionalDetectorDisagreementsJson,
   runFictionalDetectorDisagreementsStdin,
   prioritizeFictionalDetectorIssues,prioritizeFictionalDetectorIssuesJson,
-  runFictionalDetectorPrioritiesStdin
+  runFictionalDetectorPrioritiesStdin,
+  exportFictionalContextContrasts,triageFictionalContextResults,
+  triageFictionalContextJson,runFictionalContextTriageStdin
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -661,4 +663,87 @@ test('M43: replay published firstwatch 0.2.0/0.3.0 categories without executing 
     assert.equal(replay.limits.independentlyReproduced,false);
     assert.equal(replay.limits.independentBetaVerified,false);
   }
+});
+
+test('M44: separate contextual contrasts are source-owned and M38 stays stable',()=>{
+  const baseline=exportFictionalDetectorCases();
+  const contextual=exportFictionalContextContrasts();
+  assert.equal(contextual.status,'PASS');
+  assert.equal(contextual.profile,'m44-fictional-context-contrasts-v1');
+  assert.equal(contextual.caseCount,6);
+  assert.deepEqual(contextual.rows.map(x=>x.expectedLabel),
+    ['BENIGN','INJECTION','BENIGN','INJECTION','BENIGN','INJECTION']);
+  assert.deepEqual(contextual.rows.map(x=>x.contrastGroup),
+    ['task-change','task-change','required-step','required-step',
+     'json-tool-result','json-tool-result']);
+  assert.equal(contextual.authorLabelsOnly,true);
+  assert.equal(contextual.scannerExecuted,false);
+  assert.equal(contextual.limits.scannerExecuted,false);
+  assert.equal(Object.isFrozen(contextual.rows),true);
+  for(const row of contextual.rows){
+    assert.equal(Object.isFrozen(row),true);
+    assert.ok(!baseline.rows.some(old=>old.caseId===row.caseId));
+  }
+  assert.deepEqual(exportFictionalDetectorCases(),baseline);
+  const cli=m38Cli(['--export-context-contrasts']);
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),contextual);
+  assert.ok(!cli.stdout.includes('PRIVATE_CANARY'));
+});
+test('M44: local report classifies benign email, AI instruction and JSON cases',async()=>{
+  const cases=exportFictionalContextContrasts().rows;
+  const obs=['NOT_FLAGGED','NOT_FLAGGED','FLAGGED',
+    'FLAGGED','NOT_FLAGGED','ERROR'];
+  const input={reportSchemaVersion:1,
+    sourceProfile:'m44-fictional-context-contrasts-v1',
+    results:cases.map((x,i)=>({caseId:x.caseId,observed:obs[i]}))};
+  const result=triageFictionalContextResults(input);
+  assert.equal(result.status,'PASS');
+  assert.deepEqual(result.counts,{TP:1,FP:1,FN:1,TN:2,ERROR:1});
+  assert.deepEqual(result.results.map(x=>x.classification),
+    ['TN','FN','FP','TP','TN','ERROR']);
+  assert.equal(result.resultsSelfReportedOnly,true);
+  assert.equal(result.manualReviewRequired,true);
+  assert.equal(result.noEstimatedPopulationPerformance,true);
+  assert.equal(result.limits.independentlyReproduced,false);
+  const encoded=JSON.stringify(input);
+  const cli=m38Cli(['--triage-context-contrasts'],encoded);
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),result);
+  assert.ok(!cli.stdout.includes('Fictional order Q17'));
+  assert.ok(!cli.stdout.includes('Fictional ticket T42'));
+  assert.deepEqual(await runFictionalContextTriageStdin([],
+    Readable.from([Buffer.from(encoded)])),result);
+  for(const change of [
+    x=>{x.sourceProfile='m38-fictional-detector-cases-v1';},
+    x=>{x.results[0].caseId=x.results[1].caseId;},
+    x=>{x.results[0].observed='PROTECTED';},
+    x=>{x.results[0].scannerCommit='PRIVATE_CANARY';},
+    x=>{x.results.pop();},
+    x=>{x.results.push({caseId:'extra',observed:'FLAGGED'});},
+    x=>{x.verified=true;},
+    x=>{delete x.results[0];},
+    x=>{x.results[0].observed=null;}
+  ]){
+    const tampered=structuredClone(input);
+    change(tampered);
+    assert.equal(triageFictionalContextResults(tampered).status,'ERROR');
+  }
+  for(const invalid of [
+    '', '{"reportSchemaVersion":1,"reportSchemaVersion":1}',
+    JSON.stringify({...input,private:'PRIVATE_CANARY'}),
+    ' '.repeat(4097)
+  ])assert.equal(triageFictionalContextJson(invalid).status,'ERROR');
+  for(const args of [
+    ['--triage-context-contrasts','--target=PRIVATE_CANARY'],
+    ['--export-context-contrasts','--publish']
+  ]){
+    const res=m38Cli(args,encoded);
+    assert.equal(res.status,2,res.stderr);
+    assert.ok(!res.stdout.includes('PRIVATE_CANARY'));
+  }
+  const badBytes=m38Cli(['--triage-context-contrasts'],
+    Buffer.from([0xff,0xfe]));
+  assert.equal(badBytes.status,2);
+  assert.equal(badBytes.stderr,'');
 });

@@ -133,6 +133,14 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - Source/CLI regression covers repeated misses, counts, deterministic sorting, error precedence, no-findings case, malformed JSON, invalid UTF-8 and extra-flag denial.
 - Acceptance requires exact PR 4/4 and post-merge `main` CI; independent beta, external execution and publication remain separate.
 
+## M44 — new public contextual scanner contrasts (engineering in PR)
+
+- Extend the source-only, opt-in fictional-detector fixture workflow with a **separate six-row** contextual contrast profile: normal human-to-human email instructions, explicit AI-addressed tool-result task switches and prerequisites, and clean/mixed JSON tool results.
+- Export via `--export-context-contrasts`; accept strict six-row, 4096-byte UTF-8 report via `--triage-context-contrasts` and calculate TP/FP/FN/TN/ERROR **only relative to author-written labels**.
+- M38 original four cases and M39–M42 formats remain unchanged. M44 is a public reviewed test set, **not held-out**, a scanner execution, a proof of prevented tool calls, or an independent security beta.
+- Zero real targets, credentials, network, remote scanner calls or additional source paths; use current source-only script and test files.
+- Engineering acceptance pending exact PR CI 4/4 and merged-main verification. Follow-up [#345](../../issues/345) retains separate detection-vs-enforcement investigation.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
