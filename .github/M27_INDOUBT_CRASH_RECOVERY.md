@@ -63,5 +63,11 @@ caller-selected path/PID, telemetry or Stable Bridge is involved.
 The new helpers are source-only, excluded from the fixed **unpublished
 80-path npm candidate**. External tester beta [#59](../issues/59),
 audit [#43](../issues/43) and real-target authorization [#21](../issues/21)
-remain open. Engineering acceptance requires Windows/Ubuntu Node20/22
-**4/4 PR CI** and a separately matched **4/4 main-push CI**.
+remain open. Engineering accepted on 2026-10-30:
+[PR #306](../pull/306) passed [PR CI #41014727992](../actions/runs/41014727992)
+**4/4** on Windows/Ubuntu × Node20/22 and merged as exact main SHA
+`8b9d6b4a20d344090e0875362b47f39614a279b5`.
+Independent [main CI #41015098532](../actions/runs/41015098532)
+passed **4/4 on that same SHA**. This remains author-controlled,
+synthetic crash-window evidence, **not** independently verified
+exactly-once delivery, power-loss durability or safe real-world recovery.
