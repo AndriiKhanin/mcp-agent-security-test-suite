@@ -104,3 +104,17 @@ and exact merged SHA main-push CI 4/4 are required for engineering
 acceptance. Real-target authorization [#21](../issues/21),
 independent review [#43](../issues/43), and independent beta
 [#59](../issues/59) remain open.
+
+## First-party engineering acceptance (2026-10-30)
+
+[PR #324](../pull/324) passed
+[PR CI #41030205354](../actions/runs/41030205354) **4/4** on
+Windows/Ubuntu Node20/22, then merged at the exact source SHA
+`57e8a1ec962448af22015f50a330abf48086c843`.
+The independently triggered
+[main push CI #41030636334](../actions/runs/41030636334)
+passed **4/4 on that same SHA** (Ubuntu20 1344/1344 tests, no failures).
+[Issue #323](../issues/323) is closed for the source-only engineering
+scope. None of these controls authenticate external target ownership,
+execute an MCP client/server, prove real agent protection, approve a
+release or satisfy the external beta/audit/authorization gates.
