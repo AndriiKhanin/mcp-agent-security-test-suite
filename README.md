@@ -1,5 +1,33 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Check offline distribution integrity before any release (M36)
+
+From the **source checkout** with Node.js 20+ and its bundled npm,
+run:
+
+```sh
+node tools/reviewer-handoff.mjs doctor
+```
+
+The source-only `doctor` command packages the frozen
+`0.0.10-rc.1` candidate into a **disposable** offline npm archive,
+installs the tarball locally with lifecycle scripts disabled, compares
+all **80** shipped file paths, and hashes the **240/240** files in the
+bounded excluded-source custody inventory. It prints a no-echo JSON
+report with local SHA-256/512 hashes and an explicit list of **unmet**
+independent review, external beta, target authorization and owner
+publication gates. The temporary archive/install/cache are removed
+after the check. No project-specific MCP contacts are attempted.
+
+**PASS is local packaging consistency only, not a release.** It cannot
+prove a trusted Git revision, externally authenticated artifact,
+independent security audit, clean checkout, publication authority or
+real MCP/agent safety. This helper is excluded from the fixed unpublished
+80-path npm package. All other arguments are rejected. See
+[release readiness](docs/RELEASE_READINESS.md) and the
+[getting-started doctor guide](docs/GETTING_STARTED.md).
+
+
 ## Readable, evidence-scoped offline onboarding report (M35)
 
 From a reviewed source checkout, pipe an existing **one-server**
