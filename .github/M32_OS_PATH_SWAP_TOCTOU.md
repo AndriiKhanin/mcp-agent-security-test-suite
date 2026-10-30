@@ -75,58 +75,23 @@ engineering scope only. External observer trust, remote effect proof,
 release, independent beta, audit and real-target authorization
 remain unverified.
 
-## M50 — fixed child-process tool effect, parent-owned OS readback
+## M50 — child effect witness (first party only)
 
-Run from a reviewed first-party checkout:
+Run `node tools/m32-path-swap-lab.mjs --child-process-effect-witness`.
+Six fixed scenarios use the exact source-owned M32 child, IPC and a fresh
+parent-allocated OS temporary directory. Only a trusted-owner context
+with `WRITE_TASK_STATUS` may create the fixed fictional file; read-only
+owner and tool-result/email contexts (even forged owner or scanner
+clearance) are denied. Parent independently checks disk after child exit,
+then verifies directory removal.
 
-```sh
-node tools/m32-path-swap-lab.mjs --child-process-effect-witness
-node --test test/m10-toy-agent-exchange.test.mjs
-```
-
-The first command runs **six fixed** scenarios. Every scenario creates a
-fresh temporary directory owned by the parent and launches the exact
-source-owned `tools/m32-path-swap-lab.mjs` file in a disposable Node child:
-no shell, no arbitrary executable, no inherited command-line arguments,
-no copied environment secrets, no user-selected path and no external MCP.
-
-The child asks the parent for `WRITE_TASK_STATUS` over IPC. **Only
-parent-side first-party source** binds the caller scenario and determines
-the grant. Owner + exact write grant is allowed; owner + read-only grant,
-untrusted tool result (even claiming owner or `NOT_FLAGGED` scanner
-clearance), and untrusted email are denied. The parent passes the
-randomly allocated temporary workspace to the child for both allowed
-and denied requests. This is intentional for the fault test, and
-**is not OS-level filesystem confinement**.
-
-After the child exits, the parent independently enumerates actual files
-and reads allowed fixed bytes. One allowed child write must exist;
-the other five scenarios must leave no files. Every case must confirm
-child reaping and temporary directory removal.
-
-The **direct test-only** function
-`runFixedChildProcessEffectFaultSelftest()` runs five controls:
-
-- A denied child deliberately creates one unauthorized temporary file;
-  the parent must observe it and return a failing case
-- A child falsely reports a write without creating a file; disk readback
-  must contradict the claim
-- A child sends unexpected IPC fields
-- A child exits without completing the request
-- A child hangs until the bounded parent timeout and is terminated
-
-The fault controls are never selectable through the public CLI. The
-private worker entrypoint refuses invocation without a parent IPC
-channel. Reports contain only symbolic case IDs, counters, outcomes
-and cleanup evidence, never the temporary path, file bytes or secrets.
-
-**Security boundary:** the child has the same OS user privileges as
-the parent and can disobey an IPC denial. This experiment **detects**
-such an effect but does not prevent a malicious process from writing
-elsewhere, attest owner identity, execute an LLM or independent scanner,
-or authorize real MCP targets. Genuine OS containment, real endpoint
-credentials, production side-effect prevention and external beta
-remain separate tasks requiring review and explicit permission.
+Five direct test-only controls must detect unauthorized child write
+despite `DENY`, false IPC effect claim, malformed IPC, early exit and
+bounded hang termination. No fault controls, arbitrary paths, commands,
+credentials or remote targets are exposed through the public CLI.
+Parent and child share an OS identity: **not process sandboxing**.
+Accepted in [PR #359](../pull/359), CI 4/4 (1388/1388 per job).
+External authorization, beta, audit and release remain unverified.
 
 ## M51 — actual OS file-handle rights (not process isolation)
 
