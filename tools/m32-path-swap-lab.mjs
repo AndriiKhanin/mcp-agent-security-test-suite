@@ -229,7 +229,7 @@ export function summarizePathSwap(rows){
       'M32_TOCTOU_WITNESS_MISMATCH',
     checked:SCENARIOS.length,matched,failed:SCENARIOS.length-matched,
     cases:Object.freeze(cases),
-    sizeOnlyFalseConfidenceCases:1,
+    sizeOnlyFalseConfidenceCases:2,
     changedOrInvalidEvidenceCases:6,
     guardedCasesQuarantined:SCENARIOS.length,
     actualSourceOwnedOsRaceVerified:pass,
