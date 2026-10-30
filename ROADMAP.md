@@ -78,12 +78,12 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
 | **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **ENGINEERING ACCEPTED — PR/main CI 4/4; release blocked** | [#330](../../issues/330), [PR #331](../../pull/331), [main CI #41036858127](../../actions/runs/41036858127), [readiness](docs/RELEASE_READINESS.md) | 80 packaged + 240 fully hashed excluded files, 1353/1353 Ubuntu20; no publication approval |
-| **M37 — One-command source-only first run** | M8 two-transport synthetic smoke + M35 two-format fictional importer, readable text/JSON and private next-step instructions | **ENGINEERING IN PR — acceptance pending** | [#335](../../issues/335), [getting started](docs/GETTING_STARTED.md) | Exact --self-check or --self-check-json; no real MCP/user config; 240/240 M6-J custody; PR/main CI 4/4 |
+| **M37 — One-command source-only first run** | M8 two-transport synthetic smoke + M35 two-format fictional importer, readable text/JSON and private next-step instructions | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#335](../../issues/335), [PR #336](../../pull/336), [main CI #41050360958](../../actions/runs/41050360958), [getting started](docs/GETTING_STARTED.md) | 1358/1358 Ubuntu20; no real MCP/user config; 240/240 M6-J custody; exact 4/4 PR and main CI |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M37-A/B/C — zero-config adopter first run (engineering in PR)
+## M37-A/B/C — zero-config adopter first run (engineering accepted)
 
 - [Issue #335](../../issues/335). Source-only
   `node tools/adapter-first-run-view.mjs --self-check`
@@ -107,10 +107,15 @@ We will not claim a release is production-ready merely because a synthetic test 
   240/240 SHA-256 custody limit; 241st-file denial remains.
   Frozen unpublished 80-path npm candidate has no new paths
   or new release permission.
-- **Pending acceptance:** PR CI Windows/Ubuntu Node20/22 **4/4**,
-  then independently matched main-push CI **4/4** on exact SHA.
-  External beta #59, real MCP target authority #21 and
-  independent audit #43 remain OPEN.
+- **Accepted 2026-10-30:** [PR #336](../../pull/336)
+  [PR CI #41049886879](../../actions/runs/41049886879)
+  **4/4 PASS** Windows/Ubuntu Node20/22, Ubuntu20
+  **1358/1358** tests (0 failures, 0 skipped). Squash-merged
+  exact SHA `84a6e7d487e0dd022a4cbd7a748fa2703fc25743`;
+  independent [main CI #41050360958](../../actions/runs/41050360958)
+  **4/4 PASS on identical SHA**. [Issue #335](../../issues/335)
+  closed for first-party engineering only. External beta #59,
+  real MCP target authority #21 and independent audit #43 remain OPEN.
 
 ## M36-A/B/C — local distribution doctor (engineering accepted)
 
