@@ -1,5 +1,25 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Import a project's existing MCP client JSON offline (M34)
+
+Review an existing **single-server** `mcpServers` or `servers` JSON
+(Claude-style or VS Code-style). On Node.js 20+, run a **no-contact**
+validation; it prints only fixed categorical status, no project name,
+executable, args or endpoint:
+
+`Get-Content -Raw -Encoding utf8 .\client-config.json | node tools/m34-client-config-bridge.mjs` (PowerShell)
+
+To explicitly export a **private** normalized `validate-only`
+descriptor, add `--emit-descriptor` and redirect stdout to your own local
+JSON file, then pipe that file through
+`node tools/m24-stdin-adapter-preflight.mjs`.
+This is a deliberate opt-in to printing private config fields locally.
+Never post those files publicly. Env, credentials, headers, active grants
+and multiple servers are refused. No user process is run, no MCP target
+is contacted, and five **fixed fictional controls** are not tests of
+your configured server. See [M34 usage and limits](.github/M34_CLIENT_CONFIG_IMPORT.md).
+
+
 ## Deterministic OS path-swap evidence race (M32)
 
 From a reviewed source checkout, run `node tools/m32-path-swap-lab.mjs`.
