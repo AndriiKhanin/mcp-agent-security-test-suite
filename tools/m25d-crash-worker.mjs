@@ -135,6 +135,10 @@ if(!validBoot){
       !owned(msg,['type']))return;
     if(msg.type==='ISSUE'&&[1,2,3].includes(msg.id)){
       process.send({type:'ISSUED',id:msg.id,grant:grant()});
+    }else if(msg.type==='SYNC'&&[1,2,3].includes(msg.id)){
+      // FIFO IPC receipt: effect notifications sent before this barrier
+      // must already be visible to the parent when SYNCED is received.
+      process.send({type:'SYNCED',id:msg.id,effects});
     }else if(msg.type==='CLOSE'){
       // Graceful cleanup is allowed only for the surviving, fresh worker.
       server.close(()=>{
