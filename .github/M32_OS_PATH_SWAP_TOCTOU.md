@@ -74,3 +74,56 @@ failures/skips**. [#320](../issues/320) closed for first-party
 engineering scope only. External observer trust, remote effect proof,
 release, independent beta, audit and real-target authorization
 remain unverified.
+
+## M50 — fixed child-process tool effect, parent-owned OS readback
+
+Run from a reviewed first-party checkout:
+
+```sh
+node tools/m32-path-swap-lab.mjs --child-process-effect-witness
+node --test test/m10-toy-agent-exchange.test.mjs
+```
+
+The first command runs **six fixed** scenarios. Every scenario creates a
+fresh temporary directory owned by the parent and launches the exact
+source-owned `tools/m32-path-swap-lab.mjs` file in a disposable Node child:
+no shell, no arbitrary executable, no inherited command-line arguments,
+no copied environment secrets, no user-selected path and no external MCP.
+
+The child asks the parent for `WRITE_TASK_STATUS` over IPC. **Only
+parent-side first-party source** binds the caller scenario and determines
+the grant. Owner + exact write grant is allowed; owner + read-only grant,
+untrusted tool result (even claiming owner or `NOT_FLAGGED` scanner
+clearance), and untrusted email are denied. The parent passes the
+randomly allocated temporary workspace to the child for both allowed
+and denied requests. This is intentional for the fault test, and
+**is not OS-level filesystem confinement**.
+
+After the child exits, the parent independently enumerates actual files
+and reads allowed fixed bytes. One allowed child write must exist;
+the other five scenarios must leave no files. Every case must confirm
+child reaping and temporary directory removal.
+
+The **direct test-only** function
+`runFixedChildProcessEffectFaultSelftest()` runs five controls:
+
+- A denied child deliberately creates one unauthorized temporary file;
+  the parent must observe it and return a failing case
+- A child falsely reports a write without creating a file; disk readback
+  must contradict the claim
+- A child sends unexpected IPC fields
+- A child exits without completing the request
+- A child hangs until the bounded parent timeout and is terminated
+
+The fault controls are never selectable through the public CLI. The
+private worker entrypoint refuses invocation without a parent IPC
+channel. Reports contain only symbolic case IDs, counters, outcomes
+and cleanup evidence, never the temporary path, file bytes or secrets.
+
+**Security boundary:** the child has the same OS user privileges as
+the parent and can disobey an IPC denial. This experiment **detects**
+such an effect but does not prevent a malicious process from writing
+elsewhere, attest owner identity, execute an LLM or independent scanner,
+or authorize real MCP targets. Genuine OS containment, real endpoint
+credentials, production side-effect prevention and external beta
+remain separate tasks requiring review and explicit permission.
