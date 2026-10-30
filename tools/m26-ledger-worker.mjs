@@ -33,7 +33,7 @@ if(!owned||!validDir){
 }
 const mode=args[1],spent=new Set();
 let pending=null,closed=false;
-const send=message=>process.send(message);
+const send=(message,callback)=>process.send(message,callback);
 function handle(message){
   if(!message||typeof message!=='object'||Array.isArray(message)||
       Object.getPrototypeOf(message)!==Object.prototype){
