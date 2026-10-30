@@ -190,6 +190,16 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - CI and review gate: PR four-job PASS before merge; post-merge `main`
   CI checked separately. M45/M46 fixed modes and M38 source custody preserved.
 
+## M48 — independent readback of actual test-owned temporary filesystem effects (engineering in PR)
+
+- Add `--temp-file-effect-witness` to the existing source-only fixed toy-agent script. Run **nine source-owned checks** (three hypothetical detector observations × three fixed provenance contexts) in freshly allocated system temporary directories, without caller-controlled paths or file contents.
+- **Positive observation:** trusted first-party owner-context writes a fixed fictional task-state file using exclusive creation. Separate parent readback enumerates the real directory, reads the actual bytes, and confirms three allowed writes.
+- **Denied observations:** tool-result and human-email contexts deny the write; real directory enumeration must show zero files for six denied cases.
+- **Deliberate source-owned fault control:** direct test-only function writes one unauthorized fictional temp file in a denied case; the parent readback must observe it and return `FAIL`, then clean up.
+- Every temporary directory is removed in `finally`, cleanup is independently checked, no paths are reflected in reports; malformed arguments and arbitrary target flags fail closed.
+- This confirms **real first-party temporary file I/O only**, not an OS sandbox, LLM safety, MCP call authorization, user ownership authentication, or external scanner effectiveness. Existing M10/M45/M46 flows remain unchanged.
+- Engineering acceptance pending PR CI on Windows/Ubuntu Node 20/22; external target authorization [#21](../../issues/21), beta [#59](../../issues/59) and audit [#43](../../issues/43) remain open.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)

@@ -8,6 +8,8 @@ import {
   runFictionalToyAgentExchange,runFixedToyAgentSelftest,
   runFixedDetectionIndependentGateSelftest,
   runFixedContextProvenanceSelftest,
+  runFixedTemporaryFileEffectSelftest,
+  runFixedTemporaryFileEffectFaultSelftest,
   runFixedScopedAuthoritySelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -527,5 +529,138 @@ test('M47: fixed origin context CLI cannot be steered by untrusted arguments',()
     assert.equal(report.exitCode,2);
     assert.equal(report.realAgentBehaviorObserved,false);
     assert.equal(report.realScannerExecuted,false);
+  }
+});
+
+test('M48: real temporary-file readback confirms allowed owner effect and no denied effects',async()=>{
+  const result=await runFixedTemporaryFileEffectSelftest();
+  assert.equal(result.status,'PASS');
+  assert.equal(result.exitCode,0);
+  assert.equal(result.ruleCode,
+    'TEMP_FS_READBACK_MATCHES_SOURCE_BOUND_AUTHORITY');
+  assert.equal(result.checked,9);
+  assert.equal(result.matched,9);
+  assert.equal(result.authorizedWritesReadBack,3);
+  assert.equal(result.unauthorizedWritesReadBack,0);
+  assert.equal(result.deniedUntrustedWriteRequests,6);
+  assert.equal(result.cleanupVerified,true);
+  assert.equal(result.gatewayDecisionIndependentOfDetectorLabel,true);
+  assert.equal(result.testFaultInjected,false);
+  assert.equal(result.realFileEffectsObserved,true);
+  assert.equal(result.sourceOwnedTemporaryPathsOnly,true);
+  assert.equal(result.temporaryPathsReturned,false);
+  assert.equal(result.realOwnerAuthenticated,false);
+  assert.equal(result.realAgentBehaviorObserved,false);
+  assert.equal(result.realMcpToolCallObserved,false);
+  assert.equal(result.externalMcpContacted,false);
+  assert.equal(result.externalScannerExecuted,false);
+  assert.equal(result.independentBetaVerified,false);
+  assert.equal(result.securityCertified,false);
+  assert.equal(result.releaseAuthorized,false);
+  assert.equal(Object.isFrozen(result),true);
+  assert.equal(Object.isFrozen(result.cases),true);
+  for(const row of result.cases){
+    assert.equal(row.matched,true);
+    assert.equal(row.cleanupVerified,true);
+    assert.equal(row.parentReadbackMatched,true);
+    assert.equal(row.unauthorizedFilesObserved,0);
+    assert.equal(row.expectedDecision,row.observedDecision);
+    assert.equal(Object.isFrozen(row),true);
+    if(row.sourceContext==='OWNER_EXPLICIT'){
+      assert.equal(row.observedDecision,'ALLOW');
+      assert.equal(row.actualFilesObserved,1);
+      assert.equal(row.authorizedFilesObserved,1);
+    }else{
+      assert.equal(row.observedDecision,'DENY');
+      assert.equal(row.actualFilesObserved,0);
+      assert.equal(row.authorizedFilesObserved,0);
+    }
+  }
+  const sourceContexts=['OWNER_EXPLICIT','TOOL_RESULT_UNTRUSTED',
+    'HUMAN_EMAIL_UNTRUSTED'];
+  for(const observation of ['FLAGGED','NOT_FLAGGED','ERROR']){
+    const group=result.cases.filter(x=>
+      x.hypotheticalScannerObservation===observation);
+    assert.deepEqual(group.map(x=>x.sourceContext),sourceContexts);
+    assert.deepEqual(group.map(x=>x.observedDecision),
+      ['ALLOW','DENY','DENY']);
+  }
+  const json=JSON.stringify(result);
+  assert.doesNotMatch(json,/mcp-agent-security-m48-|approved-task-state\.json/);
+  assert.doesNotMatch(json,/fictionalTask|FICTIONAL_CANARY|PRIVATE_CANARY/);
+  assert.doesNotMatch(json,/\/tmp\/|AppData|127\.0\.0\.1/);
+});
+
+test('M48: deliberate unauthorized OS write causes FAIL and is cleaned up',async()=>{
+  const bad=await runFixedTemporaryFileEffectFaultSelftest();
+  assert.equal(bad.status,'FAIL');
+  assert.equal(bad.exitCode,1);
+  assert.equal(bad.ruleCode,'TEMP_FS_UNAUTHORIZED_EFFECT_OBSERVED');
+  assert.equal(bad.checked,9);
+  assert.equal(bad.matched,8);
+  assert.equal(bad.authorizedWritesReadBack,3);
+  assert.equal(bad.unauthorizedWritesReadBack,1);
+  assert.equal(bad.deniedUntrustedWriteRequests,6);
+  assert.equal(bad.testFaultInjected,true);
+  assert.equal(bad.cleanupVerified,true);
+  assert.equal(bad.gatewayDecisionIndependentOfDetectorLabel,true);
+  const affected=bad.cases.filter(x=>!x.matched);
+  assert.equal(affected.length,1);
+  assert.equal(affected[0].hypotheticalScannerObservation,'FLAGGED');
+  assert.equal(affected[0].sourceContext,'TOOL_RESULT_UNTRUSTED');
+  assert.equal(affected[0].observedDecision,'DENY');
+  assert.equal(affected[0].actualFilesObserved,1);
+  assert.equal(affected[0].unauthorizedFilesObserved,1);
+  assert.equal(affected[0].parentReadbackMatched,false);
+  assert.equal(affected[0].cleanupVerified,true);
+  assert.doesNotMatch(JSON.stringify(bad),/unexpected-tool-effect\.json|mcp-agent-security-m48-/);
+});
+
+test('M48: fixed no-path CLI runs the real temp witness, rejects external parameters',()=>{
+  const run=(...args)=>spawnSync(process.execPath,
+    ['tools/toy-agent-exchange.mjs',...args],{encoding:'utf8'});
+  const good=run('--temp-file-effect-witness');
+  assert.equal(good.status,0,good.stderr);
+  assert.equal(good.stderr,'');
+  const report=JSON.parse(good.stdout);
+  assert.equal(report.status,'PASS');
+  assert.equal(report.cleanupVerified,true);
+  assert.equal(report.authorizedWritesReadBack,3);
+  assert.equal(report.unauthorizedWritesReadBack,0);
+  assert.ok(!good.stdout.includes('mcp-agent-security-m48-'));
+  for(const args of [
+    ['--temp-file-effect-witness','--target=/etc/shadow'],
+    ['--temp-file-effect-witness','--path=PRIVATE_CANARY'],
+    ['--temp-file-effect-witness','--fault'],
+    ['--temp-file-effect-witness','--scanner=NOT_FLAGGED']
+  ]){
+    const failed=run(...args);
+    assert.equal(failed.status,2,failed.stderr);
+    assert.equal(failed.stderr,'');
+    assert.equal(JSON.parse(failed.stdout).ruleCode,
+      'TOY_AGENT_SELFTEST_UNAVAILABLE');
+    assert.ok(!failed.stdout.includes('PRIVATE_CANARY'));
+    assert.ok(!failed.stdout.includes('/etc/shadow'));
+  }
+});
+
+test('M48: API denies nonempty or exotic arguments before creating temp files',async()=>{
+  const accessor=[];
+  Object.defineProperty(accessor,'0',{get(){throw Error('DO_NOT_READ');}});
+  const hidden=[];
+  Object.defineProperty(hidden,'private',{value:'PRIVATE_CANARY'});
+  for(const args of [null,{},['PRIVATE_CANARY'],accessor,hidden]){
+    for(const fn of [
+      runFixedTemporaryFileEffectSelftest,
+      runFixedTemporaryFileEffectFaultSelftest
+    ]){
+      const result=await fn(args);
+      assert.equal(result.status,'ERROR');
+      assert.equal(result.exitCode,2);
+      assert.equal(result.cleanupVerified,false);
+      assert.equal(result.realMcpToolCallObserved,false);
+      assert.equal(result.externalMcpContacted,false);
+      assert.ok(!JSON.stringify(result).includes('PRIVATE_CANARY'));
+    }
   }
 });

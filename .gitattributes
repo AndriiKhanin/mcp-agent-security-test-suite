@@ -1,0 +1,6 @@
+# Consistent excluded-source custody bytes on Windows and Linux.
+# Keep Git's binary detection: only text is normalized.
+# M6-J still hashes every real byte and preserves its 240-file/2MB bounds.
+.github/** text=auto eol=lf
+test/** text=auto eol=lf
+tools/** text=auto eol=lf
