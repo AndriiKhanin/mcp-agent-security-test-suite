@@ -1,5 +1,58 @@
 # Contributing
 
+
+## M39: compare multiple fictional scanner reports locally
+
+From a reviewed source checkout, export the same four public fictional cases
+with `node tools/fixture-batch-preflight.mjs --export-detector-cases`.
+Each volunteer runs their own detector separately. Make a local JSON file
+`detector-batch.json` with this structure:
+
+```json
+{
+  "reportSchemaVersion": 1,
+  "sourceProfile": "m38-fictional-detector-cases-v1",
+  "scanners": [
+    {
+      "scannerId": "scanner-a",
+      "results": [
+        {"caseId": "mixed-tool-result-file-read:clean", "observed": "NOT_FLAGGED"},
+        {"caseId": "mixed-tool-result-file-read:mixed", "observed": "FLAGGED"},
+        {"caseId": "ticket-status-prerequisite-file-read:clean", "observed": "NOT_FLAGGED"},
+        {"caseId": "ticket-status-prerequisite-file-read:mixed", "observed": "ERROR"}
+      ]
+    }
+  ]
+}
+```
+
+The values above illustrate the format, **not actual external observations**.
+Include 1–8 scanners with unique lowercase local aliases (no real identities),
+exactly four rows in the prescribed order for each scanner, and only
+`FLAGGED`, `NOT_FLAGGED` or `ERROR` as observations.
+
+Windows PowerShell:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\detector-batch.json | node tools/fixture-batch-preflight.mjs --compare-detector-batch
+```
+
+Linux/macOS:
+
+```sh
+cat detector-batch.json | node tools/fixture-batch-preflight.mjs --compare-detector-batch
+```
+
+This mode emits per-scanner and per-case TP/FP/FN/TN/ERROR totals relative
+to the author labels, and aggregate counts. It validates strict JSON, limits
+stdin to 16 KiB and never starts scanners or connects to targets. It does
+not prove scanner provenance, identity, real-agent safety, beta acceptance,
+security certification or generalizable accuracy. Share only sanitized
+category counts and independently recorded scanner version details in
+[comparison issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
+Do not include private outputs, file paths, credentials or customer data.
+
+
 ## Independent detector comparisons (M38, fictional only)
 
 Independent security-tool maintainers can review and classify exactly
