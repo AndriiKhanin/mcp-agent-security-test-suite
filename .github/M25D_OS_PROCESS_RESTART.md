@@ -81,6 +81,12 @@ installed, restarted, queried or touched.**
 The worker and parent helper are **source-only** and excluded from the
 unpublished 80-path npm candidate. Real-target approval [#21](../issues/21),
 independent review [#43](../issues/43) and independent beta [#59](../issues/59)
-remain open. Engineering acceptance requires Windows/Ubuntu Node 20/22
-PR CI **4/4** followed by an independently confirmed exact
-post-merge main CI **4/4**.
+remain open. Engineering accepted (2026-10-30): [PR #300](../pull/300) passed
+[PR CI #41007941306](../actions/runs/41007941306) **4/4**
+(Windows/Ubuntu Node20/22), then merged as exact main commit
+`79592457788f86de05db977203633ccf7eec43d7`.
+Independent [post-merge main CI #41008307216](../actions/runs/41008307216)
+passed **4/4 on the same commit**. Earlier tests found an IPC/HTTP
+witness-observation race; ordered child-to-parent SYNC receipts fixed it
+before merge. This remains author-controlled engineering evidence, **not**
+proof of durable production authorization recovery or an independent audit.
