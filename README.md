@@ -817,6 +817,34 @@ MCP servers or Stable Bridge. See the
 [M25 test guide](.github/M25_APPROVAL_POLICY_EPOCH.md).
 The helper is source-only, outside the unpublished npm package.
 
+## Two signed outcome statements are not verified effects (M30, source only)
+
+From a reviewed public source checkout:
+
+```sh
+node tools/m30-dual-signer-illusion.mjs
+```
+
+M30 exercises **14 synthetic dual-signer cases**, generating actual
+ephemeral Ed25519 keypairs and verifying two differently signed
+fictional recovery claims. In two deliberately dangerous cases,
+**both valid signatures agree on an incorrect outcome**; a naive
+quorum-only resolver would then **lose an unperformed operation** or
+**duplicate an already completed synthetic effect**. Signature
+tampering, rogue signer, same key under two issuer aliases, replay,
+scope changes, expiry and disagreements are negative controls.
+The guarded rule always **quarantines unresolved effects**, even
+when both first-party signatures cryptographically verify.
+
+`14/14 PASS` means the false-proof vulnerability was exposed and
+the guarded toy rule preserved quarantine. It **does not authenticate
+independent real observers or establish effect truth, exactly-once
+recovery, production signing identities or real agent safety**.
+There are no real credentials, external MCP targets, actual business
+operations, file reads, telemetry or Stable Bridge interactions.
+See the [M30 scope guide](.github/M30_DUAL_SIGNER_QUORUM.md).
+This helper is source-only and outside the unpublished 80-file package.
+
 ## Signed receipt authenticity versus real outcome proof (M29, source only)
 
 From a reviewed first-party source checkout:
