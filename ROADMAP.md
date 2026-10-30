@@ -162,13 +162,13 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - No new paths, unreviewed or private fixtures, package release changes, process spawning, network, real scanner calls, real LLM, external MCP contact, credential use, or actual OS effects. This is **not authenticated real-world provenance**.
 - Engineering merged: [PR #350](../../pull/350), CI 4/4 PASS; Ubuntu Node 20 1374/1374. Post-merge `main` CI not separately verified. Related feedback [#329](../../issues/329) and follow-up [#345](../../issues/345); external MCP authorization [#21](../../issues/21) and beta [#59](../../issues/59) remain open.
 
-## M47 — first-party staging wire rejection of forged source and scanner clearance (PR CI pending)
+## M47 — first-party staging wire rejection of forged source and scanner clearance (PR #352 merged, CI 4/4)
 
 - Reuse the existing approved, fixed one-request IPv4 `127.0.0.1` staging MCP discovery server. Two **test-only**, source-authored faults send actual HTTP `tools/call` requests claiming either `OWNER_EXPLICIT` authority or a `NOT_FLAGGED` scanner clearance. These claims are untrusted request fields, not capabilities.
 - The server's exact method allowlist rejects both before any handler can dispatch; the witness must show 1 received, 0 accepted, 1 socket closed, no target outside the first-party loopback. The original allowed `server/discover` positive control remains valid.
 - Direct fault API is unavailable through public CLI; arbitrary URLs, credentials, user-chosen methods and external MCP contact remain disallowed. Existing strict request/response limits and cleanup are unchanged.
 - Unlike M46 this checks actual local HTTP **transport rejection**, but no MCP tool, third-party scanner, model, real filesystem operation or authenticated owner is involved. It is not end-to-end security certification.
-- Acceptance requires four-job PR CI and separate merged-main evidence. Tracking [#345](../../issues/345), external authorization [#21](../../issues/21), independent beta [#59](../../issues/59).
+- Engineering merged: [PR #352](../../pull/352), four-job CI 4/4 PASS; Ubuntu Node 20 **1376/1376**. Post-merge `main` CI not separately verified. Tracking [#345](../../issues/345), external authorization [#21](../../issues/21) and independent beta [#59](../../issues/59) remain open.
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
