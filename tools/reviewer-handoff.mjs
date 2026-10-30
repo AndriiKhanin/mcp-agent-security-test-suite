@@ -249,6 +249,88 @@ export function verifyHandoff(value){
      !exact(value.excludedReview,excluded))return false;
   return canonical(value)===canonical(buildHandoff());
 }
+/**
+ * M36: source-only offline distribution doctor.
+ *
+ * A PASS means only locally self-computed source/archive/installed-file
+ * evidence. No recorded archive is retained, no trusted external receipt is
+ * created, and no release decision or publication authority is conferred.
+ */
+const doctorProfile='m36-offline-distribution-doctor-v1';
+const doctorDenials=Object.freeze([
+  'INDEPENDENT_SOURCE_AND_ARTIFACT_AUDIT_REQUIRED',
+  'INDEPENDENT_BETA_REVIEW_REQUIRED',
+  'VERIFIED_EXTERNAL_TARGET_CONSENT_SEPARATE',
+  'OWNER_PUBLICATION_APPROVAL_REQUIRED'
+]);
+function doctorFailure(){
+  return Object.freeze({
+    reportSchemaVersion:1,profile:doctorProfile,
+    status:'ERROR',exitCode:2,ruleCode:'M36_LOCAL_PREFLIGHT_UNAVAILABLE',
+    evidenceKind:'SELF_GENERATED_LOCAL_EVIDENCE_ONLY',
+    sourceContact:'LOCAL_ONLY',
+    targetContact:'NOT_ATTEMPTED',
+    archivedAndInstalledLocally:false,
+    releaseReady:false,releaseApproved:false,
+    externalTargetAuthorized:false,independentAuditVerified:false,
+    independentBetaVerified:false,published:false,
+    checkoutCleanlinessVerified:false,
+    sourceRevisionIndependentlyVerified:false,
+    artifactDigestIndependentlyAnchored:false,
+    nextGates:doctorDenials
+  });
+}
+function doctorEmptyArgs(args){
+  if(!Array.isArray(args)||Object.getPrototypeOf(args)!==
+      Array.prototype||args.length!==0)return false;
+  const d=Object.getOwnPropertyDescriptors(args);
+  return Reflect.ownKeys(d).length===1&&d.length?.value===0;
+}
+/**
+ * Actual bounded offline archive/install verification is delegated to the
+ * existing M6-J and R4 custody. This deliberately does not trust a caller's
+ * handoff JSON or accept arbitrary source paths / external targets.
+ */
+export function runDistributionDoctor(args=[]){
+  if(!doctorEmptyArgs(args))return doctorFailure();
+  try{
+    const h=buildHandoff();
+    if(validateHandoff(h)!==true||
+       h.packagedSource.fileCount!==80||
+       h.excludedReview.fileCount>MAX_EXCLUDED_FILES||
+       h.excludedReview.files.length!==h.excludedReview.fileCount||
+       h.scope.externalNetworkTargetsContacted!==false||
+       h.scope.releaseArtifactPublished!==false||
+       !Object.values(h.independentGates).every(v=>v==='NOT_VERIFIED'))
+      denied();
+    return Object.freeze({
+      reportSchemaVersion:1,profile:doctorProfile,
+      status:'PASS',exitCode:0,
+      ruleCode:'LOCAL_SOURCE_ARCHIVE_INSTALL_MATCH',
+      evidenceKind:'SELF_GENERATED_LOCAL_EVIDENCE_ONLY',
+      sourceContact:'LOCAL_ONLY',
+      targetContact:'NOT_ATTEMPTED',
+      candidateVersion:'0.0.10-rc.1',
+      packagePathCount:h.packagedSource.fileCount,
+      excludedSourceFileCount:h.excludedReview.fileCount,
+      excludedSourceFileCap:MAX_EXCLUDED_FILES,
+      sourceIndexSha256:h.packagedSource.indexSha256,
+      archiveSha256:h.localArchive.sha256,
+      archiveSha512:h.localArchive.sha512,
+      archiveNpmIntegrity:h.localArchive.npmIntegrity,
+      installedIndexSha256:h.localArchive.installedIndexSha256,
+      excludedSourceIndexSha256:h.excludedReview.indexSha256,
+      archivedAndInstalledLocally:true,
+      releaseReady:false,releaseApproved:false,
+      externalTargetAuthorized:false,independentAuditVerified:false,
+      independentBetaVerified:false,published:false,
+      checkoutCleanlinessVerified:false,
+      sourceRevisionIndependentlyVerified:false,
+      artifactDigestIndependentlyAnchored:false,
+      nextGates:doctorDenials
+    });
+  }catch{return doctorFailure();}
+}
 const reply=(status,code)=>JSON.stringify({
   status,code,
   evidenceKind:'SELF_GENERATED_OFFLINE_ASSESSOR_HANDOFF_ONLY',
@@ -257,6 +339,12 @@ const reply=(status,code)=>JSON.stringify({
 function main(){
   const [cmd,...args]=process.argv.slice(2);
   try{
+    if(cmd==='doctor'){
+      const report=runDistributionDoctor(args);
+      process.stdout.write(JSON.stringify(report,null,2)+'\n');
+      process.exitCode=report.exitCode;
+      return;
+    }
     if(cmd==='snapshot'&&args.length===0){
       const result=canonical(buildHandoff());
       if(Buffer.byteLength(result,'utf8')>MAX_PACKET_BYTES)denied();
