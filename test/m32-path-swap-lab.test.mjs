@@ -5,7 +5,8 @@ import {spawnSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {runPathSwapLab,summarizePathSwap,
-  runFixedChildProcessEffectSelftest,runFixedChildProcessEffectFaultSelftest}
+  runFixedChildProcessEffectSelftest,runFixedChildProcessEffectFaultSelftest,
+  runFixedOsHandleRightsSelftest,runFixedOsHandleFalseReportSelftest}
   from '../tools/m32-path-swap-lab.mjs';
 
 const cases=Object.freeze([
@@ -287,6 +288,106 @@ test('M50: direct APIs reject non-empty, sparse and getter-bearing arguments',as
       assert.equal(r.ruleCode,'M50_FIXED_CHILD_EFFECT_SELFTEST_UNAVAILABLE');
       assert.equal(r.externalMcpContacted,false);
       assert.equal(r.realOwnerAuthenticated,false);
+      assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
+    }
+  }
+});
+
+
+test('M51: actual read-only handle prevents writes, writable positive passes',async()=>{
+  const report=await runFixedOsHandleRightsSelftest();
+  assert.equal(report.status,'PASS',JSON.stringify(report));
+  assert.equal(report.exitCode,0);
+  assert.equal(report.checked,3);
+  assert.equal(report.matched,3);
+  assert.equal(report.realReadOnlyHandleWriteDenied,true);
+  assert.equal(report.writableHandlePositiveControl,true);
+  assert.equal(report.sameUserPathReopenBypassConfirmed,true);
+  assert.equal(report.cleanupVerified,true);
+  assert.equal(report.realChildProcessUsed,true);
+  assert.equal(report.realOsFileHandleRightsTested,true);
+  assert.equal(report.osSandboxed,false);
+  assert.equal(report.arbitraryPathAccessPrevented,false);
+  assert.equal(report.realOwnerAuthenticated,false);
+  assert.equal(report.externalMcpContacted,false);
+  assert.equal(report.releaseAuthorized,false);
+  assert.deepEqual(report.cases.map(x=>x.caseId),[
+    'READ_ONLY_HANDLE','WRITABLE_HANDLE','REOPEN_PATH_AFTER_DENIAL'
+  ]);
+  assert.deepEqual(report.cases.map(x=>x.actualFileEffect),
+    ['UNCHANGED','MODIFIED','MODIFIED']);
+  assert.deepEqual(report.cases.map(x=>x.handleWriteDenied),
+    [true,false,true]);
+  for(const c of report.cases){
+    assert.equal(c.status,'PASS',c.caseId);
+    assert.equal(c.childReaped,true);
+    assert.equal(c.childExitCode,0);
+    assert.equal(c.childRequests,1);
+    assert.equal(c.childReports,1);
+    assert.equal(c.cleanupVerified,true);
+    assert.equal(c.realParentDiskReadback,true);
+    assert.equal(c.osSandboxed,false);
+    assert.ok(Object.isFrozen(c));
+  }
+  assert.equal(report.cases[0].pathReopenBypassObserved,false);
+  assert.equal(report.cases[2].pathReopenBypassObserved,true);
+  const serialized=JSON.stringify(report);
+  assert.doesNotMatch(serialized,/mcp-m51-fd-|fictional-readonly-handle\.txt/);
+  assert.doesNotMatch(serialized,/FICTIONAL-M51-|PRIVATE_CANARY|AppData|\/tmp\//);
+});
+
+test('M51: falsified child effect claim is caught by independent OS readback',async()=>{
+  const row=await runFixedOsHandleFalseReportSelftest();
+  assert.equal(row.status,'FAIL');
+  assert.equal(row.ruleCode,'M51_FALSE_CHILD_EFFECT_CLAIM');
+  assert.equal(row.caseId,'FALSE_NO_EFFECT_REPORT');
+  assert.equal(row.actualFileEffect,'MODIFIED');
+  assert.equal(row.childClaimedEffect,false);
+  assert.equal(row.handleWriteDenied,false);
+  assert.equal(row.denialCode,'NONE');
+  assert.equal(row.childReaped,true);
+  assert.equal(row.childExitCode,0);
+  assert.equal(row.cleanupVerified,true);
+  assert.equal(row.osSandboxed,false);
+});
+
+test('M51: fixed public CLI refuses arbitrary path and private worker access',()=>{
+  const cli=run('tools/m32-path-swap-lab.mjs','--os-filehandle-rights-witness');
+  assert.equal(cli.status,0,cli.stderr);
+  assert.equal(cli.stderr,'');
+  const report=JSON.parse(cli.stdout);
+  assert.equal(report.status,'PASS');
+  assert.equal(report.sameUserPathReopenBypassConfirmed,true);
+  for(const arg of [
+    '--path=PRIVATE_CANARY','--owner=someone',
+    '--target=https://example.invalid','--mode=unsafe'
+  ]){
+    const bad=run('tools/m32-path-swap-lab.mjs',
+      '--os-filehandle-rights-witness',arg);
+    assert.equal(bad.status,2,arg);
+    assert.equal(JSON.parse(bad.stdout).ruleCode,'M32_ARGUMENTS_NOT_ALLOWED');
+    assert.ok(!bad.stdout.includes('PRIVATE_CANARY'));
+  }
+  const privateEntry=run('tools/m32-path-swap-lab.mjs',
+    '--m51-private-worker','READ_ONLY_HANDLE');
+  assert.equal(privateEntry.status,2);
+  assert.equal(privateEntry.stdout,'');
+});
+
+test('M51: direct API rejects spoofed, sparse and getter-bearing options',async()=>{
+  const getter=[];
+  Object.defineProperty(getter,'0',{get(){throw Error('PRIVATE_CANARY');}});
+  const hidden=[];
+  Object.defineProperty(hidden,'private',{value:'PRIVATE_CANARY'});
+  for(const input of [null,{},['UNSAFE'],Array(1),getter,hidden]){
+    for(const fn of [runFixedOsHandleRightsSelftest,
+      runFixedOsHandleFalseReportSelftest]){
+      const r=await fn(input);
+      assert.equal(r.status,'ERROR');
+      assert.equal(r.exitCode,2);
+      assert.equal(r.ruleCode,'M51_FIXED_OS_HANDLE_TEST_UNAVAILABLE');
+      assert.equal(r.osSandboxed,false);
+      assert.equal(r.externalMcpContacted,false);
       assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
     }
   }
