@@ -77,9 +77,34 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
+| **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **IN PR — engineering CI pending; release blocked** | [#330](../../issues/330), [readiness](docs/RELEASE_READINESS.md) | No release authorization; 80 packaged + 240 fully hashed excluded paths, no publication, PR/main 4/4 |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M36-A/B/C — local distribution doctor (engineering CI pending)
+
+- [Issue #330](../../issues/330) tracks a source-only
+  `node tools/reviewer-handoff.mjs doctor` command. It reuses the
+  existing M6-J local source inventory, temporary offline npm
+  tarball + install validation, and SHA-256 comparison, without
+  expanding the unpublished npm 80-path package.
+- **M36-A:** bounded categorical JSON-v1 local preflight;
+  80 packaged file hashes, 240 fully indexed excluded files,
+  actual local pack/install evidence and local SHA-256 indexes.
+  It must never claim independently anchored Git, signing,
+  real MCP target security or publication approval.
+- **M36-B:** same existing source-only tool/test paths updated,
+  no extra .github/test/tools files. Deny extra arguments and
+  forged approval attempts. M6-J remains 240 maximum and
+  **241st-entry denial**; lifecycle script restrictions retained.
+- **M36-C:** [README](README.md),
+  [getting started](docs/GETTING_STARTED.md),
+  [release readiness](docs/RELEASE_READINESS.md); technical
+  PR **4/4** and independently matched main **4/4** still pending.
+- **Publication BLOCKED:** external beta #59, audit #43,
+  real-target authorization #21, and explicit owner release
+  decision remain independent requirements.
 
 ## M35-A/B/C — explainable offline report, not a vulnerability scan (engineering accepted)
 
