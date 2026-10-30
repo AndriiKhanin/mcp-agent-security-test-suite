@@ -817,6 +817,31 @@ MCP servers or Stable Bridge. See the
 [M25 test guide](.github/M25_APPROVAL_POLICY_EPOCH.md).
 The helper is source-only, outside the unpublished npm package.
 
+## Crash between reservation, effect and acknowledgement (M27, source only)
+
+Run only from a reviewed first-party source checkout:
+
+```sh
+node tools/m27-indoubt-crash-replay.mjs
+```
+
+This disposable OS-process experiment tests an **in-doubt** operation:
+a synthetic key is reserved on disk before a worker crashes. In one case
+there was no effect; in another, the child emitted one synthetic effect
+but never an acknowledgement. A new guarded worker refuses to retry
+the unresolved key (symbolic 423) yet accepts an unrelated new key.
+A deliberately unsafe comparison repeats the old effect, demonstrating
+why silent retry after a crash is dangerous.
+
+`3/3 PASS` means the uncertainty, guarded quarantine and intentional
+unsafe replay were witnessed. It **does not** demonstrate exactly-once,
+power-loss durability, automated reconciliation or a real MCP agent.
+The test **really creates and cleans disposable temporary files and
+terminates only its own child processes**; it never touches Stable Bridge,
+user data, credentials or an external MCP server. See
+[M27 scope and limitations](.github/M27_INDOUBT_CRASH_RECOVERY.md).
+Source-only; excluded from unpublished 80-file npm candidate.
+
 ## Disposable disk-backed replay ledger across OS workers (M26, source only)
 
 In a reviewed first-party checkout run:
