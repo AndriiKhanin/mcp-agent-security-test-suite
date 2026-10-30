@@ -109,7 +109,7 @@ function wait(state,type,id){
     w.timer=setTimeout(()=>{
       const position=state.waiters.indexOf(w);
       if(position>=0)state.waiters.splice(position,1);
-      reject(Error('CHILD_IPC_TIMEOUT'));
+      reject(Error('CHILD_IPC_TIMEOUT_'+type));
     },DEADLINE);
     state.waiters.push(w);
   });
@@ -321,7 +321,21 @@ export async function runCrossProcessLedger(args=[]){
       await parallel()
     ];
     return summarizeCrossProcessLedger(observations);
-  }catch{return errorReport('CROSS_PROCESS_LEDGER_UNAVAILABLE');}
+  }catch(error){
+    // Explicit fixed internal diagnostic classes, never the raw error,
+    // executable, temporary path, PID or host environment.
+    const allowed=new Set([
+      'CHILD_IPC_TIMEOUT_READY','CHILD_IPC_TIMEOUT_PREPARED',
+      'CHILD_IPC_TIMEOUT_RESULT','CHILD_IPC_TIMEOUT_CLOSED',
+      'CHILD_ALREADY_EXITED','OWNED_CHILD_EXITED','BOUNDED_TIMEOUT',
+      'OWNED_CHILD_READY_MISMATCH','INVALID_OWNED_ACK',
+      'CHILD_IPC_CLOSED','OWNED_KILL_REFUSED',
+      'OWNED_NOT_CLEAN','UNEXPECTED_DISPOSABLE_FILE',
+      'DISPOSABLE_MARKER_INVALID','DISPOSABLE_DIR_NOT_REMOVED'
+    ]);
+    return errorReport(allowed.has(error?.message)?
+      'CROSS_PROCESS_'+error.message:'CROSS_PROCESS_LEDGER_UNAVAILABLE');
+  }
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const result=await runCrossProcessLedger(process.argv.slice(2));
