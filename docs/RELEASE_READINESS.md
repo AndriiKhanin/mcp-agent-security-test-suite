@@ -1,7 +1,7 @@
 # v0.0.10 stable release readiness — preflight, NOT a release
 
 
-## M36 — one-command offline candidate doctor (engineering CI pending)
+## M36 — one-command offline candidate doctor (engineering accepted)
 
 From a reviewed **source checkout**, run:
 
@@ -33,8 +33,16 @@ This command needs the source checkout and npm; the SOURCE-ONLY helper
 is intentionally excluded from the frozen 80-file npm candidate.
 It does not replace #43 independent audit, #59 genuine external beta,
 #21 verified external MCP target approvals or owner's explicit release
-decision. M36 engineering CI must pass 4/4 on PR and separately
-on exact merged main SHA before marking it accepted.
+decision. M36 engineering acceptance (2026-10-30):
+[PR #331](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/331)
+[PR CI #41036321059](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41036321059)
+**4/4 PASS** on Windows/Ubuntu Node20/22, merge SHA
+`f13281d100634b9512ff698316b84927d1cec3f5`;
+separately [main CI #41036858127](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41036858127)
+**4/4 PASS on the exact same SHA**. Ubuntu20: **1353/1353
+tests**, 0 failed/skipped. [M36 issue #330](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/330)
+closed for engineering only; stable release and independent
+approval gates remain OPEN.
 
 
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  

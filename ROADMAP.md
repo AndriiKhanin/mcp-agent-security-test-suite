@@ -77,12 +77,12 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
-| **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **IN PR — engineering CI pending; release blocked** | [#330](../../issues/330), [readiness](docs/RELEASE_READINESS.md) | No release authorization; 80 packaged + 240 fully hashed excluded paths, no publication, PR/main 4/4 |
+| **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **ENGINEERING ACCEPTED — PR/main CI 4/4; release blocked** | [#330](../../issues/330), [PR #331](../../pull/331), [main CI #41036858127](../../actions/runs/41036858127), [readiness](docs/RELEASE_READINESS.md) | 80 packaged + 240 fully hashed excluded files, 1353/1353 Ubuntu20; no publication approval |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M36-A/B/C — local distribution doctor (engineering CI pending)
+## M36-A/B/C — local distribution doctor (engineering accepted)
 
 - [Issue #330](../../issues/330) tracks a source-only
   `node tools/reviewer-handoff.mjs doctor` command. It reuses the
@@ -101,7 +101,12 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **M36-C:** [README](README.md),
   [getting started](docs/GETTING_STARTED.md),
   [release readiness](docs/RELEASE_READINESS.md); technical
-  PR **4/4** and independently matched main **4/4** still pending.
+  [PR #331](../../pull/331) [PR CI #41036321059](../../actions/runs/41036321059)
+  **4/4 PASS**; squash merge SHA
+  `f13281d100634b9512ff698316b84927d1cec3f5`;
+  independent [main CI #41036858127](../../actions/runs/41036858127)
+  **4/4 PASS on exact same SHA**. Ubuntu20 1353/1353 tests.
+  [Issue #330](../../issues/330) closed for engineering only.
 - **Publication BLOCKED:** external beta #59, audit #43,
   real-target authorization #21, and explicit owner release
   decision remain independent requirements.
