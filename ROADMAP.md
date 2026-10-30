@@ -62,11 +62,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M25-D — Actual disposable gate OS process crash/relaunch** | Parent-owned IPC and real process exit distinguish stale-approval rejection from unsafe reexecution | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#299](../../issues/299), [PR #300](../../pull/300), [main CI #41008307216](../../actions/runs/41008307216), [guide](.github/M25D_OS_PROCESS_RESTART.md) | 3/3 observed toy cases, negative mutations, independent PR/main CI; real durability unverified |
 
-| **M26 — Disposable cross-process spent-key ledger** | Guarded spent-key claim survives owned OS child crash; two concurrent workers race on exclusive marker; deliberately transient comparator exposes replay | **ENGINEERING IN PROGRESS — PR/main CI pending** | [#302](../../issues/302), [guide](.github/M26_CROSS_PROCESS_LEDGER.md) | Three OS+disk scenarios; mutation/no-echo controls; separate PR and main CI 4/4; no power-loss claim |
+| **M26 — Disposable cross-process spent-key ledger** | Guarded spent-key claim survives owned OS child crash; two concurrent workers race on exclusive marker; deliberately transient comparator exposes replay | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#302](../../issues/302), [PR #303](../../pull/303), [main CI #41013215418](../../actions/runs/41013215418), [guide](.github/M26_CROSS_PROCESS_LEDGER.md) | Three OS+disk scenarios witnessed; separately checked main 4/4; no power-loss durability claim |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M26-A/B/C — disposable cross-process replay ledger (engineering in progress)
+## M26-A/B/C — disposable cross-process replay ledger (engineering accepted)
 
 - [Issue #302](../../issues/302) adds source-only
   `node tools/m26-cross-process-ledger.mjs`. Only owned Node workers,
@@ -89,8 +89,16 @@ We will not claim a release is production-ready merely because a synthetic test 
   and frozen unpublished **80-path** package. Passing does **not**
   prove power-loss durability, real authorization or a production
   transactional store. Independent review/beta/target gates
-  #43/#59/#21 remain OPEN. Require Windows/Ubuntu Node20/22
-  PR CI **4/4**, then separate exact-SHA main push **4/4**.
+  #43/#59/#21 remain OPEN. [PR #303](../../pull/303) passed
+  [PR CI #41012856455](../../actions/runs/41012856455) **4/4**,
+  then merged as exact main SHA
+  `c53dfad239b3c8af356e8050572920cde943e05c`.
+  Independent [main CI #41013215418](../../actions/runs/41013215418)
+  passed **4/4 on that same SHA**, Windows/Ubuntu Node20/22.
+  Initial worker IPC close callback and M6-J 40 KiB handoff-capacity
+  failures were corrected before merge (bounded 64 KiB packet,
+  full source hashes and oversize-denial tests retained).
+  Engineering acceptance only; no power-loss durability certification.
 
 ## M25-D — actual first-party worker process termination (engineering accepted)
 
