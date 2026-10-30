@@ -63,7 +63,13 @@ function spawnOwned(root,policy){
       M26_OWNED_LEDGER_DIR:root,
       NODE_OPTIONS:'',
       PATH:process.env.PATH??'',
-      SystemRoot:process.env.SystemRoot??''
+      SystemRoot:process.env.SystemRoot??'',
+      // Windows os.tmpdir() uses TEMP/TMP; preserve only these safe
+      // scratch-location variables so the worker verifies the exact
+      // parent-owned directory without inheriting application secrets.
+      TEMP:process.env.TEMP??'',
+      TMP:process.env.TMP??'',
+      TMPDIR:process.env.TMPDIR??''
     }
   });
   const state={
