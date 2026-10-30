@@ -60,11 +60,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M25 — Policy-version drift + logical gate restart** | Community request: stale approval cannot authorize delayed execution after policy change or gate-generation replacement | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#296](../../issues/296), [PR #297](../../pull/297), [main CI #40950548884](../../actions/runs/40950548884), [guide](.github/M25_APPROVAL_POLICY_EPOCH.md) | 5/5 owned-wire scenarios, protected stale denial and fresh reapproval; no real OS restart claim |
 
-| **M25-D — Actual disposable gate OS process crash/relaunch** | Parent-owned IPC and real process exit distinguish stale-approval rejection from unsafe reexecution | **IN PROGRESS — PR AND CI PENDING** | [#299](../../issues/299), [guide](.github/M25D_OS_PROCESS_RESTART.md) | 3/3 owned child-process cases + independent negative mutation controls; 4/4 PR and main CI required |
+| **M25-D — Actual disposable gate OS process crash/relaunch** | Parent-owned IPC and real process exit distinguish stale-approval rejection from unsafe reexecution | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#299](../../issues/299), [PR #300](../../pull/300), [main CI #41008307216](../../actions/runs/41008307216), [guide](.github/M25D_OS_PROCESS_RESTART.md) | 3/3 observed toy cases, negative mutations, independent PR/main CI; real durability unverified |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M25-D — actual first-party worker process termination (engineering in progress)
+## M25-D — actual first-party worker process termination (engineering accepted)
 
 - [Issue #299](../../issues/299): source-only
   `node tools/m25d-os-crash-relaunch.mjs` runs a fixed child Node.js
@@ -85,8 +85,14 @@ We will not claim a release is production-ready merely because a synthetic test 
   real authorization, persisted crash recovery, an external MCP test,
   a real model, a secret-bearing workload or security certification.
   Stable Bridge never contacted. #21/#43/#59 remain OPEN.
-  Engineering acceptance requires PR and exact post-merge main CI
-  **4/4** on Windows/Ubuntu Node20/22.
+  [PR #300](../../pull/300) passed [PR CI #41007941306](../../actions/runs/41007941306)
+  **4/4** on Windows/Ubuntu Node20/22, then merged as exact SHA
+  `79592457788f86de05db977203633ccf7eec43d7`.
+  Independent [main CI #41008307216](../../actions/runs/41008307216)
+  passed **4/4 on that same SHA**. The initial timing mismatch in
+  parent-observed IPC effect counts was corrected using ordered SYNC
+  acknowledgments before merge; the failed run was not waived.
+  Engineering acceptance only: no production crash-durability guarantee.
 
 ## M25-A/B/C — community policy-version and logical restart TOCTOU (engineering accepted)
 
