@@ -78,9 +78,39 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
 | **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **ENGINEERING ACCEPTED — PR/main CI 4/4; release blocked** | [#330](../../issues/330), [PR #331](../../pull/331), [main CI #41036858127](../../actions/runs/41036858127), [readiness](docs/RELEASE_READINESS.md) | 80 packaged + 240 fully hashed excluded files, 1353/1353 Ubuntu20; no publication approval |
+| **M37 — One-command source-only first run** | M8 two-transport synthetic smoke + M35 two-format fictional importer, readable text/JSON and private next-step instructions | **ENGINEERING IN PR — acceptance pending** | [#335](../../issues/335), [getting started](docs/GETTING_STARTED.md) | Exact --self-check or --self-check-json; no real MCP/user config; 240/240 M6-J custody; PR/main CI 4/4 |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M37-A/B/C — zero-config adopter first run (engineering in PR)
+
+- [Issue #335](../../issues/335). Source-only
+  `node tools/adapter-first-run-view.mjs --self-check`
+  (human readable) or exact `--self-check-json` (fixed schema)
+  merges M8 two-transport fictional adapter smoke (2/2) with
+  **two static M34/M35 client-format examples** (2/2, stdio/HTTPS).
+  Both re-evaluate the same five unrelated first-party fictional
+  controls, **not a scanner detection accuracy rate**.
+- **M37-A:** no user stdin/config, executable, credentials, remote
+  MCP, real LLM, network connection, DNS or filesystem side effects.
+  Output provides the exact M35 local private stdin route and
+  separate M36 local release doctor.
+- **M37-B:** direct strict source-owned report/arrays/transport
+  validation refuses extra approval/status fields, accessors,
+  sparse arrays, mismatched expectations and unauthorized CLI flags.
+  Persistent `riskRating:NOT_SCORED`, independent beta, audit,
+  release and target-authority flags false.
+- **M37-C:** reuse existing `tools/adapter-first-run-view.mjs`
+  and `test/m8-first-run-view.test.mjs`, plus README, roadmap and
+  getting started. **No new excluded-source files** at M6-J
+  240/240 SHA-256 custody limit; 241st-file denial remains.
+  Frozen unpublished 80-path npm candidate has no new paths
+  or new release permission.
+- **Pending acceptance:** PR CI Windows/Ubuntu Node20/22 **4/4**,
+  then independently matched main-push CI **4/4** on exact SHA.
+  External beta #59, real MCP target authority #21 and
+  independent audit #43 remain OPEN.
 
 ## M36-A/B/C — local distribution doctor (engineering accepted)
 

@@ -1,5 +1,37 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## One-command local first run — no config required (M37)
+
+On Node.js 20+ in a reviewed source checkout, try both built-in adapter
+transports and the two common client-config shapes **without supplying
+any user file, server or credential**:
+
+```sh
+node tools/adapter-first-run-view.mjs --self-check
+```
+
+For strict, machine-readable JSON (still source-only, zero contact):
+
+```sh
+node tools/adapter-first-run-view.mjs --self-check-json
+```
+
+These modes reuse the already tested M8 fictional adapter smoke
+(2/2) and demonstrate the M35 grammar on two **fixed fictional**
+stdio/HTTPS client examples (2/2). The separate five fixture
+controls in each M35 example are **not a real scanner efficacy score**.
+The output gives next steps, but it is **not a security audit, real
+project scan, ownership verification, external beta, approval to test
+a real target or stable release authorization**. The legacy
+zero-argument first-run view still works unchanged.
+
+To assess only the *shape* of an existing private one-server config,
+pipe it locally into `node tools/m35-offline-onboarding-report.mjs`;
+for *maintainer* local packaging integrity, use the separate
+`node tools/reviewer-handoff.mjs doctor`. These must not be confused
+with real MCP security assessments. See [getting started](docs/GETTING_STARTED.md).
+
+
 
 ## One-command local distribution preflight (M36)
 
