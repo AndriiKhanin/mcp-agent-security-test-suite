@@ -764,6 +764,32 @@ Stable Bridge or user-supplied arguments. See the
 [M18 evaluation guide](.github/M18_SYMBOLIC_EVALUATION_BENCHMARK.md).
 This command is source-only and excluded from the unpublished npm candidate.
 
+## Real disposable gate process crash/relaunch (M25-D, source only)
+
+From a reviewed first-party source checkout:
+
+```sh
+node tools/m25d-os-crash-relaunch.mjs
+```
+
+This complements M25's **logical** gate-generation invalidation with
+an **actual** process-level failure: a first-party child accepts a fictional
+request but deliberately holds it before executing, the parent forcibly kills
+that exact child, and a new child is launched with a new generation. The
+old pending HTTP request must abort. A guarded replacement denies the
+stale approval (HTTP 410), then accepts a fresh approval (200). A separately
+**intentionally unsafe** replacement demonstrates the bad behavior by
+accepting the stale approval.
+
+`3/3 PASS` means this differential was **observed**, not that the
+vulnerable toy or real production gates are safe. The command only launches
+its own fixed test worker, uses ephemeral `127.0.0.1` sockets and
+in-memory fictional effects, and never touches Stable Bridge, real
+user credentials, unrelated files or external MCP servers. It does **not**
+establish crash-safe persistence or independent security certification.
+[Process-level scope and evidence](.github/M25D_OS_PROCESS_RESTART.md).
+The tools are source-only and excluded from the unpublished npm package.
+
 ## Community-requested approval policy drift and gate restart (M25, source only)
 
 From a reviewed first-party source checkout run:
