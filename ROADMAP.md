@@ -68,11 +68,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M28 — In-doubt recovery ambiguity** | Same fsynced pending marker across two hidden fictional effect worlds; blind retry/skip vs quarantine and forged proof | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#308](../../issues/308), [PR #309](../../pull/309), [main CI #41017290535](../../actions/runs/41017290535), [guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 8/8 first-party cases, exact loss/duplicate and quarantine witnesses; no external recovery |
 
-| **M29 — Signed receipt authenticity ≠ verified outcome** | Real ephemeral Ed25519 signatures with exact operation/marker/epoch binding, invalid and replayed receipt controls, and deceptive signed outcome comparison | **IN PROGRESS — CI PENDING** | [#311](../../issues/311), [M28/M29 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 12 synthetic signed cases + guarded quarantine; PR 4/4 and matched main 4/4 required |
+| **M29 — Signed receipt authenticity ≠ verified outcome** | Real ephemeral Ed25519 signatures with exact operation/marker/epoch binding, invalid and replayed receipt controls, and deceptive signed outcome comparison | **ENGINEERING ACCEPTED — PR/main 4/4** | [#311](../../issues/311), [PR #312](../../pull/312), [main CI #41020234312](../../actions/runs/41020234312), [M28/M29 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 12/12 first-party signed cases, guarded quarantine; external signer never verified |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M29-A/B/C — signed outcome authenticity versus trusted effect provenance (in progress)
+## M29-A/B/C — signed outcome authenticity versus trusted effect provenance (engineering accepted)
 
 - [Issue #311](../../issues/311): source-only
   `node tools/m29-signed-receipt-provenance.mjs` generates **ephemeral
@@ -95,7 +95,13 @@ We will not claim a release is production-ready merely because a synthetic test 
   customer file, external MCP, independently trusted signer,
   authenticated business outcome, LLM, Stable Bridge or exactly-once
   guarantee. Frozen unpublished **80-path** candidate unchanged;
-  #21/#43/#59 remain OPEN. PR and matched main CI **4/4** required.
+  #21/#43/#59 remain OPEN. [PR #312](../../pull/312) passed
+  [PR CI #41019901819](../../actions/runs/41019901819) **4/4** and
+  merged as exact main SHA `2ff47013ffb1e8cb74923863fce8a03d58a183c9`.
+  Independently triggered [main CI #41020234312](../../actions/runs/41020234312)
+  passed **4/4 on that same SHA** (Ubuntu/Windows Node20/22).
+  These are first-party engineering checks, not an independent signer
+  audit, customer recovery or release authorization.
 
 ## M28-A/B/C — two-world recovery ambiguity (engineering accepted)
 
