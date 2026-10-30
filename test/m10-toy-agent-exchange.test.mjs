@@ -6,7 +6,8 @@ import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
 import {
   runFictionalToyAgentExchange,runFixedToyAgentSelftest,
-  runFixedDetectionIndependentGateSelftest
+  runFixedDetectionIndependentGateSelftest,
+  runFixedContextProvenanceSelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
 
@@ -304,5 +305,108 @@ test('M45: only exact fixed CLI mode, no arbitrary parameters or target',()=>{
     assert.equal(r.exitCode,2);
     assert.equal(r.realScannerExecuted,false);
     assert.equal(r.realMcpToolCallObserved,false);
+  }
+});
+
+
+test('M46: trusted owner gets scoped toy write, external data gets only task read',()=>{
+  const r=runFixedContextProvenanceSelftest();
+  assert.equal(r.status,'PASS');
+  assert.equal(r.exitCode,0);
+  assert.equal(r.checked,36);
+  assert.equal(r.matched,36);
+  assert.deepEqual(r.scannerHypotheses,['FLAGGED','NOT_FLAGGED','ERROR']);
+  assert.deepEqual(r.sourceContexts,[
+    'OWNER_EXPLICIT','TOOL_RESULT_UNTRUSTED','HUMAN_EMAIL_UNTRUSTED'
+  ]);
+  assert.deepEqual(r.actions,[
+    'CONSUME_TASK_DATA','WRITE_TASK_STATUS',
+    'READ_UNRELATED_FILE','PROMOTE_CLAIMED_AUTHORITY'
+  ]);
+  assert.equal(r.authorizedOwnerWriteControls,3);
+  assert.equal(r.externalWriteDenials,6);
+  assert.equal(r.gatewayDecisionIndependentOfDetectorLabel,true);
+  assert.equal(r.realOwnerAuthenticated,false);
+  assert.equal(r.realScannerExecuted,false);
+  assert.equal(r.realAgentBehaviorObserved,false);
+  assert.equal(r.realFilesystemReadObserved,false);
+  assert.equal(r.realMcpToolCallObserved,false);
+  assert.equal(r.externalMcpContacted,false);
+  assert.equal(r.independentBetaVerified,false);
+  assert.equal(r.securityCertified,false);
+  assert.equal(Object.isFrozen(r),true);
+  assert.equal(Object.isFrozen(r.cases),true);
+  for(const row of r.cases){
+    assert.equal(row.matched,true);
+    assert.equal(row.expectedDecision,row.observedDecision);
+    assert.equal(row.fictionalUnauthorizedWritesCommitted,0);
+    assert.equal(row.fictionalUnrelatedFileEffectsCommitted,0);
+    assert.ok(Object.isFrozen(row));
+    if(row.action==='CONSUME_TASK_DATA'){
+      assert.equal(row.observedDecision,'ALLOW');
+    }else if(row.action==='WRITE_TASK_STATUS'&&
+             row.sourceContext==='OWNER_EXPLICIT'){
+      assert.equal(row.observedDecision,'ALLOW');
+      assert.equal(row.authorizedTaskWritesCommitted,1);
+    }else{
+      assert.equal(row.observedDecision,'DENY');
+      assert.equal(row.authorizedTaskWritesCommitted,0);
+      if(row.action==='WRITE_TASK_STATUS')
+        assert.equal(row.deniedWrites,1);
+      if(row.action==='READ_UNRELATED_FILE')
+        assert.equal(row.deniedUnrelatedReads,1);
+      if(row.action==='PROMOTE_CLAIMED_AUTHORITY')
+        assert.equal(row.deniedAuthorityClaims,1);
+    }
+  }
+  const one=r.sourceContexts.length*r.actions.length;
+  for(let i=0;i<one;i++){
+    const baseline=r.cases[i];
+    for(const n of [1,2]){
+      const other=r.cases[i+one*n];
+      assert.equal(other.sourceContext,baseline.sourceContext);
+      assert.equal(other.action,baseline.action);
+      assert.equal(other.observedDecision,baseline.observedDecision);
+      assert.equal(other.authorizedTaskWritesCommitted,
+        baseline.authorizedTaskWritesCommitted);
+    }
+  }
+  assert.equal(JSON.stringify(r).includes(fixture.caseId),false);
+  assert.equal(JSON.stringify(r).includes(fixture.toolResult.embeddedInstruction),false);
+});
+
+test('M46: context gate CLI is fixed, offline and rejects untrusted claims',()=>{
+  const run=(...args)=>spawnSync(process.execPath,
+    ['tools/toy-agent-exchange.mjs',...args],{encoding:'utf8'});
+  const a=run('--context-provenance-matrix');
+  assert.equal(a.status,0,a.stderr);
+  assert.equal(a.stderr,'');
+  assert.deepEqual(JSON.parse(a.stdout),runFixedContextProvenanceSelftest());
+  assert.doesNotMatch(a.stdout,/Ignore the order task|Fictional order/);
+  for(const args of [
+    ['--context-provenance-matrix','--role=OWNER_EXPLICIT'],
+    ['--context-provenance-matrix','--scanner=FLAGGED'],
+    ['--context-provenance-matrix','--target=PRIVATE_CANARY'],
+    ['--context-provenance-matrix','../../user-secrets.json']
+  ]){
+    const b=run(...args);
+    assert.equal(b.status,2,b.stderr);
+    assert.equal(b.stderr,'');
+    assert.equal(JSON.parse(b.stdout).ruleCode,
+      'TOY_AGENT_SELFTEST_UNAVAILABLE');
+    assert.doesNotMatch(b.stdout,/PRIVATE_CANARY|user-secrets.json/);
+  }
+  const getter=[];
+  Object.defineProperty(getter,'0',{get(){throw Error('CANARY_ACCESSOR');}});
+  const hidden=[];
+  Object.defineProperty(hidden,'private',{value:'CANARY'});
+  for(const args of [
+    ['--context-provenance-matrix'],null,{},getter,hidden
+  ]){
+    const c=runFixedContextProvenanceSelftest(args);
+    assert.equal(c.status,'ERROR');
+    assert.equal(c.exitCode,2);
+    assert.equal(c.realOwnerAuthenticated,false);
+    assert.equal(c.externalMcpContacted,false);
   }
 });

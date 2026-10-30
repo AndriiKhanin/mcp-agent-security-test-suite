@@ -153,6 +153,15 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - [PR #348](../../pull/348) merged after PR CI 4/4. This is **not a real LLM, third-party agent, filesystem permission boundary, authorized external MCP test, real scanner accuracy result or product certification**. Post-merge `main` CI not separately verified.
 - Next product gate: separately approved and isolated evaluation with genuine agent/tool execution and independent side-effect observation. Owner authorization and first-party staging controls must be established before expanding external contact; see [#21](../../issues/21), [#59](../../issues/59) and [#345](../../issues/345).
 
+## M46 — source-bound toy authorization and provenance matrix (PR CI pending)
+
+- Extend the existing first-party toy gateway with `--context-provenance-matrix`: **3 source-owned call contexts × 4 toy method intentions × 3 hypothetical detector outcomes = 36 in-memory tests**.
+- Separately bound gateway interfaces represent `OWNER_EXPLICIT` (owner-controlled source code), `TOOL_RESULT_UNTRUSTED`, and `HUMAN_EMAIL_UNTRUSTED`. A text-level source claim is **not** trusted identity; only first-party method closure selection determines the toy authority.
+- Positive controls commit a fictional task-state update under the trusted-owner context, and all sources may consume benign task data. Negative controls deny the same update from untrusted external content, deny unrelated file access from every origin, and deny attempts to elevate claimed source authority.
+- Decisions are invariant to `FLAGGED`, `NOT_FLAGGED`, and `ERROR` hypothetical scanner outcomes. A blocked request is observed by the parent-owned in-memory witness, not inferred from detector classifications.
+- No new paths, unreviewed or private fixtures, package release changes, process spawning, network, real scanner calls, real LLM, external MCP contact, credential use, or actual OS effects. This is **not authenticated real-world provenance**.
+- Acceptance gate: PR CI 4/4 plus matched merged-main verification (separate). Related independent feedback [#329](../../issues/329) and follow-up [#345](../../issues/345). External MCP authorization [#21](../../issues/21) and beta [#59](../../issues/59) remain open.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
