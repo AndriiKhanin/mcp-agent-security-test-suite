@@ -2,6 +2,27 @@
 
 
 
+## M41: compare fictional scanner disagreements
+
+Using the same local `detector-batch.json` from M39, run:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\detector-batch.json | node tools/fixture-batch-preflight.mjs --analyze-detector-disagreements
+```
+
+Linux/macOS: `cat detector-batch.json | node tools/fixture-batch-preflight.mjs --analyze-detector-disagreements`.
+
+The JSON output reports `FLAGGED`, `NOT_FLAGGED`, and `ERROR` vote
+counts for each of the four fixed fictional cases. A disagreement means both
+`FLAGGED` and `NOT_FLAGGED` were reported; errors are **not votes**.
+The reported consensus is only a strict count-based majority (or `TIE`
+/ `NO_CLASSIFICATIONS`), **not** a correctness or truth judgment.
+An injection case missed by two or more self-reporting scanners receives
+`REPEATED_MISS` review priority. Scanner identities are unverified
+sanitized aliases; no real-world detection rate, independent validation or
+execution of an external scanner is implied. Do not share private logs,
+customer data or credentials.
+
 ## M40: generate a reviewer queue for fictional scanner findings
 
 After preparing the same local `detector-batch.json` file documented in M39,
