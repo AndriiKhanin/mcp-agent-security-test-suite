@@ -64,11 +64,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M26 — Disposable cross-process spent-key ledger** | Guarded spent-key claim survives owned OS child crash; two concurrent workers race on exclusive marker; deliberately transient comparator exposes replay | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#302](../../issues/302), [PR #303](../../pull/303), [main CI #41013215418](../../actions/runs/41013215418), [guide](.github/M26_CROSS_PROCESS_LEDGER.md) | Three OS+disk scenarios witnessed; separately checked main 4/4; no power-loss durability claim |
 
-| **M27 — In-doubt effect crash / recovery boundary** | Disposable child forced to exit after fsynced pending reservation, with/without observed synthetic effect; guarded quarantine vs unsafe retry | **M27-A/B/C IN PROGRESS — PR/CI PENDING** | [#305](../../issues/305), [guide](.github/M27_INDOUBT_CRASH_RECOVERY.md) | 3 owned OS crash cases, independent negative controls, 4/4 PR/main CI; no exactly-once claim |
+| **M27 — In-doubt effect crash / recovery boundary** | Disposable child forced to exit after fsynced pending reservation, with/without observed synthetic effect; guarded quarantine vs unsafe retry | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#305](../../issues/305), [PR #306](../../pull/306), [main CI #41015098532](../../actions/runs/41015098532), [guide](.github/M27_INDOUBT_CRASH_RECOVERY.md) | Three witnessed owned crash cases; at-most-once quarantine not exactly-once recovery |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M27-A/B/C — unresolved-claim crash windows (engineering in progress)
+## M27-A/B/C — unresolved-claim crash windows (engineering accepted)
 
 - [Issue #305](../../issues/305): `node tools/m27-indoubt-crash-replay.mjs`
   owns a private temporary OS directory and fixed Node child workers.
@@ -91,6 +91,13 @@ We will not claim a release is production-ready merely because a synthetic test 
   candidate unchanged. Real credentials, external MCP, production
   database, actual user effect, Stable Bridge and real model excluded.
   Independent beta/audit/authorization gates #59/#43/#21 remain OPEN.
+  [PR #306](../../pull/306) passed
+  [PR CI #41014727992](../../actions/runs/41014727992) **4/4**,
+  merged as exact SHA `8b9d6b4a20d344090e0875362b47f39614a279b5`.
+  Separate [main CI #41015098532](../../actions/runs/41015098532)
+  passed **4/4 on that exact SHA** (Windows/Ubuntu Node20/22).
+  This establishes only first-party engineering acceptance; independently
+  authorized real-effect reconciliation remains unverified.
 
 ## M26-A/B/C — disposable cross-process replay ledger (engineering accepted)
 
