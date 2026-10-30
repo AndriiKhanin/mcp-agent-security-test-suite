@@ -26,20 +26,15 @@ or power-loss durability.
 
 ## Security and release boundary
 
-All files are source-owned inert markers in automatically generated
-OS temp directories; there is no caller-provided filesystem path,
-external service, user MCP target, credentials, real model/agent,
-Stable Bridge, privileged action, network call or telemetry. Error
-reports never echo file names, full paths or bytes. The actual worker
-rejects direct CLI calls.
-
-Files and tests remain outside the unpublished 80-path npm candidate.
-M6-J must continue indexing all excluded-source files with SHA-256,
-within the bounded 240-file cap and with its 241st-file deny control.
-Acceptance requires Windows/Ubuntu x Node20/22 **4/4 PR CI**, a merge
-and **independently matched main-push 4/4 CI on the exact merged SHA**.
-Independent beta [#59](../issues/59), audit [#43](../issues/43)
-and external target authorization [#21](../issues/21) remain open.
+Only first-party temporary files and fixed child processes;
+no user paths, external targets, credentials, real agents, telemetry
+or trusted OS sandbox. Error reports omit private paths and bytes.
+Sources remain outside the frozen unpublished 80-path npm candidate;
+M6-J retains SHA-256 custody (240 files maximum; 241st denied).
+Acceptance needs four Windows/Ubuntu Node20/22 CI jobs and exact
+post-merge main verification. External beta [#59](../issues/59),
+independent audit [#43](../issues/43) and target permission
+[#21](../issues/21) remain open.
 
 ## Engineering acceptance (2026-10-30)
 
