@@ -79,12 +79,12 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
 | **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **ENGINEERING ACCEPTED — PR/main CI 4/4; release blocked** | [#330](../../issues/330), [PR #331](../../pull/331), [main CI #41036858127](../../actions/runs/41036858127), [readiness](docs/RELEASE_READINESS.md) | 80 packaged + 240 fully hashed excluded files, 1353/1353 Ubuntu20; no publication approval |
 | **M37 — One-command source-only first run** | M8 two-transport synthetic smoke + M35 two-format fictional importer, readable text/JSON and private next-step instructions | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#335](../../issues/335), [PR #336](../../pull/336), [main CI #41050360958](../../actions/runs/41050360958), [getting started](docs/GETTING_STARTED.md) | 1358/1358 Ubuntu20; no real MCP/user config; 240/240 M6-J custody; exact 4/4 PR and main CI |
-| **M38 — Independent fictional scanner comparisons** | Export two fixed clean/mixed tool-result pairs and classify self-reported third-party rule detector outcomes | **ENGINEERING IN PR — acceptance pending** | [#338](../../issues/338), [#329](../../issues/329), [contributor guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) | Four source-pinned fictional cases; TP/FP/FN/TN/ERROR, no scanner execution or independent-beta claim, PR/main CI 4/4 |
+| **M38 — Independent fictional scanner comparisons** | Export two fixed clean/mixed tool-result pairs and classify self-reported third-party rule detector outcomes | **ENGINEERING ACCEPTED — PR/main CI 4/4; external results pending** | [#338](../../issues/338), [PR #339](../../pull/339), [main CI #41061833450](../../actions/runs/41061833450), [volunteer #329](../../issues/329), [guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) | Four fixed fictional cases; 1363/1363 Ubuntu20; exact 4/4 PR/main; no scanner execution or beta claim |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M38-A/B/C — four-case external rule-scanner comparison (engineering in PR)
+## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
 
 - [Issue #338](../../issues/338), external opt-in
   [comparison #329](../../issues/329): source-only
@@ -111,9 +111,18 @@ We will not claim a release is production-ready merely because a synthetic test 
 - **Source custody:** existing tool/test/docs modified only, no
   new file paths at M6-J 240/240 SHA-256 custody cap; 241st file
   denied. Unpublished npm candidate remains frozen 80 paths.
-- **Pending:** PR CI Windows/Ubuntu Node20/22 **4/4**, then exact
-  merged-sha main CI **4/4**; independent beta #59,
-  real-target owner authorization #21 and audit #43 remain OPEN.
+- **Engineering accepted 2026-10-30:** [PR #339](../../pull/339)
+  [PR CI #41061123812](../../actions/runs/41061123812)
+  **4/4 PASS** Windows/Ubuntu Node20/22; Ubuntu20
+  **1363/1363 tests**, 0 failed/skipped. Squash-merged SHA
+  `39e411a7926a5acf6e5abf392fcdfa0de2db59ec`;
+  independently [main CI #41061833450](../../actions/runs/41061833450)
+  **4/4 PASS on the identical SHA**. [Issue #338](../../issues/338)
+  closed for first-party engineering only. [Voluntary scanner
+  comparison #329](../../issues/329) remains OPEN awaiting
+  real independently submitted four-row classifications.
+  External beta #59, real-target authorization #21 and
+  independent audit #43 remain OPEN.
 
 ## M37-A/B/C — zero-config adopter first run (engineering accepted)
 
