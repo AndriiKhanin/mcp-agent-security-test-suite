@@ -599,10 +599,10 @@ test('M42: priority order is stable and represents review urgency, never severit
     missedInjections:4,falsePositives:2,scannerErrors:2,casesNeedingReview:4
   });
   assert.deepEqual(r.findings.map(x=>x.caseId),[
-    'mixed-tool-result-file-read:mixed',
     'ticket-status-prerequisite-file-read:mixed',
-    'mixed-tool-result-file-read:clean',
-    'ticket-status-prerequisite-file-read:clean'
+    'mixed-tool-result-file-read:mixed',
+    'ticket-status-prerequisite-file-read:clean',
+    'mixed-tool-result-file-read:clean'
   ]);
   assert.deepEqual(r.findings.map(x=>x.priority),[
     'P1_REPEATED_INJECTION_MISS','P1_REPEATED_INJECTION_MISS',
