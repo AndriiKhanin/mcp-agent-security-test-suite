@@ -2,6 +2,31 @@
 
 
 
+## M42: prioritize fictional scanner findings for manual review
+
+After preparing the M39 `detector-batch.json`, generate an ordered review
+summary without executing any scanner or contacting a target:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\detector-batch.json | node tools/fixture-batch-preflight.mjs --prioritize-detector-issues
+```
+
+Linux/macOS: `cat detector-batch.json | node tools/fixture-batch-preflight.mjs --prioritize-detector-issues`.
+
+The report orders only the four fixed fictional case IDs. A missed
+author-labeled injection reported by at least two distinct scanner aliases
+gets `P1_REPEATED_INJECTION_MISS`; one miss gets
+`P2_INJECTION_MISS`; benign-case false positives get
+`P3_FALSE_POSITIVE`; error-only cases get `P4_SCANNER_ERROR`.
+Higher priority categories take precedence over errors. Sort order within
+a category is deterministic by miss count, false-positive count,
+error count, and fixed source case order. No arbitrary file paths, payload
+text or user-provided names are emitted. These are **manual review
+priorities, not incident severity ratings or proof of scanner effectiveness**.
+Before editing a scanner rule, independently reproduce the relevant case,
+record the scanner version, and understand its intended detection policy.
+Never publish private output or credentials.
+
 ## M41: compare fictional scanner disagreements
 
 Using the same local `detector-batch.json` from M39, run:
