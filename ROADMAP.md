@@ -77,9 +77,40 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
+| **M36 — Offline pre-distribution doctor** | One-command local source/archive/install SHA-256/512 proof and explicit release-denied report | **ENGINEERING IN PR — CI pending** | [#330](../../issues/330), [doctor](docs/GETTING_STARTED.md) | Exact 80-path local archive/install comparison, 240-file M6-J custody, no publication or source attestation, 4/4 PR + main CI |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M36-A/B/C — offline distribution doctor (engineering in PR)
+
+- [Issue #330](../../issues/330): extend existing
+  `tools/reviewer-handoff.mjs` with the exact zero-extra-argument
+  `doctor` subcommand. **Source-only**; not part of the frozen,
+  unpublished 80-path npm `0.0.10-rc.1` candidate.
+- **M36-A:** reuse M6-J `buildHandoff()` with actual temporary
+  offline npm archive, script-disabled isolated install, exact
+  shipped byte comparison, SHA-256 and SHA-512 archive digests,
+  fixed packaged source index, and fully hashed excluded-source index.
+  `PASS` means **locally self-produced match only**.
+- **M36-B:** stdout JSON v1 contains no executable, target URL,
+  user path or raw npm output. Invalid CLI args fail closed (exit 2).
+  `releaseReady:false`, `releaseApproved:false`,
+  `published:false`, `independentAuditVerified:false`,
+  `independentBetaVerified:false`,
+  `externalTargetAuthorized:false` and unverified checkout/source
+  provenance are permanent. Negative regression tests preserve
+  the full M6-J 240-file SHA-256 custody cap and 241st-entry refusal.
+- **M36-C:** README, getting-started and release-readiness
+  copy/paste instructions; **no new files** under excluded roots,
+  no new npm dependencies, no package inventory/version changes.
+  No real MCP server/LLM, network target, registry publication,
+  Stable Bridge or external security certification.
+- **Pending gate:** first PR CI **4/4** Ubuntu/Windows Node20/22,
+  then independently matched post-merge main CI **4/4**.
+  External beta #59, independent audit #43 and real MCP target
+  owner approval #21 remain open; release destination and owner
+  publication decision still unapproved.
 
 ## M35-A/B/C — explainable offline report, not a vulnerability scan (engineering accepted)
 
