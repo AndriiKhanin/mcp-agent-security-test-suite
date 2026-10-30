@@ -71,8 +71,34 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M29 — Signed receipt authenticity ≠ verified outcome** | Real ephemeral Ed25519 signatures with exact operation/marker/epoch binding, invalid and replayed receipt controls, and deceptive signed outcome comparison | **ENGINEERING ACCEPTED — PR/main 4/4** | [#311](../../issues/311), [PR #312](../../pull/312), [main CI #41020234312](../../actions/runs/41020234312), [M28/M29 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 12/12 first-party signed cases, guarded quarantine; external signer never verified |
 
 | **M30 — Two signed claims ≠ effect provenance** | Ephemeral dual Ed25519 signatures, signer-key diversity, false consensus and quarantine after conflicting or deceptive outcomes | **ENGINEERING ACCEPTED — PR/main 4/4** | [#314](../../issues/314), [PR #315](../../pull/315), [main CI #41023181163](../../actions/runs/41023181163), [guide](.github/M30_DUAL_SIGNER_QUORUM.md) | 14/14 source-owned crypto cases, PR/main CI 4/4; no independently verified effect provenance |
+| **M31 — Independent parent OS observation ≠ remote effect provenance** | Seven first-party disposable child/parent disk scenarios; false IPC claims, corrupted and drifting marker, conservative quarantine | **IMPLEMENTATION IN PR — acceptance pending** | [#317](../../issues/317), [guide](.github/M31_PARENT_OS_EFFECT_EVIDENCE.md) | Independent first/second OS reads, real scratch cleanup, exact negative-mutation oracle; PR + matched main CI 4/4 required |
+
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M31-A/B/C — independent parent OS scratch observations (implementation in PR)
+
+- [Issue #317](../../issues/317) adds a source-only zero-argument
+  owned child/parent runner. Each of seven fixed scenarios uses a new
+  isolated temporary directory; worker may write and fsync an inert
+  fixed marker or make a false IPC claim. Parent reads disk after the
+  worker exits; it never accepts IPC as authenticated effect truth.
+- **M31-A:** cases include truthful marker/absence, false committed
+  and absent claims, corrupt marker, and marker removal/rewrite between
+  independent parent disk observations. A naive claim-only hypothetical
+  resolver would lose one unperformed fictional action or duplicate
+  one already-marked fictional action.
+- **M31-B:** independent exact row oracle, malicious-getter, sparse
+  input and negative mutation controls validate each disk observation,
+  process/cleanup witness, case order and unconditional quarantine.
+- **M31-C:** [scope limits](.github/M31_PARENT_OS_EFFECT_EVIDENCE.md),
+  README, source-only CLI and 80-path unpublished npm package unchanged.
+  M6-J hashes the added excluded-source files within its bounded
+  240-file index. Acceptance requires PR CI **4/4** followed by
+  independently matched main-push CI **4/4**.
+- **Not accepted until CI evidence:** real OS scratch I/O is not a
+  business effect, authenticated independent observer, authorized
+  remote MCP connection or exactly-once recovery. #21/#43/#59 OPEN.
 
 ## M30-A/B/C — dual-signer agreement still does not prove real effects (engineering accepted)
 
