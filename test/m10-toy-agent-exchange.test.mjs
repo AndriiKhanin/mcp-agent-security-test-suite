@@ -5,7 +5,8 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
 import {
-  runFictionalToyAgentExchange,runFixedToyAgentSelftest
+  runFictionalToyAgentExchange,runFixedToyAgentSelftest,
+  runFixedDetectionIndependentGateSelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
 
@@ -217,4 +218,91 @@ test('M10-C: source-only docs accurately label toy agent and gate status',()=>{
     assert.match(t,/not (?:a )?real (?:AI )?agent/i);
   }
   assert.match(roadmap,/M10-A\/B\/C/);
+});
+
+
+test('M45: hypothetical scanner blind spot never grants protected toy effects',()=>{
+  const r=runFixedDetectionIndependentGateSelftest();
+  assert.equal(r.status,'PASS');
+  assert.equal(r.exitCode,0);
+  assert.equal(r.checked,15);
+  assert.equal(r.matched,15);
+  assert.equal(r.expectedDeniedFaultCases,12);
+  assert.equal(r.gatewayDecisionIndependentOfDetectorLabel,true);
+  assert.deepEqual(r.scannerHypotheses,['FLAGGED','NOT_FLAGGED','ERROR']);
+  assert.equal(r.realScannerExecuted,false);
+  assert.equal(r.realAgentBehaviorObserved,false);
+  assert.equal(r.realFilesystemReadObserved,false);
+  assert.equal(r.realMcpToolCallObserved,false);
+  assert.equal(r.externalMcpContacted,false);
+  assert.equal(r.independentBetaVerified,false);
+  assert.equal(r.securityCertified,false);
+  assert.equal(r.releaseAuthorized,false);
+  assert.equal(Object.isFrozen(r),true);
+  assert.equal(Object.isFrozen(r.cases),true);
+  for(const observed of r.scannerHypotheses){
+    const group=r.cases.filter(c=>c.hypotheticalScannerObservation===observed);
+    assert.equal(group.length,5);
+    assert.equal(group.filter(c=>c.observedToyStatus==='FAIL').length,4);
+    for(const row of group){
+      assert.equal(row.matched,true);
+      assert.equal(row.fictionalProtectedFileEffectsCommitted,0);
+      assert.equal(row.fictionalProtectedToolEffectsCommitted,0);
+      assert.equal(row.forbiddenRequestsDenied,row.forbiddenRequestsObserved);
+      if(row.toyMode==='SAFE_DATA_ONLY'){
+        assert.equal(row.observedToyStatus,'PASS');
+        assert.equal(row.forbiddenRequestsObserved,0);
+      }else{
+        assert.equal(row.observedToyStatus,'FAIL');
+        assert.ok(row.forbiddenRequestsObserved>=1);
+      }
+    }
+  }
+  for(let i=0;i<5;i++){
+    const base=r.cases[i];
+    for(const offset of [5,10]){
+      const candidate=r.cases[i+offset];
+      assert.equal(candidate.toyMode,base.toyMode);
+      assert.equal(candidate.observedToyStatus,base.observedToyStatus);
+      assert.equal(candidate.forbiddenRequestsDenied,base.forbiddenRequestsDenied);
+      assert.equal(candidate.fictionalProtectedFileEffectsCommitted,0);
+      assert.equal(candidate.fictionalProtectedToolEffectsCommitted,0);
+    }
+  }
+  assert.ok(!JSON.stringify(r).includes(fixture.caseId));
+  assert.ok(!JSON.stringify(r).includes(fixture.toolResult.embeddedInstruction));
+});
+
+test('M45: only exact fixed CLI mode, no arbitrary parameters or target',()=>{
+  const run=(...args)=>spawnSync(process.execPath,
+    ['tools/toy-agent-exchange.mjs',...args],{encoding:'utf8'});
+  const ok=run('--blindspot-gate-matrix');
+  assert.equal(ok.status,0,ok.stderr);
+  assert.equal(ok.stderr,'');
+  assert.deepEqual(JSON.parse(ok.stdout),
+    runFixedDetectionIndependentGateSelftest());
+  assert.ok(!ok.stdout.includes('Ignore the order task'));
+  for(const args of [
+    ['--blindspot-gate-matrix','--target=private'],
+    ['--blindspot-gate-matrix','--scanner-command=PRIVATE_CANARY'],
+    ['--blindspot-gate-matrix','--run'],
+    ['--blindspot-gate-matrix','../../sensitive.json']
+  ]){
+    const denied=run(...args);
+    assert.equal(denied.status,2,denied.stderr);
+    assert.equal(denied.stderr,'');
+    assert.equal(JSON.parse(denied.stdout).ruleCode,
+      'TOY_AGENT_SELFTEST_UNAVAILABLE');
+    assert.ok(!denied.stdout.includes('PRIVATE_CANARY'));
+    assert.ok(!denied.stdout.includes('sensitive.json'));
+  }
+  for(const args of [
+    ['PRIVATE_CANARY'],Array(1),Object.create([]),Object.create(null)
+  ]){
+    const r=runFixedDetectionIndependentGateSelftest(args);
+    assert.equal(r.status,'ERROR');
+    assert.equal(r.exitCode,2);
+    assert.equal(r.realScannerExecuted,false);
+    assert.equal(r.realMcpToolCallObserved,false);
+  }
 });

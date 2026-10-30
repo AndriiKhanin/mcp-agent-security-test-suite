@@ -210,8 +210,93 @@ export function runFixedToyAgentSelftest(args=[]){
     });
   }catch{return rejected;}
 }
+
+/**
+ * M45: deterministic test that a source-owned gateway's authorization
+ * decisions do not depend on *hypothetical* scanner classifications.
+ * No scanner or LLM runs; only the existing fixed in-memory method calls.
+ */
+const SCANNER_HYPOTHESES=Object.freeze(['FLAGGED','NOT_FLAGGED','ERROR']);
+const BLINDSPOT_SCOPE='FIRST_PARTY_TOY_GATE_WITH_HYPOTHETICAL_SCANNER_LABELS';
+const blindspotRejected=Object.freeze({
+  reportSchemaVersion:1,status:'ERROR',exitCode:2,
+  ruleCode:'TOY_GATE_BLINDSPOT_SELFTEST_UNAVAILABLE',scope:BLINDSPOT_SCOPE,
+  realScannerExecuted:false,realAgentBehaviorObserved:false,
+  realMcpToolCallObserved:false,externalMcpContacted:false
+});
+export function runFixedDetectionIndependentGateSelftest(args=[]){
+  if(!noArgs(args))return blindspotRejected;
+  try{
+    const fixture=parseStrictJson(readFileSync(FIXTURE_URL,'utf8'));
+    const cases=[];
+    for(const observed of SCANNER_HYPOTHESES){
+      for(const [mode,status,count,read,tool,claim] of FIXED_EXPECTATIONS){
+        // Classification deliberately never reaches the gateway.
+        const r=runFictionalToyAgentExchange(fixture,mode);
+        const denied=r.unrelatedFileRequestsDenied+
+          r.unauthorizedToolRequestsDenied+r.forgedAuthorityClaimsDenied;
+        const matched=r.status===status&&r.forbiddenRequestsObserved===count&&
+          denied===count&&r.unrelatedFileRequestsDenied===read&&
+          r.unauthorizedToolRequestsDenied===tool&&
+          r.forgedAuthorityClaimsDenied===claim&&
+          r.methodCallsObserved===1+count&&r.taskDataAccepted===1&&
+          r.fictionalProtectedFileEffectsCommitted===0&&
+          r.fictionalProtectedToolEffectsCommitted===0&&
+          r.realAgentBehaviorObserved===false&&
+          r.realMcpToolCallObserved===false&&
+          r.injectedInstructionInterpreted===false;
+        cases.push(Object.freeze({
+          hypotheticalScannerObservation:observed,toyMode:mode,
+          expectedToyStatus:status,observedToyStatus:r.status,
+          forbiddenRequestsObserved:count,forbiddenRequestsDenied:denied,
+          fictionalProtectedFileEffectsCommitted:
+            r.fictionalProtectedFileEffectsCommitted,
+          fictionalProtectedToolEffectsCommitted:
+            r.fictionalProtectedToolEffectsCommitted,
+          matched
+        }));
+      }
+    }
+    const controls=FIXED_EXPECTATIONS.length,baseline=cases.slice(0,controls);
+    const invariant=cases.every((x,i)=>{
+      const expected=baseline[i%controls];
+      return x.toyMode===expected.toyMode&&
+        x.observedToyStatus===expected.observedToyStatus&&
+        x.forbiddenRequestsObserved===expected.forbiddenRequestsObserved&&
+        x.forbiddenRequestsDenied===expected.forbiddenRequestsDenied&&
+        x.fictionalProtectedFileEffectsCommitted===
+          expected.fictionalProtectedFileEffectsCommitted&&
+        x.fictionalProtectedToolEffectsCommitted===
+          expected.fictionalProtectedToolEffectsCommitted;
+    });
+    const matchedCount=cases.filter(x=>x.matched).length;
+    const accepted=matchedCount===cases.length&&invariant;
+    return Object.freeze({
+      reportSchemaVersion:1,
+      status:accepted?'PASS':'FAIL',exitCode:accepted?0:1,
+      ruleCode:accepted?
+        'TOY_GATE_INDEPENDENT_OF_HYPOTHETICAL_DETECTION':
+        'TOY_GATE_DETECTION_INDEPENDENCE_MISMATCH',
+      scope:BLINDSPOT_SCOPE,
+      scannerHypotheses:SCANNER_HYPOTHESES,
+      checked:cases.length,matched:matchedCount,
+      expectedDeniedFaultCases:SCANNER_HYPOTHESES.length*(controls-1),
+      gatewayDecisionIndependentOfDetectorLabel:invariant,
+      cases:Object.freeze(cases),
+      hypotheticalLabelsOnly:true,realScannerExecuted:false,
+      realAgentBehaviorObserved:false,realFilesystemReadObserved:false,
+      realMcpToolCallObserved:false,externalMcpContacted:false,
+      independentBetaVerified:false,securityCertified:false,
+      releaseAuthorized:false
+    });
+  }catch{return blindspotRejected;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  const result=runFixedToyAgentSelftest(process.argv.slice(2));
+  const argv=process.argv.slice(2);
+  const result=argv.length===1&&argv[0]==='--blindspot-gate-matrix'?
+    runFixedDetectionIndependentGateSelftest():
+    runFixedToyAgentSelftest(argv);
   process.stdout.write(JSON.stringify(result,null,2)+'\n');
   process.exitCode=result.exitCode;
 }
