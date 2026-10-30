@@ -1,3 +1,53 @@
+## M37 — one-command first run (no config, no user server)
+
+From an independently reviewed source checkout with Node.js 20+:
+
+PowerShell, Linux or macOS:
+
+```sh
+node tools/adapter-first-run-view.mjs --self-check
+```
+
+For a fixed-schema machine-readable report:
+
+```sh
+node tools/adapter-first-run-view.mjs --self-check-json
+```
+
+This exercises only **bundled first-party source**. M8's fictional
+adapter smoke verifies two inert transport examples (2/2). M35
+independently parses two **fixed fictional** MCP client shapes
+(2/2): `mcpServers` stdio and `servers` HTTPS, reusing five
+*unchanged synthetic controls per example*. No file argument, stdin
+input, external MCP server, configured command, credential, model,
+DNS or HTTP request is used by this command. Zero-argument
+`node tools/adapter-first-run-view.mjs` remains the earlier
+M8 guide; all other arguments are rejected with exit 2 and no echo.
+
+A PASS means only this local, fixed first-party test path works on
+the current checkout. This is **not a real security scan, security
+audit or security certification**, does not establish independent
+beta participation, and does not grant any real server permission.
+The JSON `riskRating` remains `NOT_SCORED`.
+
+**Next:** for your *own private client config* inspect the supported
+M34/M35 input restrictions and use a local pipe:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\client-config.json | node tools/m35-offline-onboarding-report.mjs
+```
+
+Linux/macOS: `cat ./client-config.json | node tools/m35-offline-onboarding-report.mjs`.
+Do not paste real credentials, production URLs or customer data.
+For *release maintainers* the separate
+`node tools/reviewer-handoff.mjs doctor` performs the frozen local
+npm pack/install SHA-256/512 custody checks; it does **not**
+publish an npm package. Actual real-target authorization #21,
+independent audit #43 and external beta #59 remain separate
+unfulfilled gates.
+
+---
+
 ## M35 — first-party readable offline onboarding (source checkout)
 
 
