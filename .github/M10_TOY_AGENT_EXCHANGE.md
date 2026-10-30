@@ -89,3 +89,42 @@ remain open.
 The source-only helpers are excluded from the exact pinned 80-path npm
 candidate. Any newly excluded files still enter M6-J's bounded full
 source-custody inventory with no missing hashes.
+
+## M45 — detector-blindspot authorization matrix (source-owned toy gateway)
+
+The follow-up to externally reported Firstwatch misses in
+[comparison #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329)
+and [tracking #345](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/345)
+demonstrates a different invariant from detection accuracy: the
+**authorization gateway must reject forbidden methods regardless of whether
+a scanner flags, misses, or errors on text**.
+
+From the reviewed repository checkout, run:
+
+```sh
+node tools/toy-agent-exchange.mjs --blindspot-gate-matrix
+node --test test/m10-toy-agent-exchange.test.mjs
+```
+
+This runs **15 source-authored in-memory cases**: three hypothetical scanner
+observations (`FLAGGED`, `NOT_FLAGGED`, `ERROR`) multiplied by the
+existing five deterministic toy-agent gateway modes. Each observation is
+a *hypothesis*, not a scanner result; it is intentionally not passed into
+the gateway. Four modes make source-authored forbidden method calls that
+the parent-owned in-memory gateway denies. The safe mode makes no forbidden
+call. **The real firstwatch scanner is not run or imported**.
+
+An expected `FAIL` on a fault mode signifies an *observed, denied
+forbidden method request*, not a committed protected effect; the matrix
+selftest passes only if all 15 predictions match, all denied request
+counts agree, and fictional protected effects remain zero. The matrix
+also requires the observed gateway decision to be identical across
+hypothetical scanner outcomes for a given mode.
+
+This is **not** proof that a real model follows the policy, that real
+filesystem or network operations were stopped, that a third-party scanner
+will miss an injection, or that the agent is protected in production.
+No OS file target, external MCP endpoint, model, API key or executable
+is accepted. The no-argument five-case selftest remains unchanged.
+Future independent real-agent tests require separate owner approval,
+isolated operation and real side-effect witnesses.
