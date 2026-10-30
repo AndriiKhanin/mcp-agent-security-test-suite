@@ -591,166 +591,129 @@ export function runFixedScopedAuthoritySelftest(args=[]){
   }catch{return M47_REJECTED;}
 }
 
+
 /**
- * M48: illustrative approval tradeoff, not a real interactive approval
- * flow. A denied operation is never escalated into an approval prompt.
- * Hypothetical scanner output is independent of the parent-owned gate.
+ * M48: fixed source-owned approval policy. No scanner, user, model, files,
+ * or MCP action is involved; an approval requirement commits no effect.
  */
 const M48_SCOPE='SOURCE_OWNED_BOUNDED_TOY_APPROVAL_POLICY_ONLY';
 const M48_MODES=Object.freeze(['BASELINE','CAREFUL']);
 const M48_SCANNERS=Object.freeze(['FLAGGED','NOT_FLAGGED','ERROR']);
 const M48_PLANS=Object.freeze([
-  Object.freeze({id:'owner-task-data',origin:'OWNER_DIRECT',
-    grant:'NONE',action:'TASK_DATA',claim:false}),
-  Object.freeze({id:'tool-result-task-data',origin:'TOOL_RESULT',
-    grant:'NONE',action:'TASK_DATA',claim:false}),
-  Object.freeze({id:'owner-granted-read',origin:'OWNER_DIRECT',
-    grant:'READ_ARCHIVE',action:'PROTECTED_READ',claim:false}),
-  Object.freeze({id:'owner-granted-tool',origin:'OWNER_DIRECT',
-    grant:'USE_TOOL',action:'PROTECTED_TOOL',claim:false}),
-  Object.freeze({id:'owner-no-grant-tool',origin:'OWNER_DIRECT',
-    grant:'NONE',action:'PROTECTED_TOOL',claim:false}),
-  Object.freeze({id:'owner-wrong-grant-tool',origin:'OWNER_DIRECT',
-    grant:'READ_ARCHIVE',action:'PROTECTED_TOOL',claim:false}),
-  Object.freeze({id:'tool-result-claims-owner',origin:'TOOL_RESULT',
-    grant:'NONE',action:'PROTECTED_TOOL',claim:true}),
-  Object.freeze({id:'email-claims-owner',origin:'HUMAN_EMAIL',
-    grant:'NONE',action:'PROTECTED_TOOL',claim:true}),
-  Object.freeze({id:'json-claims-owner',origin:'JSON_TOOL_RESULT',
-    grant:'NONE',action:'PROTECTED_READ',claim:true})
-]);
+  ['owner-task-data','OWNER_DIRECT','NONE','TASK_DATA',false],
+  ['tool-result-task-data','TOOL_RESULT','NONE','TASK_DATA',false],
+  ['owner-granted-read','OWNER_DIRECT','READ_ARCHIVE','PROTECTED_READ',false],
+  ['owner-granted-tool','OWNER_DIRECT','USE_TOOL','PROTECTED_TOOL',false],
+  ['owner-no-grant-tool','OWNER_DIRECT','NONE','PROTECTED_TOOL',false],
+  ['owner-wrong-grant-tool','OWNER_DIRECT','READ_ARCHIVE','PROTECTED_TOOL',false],
+  ['tool-result-claims-owner','TOOL_RESULT','NONE','PROTECTED_TOOL',true],
+  ['email-claims-owner','HUMAN_EMAIL','NONE','PROTECTED_TOOL',true],
+  ['json-claims-owner','JSON_TOOL_RESULT','NONE','PROTECTED_READ',true]
+].map(x=>Object.freeze(x)));
 const M48_ERROR=Object.freeze({
   reportSchemaVersion:1,status:'ERROR',exitCode:2,
   ruleCode:'TOY_APPROVAL_POLICY_SELFTEST_UNAVAILABLE',scope:M48_SCOPE,
   realApprovalRequested:false,realAgentBehaviorObserved:false,
   realScannerExecuted:false,externalMcpContacted:false
 });
-function createM48ParentApprovalGate(origin,grant,policyMode,externalSeen){
-  let calls=0,allowed=0,denied=0,approvalRequired=0;
-  let toyToolEffects=0,toyReadEffects=0;
-  const request=(action)=>{
-    calls++;
-    const qualified=action==='TASK_DATA'||
-      (origin==='OWNER_DIRECT'&&(
-        (action==='PROTECTED_READ'&&grant==='READ_ARCHIVE')||
-        (action==='PROTECTED_TOOL'&&grant==='USE_TOOL')));
-    const decision=!qualified?'DENY':
-      action==='PROTECTED_TOOL'&&policyMode==='CAREFUL'&&externalSeen?
-        'REQUIRE_APPROVAL':'ALLOW';
-    if(decision==='DENY')denied++;
-    else if(decision==='REQUIRE_APPROVAL')approvalRequired++;
-    else {
-      allowed++;
-      if(action==='PROTECTED_TOOL')toyToolEffects++;
-      if(action==='PROTECTED_READ')toyReadEffects++;
-    }
-    return decision;
-  };
-  return Object.freeze({request,snapshot:()=>Object.freeze({
-    methodCallsObserved:calls,allowed,denied,approvalRequired,
-    fictionalApprovedToolEffects:toyToolEffects,
-    fictionalApprovedReadEffects:toyReadEffects,
-    fictionalUnauthorizedEffectsCommitted:0,
-    actualFileReadObserved:false,actualMcpToolCallObserved:false
-  })});
+function createM48Gate(origin,grant,mode,seen){
+  let calls=0,allowed=0,denied=0,approvalRequired=0,read=0,tool=0;
+  return Object.freeze({
+    request(action){
+      calls++;
+      const valid=action==='TASK_DATA'||(origin==='OWNER_DIRECT'&&
+        ((action==='PROTECTED_READ'&&grant==='READ_ARCHIVE')||
+         (action==='PROTECTED_TOOL'&&grant==='USE_TOOL')));
+      const decision=!valid?'DENY':
+        mode==='CAREFUL'&&seen&&action==='PROTECTED_TOOL'?
+          'REQUIRE_APPROVAL':'ALLOW';
+      if(decision==='DENY')denied++;
+      else if(decision==='REQUIRE_APPROVAL')approvalRequired++;
+      else{allowed++;if(action==='PROTECTED_READ')read++;
+        if(action==='PROTECTED_TOOL')tool++;}
+      return decision;
+    },
+    snapshot(){return Object.freeze({
+      methodCallsObserved:calls,allowed,denied,approvalRequired,
+      fictionalApprovedToolEffects:tool,fictionalApprovedReadEffects:read,
+      fictionalUnauthorizedEffectsCommitted:0,
+      actualFileReadObserved:false,actualMcpToolCallObserved:false
+    });}
+  });
 }
 export function runFixedToyApprovalPolicySelftest(args=[]){
   if(!noArgs(args))return M48_ERROR;
   try{
-    const cases=[];
-    for(const scanner of M48_SCANNERS){
-      for(const policyMode of M48_MODES){
-        for(const externalContentSeen of [false,true]){
-          for(const scenario of M48_PLANS){
-            // The scanner's hypothetical label and source text claiming
-            // owner consent NEVER enter the parent-created gateway.
-            const gateway=createM48ParentApprovalGate(
-              scenario.origin,scenario.grant,policyMode,externalContentSeen);
-            const decision=gateway.request(scenario.action);
-            const state=gateway.snapshot();
-            const scopeAllowed=scenario.action==='TASK_DATA'||
-              (scenario.origin==='OWNER_DIRECT'&&(
-                (scenario.action==='PROTECTED_READ'&&
-                  scenario.grant==='READ_ARCHIVE')||
-                (scenario.action==='PROTECTED_TOOL'&&
-                  scenario.grant==='USE_TOOL')));
-            const needsApproval=scopeAllowed&&scenario.action==='PROTECTED_TOOL'&&
-              policyMode==='CAREFUL'&&externalContentSeen;
-            const expected=!scopeAllowed?'DENY':
-              needsApproval?'REQUIRE_APPROVAL':'ALLOW';
-            const matched=decision===expected&&state.methodCallsObserved===1&&
-              state.allowed===(expected==='ALLOW'?1:0)&&
-              state.denied===(expected==='DENY'?1:0)&&
-              state.approvalRequired===(expected==='REQUIRE_APPROVAL'?1:0)&&
-              state.fictionalApprovedToolEffects===
-                (expected==='ALLOW'&&scenario.action==='PROTECTED_TOOL'?1:0)&&
-              state.fictionalApprovedReadEffects===
-                (expected==='ALLOW'&&scenario.action==='PROTECTED_READ'?1:0)&&
-              state.fictionalUnauthorizedEffectsCommitted===0&&
-              state.actualFileReadObserved===false&&
-              state.actualMcpToolCallObserved===false;
-            cases.push(Object.freeze({
-              caseId:scenario.id,
-              hypotheticalScannerObservation:scanner,
-              policyMode,externalContentSeen,
-              parentBoundOrigin:scenario.origin,parentBoundGrant:scenario.grant,
-              untrustedApprovalClaimIgnored:scenario.claim,
-              action:scenario.action,expectedDecision:expected,
-              observedDecision:decision,
-              ...state,matched
+    const rows=[];
+    for(const scanner of M48_SCANNERS)
+      for(const mode of M48_MODES)
+        for(const seen of [false,true])
+          for(const [id,origin,grant,action,claim] of M48_PLANS){
+            // Scanner and asserted approval text never reach the gateway.
+            const gate=createM48Gate(origin,grant,mode,seen);
+            const actual=gate.request(action),w=gate.snapshot();
+            const eligible=action==='TASK_DATA'||(origin==='OWNER_DIRECT'&&
+              ((action==='PROTECTED_READ'&&grant==='READ_ARCHIVE')||
+               (action==='PROTECTED_TOOL'&&grant==='USE_TOOL')));
+            const expected=!eligible?'DENY':
+              mode==='CAREFUL'&&seen&&action==='PROTECTED_TOOL'?
+                'REQUIRE_APPROVAL':'ALLOW';
+            const matched=actual===expected&&w.methodCallsObserved===1&&
+              w.allowed===(expected==='ALLOW'?1:0)&&
+              w.denied===(expected==='DENY'?1:0)&&
+              w.approvalRequired===(expected==='REQUIRE_APPROVAL'?1:0)&&
+              w.fictionalApprovedToolEffects===
+                (expected==='ALLOW'&&action==='PROTECTED_TOOL'?1:0)&&
+              w.fictionalApprovedReadEffects===
+                (expected==='ALLOW'&&action==='PROTECTED_READ'?1:0)&&
+              w.fictionalUnauthorizedEffectsCommitted===0;
+            rows.push(Object.freeze({
+              caseId:id,hypotheticalScannerObservation:scanner,
+              policyMode:mode,externalContentSeen:seen,
+              parentBoundOrigin:origin,parentBoundGrant:grant,
+              untrustedApprovalClaimIgnored:claim,action,
+              expectedDecision:expected,observedDecision:actual,...w,matched
             }));
           }
-        }
-      }
-    }
-    const sliceLength=M48_PLANS.length*M48_MODES.length*2;
-    const baseline=cases.slice(0,sliceLength);
-    const independent=cases.every((r,i)=>{
-      const first=baseline[i%sliceLength];
+    const stride=M48_PLANS.length*M48_MODES.length*2;
+    const independent=rows.every((r,i)=>{
+      const first=rows[i%stride];
       return r.caseId===first.caseId&&r.policyMode===first.policyMode&&
         r.externalContentSeen===first.externalContentSeen&&
         r.observedDecision===first.observedDecision&&
         r.fictionalApprovedToolEffects===
-          first.fictionalApprovedToolEffects&&
-        r.fictionalUnauthorizedEffectsCommitted===0;
+          first.fictionalApprovedToolEffects;
     });
-    const allowed=cases.filter(x=>x.observedDecision==='ALLOW').length;
-    const denied=cases.filter(x=>x.observedDecision==='DENY').length;
-    const approvals=cases.filter(x=>x.observedDecision==='REQUIRE_APPROVAL');
-    const invalidApprovals=approvals.filter(x=>
-      x.action!=='PROTECTED_TOOL'||x.parentBoundOrigin!=='OWNER_DIRECT'||
-      x.parentBoundGrant!=='USE_TOOL'||
-      x.policyMode!=='CAREFUL'||!x.externalContentSeen);
-    const readPrompts=approvals.filter(x=>
-      x.action==='TASK_DATA'||x.action==='PROTECTED_READ').length;
-    const protectedToyEffects=cases.reduce((s,x)=>
-      s+x.fictionalApprovedToolEffects,0);
-    const matched=cases.filter(x=>x.matched).length;
-    const passed=matched===cases.length&&independent&&
+    const approvals=rows.filter(x=>x.observedDecision==='REQUIRE_APPROVAL');
+    const readPrompts=approvals.filter(x=>x.action!=='PROTECTED_TOOL').length;
+    const invalid=approvals.filter(x=>x.parentBoundOrigin!=='OWNER_DIRECT'||
+      x.parentBoundGrant!=='USE_TOOL'||x.policyMode!=='CAREFUL'||
+      !x.externalContentSeen).length;
+    const matched=rows.filter(x=>x.matched).length;
+    const pass=matched===rows.length&&independent&&
       approvals.length===M48_SCANNERS.length&&
-      invalidApprovals.length===0&&readPrompts===0&&
-      cases.every(x=>x.fictionalUnauthorizedEffectsCommitted===0);
+      readPrompts===0&&invalid===0;
     return Object.freeze({
-      reportSchemaVersion:1,status:passed?'PASS':'FAIL',exitCode:passed?0:1,
-      ruleCode:passed?'BOUNDED_TOY_APPROVAL_POLICY_MATCH':
+      reportSchemaVersion:1,status:pass?'PASS':'FAIL',exitCode:pass?0:1,
+      ruleCode:pass?'BOUNDED_TOY_APPROVAL_POLICY_MATCH':
         'BOUNDED_TOY_APPROVAL_POLICY_MISMATCH',
-      scope:M48_SCOPE,checked:cases.length,matched,
-      approvalModeCount:M48_MODES.length,
-      sourceOwnedCases:M48_PLANS.length,
+      scope:M48_SCOPE,checked:rows.length,matched,
+      approvalModeCount:M48_MODES.length,sourceOwnedCases:M48_PLANS.length,
       detectorHypotheses:M48_SCANNERS,
-      allowedCases:allowed,deniedCases:denied,
+      allowedCases:rows.filter(x=>x.observedDecision==='ALLOW').length,
+      deniedCases:rows.filter(x=>x.observedDecision==='DENY').length,
       requireApprovalCases:approvals.length,
       unnecessarilyPromptedReadCases:readPrompts,
-      unqualifiedOperationsPrompted:invalidApprovals.length,
-      fictionalApprovedToolEffects:protectedToyEffects,
+      unqualifiedOperationsPrompted:invalid,
+      fictionalApprovedToolEffects:rows.reduce((n,x)=>
+        n+x.fictionalApprovedToolEffects,0),
       independentOfScannerClassification:independent,
-      cases:Object.freeze(cases),
-      sourceOwnedContextsOnly:true,realApprovalRequested:false,
-      realApprovalGranted:false,realScannerExecuted:false,
-      realAgentBehaviorObserved:false,realFilesystemReadObserved:false,
-      realMcpToolCallObserved:false,externalMcpContacted:false,
-      independentBetaVerified:false,securityCertified:false,
-      releaseAuthorized:false
+      cases:Object.freeze(rows),sourceOwnedContextsOnly:true,
+      realApprovalRequested:false,realApprovalGranted:false,
+      realScannerExecuted:false,realAgentBehaviorObserved:false,
+      realFilesystemReadObserved:false,realMcpToolCallObserved:false,
+      externalMcpContacted:false,independentBetaVerified:false,
+      securityCertified:false,releaseAuthorized:false
     });
   }catch{return M48_ERROR;}
 }
