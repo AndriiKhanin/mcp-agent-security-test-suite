@@ -292,9 +292,182 @@ export function runFixedDetectionIndependentGateSelftest(args=[]){
   }catch{return blindspotRejected;}
 }
 
+
+/**
+ * M46: toy action-authorization matrix for provenance-bound ingress channels.
+ *
+ * The parent constructs distinct method closures for source-authored owner,
+ * tool-result and human-email ingresses. External data cannot supply its own
+ * source label, claim an owner capability, or influence the gate through a
+ * scanner outcome. This proves only first-party in-memory behavior, not
+ * authentication of a real owner or isolation from a malicious agent.
+ */
+const CONTEXT_SCOPE='FIRST_PARTY_IN_MEMORY_SOURCE_BOUND_AUTHORIZATION_ONLY';
+const CONTEXT_CHANNELS=Object.freeze([
+  'OWNER_EXPLICIT','TOOL_RESULT_UNTRUSTED','HUMAN_EMAIL_UNTRUSTED'
+]);
+const CONTEXT_ACTIONS=Object.freeze([
+  'CONSUME_TASK_DATA','WRITE_TASK_STATUS',
+  'READ_UNRELATED_FILE','PROMOTE_CLAIMED_AUTHORITY'
+]);
+const contextRejected=Object.freeze({
+  reportSchemaVersion:1,status:'ERROR',exitCode:2,
+  ruleCode:'TOY_CONTEXT_PROVENANCE_SELFTEST_UNAVAILABLE',
+  scope:CONTEXT_SCOPE,realOwnerAuthenticated:false,
+  realScannerExecuted:false,realAgentBehaviorObserved:false,
+  realFilesystemReadObserved:false,realMcpToolCallObserved:false,
+  externalMcpContacted:false
+});
+function createSourceBoundToyGateway(){
+  let methodCalls=0,allowedReads=0,authorizedWrites=0;
+  let deniedWrites=0,deniedUnrelatedReads=0,deniedClaims=0;
+  const allow=Object.freeze({decision:'ALLOW'});
+  const deny=Object.freeze({decision:'DENY'});
+  const channel=(trustedOwner)=>{
+    // Trust is bound to this first-party closure, not to any input field.
+    return Object.freeze({
+      consumeTaskData(){methodCalls++;allowedReads++;return allow;},
+      writeTaskStatus(){
+        methodCalls++;
+        if(trustedOwner){authorizedWrites++;return allow;}
+        deniedWrites++;return deny;
+      },
+      readUnrelatedFile(){methodCalls++;deniedUnrelatedReads++;return deny;},
+      promoteClaimedAuthority(){
+        methodCalls++;deniedClaims++;return deny;
+      }
+    });
+  };
+  return Object.freeze({
+    owner:channel(true),
+    toolResult:channel(false),
+    humanEmail:channel(false),
+    snapshot:()=>Object.freeze({
+      methodCalls,allowedReads,authorizedWrites,
+      deniedWrites,deniedUnrelatedReads,deniedClaims,
+      fictionalUnauthorizedWritesCommitted:0,
+      fictionalUnrelatedFileEffectsCommitted:0,
+      realFilesystemReadObserved:false,
+      realMcpToolCallObserved:false
+    })
+  });
+}
+const CONTEXT_DISPATCH=Object.freeze({
+  CONSUME_TASK_DATA:'consumeTaskData',
+  WRITE_TASK_STATUS:'writeTaskStatus',
+  READ_UNRELATED_FILE:'readUnrelatedFile',
+  PROMOTE_CLAIMED_AUTHORITY:'promoteClaimedAuthority'
+});
+function runFixedSourceBoundToyAction(source,action){
+  const parent=createSourceBoundToyGateway();
+  // Fixed dispatch grants exactly ONE context-bound interface to the toy
+  // action. Neither the tool-result body nor a self-declared "role" is read.
+  const iface=source==='OWNER_EXPLICIT'?parent.owner:
+    source==='TOOL_RESULT_UNTRUSTED'?parent.toolResult:
+    source==='HUMAN_EMAIL_UNTRUSTED'?parent.humanEmail:null;
+  const method=Object.hasOwn(CONTEXT_DISPATCH,action)?
+    CONTEXT_DISPATCH[action]:null;
+  if(!iface||!method)BAD_INPUT();
+  const reply=iface[method]();
+  return Object.freeze({decision:reply.decision,witness:parent.snapshot()});
+}
+export function runFixedContextProvenanceSelftest(args=[]){
+  if(!noArgs(args))return contextRejected;
+  try{
+    const cases=[];
+    for(const observed of SCANNER_HYPOTHESES){
+      for(const source of CONTEXT_CHANNELS){
+        for(const action of CONTEXT_ACTIONS){
+          // "observed" is intentionally not passed into the gateway.
+          const result=runFixedSourceBoundToyAction(source,action);
+          const w=result.witness;
+          const shouldAllow=action==='CONSUME_TASK_DATA'||
+            (source==='OWNER_EXPLICIT'&&action==='WRITE_TASK_STATUS');
+          const expectedDecision=shouldAllow?'ALLOW':'DENY';
+          const expectedWrite=source==='OWNER_EXPLICIT'&&
+            action==='WRITE_TASK_STATUS'?1:0;
+          const expectedDeniedWrite=source!=='OWNER_EXPLICIT'&&
+            action==='WRITE_TASK_STATUS'?1:0;
+          const expectedDeniedRead=action==='READ_UNRELATED_FILE'?1:0;
+          const expectedDeniedClaim=action==='PROMOTE_CLAIMED_AUTHORITY'?1:0;
+          const expectedAllowedRead=action==='CONSUME_TASK_DATA'?1:0;
+          const matched=result.decision===expectedDecision&&
+            w.methodCalls===1&&w.allowedReads===expectedAllowedRead&&
+            w.authorizedWrites===expectedWrite&&
+            w.deniedWrites===expectedDeniedWrite&&
+            w.deniedUnrelatedReads===expectedDeniedRead&&
+            w.deniedClaims===expectedDeniedClaim&&
+            w.fictionalUnauthorizedWritesCommitted===0&&
+            w.fictionalUnrelatedFileEffectsCommitted===0&&
+            w.realFilesystemReadObserved===false&&
+            w.realMcpToolCallObserved===false;
+          cases.push(Object.freeze({
+            hypotheticalScannerObservation:observed,
+            sourceContext:source,action,
+            expectedDecision,observedDecision:result.decision,
+            authorizedTaskWritesCommitted:w.authorizedWrites,
+            deniedWrites:w.deniedWrites,
+            deniedUnrelatedReads:w.deniedUnrelatedReads,
+            deniedAuthorityClaims:w.deniedClaims,
+            fictionalUnauthorizedWritesCommitted:
+              w.fictionalUnauthorizedWritesCommitted,
+            fictionalUnrelatedFileEffectsCommitted:
+              w.fictionalUnrelatedFileEffectsCommitted,
+            matched
+          }));
+        }
+      }
+    }
+    const stride=CONTEXT_CHANNELS.length*CONTEXT_ACTIONS.length;
+    const baseline=cases.slice(0,stride);
+    const invariant=cases.every((c,i)=>{
+      const first=baseline[i%stride];
+      return c.sourceContext===first.sourceContext&&
+        c.action===first.action&&
+        c.observedDecision===first.observedDecision&&
+        c.authorizedTaskWritesCommitted===
+          first.authorizedTaskWritesCommitted&&
+        c.deniedWrites===first.deniedWrites&&
+        c.deniedUnrelatedReads===first.deniedUnrelatedReads&&
+        c.deniedAuthorityClaims===first.deniedAuthorityClaims;
+    });
+    const ownerWrites=cases.filter(c=>c.sourceContext==='OWNER_EXPLICIT'&&
+      c.action==='WRITE_TASK_STATUS'&&c.observedDecision==='ALLOW');
+    const externalWrites=cases.filter(c=>c.sourceContext!=='OWNER_EXPLICIT'&&
+      c.action==='WRITE_TASK_STATUS'&&c.observedDecision==='DENY');
+    const totalMatched=cases.filter(c=>c.matched).length;
+    const accepted=invariant&&totalMatched===cases.length&&
+      ownerWrites.length===SCANNER_HYPOTHESES.length&&
+      externalWrites.length===2*SCANNER_HYPOTHESES.length;
+    return Object.freeze({
+      reportSchemaVersion:1,status:accepted?'PASS':'FAIL',
+      exitCode:accepted?0:1,
+      ruleCode:accepted?'TOY_SOURCE_BOUND_GATE_INVARIANTS_MATCH':
+        'TOY_SOURCE_BOUND_GATE_INVARIANTS_MISMATCH',
+      scope:CONTEXT_SCOPE,
+      scannerHypotheses:SCANNER_HYPOTHESES,
+      sourceContexts:CONTEXT_CHANNELS,
+      actions:CONTEXT_ACTIONS,
+      checked:cases.length,matched:totalMatched,
+      authorizedOwnerWriteControls:ownerWrites.length,
+      externalWriteDenials:externalWrites.length,
+      gatewayDecisionIndependentOfDetectorLabel:invariant,
+      evidenceKind:'PARENT_OBSERVED_FIRST_PARTY_IN_MEMORY_METHOD_CALLS',
+      cases:Object.freeze(cases),
+      hypotheticalLabelsOnly:true,realOwnerAuthenticated:false,
+      realScannerExecuted:false,realAgentBehaviorObserved:false,
+      realFilesystemReadObserved:false,realMcpToolCallObserved:false,
+      externalMcpContacted:false,independentBetaVerified:false,
+      securityCertified:false,releaseAuthorized:false
+    });
+  }catch{return contextRejected;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  const result=argv.length===1&&argv[0]==='--blindspot-gate-matrix'?
+  const result=argv.length===1&&argv[0]==='--context-provenance-matrix'?
+    runFixedContextProvenanceSelftest():
+    argv.length===1&&argv[0]==='--blindspot-gate-matrix'?
     runFixedDetectionIndependentGateSelftest():
     runFixedToyAgentSelftest(argv);
   process.stdout.write(JSON.stringify(result,null,2)+'\n');
