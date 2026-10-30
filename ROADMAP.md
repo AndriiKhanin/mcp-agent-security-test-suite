@@ -170,6 +170,26 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - Unlike M46 this checks actual local HTTP **transport rejection**, but no MCP tool, third-party scanner, model, real filesystem operation or authenticated owner is involved. It is not end-to-end security certification.
 - Acceptance requires four-job PR CI and separate merged-main evidence. Tracking [#345](../../issues/345), external authorization [#21](../../issues/21), independent beta [#59](../../issues/59).
 
+## M47-B — scoped toy owner grants after M47 staging (engineering in PR)
+
+- Builds **on merged M46's source-owned ingress channels and M47 staging checks** with 11 fixed
+  origin/grant/action controls × three hypothetical detector labels (33 trials).
+  `--scoped-authority-matrix` accepts no source-selected files, endpoints
+  or additional CLI arguments.
+- Positive controls: safe task-data access and owner-originated toy read/tool
+  actions with their **matching** source-authored `READ_ARCHIVE` or
+  `USE_TOOL` grants.
+- Negative controls: owner with missing or mismatched scope, and tool-result,
+  email or JSON-result text asserting owner approval; no claim can confer
+  a permission. Unauthorized toy effects remain zero, and the scanner
+  label never influences the authorization.
+- Only source-authored metadata and memory-only effects are modeled. This
+  is not identity authentication, model or scanner execution, real MCP
+  protection, credential enforcement, real filesystem side-effect
+  witnessing, beta acceptance or security certification.
+- CI and review gate: PR four-job PASS before merge; post-merge `main`
+  CI checked separately. M45/M46 fixed modes and M38 source custody preserved.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
