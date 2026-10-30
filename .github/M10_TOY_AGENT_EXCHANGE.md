@@ -204,3 +204,53 @@ M47 supplements (but does not replace) the M46 channel comparison or
 M45 blindspot matrix. Real grants and trustworthy provenance are future
 integration requirements; this matrix alone cannot establish that either
 would be enforced in a deployed agent.
+
+## M48 — real temporary-file effect readback, first-party only
+
+M48 adds actual **ordinary local filesystem I/O** to the first-party
+source-only testing workflow, in contrast to M45/M46's exclusively
+in-memory counters and M47's loopback transport denial.
+
+From a reviewed source checkout:
+
+```sh
+node tools/toy-agent-exchange.mjs --temp-file-effect-witness
+node --test test/m10-toy-agent-exchange.test.mjs
+```
+
+The new command performs **nine fixed checks** (three *hypothetical*
+scanner classifications × three source-owned contexts). Every check
+creates a fresh OS-allocated test-owned directory under the system's
+temporary directory. No path or file content is caller-selectable.
+
+- The source-assigned `OWNER_EXPLICIT` closure writes a single fixed,
+  fictional task-state file with exclusive creation (`wx`). A separate
+  parent-owned readback enumerates the actual directory and verifies
+  the exact bytes. Three allowed writes are observed across nine checks.
+- The source-assigned `TOOL_RESULT_UNTRUSTED` and
+  `HUMAN_EMAIL_UNTRUSTED` closures deny the same write. A parent-owned
+  directory enumeration must see zero files for these six cases.
+- The test-only exported `runFixedTemporaryFileEffectFaultSelftest()`
+  deliberately writes **one unauthorized fictional file** in one
+  temporary directory despite a denied gateway decision. A sound
+  witness returns `FAIL`, observes one unexpected file, then cleans
+  up. This direct test fault is **not reachable via CLI**.
+- Every directory is recursively removed in `finally` and checked
+  for absence; cleanup failure prevents `PASS`. The result never
+  publishes a temporary path, arbitrary bytes, credentials or
+  operating-system environment values.
+
+This is evidence of **real, test-owned temporary file creation,
+readback and deletion**, not evidence of an OS sandbox: the code
+runs with normal process privileges, parent and gateway reside
+inside one trusted process, and no real user ownership is verified.
+No model, firstwatch scanner, MCP tool call, external target, secret
+file, remote network, user-selected command or path is involved.
+Do not extrapolate this to end-to-end prompt-injection prevention,
+real filesystem confinement, or an independent beta/audit.
+
+The original no-argument M10 selftest and M45/M46 CLI modes
+remain unchanged. Follow-up M49 can separately explore first-party
+staging transport with independently observed allowed/denied effects
+after review. An external/user-owned MCP target remains gated under
+[#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21).
