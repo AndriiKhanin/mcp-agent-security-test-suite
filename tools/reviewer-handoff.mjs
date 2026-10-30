@@ -303,6 +303,8 @@ export function runDistributionDoctor(args=[]){
       excludedSourceLimit:MAX_EXCLUDED_FILES,
       excludedSourceIndexSha256:packet.excludedReview.indexSha256,
       localArchiveSha256:packet.localArchive.sha256,
+      localArchiveSha512:packet.localArchive.sha512,
+      localArchiveNpmIntegrity:packet.localArchive.npmIntegrity,
       localInstalledIndexSha256:packet.localArchive.installedIndexSha256,
       localArchivePackedAndInstalled:true,
       sourceAndInstalledBytesComparedLocally:true,

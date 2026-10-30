@@ -57,6 +57,11 @@ test('M36-A: direct doctor proves local package/install custody but blocks distr
   for(const key of ['packageSourceIndexSha256','excludedSourceIndexSha256',
     'localArchiveSha256','localInstalledIndexSha256'])
     assert.match(report[key],/^[0-9a-f]{64}$/u,key);
+  assert.match(report.localArchiveSha512,/^[0-9a-f]{128}$/u);
+  assert.equal(report.localArchiveNpmIntegrity,
+    'sha512-'+Buffer.from(report.localArchiveSha512,'hex').toString('base64'));
+  assert.equal(report.localArchiveSha512,sample().localArchive.sha512);
+  assert.equal(report.localArchiveNpmIntegrity,sample().localArchive.npmIntegrity);
   assert.equal(report.localArchivePackedAndInstalled,true);
   assert.equal(report.sourceAndInstalledBytesComparedLocally,true);
   assert.equal(report.excludedSourcesCompletelyHashed,true);
@@ -97,6 +102,9 @@ test('M36-B: doctor CLI only accepts the literal no-arg operation',()=>{
   assert.equal(report.independentAuditVerified,false);
   assert.equal(report.independentBetaVerified,false);
   assert.equal(report.localArchivePackedAndInstalled,true);
+  assert.match(report.localArchiveSha512,/^[0-9a-f]{128}$/u);
+  assert.equal(report.localArchiveNpmIntegrity,
+    'sha512-'+Buffer.from(report.localArchiveSha512,'hex').toString('base64'));
   assert.equal(report.gitSourceIndependentlyVerified,false);
   assert.equal(report.artifactSignatureVerified,false);
   assert.equal(report.published,false);
