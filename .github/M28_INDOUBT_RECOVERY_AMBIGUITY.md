@@ -67,6 +67,10 @@ telemetry or caller-selected process/path is accessed.
 The command, its tests and this guide are source-only, outside the
 unchanged unpublished **80-path npm candidate**. Independent beta
 [#59](../issues/59), security audit [#43](../issues/43) and real-target
-authorization [#21](../issues/21) remain OPEN. Engineering
-acceptance requires Windows/Ubuntu × Node 20/22 PR CI 4/4 plus a
-separate, SHA-matched post-merge main CI 4/4.
+authorization [#21](../issues/21) remain OPEN. Engineering acceptance (2026-10-30): [PR #309](../pull/309) passed
+[PR CI #41016927718](../actions/runs/41016927718) **4/4** on
+Windows/Ubuntu × Node20/22, merged as exact main SHA
+`2bf8a9f03159a7932582b63d0e6dbd4a53300340`, and independent
+[main CI #41017290535](../actions/runs/41017290535) passed
+**4/4 on the same SHA**. These are first-party synthetic tests, not
+independent beta, authenticated real-world reconciliation or release authorization.

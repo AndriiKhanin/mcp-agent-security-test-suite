@@ -66,11 +66,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M27 — In-doubt effect crash / recovery boundary** | Disposable child forced to exit after fsynced pending reservation, with/without observed synthetic effect; guarded quarantine vs unsafe retry | **ENGINEERING ACCEPTED — 4/4 PR + 4/4 main CI** | [#305](../../issues/305), [PR #306](../../pull/306), [main CI #41015098532](../../actions/runs/41015098532), [guide](.github/M27_INDOUBT_CRASH_RECOVERY.md) | Three witnessed owned crash cases; at-most-once quarantine not exactly-once recovery |
 
-| **M28 — In-doubt recovery ambiguity** | Same fsynced pending marker across two hidden fictional effect worlds; blind retry/skip vs quarantine and forged proof | **M28-A/B/C IN PROGRESS — CI PENDING** | [#308](../../issues/308), [guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | Eight source-owned ambiguity cases, exact effect/loss/duplicate witnesses, PR/main CI 4/4 |
+| **M28 — In-doubt recovery ambiguity** | Same fsynced pending marker across two hidden fictional effect worlds; blind retry/skip vs quarantine and forged proof | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#308](../../issues/308), [PR #309](../../pull/309), [main CI #41017290535](../../actions/runs/41017290535), [guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 8/8 first-party cases, exact loss/duplicate and quarantine witnesses; no external recovery |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M28-A/B/C — two-world recovery ambiguity (engineering in progress)
+## M28-A/B/C — two-world recovery ambiguity (engineering accepted)
 
 - [Issue #308](../../issues/308): source-only
   `node tools/m28-recovery-ambiguity.mjs` produces eight isolated
@@ -94,7 +94,12 @@ We will not claim a release is production-ready merely because a synthetic test 
   simulator** (M27 already tests disposable OS crashes). No external
   targets, real credentials, LLM, Stable Bridge, user files or release
   authorization. The unpublished 80-path package and #21/#43/#59 gates
-  stay unchanged.
+  stay unchanged. [PR #309](../../pull/309) passed
+  [PR CI #41016927718](../../actions/runs/41016927718) **4/4**,
+  merged as exact SHA `2bf8a9f03159a7932582b63d0e6dbd4a53300340`,
+  and separately [main CI #41017290535](../../actions/runs/41017290535)
+  passed **4/4 on the same SHA**. This is author-controlled
+  engineering acceptance only, not independent beta or real recovery.
 
 ## M27-A/B/C — unresolved-claim crash windows (engineering accepted)
 
