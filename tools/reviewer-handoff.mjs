@@ -249,6 +249,82 @@ export function verifyHandoff(value){
      !exact(value.excludedReview,excluded))return false;
   return canonical(value)===canonical(buildHandoff());
 }
+/**
+ * M36: one-command pre-distribution diagnostic. This is a real, disposable
+ * LOCAL npm pack/install and complete source-hash review via M6-J, not
+ * an independent audit, Git provenance verification, or permission to publish.
+ * No caller-supplied paths, commands, credentials or targets are accepted.
+ */
+const M36_PROFILE='m36-local-distribution-doctor-v1';
+const DOCTOR_ERROR=Object.freeze({
+  reportSchemaVersion:1,
+  profile:M36_PROFILE,
+  status:'ERROR',exitCode:2,
+  ruleCode:'M36_OFFLINE_DISTRIBUTION_PRECHECK_UNAVAILABLE',
+  releaseReady:false,releaseApproved:false,published:false,
+  externalTargetAuthorized:false,independentAuditVerified:false,
+  independentBetaVerified:false,
+  checkoutCleanlinessVerified:false,
+  gitSourceIndependentlyVerified:false,
+  artifactSignatureVerified:false,
+  externalMcpContacted:false,
+  actualAgentObserved:false
+});
+export function runDistributionDoctor(args=[]){
+  // Reject argument objects with accessors, holes, prototype changes, or
+  // unexpected properties before looking at a single user input value.
+  if(!Array.isArray(args)||Object.getPrototypeOf(args)!==
+      Array.prototype||args.length!==0)return DOCTOR_ERROR;
+  const slots=Object.getOwnPropertyDescriptors(args);
+  if(Reflect.ownKeys(slots).length!==1||
+     slots.length?.value!==0)return DOCTOR_ERROR;
+  try{
+    const packet=buildHandoff();
+    validateHandoff(packet);
+    if(packet.packagedSource.fileCount!==80||
+       packet.excludedReview.fileCount>MAX_EXCLUDED_FILES||
+       packet.excludedReview.files.length!==packet.excludedReview.fileCount||
+       packet.independentGates.releaseApproved!=='NOT_VERIFIED'||
+       packet.independentGates.externalBetaObserved!=='NOT_VERIFIED'||
+       packet.independentGates.realMcpTargetAuthorization!=='NOT_VERIFIED'||
+       packet.scope.externalNetworkTargetsContacted!==false||
+       packet.scope.releaseArtifactPublished!==false)
+      denied();
+    return Object.freeze({
+      reportSchemaVersion:1,
+      profile:M36_PROFILE,status:'PASS',exitCode:0,
+      ruleCode:'M36_LOCAL_ARCHIVE_AND_SOURCE_CUSTODY_MATCH',
+      candidateName:packet.candidateName,
+      candidateVersion:packet.candidateVersion,
+      evidenceKind:'FIRST_PARTY_LOCAL_DISTRIBUTION_PRECHECK_ONLY',
+      packagePathCount:packet.packagedSource.fileCount,
+      packageSourceIndexSha256:packet.packagedSource.indexSha256,
+      excludedSourcePathCount:packet.excludedReview.fileCount,
+      excludedSourceLimit:MAX_EXCLUDED_FILES,
+      excludedSourceIndexSha256:packet.excludedReview.indexSha256,
+      localArchiveSha256:packet.localArchive.sha256,
+      localInstalledIndexSha256:packet.localArchive.installedIndexSha256,
+      localArchivePackedAndInstalled:true,
+      sourceAndInstalledBytesComparedLocally:true,
+      excludedSourcesCompletelyHashed:true,
+      distributionDecision:'BLOCKED_PENDING_INDEPENDENT_GATES_AND_OWNER',
+      releaseReady:false,releaseApproved:false,published:false,
+      externalTargetAuthorized:false,independentAuditVerified:false,
+      independentBetaVerified:false,
+      checkoutCleanlinessVerified:false,
+      gitSourceIndependentlyVerified:false,
+      artifactSignatureVerified:false,
+      externalMcpContacted:false,
+      actualAgentObserved:false,
+      nextGates:Object.freeze([
+        'INDEPENDENT_BETA_ISSUE_59',
+        'INDEPENDENT_SECURITY_AUDIT_ISSUE_43',
+        'REAL_TARGET_AUTHORIZATION_ISSUE_21',
+        'EXPLICIT_OWNER_RELEASE_DECISION'
+      ])
+    });
+  }catch{return DOCTOR_ERROR;}
+}
 const reply=(status,code)=>JSON.stringify({
   status,code,
   evidenceKind:'SELF_GENERATED_OFFLINE_ASSESSOR_HANDOFF_ONLY',
@@ -257,6 +333,12 @@ const reply=(status,code)=>JSON.stringify({
 function main(){
   const [cmd,...args]=process.argv.slice(2);
   try{
+    if(cmd==='doctor'){
+      const report=runDistributionDoctor(args);
+      process.stdout.write(canonical(report));
+      process.exitCode=report.exitCode;
+      return;
+    }
     if(cmd==='snapshot'&&args.length===0){
       const result=canonical(buildHandoff());
       if(Buffer.byteLength(result,'utf8')>MAX_PACKET_BYTES)denied();
