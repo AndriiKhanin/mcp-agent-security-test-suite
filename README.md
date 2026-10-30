@@ -1,5 +1,27 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+
+## One-command local distribution preflight (M36)
+
+In a reviewed **source checkout** with Node.js 20/22 and bundled npm:
+
+```sh
+node tools/reviewer-handoff.mjs doctor
+```
+
+This SOURCE-ONLY doctor (not included in the npm tarball) **actually
+packs and installs a disposable offline local npm candidate** and
+reconciles 80 packaged source files plus up to 240 fully SHA-256-indexed
+excluded test/tool/CI files using existing M6-J checks. A JSON
+`PASS` means only local package-byte and install-custody checks
+succeeded: **it does not authorize npm/GitHub publication, stable
+release, real MCP connections, independent audit or external beta**.
+The report explicitly sets `releaseReady:false`, records the blocked
+external gates, and never reveals private paths or invokes configured
+user MCP commands. This command writes no permanent release artifact.
+See [source-only release preflight](docs/RELEASE_READINESS.md).
+
+
 ## Readable, evidence-scoped offline onboarding report (M35)
 
 From a reviewed source checkout, pipe an existing **one-server**
