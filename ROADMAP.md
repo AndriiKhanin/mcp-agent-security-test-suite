@@ -211,7 +211,7 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 ## M50 — parent-authorized fixed worker and real child-process file effects (PR CI pending)
 
-- Reuse the **existing nonpackaged** `tools/toy-agent-exchange.mjs` and its existing test/guide paths; do not add files under the bounded 240-file excluded-source inventory or modify the frozen npm candidate. Fixed CLI: `--child-process-effect-witness`.
+- Reuse the **existing nonpackaged process-enabled** `tools/m32-path-swap-lab.mjs` and its existing test/guide paths; preserve the M10 toy-agent no-child-process contract; do not add files under the bounded 240-file excluded-source inventory or modify the frozen npm candidate. Fixed CLI: `--child-process-effect-witness`.
 - Six source-authored contexts each launch the exact first-party file in a real child process with no shell, minimal environment, IPC-only transport, and fresh parent-allocated OS temporary directory. Parent-only source chooses `OWNER_DIRECT` + `WRITE_TASK_STATUS` for one permitted write; owner with read-only scope and untrusted tool/email sources (including forged owner / `NOT_FLAGGED` claims) get `DENY`.
 - Child receives the temporary directory through IPC, then may write a fixed fictional file if permitted. Parent independently enumerates actual directory contents and bytes **after observed child exit**, checks one positive allowed effect and zero effects for five denials, then removes the directory and verifies absence.
 - Five **test-only** negative controls: child writes despite denial (parent catches unexpected file), falsely claims a write, sends malformed IPC, exits early, or hangs until forcibly terminated. Result must not promote child IPC assertions to independent evidence.
