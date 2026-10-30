@@ -1,5 +1,36 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Compare an external rule-based detector on fictional tool results (M38)
+
+This **source-only**, opt-in workflow is suitable for independent
+contributors who want to run their **own local scanner** against
+two fixed public tool-result injection examples and clean baselines.
+It never launches, installs or contacts any scanner or real MCP server.
+
+```sh
+node tools/fixture-batch-preflight.mjs --export-detector-cases
+```
+
+The output contains four *public fictional* text cases with stable IDs,
+author-supplied BENIGN/INJECTION labels and explicit non-assurance flags.
+Test both the clean and mixed versions with your own detector and
+record `FLAGGED`, `NOT_FLAGGED` or `ERROR` for each. To classify your
+**self-reported** observations without uploading or contacting anything:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\detector-results.json | node tools/fixture-batch-preflight.mjs --triage-detector-results
+```
+
+Linux/macOS: `cat ./detector-results.json | node tools/fixture-batch-preflight.mjs --triage-detector-results`.
+The result counts TP/FP/FN/TN and ERRORS relative to the **four
+author labels only**, not a generalizable scanner accuracy rate,
+independently verified test, beta acceptance, external audit or
+security certification. Errors are excluded from matches and misses.
+See [exact JSON input, PowerShell instructions and volunteer report
+format](.github/FIXTURE_ONLY_CONTRIBUTIONS.md#m38--independent-scanner-comparison-on-fixed-fictional-tool-results)
+and [GitHub Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
+
+
 ## One-command local first run — no config required (M37)
 
 On Node.js 20+ in a reviewed source checkout, try both built-in adapter
