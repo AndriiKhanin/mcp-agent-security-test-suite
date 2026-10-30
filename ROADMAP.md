@@ -76,9 +76,37 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M32 — Deterministic OS path-swap TOCTOU** | Eight first-party IPC-barrier marker-swap/absence/anomaly cases exposing size-only false confidence | **ENGINEERING ACCEPTED — PR/main 4/4** | [#320](../../issues/320), [PR #321](../../pull/321), [main CI #41027413776](../../actions/runs/41027413776), [guide](.github/M32_OS_PATH_SWAP_TOCTOU.md) | 8/8 first-party OS cases; 1337/1337 Ubuntu20 tests; PR and exact main CI 4/4, no external effect proof |
 
 | **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
+| **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING IN PR — CI/acceptance pending** | [#326](../../issues/326), [getting started](docs/GETTING_STARTED.md) | No fake real-project vulnerabilities, categorical source-only report, closed no-echo boundary, 4/4 PR/main CI |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M35-A/B/C — explainable offline report, not a vulnerability scan (engineering in PR)
+
+- [Issue #326](../../issues/326). Source-only
+  `node tools/m35-offline-onboarding-report.mjs` accepts the
+  existing M34 one-server client-config format over bounded stdin.
+  Exact `--json` selects machine-readable output; default is an
+  English human-readable report with independent headings:
+  descriptor preflight, five **fixed first-party fictional**
+  controls, untested security dimensions, and next actions.
+- **M35-A:** Risk always `NOT_SCORED`; no real MCP server, LLM,
+  external effect, TLS/DNS/SSRF, credential handling or owner grant
+  evaluated. Valid shape exits 0; invalid/unsupported exits 2,
+  with controls explicitly **NOT_EVALUATED**.
+- **M35-B:** Source-owned categorical text, no user name/URL/command,
+  forged saved report rejected by private in-process issued-report
+  identity. Negative matrix: fraudulent approval/severity fields,
+  env/headers/secrets, malformed UTF-8/JSON, duplicate key, TTY,
+  oversize, accessor/prototype/sparse inputs and unsupported options.
+- **M35-C:** [copy-paste guidance](docs/GETTING_STARTED.md),
+  [README](README.md), this roadmap. Exactly two new excluded-source
+  files (tool + test) fill the existing M6-J 240-file custody cap,
+  without weakening complete SHA-256 inventory or its 241st-file
+  overflow denial. Unpublished npm 80-path candidate unchanged.
+- **Acceptance pending:** PR CI Windows/Ubuntu Node20/22 **4/4**,
+  separately matched exact post-merge main CI **4/4**. Independent
+  beta #59, audit #43, real-target permission #21 remain open.
 
 ## M34-A/B/C — common MCP client config to inert descriptor (engineering accepted)
 

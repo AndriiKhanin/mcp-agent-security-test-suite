@@ -1,5 +1,28 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Readable, evidence-scoped offline onboarding report (M35)
+
+From a reviewed source checkout, pipe an existing **one-server**
+Claude-style or VS Code-style client config to the source-only viewer:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\client-config.json | node tools/m35-offline-onboarding-report.mjs
+```
+
+Linux/macOS: `cat ./client-config.json | node tools/m35-offline-onboarding-report.mjs`.
+Use the exact `--json` flag for a fixed-schema, CI-friendly JSON report.
+The default human-readable report separates **descriptor preflight**,
+**five first-party fictional controls**, **NOT TESTED**, and
+**NEXT ACTIONS**. Neither report echoes names, endpoints, arguments or
+credential material. Both explicitly state that no real MCP server, real
+LLM, ownership, TLS/DNS/SSRF or external effects were tested. It never
+rates a real project's security. Invalid/unsupported input returns
+exit 2 and a generic, non-echoing diagnosis; successful *syntax and
+fictional controls* return exit 0. No real MCP connections or configured
+process execution. See [getting started](docs/GETTING_STARTED.md) and
+[M34 input constraints](.github/M34_CLIENT_CONFIG_IMPORT.md).
+
+
 ## Import a project's existing MCP client JSON offline (M34)
 
 Review an existing **single-server** `mcpServers` or `servers` JSON
