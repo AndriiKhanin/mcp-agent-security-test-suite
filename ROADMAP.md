@@ -218,14 +218,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - This is **not an OS sandbox or protection against hostile child code**: child runs under the same OS user and receives a writable test directory even on `DENY` to exercise the witness. No real owner identity, AI/LLM, scanner, arbitrary executable, external MCP target, secrets, network or production side effects. Public CLI cannot select test faults.
 - **Engineering merged:** [PR #359](../../pull/359), exact main commit `abdcfd856e19116f3d442de062836cd21d06a3de`. [PR workflow #41118590626](../../actions/runs/41118590626) **4/4 PASS**, **1388/1388 per job** (Ubuntu/Windows Node20/22), zero failures/skips. Original M10 source/tests/guide restored unchanged after the initial no-process source-invariant rejection; the corrected implementation uses existing M32 process-capable source/test/guide paths. A separate matched post-merge `main` CI run has not yet been verified. Independent target authorization [#21](../../issues/21), beta [#59](../../issues/59), audit [#43](../../issues/43), and an explicit owner release decision remain open.
 
-## M51 — portable OS file-handle rights and path-reopen counterexample (engineering in PR)
+## M51 — read-only FD denial with same-user path-reopen counterexample (PR CI pending)
 
-- Add `--os-filehandle-rights-witness` to the existing nonpackaged M32 process lab. Three first-party child-process checks use a fixed fictional file in fresh temporary directories on both Windows and Linux; parent independently verifies actual OS bytes after process exit.
-- **Actual OS denial:** writing through a file descriptor opened in read-only `r` mode must fail and leave original bytes unchanged. **Positive control:** writing through a `r+` handle succeeds, verified by parent readback.
-- **Critical negative control:** the same-user child first fails on `r`, then reopens the fixed path in `r+` and successfully modifies the file. The report must explicitly show `sameUserPathReopenBypassConfirmed: true` and `osSandboxed: false`. This is proof of the *absence* of arbitrary process isolation, not a permission-boundary success claim.
-- Direct test-only false-effect report must be contradicted by parent disk readback. Exact private worker IPC and bounded test inputs; no arbitrary path, real target, credentials, network, external scanner or real agent.
-- Existing M10 no-subprocess contract, M32/M50 source paths, source-only excluded-file SHA-256 inventory and frozen package manifest remain unchanged. No new files or shell commands.
-- Engineering acceptance: PR CI 4/4 on Windows/Ubuntu Node20/22; post-merge main-push CI is a separate check. OS-level confinement, external MCP authorization [#21](../../issues/21), independent beta [#59](../../issues/59), audit [#43](../../issues/43), and publication remain open.
+- Existing nonpackaged M32 process lab: 3 source-owned child cases on actual Windows/Linux OS temp files. Parent observes read-only `r` write denied and unchanged bytes, `r+` positive write, and the same child reopening the known path in `r+` after the denial to write successfully. Private negative fault falsely claims no write; parent readback catches it.
+- OS handle restriction **does not mean process isolation**: `osSandboxed:false`; no real MCP/LLM, user paths, credentials, remote targets, extra files or package changes. M10 and M6-J 240-file/2MB custody limits unchanged.
+- PR acceptance 4/4 on Windows/Ubuntu Node20/22; separate main-push CI. Real confinement, beta #59, audit #43, target authority #21 and owner release remain open.
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
