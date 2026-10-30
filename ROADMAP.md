@@ -209,6 +209,15 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - Test-owned temp directories and local TCP sockets must be closed and cleaned, with no paths, ports or data reflected. Only strictly fixed request metadata and short bounded bodies; no real AI/LLM, independently authenticated owner, external scanner, arbitrary MCP tools, remote network contact or OS sandbox.
 - CI acceptance requires four Windows/Ubuntu Node 20/22 jobs plus separately verified post-merge `main` CI. External-target authorization [#21](../../issues/21), beta [#59](../../issues/59), and audit [#43](../../issues/43) are unchanged.
 
+## M50 — parent-authorized fixed worker and real child-process file effects (PR CI pending)
+
+- Reuse the **existing nonpackaged** `tools/toy-agent-exchange.mjs` and its existing test/guide paths; do not add files under the bounded 240-file excluded-source inventory or modify the frozen npm candidate. Fixed CLI: `--child-process-effect-witness`.
+- Six source-authored contexts each launch the exact first-party file in a real child process with no shell, minimal environment, IPC-only transport, and fresh parent-allocated OS temporary directory. Parent-only source chooses `OWNER_DIRECT` + `WRITE_TASK_STATUS` for one permitted write; owner with read-only scope and untrusted tool/email sources (including forged owner / `NOT_FLAGGED` claims) get `DENY`.
+- Child receives the temporary directory through IPC, then may write a fixed fictional file if permitted. Parent independently enumerates actual directory contents and bytes **after observed child exit**, checks one positive allowed effect and zero effects for five denials, then removes the directory and verifies absence.
+- Five **test-only** negative controls: child writes despite denial (parent catches unexpected file), falsely claims a write, sends malformed IPC, exits early, or hangs until forcibly terminated. Result must not promote child IPC assertions to independent evidence.
+- This is **not an OS sandbox or protection against hostile child code**: child runs under the same OS user and receives a writable test directory even on `DENY` to exercise the witness. No real owner identity, AI/LLM, scanner, arbitrary executable, external MCP target, secrets, network or production side effects. Public CLI cannot select test faults.
+- Engineering acceptance requires all 4 PR CI environments Windows/Ubuntu Node20/22, then separately observed main-push CI. Independent target authorization [#21](../../issues/21), beta [#59](../../issues/59), audit [#43](../../issues/43) and explicit owner release decision remain outstanding.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
