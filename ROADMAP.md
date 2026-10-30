@@ -60,7 +60,33 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M25 — Policy-version drift + logical gate restart** | Community request: stale approval cannot authorize delayed execution after policy change or gate-generation replacement | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#296](../../issues/296), [PR #297](../../pull/297), [main CI #40950548884](../../actions/runs/40950548884), [guide](.github/M25_APPROVAL_POLICY_EPOCH.md) | 5/5 owned-wire scenarios, protected stale denial and fresh reapproval; no real OS restart claim |
 
+| **M25-D — Actual disposable gate OS process crash/relaunch** | Parent-owned IPC and real process exit distinguish stale-approval rejection from unsafe reexecution | **IN PROGRESS — PR AND CI PENDING** | [#299](../../issues/299), [guide](.github/M25D_OS_PROCESS_RESTART.md) | 3/3 owned child-process cases + independent negative mutation controls; 4/4 PR and main CI required |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M25-D — actual first-party worker process termination (engineering in progress)
+
+- [Issue #299](../../issues/299): source-only
+  `node tools/m25d-os-crash-relaunch.mjs` runs a fixed child Node.js
+  worker with an ephemeral IPv4 localhost listener. No caller-selected
+  executable, PID, endpoint, token or user MCP server.
+- Child admission IPC confirms a real HTTP request is **accepted but not
+  executed**. Parent forcibly terminates exactly that spawned child,
+  verifies its OS exit and the abandoned pending HTTP exchange, and
+  observes zero protected fictional effects from the old process.
+- A fresh child has a **different random generation**, but the **same
+  policy version**. Protected mode rejects the old synthetic approval
+  (410) before any effect and allows a new approval (200). Deliberately
+  vulnerable mode wrongly admits the stale grant to expose a witnessed
+  unsafe effect. An unchanged-process positive control also must succeed.
+- [Scope guide](.github/M25D_OS_PROCESS_RESTART.md), mutation tests,
+  subprocess and loopback cleanup, source-only 80-path package custody.
+  This is an actual OS process kill and re-fork but **NOT** authenticated
+  real authorization, persisted crash recovery, an external MCP test,
+  a real model, a secret-bearing workload or security certification.
+  Stable Bridge never contacted. #21/#43/#59 remain OPEN.
+  Engineering acceptance requires PR and exact post-merge main CI
+  **4/4** on Windows/Ubuntu Node20/22.
 
 ## M25-A/B/C — community policy-version and logical restart TOCTOU (engineering accepted)
 
