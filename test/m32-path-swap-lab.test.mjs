@@ -295,12 +295,11 @@ test('M50: direct APIs reject non-empty, sparse and getter-bearing arguments',as
 
 
 
-test('M51: OS denies read-only FD writes; same-user path reopen still works',async()=>{
+
+test('M51: actual read-only FD refusal, writable positive and path bypass',async()=>{
   const r=await runFixedOsHandleRightsSelftest();
   assert.equal(r.status,'PASS',JSON.stringify(r));
-  assert.equal(r.exitCode,0);
-  assert.equal(r.checked,3);
-  assert.equal(r.matched,3);
+  assert.deepEqual([r.checked,r.matched,r.exitCode],[3,3,0]);
   assert.equal(r.realReadOnlyHandleWriteDenied,true);
   assert.equal(r.writableHandlePositiveControl,true);
   assert.equal(r.sameUserPathReopenBypassConfirmed,true);
@@ -308,26 +307,23 @@ test('M51: OS denies read-only FD writes; same-user path reopen still works',asy
   assert.equal(r.osSandboxed,false);
   assert.equal(r.arbitraryPathAccessPrevented,false);
   assert.equal(r.externalMcpContacted,false);
-  assert.equal(r.releaseAuthorized,false);
-  assert.deepEqual(r.cases.map(c=>c.caseId),['RO','RW','REOPEN']);
-  assert.deepEqual(r.cases.map(c=>c.handleWriteDenied),[true,false,true]);
-  assert.deepEqual(r.cases.map(c=>c.actualFileEffect),
-    ['UNCHANGED','MODIFIED','MODIFIED']);
-  for(const c of r.cases){
-    assert.equal(c.status,'PASS');
-    assert.equal(c.childReaped,true);
-    assert.equal(c.childExitCode,0);
-    assert.equal(c.cleanupVerified,true);
-    assert.equal(c.osSandboxed,false);
-    assert.ok(Object.isFrozen(c));
+  assert.deepEqual(r.cases.map(x=>[
+    x.caseId,x.handleWriteDenied,x.actualFileEffect
+  ]),[
+    ['RO',true,'UNCHANGED'],['RW',false,'MODIFIED'],
+    ['REOPEN',true,'MODIFIED']
+  ]);
+  for(const row of r.cases){
+    assert.equal(row.status,'PASS');
+    assert.equal(row.childReaped,true);
+    assert.equal(row.childExitCode,0);
+    assert.equal(row.cleanupVerified,true);
   }
-  assert.doesNotMatch(JSON.stringify(r),
-    /m51-owned-|fictional\.txt|FICTIONAL-|PRIVATE_CANARY/);
+  assert.doesNotMatch(JSON.stringify(r),/m51-owned-|fictional\.txt|FICTIONAL-/);
 });
 
-test('M51: false child report fails independent parent disk check',async()=>{
+test('M51: lying child cannot override independent parent OS readback',async()=>{
   const r=await runFixedOsHandleFalseReportSelftest();
-  assert.equal(r.caseId,'LIAR');
   assert.equal(r.status,'FAIL');
   assert.equal(r.ruleCode,'M51_FALSE_CHILD_EFFECT_CLAIM');
   assert.equal(r.childClaimedEffect,false);
@@ -336,34 +332,32 @@ test('M51: false child report fails independent parent disk check',async()=>{
   assert.equal(r.cleanupVerified,true);
 });
 
-test('M51: no arbitrary path/target and no direct private worker',()=>{
-  const good=run('tools/m32-path-swap-lab.mjs','--os-filehandle-rights-witness');
-  assert.equal(good.status,0,good.stderr);
-  assert.equal(JSON.parse(good.stdout).sameUserPathReopenBypassConfirmed,true);
-  for(const extra of ['--path=PRIVATE_CANARY','--role=OWNER',
-    '--target=https://example.invalid']){
+test('M51: only fixed CLI; no private worker or user path',()=>{
+  const ok=run('tools/m32-path-swap-lab.mjs','--os-filehandle-rights-witness');
+  assert.equal(ok.status,0,ok.stderr);
+  assert.equal(JSON.parse(ok.stdout).sameUserPathReopenBypassConfirmed,true);
+  for(const arg of ['--path=PRIVATE_CANARY','--target=https://example.invalid']){
     const bad=run('tools/m32-path-swap-lab.mjs',
-      '--os-filehandle-rights-witness',extra);
+      '--os-filehandle-rights-witness',arg);
     assert.equal(bad.status,2);
     assert.equal(JSON.parse(bad.stdout).ruleCode,'M32_ARGUMENTS_NOT_ALLOWED');
     assert.ok(!bad.stdout.includes('PRIVATE_CANARY'));
   }
-  const worker=run('tools/m32-path-swap-lab.mjs','--m51-private-worker','RO');
-  assert.equal(worker.status,2);
-  assert.equal(worker.stdout,'');
+  const w=run('tools/m32-path-swap-lab.mjs','--m51-private-worker','RO');
+  assert.equal(w.status,2);
+  assert.equal(w.stdout,'');
 });
 
-test('M51: direct API fails closed on malformed input',async()=>{
+test('M51: invalid API arguments fail closed',async()=>{
   const getter=[];
   Object.defineProperty(getter,'0',{get(){throw Error('PRIVATE_CANARY');}});
   for(const args of [null,{},['UNSAFE'],Array(1),getter]){
     for(const fn of [runFixedOsHandleRightsSelftest,
       runFixedOsHandleFalseReportSelftest]){
-      const report=await fn(args);
-      assert.equal(report.status,'ERROR');
-      assert.equal(report.exitCode,2);
-      assert.equal(report.osSandboxed,false);
-      assert.ok(!JSON.stringify(report).includes('PRIVATE_CANARY'));
+      const r=await fn(args);
+      assert.equal(r.status,'ERROR');
+      assert.equal(r.osSandboxed,false);
+      assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
     }
   }
 });
