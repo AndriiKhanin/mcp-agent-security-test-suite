@@ -204,3 +204,40 @@ M47 supplements (but does not replace) the M46 channel comparison or
 M45 blindspot matrix. Real grants and trustworthy provenance are future
 integration requirements; this matrix alone cannot establish that either
 would be enforced in a deployed agent.
+
+## M48 — bounded fictional approval decisions, not real prompts
+
+M48 adds a separate **source-owned decision-only** matrix to explore
+the tension between unnecessary confirmations and unsafe side effects.
+It never asks a human for approval and never executes a protected action
+while approval is pending.
+
+```sh
+node tools/toy-agent-exchange.mjs --approval-policy-matrix
+node --test test/m10-toy-agent-exchange.test.mjs
+```
+
+There are **108 fixed in-memory cases**: nine source-authored origin/grant/
+action situations × baseline/careful policy mode × outside-content unseen/
+seen × three hypothetical detector observations. A source-owned owner
+with the correct fictional grant may read task data, perform a fictional
+read, or perform a fictional tool action. Outside-source instructions
+claiming owner approval cannot become authorized actions. Unqualified
+or mis-scoped requests are **DENY**, not redirected to a human.
+
+The **CAREFUL** mode requires an **unanswered, simulated** approval only
+when all these conditions hold: the action is owner-authorized and
+side-effecting, the fixed scenario has already seen outside content,
+and careful mode is active. It does *not* add prompts for read-only
+actions, nor does it allow forbidden actions by asking for consent.
+The baseline mode allows qualified toy operations without this
+additional rule. No user clicks are fabricated. Authorized toy
+effects are merely counters in memory; pending approvals produce
+no such effect.
+
+The resulting `ALLOW`, `DENY` and `REQUIRE_APPROVAL` categories
+can be compared on this fixed fictional table, but the counts are
+**not estimates** of real user annoyance, prompt injection detection,
+agent safety or actual approval UX. All origins, modes, grants and
+outside-content state are written by the test author, not inferred or
+authenticated. Neither Firstwatch nor a real MCP server is invoked.
