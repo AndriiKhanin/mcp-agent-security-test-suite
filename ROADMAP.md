@@ -90,6 +90,14 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - Add CLI and source tests plus a contributor walkthrough; independent scanner execution, real-world assurance and publication remain unverified.
 - **Acceptance pending:** PR CI 4/4 and matched post-merge CI on `main`.
 
+## M41 — comparison of self-reported detector disagreements (engineering pending)
+
+- Source-only `--analyze-detector-disagreements` consumes the existing M39 strict batch JSON and returns per-case FLAGGED/NOT_FLAGGED/ERROR votes, split decisions, and repeated injection misses.
+- ERROR observations abstain. Consensus is a vote count, not a ground truth judgment. A `REPEATED_MISS` occurs when at least two self-reported scanners did not flag an author-labeled injection.
+- The fixed four fictional cases, one-to-eight scanner aliases, bounded 16 KiB stdin, no scanner execution, no target contact and no new packaged assets remain unchanged.
+- New tests cover split votes, tie, repeated misses, single-detector case, malformed JSON, invalid UTF-8, and CLI argument denial.
+- Engineering acceptance requires PR 4/4 and matched post-merge CI; external scanner results, beta, audit, and authorization remain separate.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
