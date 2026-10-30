@@ -4,8 +4,11 @@ import {readFileSync,readdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {test} from 'node:test';
+import {Readable} from 'node:stream';
 import {
-  verifyFictionalBridgeOutcome,runFictionalFixtureBatchPreflight
+  verifyFictionalBridgeOutcome,runFictionalFixtureBatchPreflight,
+  exportFictionalDetectorCases,triageFictionalDetectorResults,
+  triageFictionalDetectorJson,runFictionalDetectorTriageStdin
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -205,4 +208,225 @@ test('M9-E: contributor guide and exact 80-path npm inventory remain intact',()=
     'src','fixtures','docs','examples','README.md',
     'LICENSE','SECURITY.md','CONTRIBUTING.md','ROADMAP.md'
   ]);
+});
+
+
+const m38Export=()=>exportFictionalDetectorCases();
+const m38Input=observations=>({
+  reportSchemaVersion:1,sourceProfile:'m38-fictional-detector-cases-v1',
+  results:m38Export().rows.map((r,i)=>({
+    caseId:r.caseId,observed:observations[i]
+  }))
+});
+const m38Cli=(args=[],input)=>spawnSync(process.execPath,
+  ['tools/fixture-batch-preflight.mjs',...args],{
+    cwd:fileURLToPath(new URL('../',import.meta.url)),
+    input,encoding:'utf8',timeout:15000,windowsHide:true,
+    env:{...process.env,NODE_OPTIONS:''}
+  });
+const denyM38=x=>{
+  assert.equal(x.reportSchemaVersion,1);
+  assert.equal(x.profile,'m38-fictional-detector-comparison-v1');
+  assert.equal(x.status,'ERROR');
+  assert.equal(x.exitCode,2);
+  assert.equal(x.ruleCode,'M38_INVALID_OR_UNREADABLE_COMPARISON');
+  assert.equal(x.manualReviewRequired,true);
+  assert.equal(x.limits.scannerExecuted,false);
+  assert.equal(x.limits.realMcpTargetContacted,false);
+  assert.equal(x.limits.independentBetaVerified,false);
+  assert.equal(x.limits.releaseAuthorized,false);
+};
+test('M38-A: export exactly two clean and two mixed approved fictional texts',()=>{
+  const pack=m38Export();
+  assert.equal(pack.reportSchemaVersion,1);
+  assert.equal(pack.profile,'m38-fictional-detector-cases-v1');
+  assert.equal(pack.status,'PASS');
+  assert.equal(pack.exitCode,0);
+  assert.equal(pack.authorLabelsOnly,true);
+  assert.equal(pack.scannerResultsIncluded,false);
+  assert.equal(pack.caseCount,4);
+  assert.deepEqual(pack.rows.map(x=>x.expectedLabel),
+    ['BENIGN','INJECTION','BENIGN','INJECTION']);
+  assert.deepEqual(pack.rows.map(x=>x.caseId),[
+    'mixed-tool-result-file-read:clean',
+    'mixed-tool-result-file-read:mixed',
+    'ticket-status-prerequisite-file-read:clean',
+    'ticket-status-prerequisite-file-read:mixed'
+  ]);
+  for(const [j,name] of [
+    'mixed-tool-result-file-read.json',
+    'ticket-status-prerequisite-file-read.json'
+  ].entries()){
+    const source=JSON.parse(readFileSync(join(root,name),'utf8'));
+    const baseline=source.toolResult.legitimateData;
+    const injected=baseline+'\n'+source.toolResult.embeddedInstruction;
+    assert.equal(pack.rows[j*2].text,baseline);
+    assert.equal(pack.rows[j*2+1].text,injected);
+    assert.equal(pack.rows[j*2].sourceCaseId,source.caseId);
+    assert.equal(pack.rows[j*2+1].sourceCaseId,source.caseId);
+  }
+  assert.equal(Object.isFrozen(pack),true);
+  assert.equal(Object.isFrozen(pack.rows),true);
+  assert.equal(Object.isFrozen(pack.rows[0]),true);
+  assert.equal(pack.limits.scannerExecuted,false);
+  assert.equal(pack.limits.securityCertified,false);
+  const a=m38Cli(['--export-detector-cases']);
+  assert.equal(a.status,0,a.stderr);
+  assert.equal(a.stderr,'');
+  assert.deepEqual(JSON.parse(a.stdout),pack);
+  assert.ok(Buffer.byteLength(a.stdout)<4096);
+  for(const forbidden of [
+    'PRIVATE_CANARY','sk-',process.cwd(),'C:\\Users\\'
+  ])assert.ok(!a.stdout.includes(forbidden),forbidden);
+});
+test('M38-B: self-reported TP FP FN TN and ERROR counted without false certification',()=>{
+  const sets=[
+    {observations:['NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED'],
+      expected:{TP:2,FP:0,FN:0,TN:2,ERROR:0},classified:4},
+    {observations:['FLAGGED','NOT_FLAGGED','NOT_FLAGGED','FLAGGED'],
+      expected:{TP:1,FP:1,FN:1,TN:1,ERROR:0},classified:4},
+    {observations:['NOT_FLAGGED','ERROR','ERROR','NOT_FLAGGED'],
+      expected:{TP:0,FP:0,FN:1,TN:1,ERROR:2},classified:2}
+  ];
+  for(const entry of sets){
+    const data=m38Input(entry.observations);
+    const report=triageFictionalDetectorResults(data);
+    assert.equal(report.status,'PASS');
+    assert.equal(report.exitCode,0);
+    assert.equal(report.ruleCode,'SELF_REPORTED_DETECTOR_RESULTS_CLASSIFIED_ONLY');
+    assert.equal(report.resultsSelfReportedOnly,true);
+    assert.equal(report.manualReviewRequired,true);
+    assert.equal(report.noEstimatedPopulationPerformance,true);
+    assert.deepEqual(report.outcomes,entry.expected);
+    assert.equal(report.classifiedCount,entry.classified);
+    assert.equal(report.caseCount,4);
+    assert.equal(report.results.length,4);
+    assert.equal(report.limits.scannerIdentityVerified,false);
+    assert.equal(report.limits.scannerExecuted,false);
+    assert.equal(report.limits.independentlyReproduced,false);
+    assert.equal(report.limits.independentBetaVerified,false);
+    assert.equal(report.limits.securityCertified,false);
+    assert.equal(report.limits.realAgentObserved,false);
+    for(const x of report.results)assert.equal(x.caseId.includes('PRIVATE'),false);
+    assert.equal(Object.isFrozen(report),true);
+    assert.equal(Object.isFrozen(report.results),true);
+    assert.equal(Object.isFrozen(report.results[0]),true);
+    const p=m38Cli(['--triage-detector-results'],JSON.stringify(data));
+    assert.equal(p.error,undefined);
+    assert.equal(p.status,0,p.stderr);
+    assert.equal(p.stderr,'');
+    assert.deepEqual(JSON.parse(p.stdout),report);
+    assert.ok(!p.stdout.includes('Fictional ticket T42'));
+    assert.ok(!p.stdout.includes('Fictional order Q17'));
+    assert.ok(!p.stdout.includes('PRIVATE_CANARY'));
+  }
+});
+test('M38-B: invalid classifications, forged provenance and unknown fields fail closed',()=>{
+  const base=m38Input(['NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED']);
+  const changes=[
+    x=>{x.results[0].observed='PASS';},
+    x=>{x.results[0].observed='SCANNED_REAL_SERVER';},
+    x=>{x.results[0].caseId='PRIVATE_CANARY';},
+    x=>{x.results[1].caseId=x.results[0].caseId;},
+    x=>{x.results[2].observed=null;},
+    x=>{x.results[3].observed=4;},
+    x=>{x.results[1].scannerVerified=true;},
+    x=>{x.results[1].rule='PRIVATE_CANARY';},
+    x=>{x.results.pop();},
+    x=>{x.results.push({caseId:'extra',observed:'FLAGGED'});},
+    x=>{x.authorized=true;},
+    x=>{x.scannerName='PRIVATE_CANARY';},
+    x=>{x.sourceProfile='REAL_AGENT_SCAN';},
+    x=>{x.reportSchemaVersion=2;}
+  ];
+  for(const mutate of changes){
+    const x=structuredClone(base);mutate(x);
+    denyM38(triageFictionalDetectorResults(x));
+  }
+  let called=0;
+  const get=structuredClone(base);
+  Object.defineProperty(get.results[0],'observed',{
+    enumerable:true,get(){called++;throw Error('PRIVATE_CANARY');}
+  });
+  denyM38(triageFictionalDetectorResults(get));
+  assert.equal(called,0);
+  const sparse=structuredClone(base);
+  delete sparse.results[1];
+  denyM38(triageFictionalDetectorResults(sparse));
+  const inherited=Object.create(base);
+  denyM38(triageFictionalDetectorResults(inherited));
+  const foreign=structuredClone(base);
+  Object.setPrototypeOf(foreign.results,{});
+  denyM38(triageFictionalDetectorResults(foreign));
+  const hidden=structuredClone(base);
+  Object.defineProperty(hidden,'hidden',{value:'PRIVATE_CANARY'});
+  denyM38(triageFictionalDetectorResults(hidden));
+  denyM38(exportFictionalDetectorCases(['--publish']));
+  denyM38(exportFictionalDetectorCases(Array(1)));
+  denyM38(exportFictionalDetectorCases(Object.create([])));
+});
+test('M38-B: strict UTF-8, bounded JSON, duplicate keys and unsupported modes deny without echo',async()=>{
+  const data=m38Input(['NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED']);
+  const accepted=JSON.stringify(data);
+  const invalid=[
+    '', ' ', '{bad}', accepted+' extra',
+    '{"reportSchemaVersion":1,"reportSchemaVersion":1}',
+    JSON.stringify({...data,private:'PRIVATE_CANARY'}),
+    Buffer.from([0xff,0xfe,0x00]),
+    Buffer.alloc(2049,0x20)
+  ];
+  for(const value of invalid){
+    if(typeof value==='string')denyM38(triageFictionalDetectorJson(value));
+    const res=m38Cli(['--triage-detector-results'],value);
+    assert.equal(res.status,2,res.stderr);
+    assert.equal(res.stderr,'');
+    const parsed=JSON.parse(res.stdout);
+    denyM38(parsed);
+    assert.ok(!res.stdout.includes('PRIVATE_CANARY'));
+  }
+  for(const args of [
+    ['--export-detector-cases','--publish'],
+    ['--triage-detector-results','--target=PRIVATE_CANARY'],
+    ['--unknown','PRIVATE_CANARY']
+  ]){
+    const p=m38Cli(args,accepted);
+    assert.equal(p.status,2,p.stderr);
+    assert.equal(p.stderr,'');
+    assert.ok(!p.stdout.includes('PRIVATE_CANARY'));
+  }
+  const tty=Readable.from([Buffer.from(accepted)]);
+  tty.isTTY=true;
+  denyM38(await runFictionalDetectorTriageStdin([],tty));
+  const streamed=Readable.from([
+    Buffer.from(accepted.slice(0,18)),Buffer.from(accepted.slice(18))
+  ]);
+  const ok=await runFictionalDetectorTriageStdin([],streamed);
+  assert.equal(ok.status,'PASS');
+  const invalidArgs=[
+    ['PRIVATE_CANARY'],Array(1),Object.create([]),
+    Object.create(null)
+  ];
+  for(const args of invalidArgs)
+    denyM38(await runFictionalDetectorTriageStdin(args,
+      Readable.from([Buffer.from(accepted)])));
+});
+test('M38-C: source-only comparative mode does not expand unpublished package or M6-J custody',()=>{
+  const packageConfig=JSON.parse(readFileSync(
+    new URL('../package.json',import.meta.url),'utf8'));
+  const paths=JSON.parse(readFileSync(
+    new URL('./expected-package-files.json',import.meta.url),'utf8'));
+  assert.equal(packageConfig.version,'0.0.10-rc.1');
+  assert.equal(paths.length,80);
+  assert.ok(!packageConfig.files.includes('tools'));
+  assert.ok(!paths.includes('tools/fixture-batch-preflight.mjs'));
+  const tool=readFileSync(new URL('../tools/fixture-batch-preflight.mjs',
+    import.meta.url),'utf8');
+  assert.doesNotMatch(tool,
+    /from ['"]node:(?:child_process|https|http|net|tls)['"]/u);
+  assert.match(tool,/scannerExecuted:false/);
+  assert.match(tool,/M38_INPUT_MAX=2048/);
+  const custody=readFileSync(new URL('../tools/reviewer-handoff.mjs',
+    import.meta.url),'utf8');
+  assert.match(custody,/const MAX_EXCLUDED_FILES=240/);
+  assert.match(custody,/if\(files.length>MAX_EXCLUDED_FILES\)denied\(\)/);
 });

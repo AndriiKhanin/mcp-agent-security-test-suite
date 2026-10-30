@@ -79,9 +79,41 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
 | **M36 — Local offline distribution doctor** | Source-checkout command reuses M6-J source SHA-256 custody and temporary offline npm pack/install | **ENGINEERING ACCEPTED — PR/main CI 4/4; release blocked** | [#330](../../issues/330), [PR #331](../../pull/331), [main CI #41036858127](../../actions/runs/41036858127), [readiness](docs/RELEASE_READINESS.md) | 80 packaged + 240 fully hashed excluded files, 1353/1353 Ubuntu20; no publication approval |
 | **M37 — One-command source-only first run** | M8 two-transport synthetic smoke + M35 two-format fictional importer, readable text/JSON and private next-step instructions | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#335](../../issues/335), [PR #336](../../pull/336), [main CI #41050360958](../../actions/runs/41050360958), [getting started](docs/GETTING_STARTED.md) | 1358/1358 Ubuntu20; no real MCP/user config; 240/240 M6-J custody; exact 4/4 PR and main CI |
+| **M38 — Independent fictional scanner comparisons** | Export two fixed clean/mixed tool-result pairs and classify self-reported third-party rule detector outcomes | **ENGINEERING IN PR — acceptance pending** | [#338](../../issues/338), [#329](../../issues/329), [contributor guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) | Four source-pinned fictional cases; TP/FP/FN/TN/ERROR, no scanner execution or independent-beta claim, PR/main CI 4/4 |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M38-A/B/C — four-case external rule-scanner comparison (engineering in PR)
+
+- [Issue #338](../../issues/338), external opt-in
+  [comparison #329](../../issues/329): source-only
+  `tools/fixture-batch-preflight.mjs --export-detector-cases`
+  emits **exactly four fixed fictional text records** (two
+  BENIGN/INJECTION pairs); every text is checked against existing
+  reviewed public source fixture descriptions. No scanner, model
+  or MCP target is run.
+- **M38-A:** the historical no-argument static fixture batch command
+  stays unchanged; explicit export mode is the only operation
+  revealing the published fictional text.
+- **M38-B:** `--triage-detector-results` consumes 2048-byte bounded,
+  duplicate-free strict UTF-8 JSON over stdin, exactly four ordered
+  `FLAGGED | NOT_FLAGGED | ERROR` classifications. Reports
+  TP/FP/FN/TN/ERROR relative to author labels **only**. Unknown
+  outcomes are errors, not successes. Forged authority fields,
+  accessors, sparse arrays, wrong IDs and extra args fail closed;
+  stdout has only categorical findings, never user input.
+- **M38-C:** contribution guide, README, CONTRIBUTING and roadmap
+  include local Windows/Linux/macOS commands and voluntary sanitized
+  independent feedback instructions. External tester results are
+  **NOT observed**, and self-reported scanner output is **NOT
+  authenticated** or a population-level effectiveness estimate.
+- **Source custody:** existing tool/test/docs modified only, no
+  new file paths at M6-J 240/240 SHA-256 custody cap; 241st file
+  denied. Unpublished npm candidate remains frozen 80 paths.
+- **Pending:** PR CI Windows/Ubuntu Node20/22 **4/4**, then exact
+  merged-sha main CI **4/4**; independent beta #59,
+  real-target owner authorization #21 and audit #43 remain OPEN.
 
 ## M37-A/B/C — zero-config adopter first run (engineering accepted)
 
