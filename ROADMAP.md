@@ -68,7 +68,34 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M28 — In-doubt recovery ambiguity** | Same fsynced pending marker across two hidden fictional effect worlds; blind retry/skip vs quarantine and forged proof | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#308](../../issues/308), [PR #309](../../pull/309), [main CI #41017290535](../../actions/runs/41017290535), [guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 8/8 first-party cases, exact loss/duplicate and quarantine witnesses; no external recovery |
 
+| **M29 — Signed receipt authenticity ≠ verified outcome** | Real ephemeral Ed25519 signatures with exact operation/marker/epoch binding, invalid and replayed receipt controls, and deceptive signed outcome comparison | **IN PROGRESS — CI PENDING** | [#311](../../issues/311), [M28/M29 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 12 synthetic signed cases + guarded quarantine; PR 4/4 and matched main 4/4 required |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M29-A/B/C — signed outcome authenticity versus trusted effect provenance (in progress)
+
+- [Issue #311](../../issues/311): source-only
+  `node tools/m29-signed-receipt-provenance.mjs` generates **ephemeral
+  Ed25519 keypairs** and verifies actual signatures over fictional
+  operation, marker digest, logical epoch, nonce and outcome fields.
+  Private keys never leave the first-party process and are never logged.
+- **M29-A:** twelve cases check valid, deceptive-but-valid and
+  tampered signatures; wrong operation/marker/epoch, expired receipt,
+  rogue signer key, reused nonce and unsigned claims. Guarded policy
+  keeps all unresolved operations quarantined without separately
+  authenticated **real outcome provenance**; signing does not establish
+  the truth of a claimed effect.
+- **M29-B:** unsafe signature-only decision explicitly loses one
+  unperformed synthetic operation or duplicates one performed effect
+  when the source-owned signer lies. Fixed independent oracle rejects
+  fabricated verifications, false release, missed loss/duplication and
+  hostile accessor-bearing witness input.
+- **M29-C:** [M28/M29 security explanation](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md),
+  README, source-only helper with zero CLI args. No real credentials,
+  customer file, external MCP, independently trusted signer,
+  authenticated business outcome, LLM, Stable Bridge or exactly-once
+  guarantee. Frozen unpublished **80-path** candidate unchanged;
+  #21/#43/#59 remain OPEN. PR and matched main CI **4/4** required.
 
 ## M28-A/B/C — two-world recovery ambiguity (engineering accepted)
 

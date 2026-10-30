@@ -817,6 +817,33 @@ MCP servers or Stable Bridge. See the
 [M25 test guide](.github/M25_APPROVAL_POLICY_EPOCH.md).
 The helper is source-only, outside the unpublished npm package.
 
+## Signed receipt authenticity versus real outcome proof (M29, source only)
+
+From a reviewed first-party source checkout:
+
+```sh
+node tools/m29-signed-receipt-provenance.mjs
+```
+
+Twelve fixed, isolated synthetic cases generate **real ephemeral Ed25519
+signatures** and check their binding to one fictional operation, pending-marker
+digest and logical epoch. The verifier rejects altered receipts, wrong
+operations/markers/epochs, wrong signing keys, expired attestations,
+replayed nonces and unsigned claims. A deliberately **unsafe signature-only**
+decision can still **lose an unperformed operation** or **duplicate an
+already completed effect** when a signer reports an incorrect outcome.
+The guarded decision **does not release quarantine for any receipt**
+because an independently authenticated external effect observer has
+not been established.
+
+`12/12 PASS` means the cryptographic controls and the **limits of
+signed claims** were demonstrated. It does not establish the identity
+or truthfulness of a real signer, real MCP outcomes, exactly-once recovery,
+production key management or authorization. No external servers,
+real credentials, private file reads, processes, telemetry or Stable Bridge.
+Read the [M28/M29 reconciliation guidance](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md).
+This helper is source-only, not part of the unpublished 80-path candidate.
+
 ## In-doubt recovery decisions and identical pending markers (M28, source only)
 
 From a reviewed source checkout, run:
