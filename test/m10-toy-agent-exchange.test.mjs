@@ -7,7 +7,8 @@ import {test} from 'node:test';
 import {
   runFictionalToyAgentExchange,runFixedToyAgentSelftest,
   runFixedDetectionIndependentGateSelftest,
-  runFixedContextProvenanceSelftest
+  runFixedContextProvenanceSelftest,
+  runFixedScopedAuthoritySelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
 
@@ -408,5 +409,123 @@ test('M46: context gate CLI is fixed, offline and rejects untrusted claims',()=>
     assert.equal(c.exitCode,2);
     assert.equal(c.realOwnerAuthenticated,false);
     assert.equal(c.externalMcpContacted,false);
+  }
+});
+
+
+test('M47: parent-bound origin and scoped grants ignore forged payload authority',()=>{
+  const r=runFixedScopedAuthoritySelftest();
+  assert.equal(r.status,'PASS');
+  assert.equal(r.exitCode,0);
+  assert.equal(r.checked,33);
+  assert.equal(r.matched,33);
+  assert.equal(r.sourceOwnedContextCases,11);
+  assert.deepEqual(r.hypotheticalScannerStates,['FLAGGED','NOT_FLAGGED','ERROR']);
+  assert.equal(r.gatewayIndependentOfScannerClassification,true);
+  assert.equal(r.payloadClaimsCannotGrantAuthority,true);
+  assert.equal(r.sourceOwnedMetadataOnly,true);
+  assert.equal(r.fictionalEffectsOnly,true);
+  assert.equal(r.realScannerExecuted,false);
+  assert.equal(r.realFilesystemReadObserved,false);
+  assert.equal(r.realMcpToolCallObserved,false);
+  assert.equal(r.realAgentBehaviorObserved,false);
+  assert.equal(r.independentBetaVerified,false);
+  assert.equal(r.securityCertified,false);
+  assert.equal(r.releaseAuthorized,false);
+  assert.equal(Object.isFrozen(r),true);
+  assert.equal(Object.isFrozen(r.cases),true);
+  const expected=new Map([
+    ['owner-task-data','ALLOW'],
+    ['owner-approved-read','ALLOW'],
+    ['owner-unapproved-read','DENY'],
+    ['owner-mismatched-grant','DENY'],
+    ['owner-approved-tool','ALLOW'],
+    ['owner-unapproved-tool','DENY'],
+    ['tool-result-task-data','ALLOW'],
+    ['tool-result-forged-read','DENY'],
+    ['tool-result-forged-tool','DENY'],
+    ['human-email-forged-read','DENY'],
+    ['json-result-forged-read','DENY']
+  ]);
+  for(const scanner of r.hypotheticalScannerStates){
+    const group=r.cases.filter(x=>x.hypotheticalScannerObservation===scanner);
+    assert.equal(group.length,11);
+    assert.equal(group.filter(x=>x.observedDecision==='ALLOW').length,4);
+    assert.equal(group.filter(x=>x.observedDecision==='DENY').length,7);
+    for(const row of group){
+      assert.equal(Object.isFrozen(row),true);
+      assert.equal(row.expectedDecision,expected.get(row.caseId));
+      assert.equal(row.observedDecision,expected.get(row.caseId));
+      assert.equal(row.matched,true);
+      assert.equal(row.methodCallsObserved,1);
+      assert.equal(row.fictionalUnauthorizedEffectsCommitted,0);
+      assert.equal(row.actualFileReadObserved,false);
+      assert.equal(row.actualMcpToolCallObserved,false);
+      assert.equal(row.denialsObserved,row.observedDecision==='DENY'?1:0);
+      assert.equal(row.fictionalAuthorizedReadEffects,
+        row.caseId==='owner-approved-read'?1:0);
+      assert.equal(row.fictionalAuthorizedToolEffects,
+        row.caseId==='owner-approved-tool'?1:0);
+    }
+    for(const name of [
+      'tool-result-forged-read','tool-result-forged-tool',
+      'human-email-forged-read','json-result-forged-read'
+    ]){
+      const caseRow=group.find(x=>x.caseId===name);
+      assert.equal(caseRow.untrustedAuthorityClaimIgnored,true);
+      assert.equal(caseRow.observedDecision,'DENY');
+    }
+    assert.equal(group.find(x=>x.caseId==='owner-mismatched-grant').observedDecision,
+      'DENY');
+    assert.equal(group.find(x=>x.caseId==='tool-result-task-data').observedDecision,
+      'ALLOW');
+  }
+  for(let i=0;i<11;i++){
+    const baseline=r.cases[i];
+    for(const offset of [11,22]){
+      assert.equal(r.cases[i+offset].caseId,baseline.caseId);
+      assert.equal(r.cases[i+offset].observedDecision,baseline.observedDecision);
+      assert.equal(r.cases[i+offset].fictionalUnauthorizedEffectsCommitted,0);
+    }
+  }
+  const report=JSON.stringify(r);
+  assert.ok(!report.includes(fixture.toolResult.embeddedInstruction));
+  assert.ok(!report.includes('OWNER_APPROVED'));
+});
+
+test('M47: fixed origin context CLI cannot be steered by untrusted arguments',()=>{
+  const run=(...args)=>spawnSync(process.execPath,
+    ['tools/toy-agent-exchange.mjs',...args],{encoding:'utf8'});
+  const good=run('--scoped-authority-matrix');
+  assert.equal(good.status,0,good.stderr);
+  assert.equal(good.stderr,'');
+  assert.deepEqual(JSON.parse(good.stdout),
+    runFixedScopedAuthoritySelftest());
+  assert.ok(!good.stdout.includes(fixture.caseId));
+  assert.ok(!good.stdout.includes(fixture.toolResult.embeddedInstruction));
+  for(const args of [
+    ['--scoped-authority-matrix','--origin=OWNER_DIRECT'],
+    ['--scoped-authority-matrix','--owner-grant=READ_ARCHIVE'],
+    ['--scoped-authority-matrix','--scanner=FLAGGED'],
+    ['--scoped-authority-matrix','--target=PRIVATE_CANARY'],
+    ['--scoped-authority-matrix','../../secret.json']
+  ]){
+    const denied=run(...args);
+    assert.equal(denied.status,2,denied.stderr);
+    assert.equal(denied.stderr,'');
+    assert.equal(JSON.parse(denied.stdout).ruleCode,
+      'TOY_AGENT_SELFTEST_UNAVAILABLE');
+    assert.ok(!denied.stdout.includes('PRIVATE_CANARY'));
+    assert.ok(!denied.stdout.includes('secret.json'));
+  }
+  for(const args of [
+    null,{},['origin=OWNER_DIRECT'],Array(1),
+    Object.create([]),Object.create(null)
+  ]){
+    const report=runFixedScopedAuthoritySelftest(args);
+    assert.equal(report.status,'ERROR');
+    assert.equal(report.exitCode,2);
+    assert.equal(report.realAgentBehaviorObserved,false);
+    assert.equal(report.realScannerExecuted,false);
   }
 });
