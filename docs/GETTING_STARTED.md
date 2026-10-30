@@ -1,3 +1,60 @@
+## M35 — first-party readable offline onboarding (source checkout)
+
+This is a zero-contact **configuration shape report**, not a vulnerability
+scan. It accepts one approved MCP client JSON entry in `mcpServers`
+or `servers` (see [M34 input limits](../.github/M34_CLIENT_CONFIG_IMPORT.md)).
+The existing M34 importer performs strict 4 KiB stdin, UTF-8 and
+duplicate-key validation, then the M24 inert descriptor gate.
+
+On **PowerShell** with Node.js 20+:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\client-config.json | node tools/m35-offline-onboarding-report.mjs
+Get-Content -Raw -Encoding utf8 .\client-config.json | node tools/m35-offline-onboarding-report.mjs --json
+```
+
+On Linux/macOS:
+
+```sh
+cat ./client-config.json | node tools/m35-offline-onboarding-report.mjs
+cat ./client-config.json | node tools/m35-offline-onboarding-report.mjs --json
+```
+
+For a **fictional** local example, create `client-config.json` with:
+
+```json
+{"mcpServers":{"fictional-example":{"command":"node","args":["server.mjs"]}}}
+```
+
+A successful text report includes `DESCRIPTOR PREFLIGHT`,
+`FICTIONAL CONTRACT CONTROLS`, `NOT TESTED` and `NEXT ACTIONS`.
+It states "5/5 reviewed first-party fictional checks matched", but
+**these five are unchanged bundled fixtures** — they do not run the
+named command, inspect a customer MCP server or discover a real
+vulnerability. In both text/JSON modes, `riskRating` is
+`NOT_SCORED`, real contact is `NOT_ATTEMPTED`, and authorization is
+not granted. No raw name, path, endpoint or command text is echoed.
+
+Invalid client configs are rejected without a project assessment:
+exit **2**, `OFFLINE_ONBOARDING_INPUT_REJECTED`; syntactic/fixed
+fictional PASS exits **0**, `OFFLINE_ONBOARDING_SHAPE_ACCEPTED`.
+The tool cannot certify your software or establish owner approval.
+To work with real external MCP servers, #21 needs separate explicit
+owner authorization and secure target drivers; independent beta
+[#59](../.github/../issues/59) and security audit #43 are still
+open. No deployment or npm publication is implied.
+
+### Hard boundaries
+
+The M35 helper performs no filesystem read of its own beyond loading
+reviewed source modules. The local shell supplies stdin; it does not
+attempt DNS, HTTP, process launching, access to credentials, network
+telemetry, or real agent inference. It never reads a stored report as
+evidence; report text is rendered only from locally minted categorical
+results. Use private test configs, never customer secrets. Opt-in M34
+`--emit-descriptor` remains a **separate** operation that can disclose
+input fields to your local stdout, unlike the M35 report.
+
 ## M7-A/B/C — built-in fictional adapter first-run guide
 
 On Node.js 20+ in a clean source checkout, get a reviewed sequence
