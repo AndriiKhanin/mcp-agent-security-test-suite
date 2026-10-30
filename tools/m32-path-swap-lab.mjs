@@ -473,7 +473,7 @@ export async function runFixedChildProcessEffectFaultSelftest(args=[]){
 /** M51: real OS file-handle rights; never claim same-user sandboxing. */
 const M51_SCOPE='OS_HANDLE_RIGHTS_NOT_PROCESS_CONFINEMENT';
 const M51_ORIGINAL='FICTIONAL-ORIGINAL\n',M51_CHANGED='FICTIONAL-MODIFIED\n';
-const M51_IDS=['RO','RW','REOPEN','LIAR'];
+const M51_IDS=['RO','RW','REOPEN','LIAR','PREOPEN'];
 const M51_ERROR=Object.freeze({status:'ERROR',exitCode:2,
   ruleCode:'M51_FIXED_OS_HANDLE_TEST_UNAVAILABLE',
   osSandboxed:false,externalMcpContacted:false});
@@ -489,7 +489,10 @@ async function m51Worker(){
     if(!m50Exact(msg,['kind','id','path'])||
       msg.kind!=='M51_PATH'||msg.id!==id||
       typeof msg.path!=='string'||!msg.path)return 2;
-    const ro=id==='RO'||id==='REOPEN';
+    // PREOPEN demonstrates that denying one handle cannot revoke an
+    // already-held writable handle in the same ordinary OS process.
+    const prior=id==='PREOPEN'?await open(msg.path,'r+'):null;
+    const ro=id==='RO'||id==='REOPEN'||id==='PREOPEN';
     const h=await open(msg.path,ro?'r':'r+');
     let denied=false;
     try{
@@ -499,6 +502,10 @@ async function m51Worker(){
         denied=true;
       }
     }finally{await h.close();}
+    if(prior){
+      try{if(denied)await prior.write(M51_CHANGED,0,'utf8');}
+      finally{await prior.close();}
+    }
     if(id==='REOPEN'&&denied){
       const writable=await open(msg.path,'r+');
       try{await writable.write(M51_CHANGED,0,'utf8');}
@@ -506,7 +513,7 @@ async function m51Worker(){
     }
     return await new Promise(resolve=>{
       process.send({kind:'M51_REPORT',id,denied,
-        claimedChanged:id==='RW'||id==='REOPEN'},err=>{
+        claimedChanged:id==='RW'||id==='REOPEN'||id==='PREOPEN'},err=>{
         if(process.connected)process.disconnect();resolve(err?2:0);
       });
     });
@@ -569,7 +576,7 @@ async function m51Case(id){
       try{await lstat(root);}catch(e){clean=e?.code==='ENOENT';}
     }catch{clean=false;}
   }
-  const ro=id==='RO'||id==='REOPEN';
+  const ro=id==='RO'||id==='REOPEN'||id==='PREOPEN';
   const changed=id!=='RO';
   if(!failure&&(!reaped||received!==1||reported!==1))
     failure='M51_CHILD_UNCONFIRMED';
@@ -604,6 +611,21 @@ export async function runFixedOsHandleRightsSelftest(args=[]){
       cases:Object.freeze(cases),realChildProcessUsed:true,
       osSandboxed:false,arbitraryPathAccessPrevented:false,
       externalMcpContacted:false,releaseAuthorized:false});
+  }catch{return M51_ERROR;}
+}
+/** M52: child retained write authority before a later read-only FD denial. */
+export async function runFixedPreopenedHandleSelftest(args=[]){
+  if(!m50NoArgs(args))return M51_ERROR;
+  try{
+    const row=await m51Case('PREOPEN');
+    const pass=row.status==='PASS'&&row.handleWriteDenied===true&&
+      row.actualFileEffect==='MODIFIED'&&row.childReaped&&row.cleanupVerified;
+    return Object.freeze({status:pass?'PASS':'FAIL',exitCode:pass?0:1,
+      ruleCode:pass?'M52_PREOPENED_WRITE_AUTHORITY_SURVIVES_DENIAL':row.ruleCode,
+      readOnlyHandleWriteDenied:row.handleWriteDenied===true,
+      retainedWritableHandleEffectObserved:row.actualFileEffect==='MODIFIED',
+      childReaped:row.childReaped,cleanupVerified:row.cleanupVerified,
+      osSandboxed:false,confinementProven:false,externalMcpContacted:false});
   }catch{return M51_ERROR;}
 }
 /** Direct source-test only: actual write followed by a false IPC claim. */
