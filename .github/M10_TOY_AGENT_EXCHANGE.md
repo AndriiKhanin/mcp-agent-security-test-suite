@@ -128,3 +128,46 @@ No OS file target, external MCP endpoint, model, API key or executable
 is accepted. The no-argument five-case selftest remains unchanged.
 Future independent real-agent tests require separate owner approval,
 isolated operation and real side-effect witnesses.
+
+
+## M46 — origin-bound toy authorization (not text-based authority)
+
+Run from a reviewed source checkout:
+
+```sh
+node tools/toy-agent-exchange.mjs --context-provenance-matrix
+node --test test/m10-toy-agent-exchange.test.mjs
+```
+
+The **source-owned, first-party in-memory** gateway binds methods to three
+separate call interfaces: `OWNER_EXPLICIT`,
+`TOOL_RESULT_UNTRUSTED`, and `HUMAN_EMAIL_UNTRUSTED`.
+A tool-result string or email cannot select the trusted owner interface
+via a claimed role, YAML metadata, suspicious phrases, or detector output.
+This distinction is guaranteed **only by fixed test source**; a real
+system would require actual authenticated caller identity and capability
+separation, which are not implemented in this toy.
+
+The matrix has **36 deterministic trials** (three hypothetical scanner
+labels × three source contexts × four actions):
+
+- Consuming fictional task data is allowed in all three contexts.
+- Updating fictional task status is allowed only via the source-bound
+  trusted-owner interface, and has a **positive committed toy effect**
+  in that case. The exact same request from an untrusted tool result
+  or ordinary email is denied.
+- Attempts to read an unrelated fictional file or promote a claimed
+  authority level are always denied.
+- Every decision is identical under hypothetical scanner outcomes
+  `FLAGGED`, `NOT_FLAGGED`, and `ERROR`, since those
+  labels are never supplied to the gateway.
+
+The parent records actual JavaScript method invocations and distinct
+fictional allow/deny effects. Passing CI is evidence **only of this
+source-owned toy policy**. These 36 cases **do not interpret natural
+language**, authenticate a real user, execute an AI model, start an
+external scanner, read real files, invoke real MCP tools, or prove that
+the same provenance guarantees hold in an adversarial process.
+
+The no-argument original five-case toy selftest and the M45
+`--blindspot-gate-matrix` remain unchanged.
