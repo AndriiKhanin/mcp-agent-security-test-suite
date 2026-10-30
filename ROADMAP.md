@@ -190,6 +190,28 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - CI and review gate: PR four-job PASS before merge; post-merge `main`
   CI checked separately. M45/M46 fixed modes and M38 source custody preserved.
 
+## M48 — bounded toy approval policy vs approval fatigue (engineering pending)
+
+- Follow-up [#354](../../issues/354): `--approval-policy-matrix`
+  evaluates **108 source-authored in-memory decisions**: 9 fixed cases ×
+  baseline/careful × outside-content seen/unseen × 3 hypothetical detector
+  outcomes.
+- Reports only `ALLOW`, `DENY`, `REQUIRE_APPROVAL`, plus counts of
+  read-only prompts and attempted prompts for actions lacking permissions.
+  **Missing/mismatched scope or untrusted source always DENY**, regardless
+  of scanner state or careful mode. Pending approval commits no toy effects.
+- Source-authorized fictional read operations do not prompt. The careful
+  policy asks for *simulated* confirmation only for a qualified owner
+  side-effecting tool operation after outside content has been observed.
+  No real user input or approval is requested or recorded.
+- Readme/test guide and regression require fixed CLI input, no text echo,
+  zero unauthorized effects and unchanged existing M10/M45/M46/M47 modes.
+  All states and grants are **synthetic test inputs**, not real provenance,
+  external MCP authorization, independent beta, security efficacy,
+  real-world UX statistics or evidence of actual user consent.
+- PR CI 4/4 and merge acceptance are pending; do not deploy this toy model
+  as a real security gateway.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
