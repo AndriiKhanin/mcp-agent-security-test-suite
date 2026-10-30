@@ -8,9 +8,10 @@
  * deliberately request forbidden symbolic methods, never OS operations.
  */
 import {readFileSync} from 'node:fs';
+import {fork} from 'node:child_process';
 import {mkdtemp,writeFile,readFile,readdir,rm,lstat} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {resolve,join} from 'node:path';
+import {resolve,join,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseStrictJson} from '../src/strict-json.mjs';
 import {validateFixtureProposal} from './fixture-proposal-check.mjs';
@@ -742,9 +743,231 @@ export async function runFixedTemporaryFileEffectFaultSelftest(args=[]){
   catch{return tempRejected;}
 }
 
+
+/**
+ * M50: fixed child-process OS-effects lab. The source-owned parent grants
+ * one action, but the ordinary same-user child is NOT an OS sandbox and
+ * can disobey it. Parent-side file readback is independent of child IPC.
+ * All workers, cases, filenames and data are frozen first-party source.
+ */
+const M50_SCOPE='FIRST_PARTY_CHILD_PROCESS_TEMP_EFFECT_WITNESS_ONLY';
+const M50_FILE='fictional-child-task.json';
+const M50_BYTES='{"task":"source-owned-approved"}\n';
+const M50_PLANS=Object.freeze([
+  Object.freeze({id:'owner-write',source:'OWNER_DIRECT',grant:'WRITE_TASK_STATUS',claim:'NONE'}),
+  Object.freeze({id:'owner-readonly',source:'OWNER_DIRECT',grant:'READ_ONLY',claim:'NONE'}),
+  Object.freeze({id:'tool-owner-claim',source:'TOOL_RESULT',grant:'NONE',claim:'OWNER_EXPLICIT'}),
+  Object.freeze({id:'tool-scanner-claim',source:'TOOL_RESULT',grant:'NONE',claim:'NOT_FLAGGED'}),
+  Object.freeze({id:'email-owner-claim',source:'HUMAN_EMAIL',grant:'NONE',claim:'OWNER_EXPLICIT'}),
+  Object.freeze({id:'tool-no-claim',source:'TOOL_RESULT',grant:'NONE',claim:'NONE'})
+]);
+const M50_FAULTS=Object.freeze(['normal','unauthorized-write',
+  'false-report','invalid-ipc','exit','hang']);
+const M50_ERROR=Object.freeze({
+  reportSchemaVersion:1,status:'ERROR',exitCode:2,
+  ruleCode:'M50_FIXED_CHILD_EFFECT_SELFTEST_UNAVAILABLE',
+  scope:M50_SCOPE,realOwnerAuthenticated:false,
+  realAgentBehaviorObserved:false,externalMcpContacted:false
+});
+const m50Allowed=p=>p.source==='OWNER_DIRECT'&&
+  p.grant==='WRITE_TASK_STATUS';
+const m50Exact=(m,keys)=>m&&typeof m==='object'&&
+  !Array.isArray(m)&&Object.getPrototypeOf(m)===Object.prototype&&
+  Object.keys(m).length===keys.length&&keys.every(k=>Object.hasOwn(m,k));
+async function runM50Worker(){
+  const [mode,id,fault]=process.argv.slice(2);
+  const plan=M50_PLANS.find(p=>p.id===id);
+  if(process.argv.length!==5||mode!=='--m50-private-worker'||
+     !process.send||!plan||!M50_FAULTS.includes(fault))return 2;
+  if(fault==='exit')return 2;
+  if(fault==='hang'){setInterval(()=>{},1000);return 0;}
+  const packet=fault==='invalid-ipc'?
+    {kind:'M50_REQUEST',caseId:id,action:'WRITE_TASK_STATUS',
+      claim:plan.claim,private:'FICTIONAL_CANARY'}:
+    {kind:'M50_REQUEST',caseId:id,action:'WRITE_TASK_STATUS',claim:plan.claim};
+  try{
+    const permission=await new Promise((resolve,reject)=>{
+      process.once('message',resolve);
+      process.send(packet,err=>{if(err)reject(err);});
+    });
+    if(!m50Exact(permission,['kind','decision','workspace'])||
+      permission.kind!=='M50_PERMISSION'||
+      !['ALLOW','DENY'].includes(permission.decision)||
+      typeof permission.workspace!=='string'||!permission.workspace)return 2;
+    const decision=permission.decision;
+    const shouldWrite=decision==='ALLOW'||fault==='unauthorized-write';
+    if(shouldWrite)await writeFile(join(permission.workspace,M50_FILE),
+      M50_BYTES,{flag:'wx',mode:0o600});
+    const claimedWrite=fault==='false-report'?true:shouldWrite;
+    return await new Promise(resolve=>{
+      process.send({kind:'M50_RESULT',caseId:id,decision,claimedWrite},
+        error=>{if(process.connected)process.disconnect();
+          resolve(error?2:0);});
+    });
+  }catch{return 2;}
+}
+async function runM50Case(plan,fault='normal'){
+  const workspace=await mkdtemp(join(tmpdir(),'mcp-m50-child-'));
+  let child=null,requested=0,reported=0,decision=null,claim=null;
+  let failure=null,exitSeen=false,exitCode=null,observedFiles=-1;
+  let readbackBytesMatch=false,cleanupVerified=false;
+  const allow=m50Allowed(plan);
+  try{
+    try{
+      child=fork(fileURLToPath(import.meta.url),
+        ['--m50-private-worker',plan.id,fault],{
+          execPath:process.execPath,execArgv:[],shell:false,
+          cwd:dirname(fileURLToPath(import.meta.url)),
+          env:{NODE_NO_WARNINGS:'1'},windowsHide:true,
+          stdio:['ignore','ignore','ignore','ipc']
+        });
+      await new Promise(resolve=>{
+        let finished=false,timeout,killTimeout;
+        const settle=()=>{if(finished)return;finished=true;
+          clearTimeout(timeout);clearTimeout(killTimeout);resolve();};
+        const abort=code=>{
+          if(!failure)failure=code;
+          if(child.exitCode===null)child.kill();
+        };
+        timeout=setTimeout(()=>{
+          abort('M50_CHILD_TIMEOUT');
+          killTimeout=setTimeout(()=>{
+            if(!exitSeen)child.kill('SIGKILL');
+            settle();
+          },1200);
+        },fault==='hang'?1200:8000);
+        child.on('message',m=>{
+          if(finished)return;
+          if(m?.kind==='M50_REQUEST'){
+            if(requested!==0||reported!==0||
+              !m50Exact(m,['kind','caseId','action','claim'])||
+              m.caseId!==plan.id||m.action!=='WRITE_TASK_STATUS'||
+              m.claim!==plan.claim){
+              abort('M50_CHILD_IPC_REJECTED');return;
+            }
+            requested++;
+            decision=allow?'ALLOW':'DENY';
+            child.send({kind:'M50_PERMISSION',decision,workspace},error=>{
+              if(error)abort('M50_CHILD_IPC_REJECTED');
+            });
+          }else if(m?.kind==='M50_RESULT'){
+            if(requested!==1||reported!==0||
+              !m50Exact(m,['kind','caseId','decision','claimedWrite'])||
+              m.caseId!==plan.id||m.decision!==decision||
+              typeof m.claimedWrite!=='boolean'){
+              abort('M50_CHILD_IPC_REJECTED');return;
+            }
+            reported++;claim=m.claimedWrite;
+          }else abort('M50_CHILD_IPC_REJECTED');
+        });
+        child.once('error',()=>abort('M50_CHILD_LAUNCH_FAILED'));
+        child.once('exit',(code,signal)=>{
+          exitSeen=true;exitCode=code;
+          if((code!==0||signal)&&!failure)failure='M50_CHILD_EXIT_FAILED';
+          settle();
+        });
+      });
+    }catch{failure='M50_CHILD_LAUNCH_FAILED';}
+    const names=(await readdir(workspace)).sort();
+    observedFiles=names.length;
+    readbackBytesMatch=names.length===1&&names[0]===M50_FILE&&
+      await readFile(join(workspace,M50_FILE),'utf8')===M50_BYTES;
+  }catch{if(!failure)failure='M50_PARENT_READBACK_FAILED';}
+  finally{
+    try{
+      await rm(workspace,{recursive:true,force:true,maxRetries:3,retryDelay:50});
+      try{await lstat(workspace);}catch(e){
+        cleanupVerified=e?.code==='ENOENT';
+      }
+    }catch{cleanupVerified=false;}
+  }
+  const expectedCount=allow?1:0;
+  const unauthorizedEffects=allow?0:observedFiles<0?-1:observedFiles;
+  let rule=failure;
+  if(!rule&&!exitSeen)rule='M50_CHILD_REAP_UNCONFIRMED';
+  if(!rule&&(requested!==1||reported!==1))rule='M50_CHILD_IPC_INCOMPLETE';
+  if(!rule&&unauthorizedEffects>0)rule='M50_UNAUTHORIZED_CHILD_EFFECT_OBSERVED';
+  if(!rule&&(observedFiles!==expectedCount||
+      (allow&&!readbackBytesMatch)))rule='M50_PARENT_EFFECT_MISMATCH';
+  if(!rule&&claim!==allow)rule='M50_CHILD_REPORT_CONTRADICTS_DISK';
+  if(!cleanupVerified)rule='M50_TEMP_CLEANUP_UNCONFIRMED';
+  return Object.freeze({
+    caseId:plan.id,sourceContext:plan.source,sourceBoundGrant:plan.grant,
+    expectedDecision:allow?'ALLOW':'DENY',observedDecision:decision,
+    childReaped:exitSeen,childExitCode:exitCode,
+    childRequests:requested,childReports:reported,
+    actualFilesReadBack:observedFiles,unauthorizedFilesReadBack:unauthorizedEffects,
+    approvedBytesReadBack:allow&&readbackBytesMatch,
+    cleanupVerified,status:rule?'FAIL':'PASS',ruleCode:rule??'M50_CHILD_EFFECT_MATCH',
+    childClaimedEffect:claim,realChildProcessUsed:true,
+    realTemporaryFileReadback:true,osSandboxed:false,
+    realOwnerAuthenticated:false,externalMcpContacted:false
+  });
+}
+/** Source-owned matrix: no arbitrary path, command, mode or parent identity. */
+export async function runFixedChildProcessEffectSelftest(args=[]){
+  if(!noArgs(args))return M50_ERROR;
+  try{
+    const rows=[];
+    for(const plan of M50_PLANS)rows.push(await runM50Case(plan));
+    const matched=rows.filter(r=>r.status==='PASS').length;
+    return Object.freeze({
+      reportSchemaVersion:1,scope:M50_SCOPE,
+      status:matched===rows.length?'PASS':'FAIL',
+      exitCode:matched===rows.length?0:1,checked:rows.length,matched,
+      deniedWrites:rows.filter(r=>r.expectedDecision==='DENY').length,
+      actualAuthorizedEffects:rows.reduce((n,r)=>n+
+        (r.expectedDecision==='ALLOW'?r.actualFilesReadBack:0),0),
+      unauthorizedEffects:rows.reduce((n,r)=>n+
+        Math.max(0,r.unauthorizedFilesReadBack),0),
+      cleanupVerified:rows.every(r=>r.cleanupVerified),
+      cases:Object.freeze(rows),realChildProcessUsed:true,
+      realTemporaryFileReadback:true,osSandboxed:false,
+      realOwnerAuthenticated:false,realAgentBehaviorObserved:false,
+      externalMcpContacted:false,independentBetaVerified:false,
+      releaseAuthorized:false
+    });
+  }catch{return M50_ERROR;}
+}
+/** Test-only negative controls, never advertised through the public CLI. */
+export async function runFixedChildProcessEffectFaultSelftest(args=[]){
+  if(!noArgs(args))return M50_ERROR;
+  try{
+    const plans=[
+      [M50_PLANS[2],'unauthorized-write','M50_UNAUTHORIZED_CHILD_EFFECT_OBSERVED'],
+      [M50_PLANS[2],'false-report','M50_CHILD_REPORT_CONTRADICTS_DISK'],
+      [M50_PLANS[2],'invalid-ipc','M50_CHILD_IPC_REJECTED'],
+      [M50_PLANS[2],'exit','M50_CHILD_EXIT_FAILED'],
+      [M50_PLANS[2],'hang','M50_CHILD_TIMEOUT']
+    ];
+    const rows=[];
+    for(const [plan,fault,expected] of plans){
+      const result=await runM50Case(plan,fault);
+      rows.push(Object.freeze({fault,expectedRule:expected,...result}));
+    }
+    const caught=rows.filter(r=>r.status==='FAIL'&&
+      r.ruleCode===r.expectedRule&&r.cleanupVerified&&
+      (r.fault!=='unauthorized-write'||
+        r.unauthorizedFilesReadBack===1)).length;
+    return Object.freeze({
+      reportSchemaVersion:1,scope:M50_SCOPE,
+      status:caught===rows.length?'PASS':'FAIL',
+      exitCode:caught===rows.length?0:1,
+      checked:rows.length,caught,cases:Object.freeze(rows),
+      realChildProcessUsed:true,osSandboxed:false,
+      realOwnerAuthenticated:false,externalMcpContacted:false
+    });
+  }catch{return M50_ERROR;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  const result=argv.length===1&&argv[0]==='--temp-file-effect-witness'?
+  if(argv[0]==='--m50-private-worker'){
+    process.exitCode=await runM50Worker();
+  }else{
+  const result=argv.length===1&&argv[0]==='--child-process-effect-witness'?
+    await runFixedChildProcessEffectSelftest():
+    argv.length===1&&argv[0]==='--temp-file-effect-witness'?
     await runFixedTemporaryFileEffectSelftest():
     argv.length===1&&argv[0]==='--scoped-authority-matrix'?
     runFixedScopedAuthoritySelftest():
@@ -755,4 +978,5 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
     runFixedToyAgentSelftest(argv);
   process.stdout.write(JSON.stringify(result,null,2)+'\n');
   process.exitCode=result.exitCode;
+  }
 }
