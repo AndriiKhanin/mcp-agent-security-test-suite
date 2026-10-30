@@ -41,8 +41,16 @@ fictional PASS exits **0**, `OFFLINE_ONBOARDING_SHAPE_ACCEPTED`.
 The tool cannot certify your software or establish owner approval.
 To work with real external MCP servers, #21 needs separate explicit
 owner authorization and secure target drivers; independent beta
-[#59](../.github/../issues/59) and security audit #43 are still
+[#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) and security audit [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) are still
 open. No deployment or npm publication is implied.
+
+Engineering evidence: [M35 PR #327](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/327)
+passed [PR CI #41033447378](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41033447378)
+and independent [main CI #41033817795](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41033817795),
+**4/4 PASS each** on exact M35 merged SHA
+`a5b9245178ce375dbcd08bd0eb82477c8760d8ac`.
+Ubuntu20 **1350/1350 tests**, 0 failures/skips. This is
+source-only acceptance; it does not close external gates.
 
 ### Hard boundaries
 
