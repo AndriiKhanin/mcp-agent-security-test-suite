@@ -1,3 +1,54 @@
+## M36 — offline distribution doctor (no npm publication)
+
+This command is for maintainers reviewing the **local frozen package
+candidate**, not for scanning your MCP server. From a checked-out
+repository with Node.js >=20 and bundled npm:
+
+Windows PowerShell 7:
+
+```powershell
+node tools/reviewer-handoff.mjs doctor
+```
+
+Linux/macOS:
+
+```sh
+node tools/reviewer-handoff.mjs doctor
+```
+
+Expected on an intact reviewed source checkout: JSON
+`profile: "m36-offline-distribution-doctor-v1"`,
+`status: "PASS"`, `packagePathCount: 80`,
+`archivedAndInstalledLocally: true`, local source/archive/installed
+hashes, and the bounded excluded-source index. The local temp
+archive and installation are removed after the check. This may take
+longer than a schema check because it runs *real* offline npm
+pack/install with `--ignore-scripts` and `--offline`.
+The helper accepts **no extra flags, paths, endpoints or credentials**.
+
+A `PASS` is **not** a published artifact or release readiness:
+`releaseReady`, `releaseApproved`, `published`,
+`externalTargetAuthorized`, `independentAuditVerified`,
+`independentBetaVerified`,
+`checkoutCleanlinessVerified` and
+`artifactDigestIndependentlyAnchored` are permanently false.
+External reviewer identity, trusted Git source revision and signing
+are not established by locally computed checksums. Missing source
+files, a broken pack/install, inconsistent inventory, npm failure
+or unsupported arguments return a generic `ERROR` report (exit 2)
+without echoing private paths or npm diagnostics.
+
+The `doctor` command belongs to the **source-only tools**
+directory; it is not present inside the frozen unpublished
+80-file npm archive. This does not publish to npm, create Git tags,
+retain an archive or authorize real MCP targets. Publication still
+requires explicit owner decision and independent gates
+[#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
+[#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
+and [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
+
+---
+
 ## M35 — first-party readable offline onboarding (source checkout)
 
 This is a zero-contact **configuration shape report**, not a vulnerability
