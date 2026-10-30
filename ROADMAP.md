@@ -72,7 +72,38 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M30 — Two signed claims ≠ effect provenance** | Ephemeral dual Ed25519 signatures, signer-key diversity, false consensus and quarantine after conflicting or deceptive outcomes | **ENGINEERING ACCEPTED — PR/main 4/4** | [#314](../../issues/314), [PR #315](../../pull/315), [main CI #41023181163](../../actions/runs/41023181163), [guide](.github/M30_DUAL_SIGNER_QUORUM.md) | 14/14 source-owned crypto cases, PR/main CI 4/4; no independently verified effect provenance |
 
+| **M31 — Disposable OS effect readback vs deceptive outcome claims** | Separate source-owned child writes a real scratch marker and parent reads exact bytes twice; false claims and stale evidence stay quarantined | **IN PROGRESS — PR/main CI pending** | [#317](../../issues/317), [guide](.github/M31_OS_EFFECT_WITNESS.md) | 7/7 real scratch observations, mutation controls, 4/4 PR and matched main CI; not external effect proof |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M31-A/B/C — parent-read disposable OS effect witness (engineering in progress)
+
+- [Issue #317](../../issues/317) adds
+  `node tools/m31-os-effect-witness.mjs`, a zero-argument source-only
+  exercise using a separate fixed Node worker and a new random directory
+  directly under `os.tmpdir()` for each of **seven** scenarios.
+  The worker writes a real **fsynced, exclusive, inert scratch file**,
+  omits it, or deliberately corrupts/removes it. The **parent** checks
+  actual regular-file metadata and exact bytes twice, never trusting
+  the child's declared effect outcome.
+- **M31-A:** detect fabricated COMMITTED without a file, fabricated
+  ABSENT with a valid file, malformed bytes and a marker that changes
+  between two observations. Truthful local claims are positive
+  controls, not independent evidence about a real business effect.
+- **M31-B:** independent fixed case oracle verifies parent first/second
+  readbacks, effect-claim contradictions, stale evidence, isolated
+  worker processes and complete scratch cleanup. Negative mutation
+  tests reject forged observations, hidden claim-only lost/duplicate
+  effects and unauthorized release. Every guarded disposition remains
+  **QUARANTINE**; zero automatic recovery transitions.
+- **M31-C:** [limitations guide](.github/M31_OS_EFFECT_WITNESS.md),
+  README, bounded M6-J source hash inventory and unchanged unpublished
+  **80-file** npm candidate. Windows/Ubuntu Node20/22 PR CI **4/4**
+  and separately matched main-push CI **4/4** required. Real
+  power-loss durability, external-effect truth, operator signing,
+  independent beta, release and #21/#43/#59 gates remain unverified.
+  No external MCP target, real user file, arbitrary command,
+  credential or Stable Bridge operation.
 
 ## M30-A/B/C — dual-signer agreement still does not prove real effects (engineering accepted)
 
