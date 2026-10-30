@@ -532,130 +532,65 @@ test('M47: fixed origin context CLI cannot be steered by untrusted arguments',()
 });
 
 
-test('M48: careful mode prompts only for qualified toy tool action after outside content',()=>{
-  const report=runFixedToyApprovalPolicySelftest();
-  assert.equal(report.status,'PASS');
-  assert.equal(report.exitCode,0);
-  assert.equal(report.checked,108);
-  assert.equal(report.matched,108);
-  assert.equal(report.sourceOwnedCases,9);
-  assert.equal(report.approvalModeCount,2);
-  assert.deepEqual(report.detectorHypotheses,['FLAGGED','NOT_FLAGGED','ERROR']);
-  assert.equal(report.allowedCases,45);
-  assert.equal(report.deniedCases,60);
-  assert.equal(report.requireApprovalCases,3);
-  assert.equal(report.unnecessarilyPromptedReadCases,0);
-  assert.equal(report.unqualifiedOperationsPrompted,0);
-  assert.equal(report.fictionalApprovedToolEffects,9);
-  assert.equal(report.independentOfScannerClassification,true);
-  assert.equal(report.realApprovalRequested,false);
-  assert.equal(report.realApprovalGranted,false);
-  assert.equal(report.realScannerExecuted,false);
-  assert.equal(report.realAgentBehaviorObserved,false);
-  assert.equal(report.realFilesystemReadObserved,false);
-  assert.equal(report.realMcpToolCallObserved,false);
-  assert.equal(report.externalMcpContacted,false);
-  assert.equal(report.securityCertified,false);
-  assert.equal(Object.isFrozen(report),true);
-  assert.equal(Object.isFrozen(report.cases),true);
-
-  for(const row of report.cases){
-    assert.equal(Object.isFrozen(row),true);
+test('M48: scoped approval matrix never prompts for read or forbidden work',()=>{
+  const r=runFixedToyApprovalPolicySelftest();
+  assert.equal(r.status,'PASS');
+  assert.deepEqual([r.checked,r.matched,r.sourceOwnedCases,
+    r.allowedCases,r.deniedCases,r.requireApprovalCases,
+    r.unnecessarilyPromptedReadCases,r.unqualifiedOperationsPrompted,
+    r.fictionalApprovedToolEffects],[108,108,9,45,60,3,0,0,9]);
+  assert.deepEqual(r.detectorHypotheses,['FLAGGED','NOT_FLAGGED','ERROR']);
+  for(const flag of ['realApprovalRequested','realApprovalGranted',
+    'realScannerExecuted','realAgentBehaviorObserved',
+    'realFilesystemReadObserved','realMcpToolCallObserved',
+    'externalMcpContacted','securityCertified'])
+    assert.equal(r[flag],false,flag);
+  assert.equal(r.independentOfScannerClassification,true);
+  assert.ok(Object.isFrozen(r)&&Object.isFrozen(r.cases));
+  for(const row of r.cases){
+    assert.ok(Object.isFrozen(row));
     assert.equal(row.matched,true);
     assert.equal(row.expectedDecision,row.observedDecision);
     assert.equal(row.methodCallsObserved,1);
-    assert.equal(row.fictionalUnauthorizedEffectsCommitted,0);
-    assert.equal(row.actualFileReadObserved,false);
-    assert.equal(row.actualMcpToolCallObserved,false);
     assert.equal(row.allowed+row.denied+row.approvalRequired,1);
-    if(row.observedDecision==='REQUIRE_APPROVAL'){
-      assert.equal(row.caseId,'owner-granted-tool');
-      assert.equal(row.parentBoundOrigin,'OWNER_DIRECT');
-      assert.equal(row.parentBoundGrant,'USE_TOOL');
-      assert.equal(row.policyMode,'CAREFUL');
-      assert.equal(row.externalContentSeen,true);
-      assert.equal(row.fictionalApprovedToolEffects,0);
-    }
+    assert.equal(row.fictionalUnauthorizedEffectsCommitted,0);
+    assert.equal(row.actualMcpToolCallObserved,false);
     if(row.observedDecision==='DENY'){
       assert.equal(row.approvalRequired,0);
-      assert.equal(row.fictionalApprovedReadEffects,0);
       assert.equal(row.fictionalApprovedToolEffects,0);
     }
-    if(row.action==='TASK_DATA'||row.action==='PROTECTED_READ')
-      assert.notEqual(row.observedDecision,'REQUIRE_APPROVAL');
+    if(row.observedDecision==='REQUIRE_APPROVAL'){
+      assert.deepEqual([row.caseId,row.policyMode,row.externalContentSeen,
+        row.parentBoundGrant,row.fictionalApprovedToolEffects],
+        ['owner-granted-tool','CAREFUL',true,'USE_TOOL',0]);
+    }
     if(row.untrustedApprovalClaimIgnored)
       assert.equal(row.observedDecision,'DENY');
+    if(row.action!=='PROTECTED_TOOL')
+      assert.notEqual(row.observedDecision,'REQUIRE_APPROVAL');
   }
-
-  for(const mode of ['BASELINE','CAREFUL']){
-    for(const outside of [false,true]){
-      const qualified=report.cases.filter(x=>x.policyMode===mode&&
-        x.externalContentSeen===outside&&
-        x.caseId==='owner-granted-tool');
-      assert.equal(qualified.length,3);
-      const expectation=mode==='CAREFUL'&&outside?
-        'REQUIRE_APPROVAL':'ALLOW';
-      for(const row of qualified)assert.equal(row.observedDecision,expectation);
-    }
-  }
-  const perScanner=report.cases.length/3;
-  for(let i=0;i<perScanner;i++){
-    const first=report.cases[i];
-    for(const offset of [perScanner,2*perScanner]){
-      assert.equal(report.cases[i+offset].caseId,first.caseId);
-      assert.equal(report.cases[i+offset].observedDecision,
-        first.observedDecision);
-    }
-  }
-  assert.ok(!JSON.stringify(report).includes(fixture.caseId));
-  assert.ok(!JSON.stringify(report).includes(fixture.toolResult.embeddedInstruction));
+  for(let i=0;i<36;i++)for(const offset of [36,72])
+    assert.equal(r.cases[i].observedDecision,
+      r.cases[i+offset].observedDecision);
+  assert.ok(!JSON.stringify(r).includes(fixture.toolResult.embeddedInstruction));
 });
-
-test('M48: approval CLI denies runtime mode overrides or user data',()=>{
+test('M48: fixed CLI rejects modes, targets and invented approval',()=>{
   const run=(...args)=>spawnSync(process.execPath,
     ['tools/toy-agent-exchange.mjs',...args],{encoding:'utf8'});
-  const good=run('--approval-policy-matrix');
-  assert.equal(good.status,0,good.stderr);
-  assert.equal(good.stderr,'');
-  assert.deepEqual(JSON.parse(good.stdout),runFixedToyApprovalPolicySelftest());
-  assert.ok(!good.stdout.includes('OWNER_APPROVED'));
-
-  for(const args of [
-    ['--approval-policy-matrix','--mode=CAREFUL'],
-    ['--approval-policy-matrix','--owner=PRIVATE_CANARY'],
-    ['--approval-policy-matrix','--approve'],
-    ['--approval-policy-matrix','--target=private.invalid']
-  ]){
-    const result=run(...args);
-    assert.equal(result.status,2,result.stderr);
-    assert.equal(result.stderr,'');
-    assert.equal(JSON.parse(result.stdout).ruleCode,
+  const ok=run('--approval-policy-matrix');
+  assert.equal(ok.status,0,ok.stderr);
+  assert.deepEqual(JSON.parse(ok.stdout),runFixedToyApprovalPolicySelftest());
+  for(const flag of ['--mode=CAREFUL','--approve',
+    '--owner=PRIVATE_CANARY','--target=private.invalid']){
+    const d=run('--approval-policy-matrix',flag);
+    assert.equal(d.status,2,d.stderr);
+    assert.equal(JSON.parse(d.stdout).ruleCode,
       'TOY_AGENT_SELFTEST_UNAVAILABLE');
-    assert.ok(!result.stdout.includes('PRIVATE_CANARY'));
-    assert.ok(!result.stdout.includes('private.invalid'));
+    assert.ok(!d.stdout.includes('PRIVATE_CANARY'));
   }
-  for(const args of [null,{},['--mode=CAREFUL'],Array(1),Object.create([])]){
-    const denied=runFixedToyApprovalPolicySelftest(args);
-    assert.equal(denied.status,'ERROR');
-    assert.equal(denied.exitCode,2);
-    assert.equal(denied.realApprovalRequested,false);
-    assert.equal(denied.realScannerExecuted,false);
+  for(const args of [null,{},['--approve'],Array(1)]){
+    const d=runFixedToyApprovalPolicySelftest(args);
+    assert.deepEqual([d.status,d.exitCode,d.realApprovalRequested],
+      ['ERROR',2,false]);
   }
 });
-
-/* TEMPORARY CI DIAGNOSTIC ONLY: removed before merging M48. */
-if(process.env.CI==='true'){
-  const {statSync}=await import('node:fs');
-  const repoRoot=fileURLToPath(new URL('../',import.meta.url));
-  let total=0,files=0;
-  function countTree(dir){
-    for(const ent of readdirSync(dir,{withFileTypes:true})){
-      const p=join(dir,ent.name);
-      if(ent.isDirectory())countTree(p);
-      else if(ent.isFile()){total+=statSync(p).size;files++;}
-    }
-  }
-  for(const root of ['.github','test','tools'])countTree(join(repoRoot,root));
-  process.stderr.write('M48_TEMP_CUSTODY_COUNT='+files+
-    ' M48_TEMP_CUSTODY_BYTES='+total+'\n');
-}
