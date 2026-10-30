@@ -8,7 +8,9 @@
  * deliberately request forbidden symbolic methods, never OS operations.
  */
 import {readFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {mkdtemp,writeFile,readFile,readdir,rm,lstat} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parseStrictJson} from '../src/strict-json.mjs';
 import {validateFixtureProposal} from './fixture-proposal-check.mjs';
@@ -591,9 +593,160 @@ export function runFixedScopedAuthoritySelftest(args=[]){
   }catch{return M47_REJECTED;}
 }
 
+/**
+ * M48: first-party, real temporary filesystem effect readback.
+ * Source-only; never accepts a path, command, file contents, model output,
+ * external scanner result or user-selected destination.
+ *
+ * A tiny, source-owned gateway writes only the pinned task-state filename
+ * after receiving a privileged source-owned closure. A separate parent
+ * readback enumerates the actual new directory and verifies file bytes.
+ * A deliberate source-authored negative fault demonstrates the witness
+ * FAILS if an unauthorized write occurs, even when the gate said DENY.
+ *
+ * This is ordinary same-process filesystem I/O, not OS sandboxing, process
+ * separation, real owner authentication or live MCP execution.
+ */
+const TEMP_EFFECT_SCOPE='FIRST_PARTY_TEMPORARY_FS_EFFECT_READBACK_ONLY';
+const TEMP_TASK_FILENAME='approved-task-state.json';
+const TEMP_FAULT_FILENAME='unexpected-tool-effect.json';
+const TEMP_TASK_BYTES='{"fictionalTask":"approved"}\n';
+const TEMP_FAULT_BYTES='{"fictionalTask":"unexpected"}\n';
+const tempRejected=Object.freeze({
+  reportSchemaVersion:1,status:'ERROR',exitCode:2,
+  ruleCode:'TEMP_EFFECT_WITNESS_SELFTEST_UNAVAILABLE',
+  scope:TEMP_EFFECT_SCOPE,cleanupVerified:false,
+  realOwnerAuthenticated:false,realAgentBehaviorObserved:false,
+  realMcpToolCallObserved:false,externalMcpContacted:false
+});
+async function inspectSingleTemporaryEffect(source,injectWitnessFault){
+  // The parent owns the path. Never expose it to a caller or in JSON output.
+  const root=await mkdtemp(join(tmpdir(),'mcp-agent-security-m48-'));
+  let observed=null,cleanupVerified=false;
+  try{
+    const taskPath=join(root,TEMP_TASK_FILENAME);
+    const faultPath=join(root,TEMP_FAULT_FILENAME);
+    const trusted=source==='OWNER_EXPLICIT';
+    const gate=Object.freeze({
+      async requestTaskStatusWrite(){
+        if(!trusted)return 'DENY';
+        // This is a deliberately positive OS side effect, bounded to a
+        // fresh test-owned directory and an exclusive fixed filename.
+        await writeFile(taskPath,TEMP_TASK_BYTES,{flag:'wx',mode:0o600});
+        return 'ALLOW';
+      }
+    });
+    const decision=await gate.requestTaskStatusWrite();
+    // Explicit *test fault*: violate a denied decision in just one case.
+    // If the parent witness misses this actual new file, the test fails.
+    if(injectWitnessFault&&source==='TOOL_RESULT_UNTRUSTED')
+      await writeFile(faultPath,TEMP_FAULT_BYTES,{flag:'wx',mode:0o600});
+    // Parent-owned observation does NOT read a gateway return value as
+    // proof of effect. It inspects directory entries and file contents.
+    const names=(await readdir(root)).sort();
+    const expectedNames=trusted?[TEMP_TASK_FILENAME]:[];
+    const matchingEntries=names.length===expectedNames.length&&
+      expectedNames.every((name,i)=>name===names[i]);
+    const matchingBytes=!trusted||
+      await readFile(taskPath,'utf8')===TEMP_TASK_BYTES;
+    const expectedDecision=trusted?'ALLOW':'DENY';
+    observed={
+      sourceContext:source,expectedDecision,observedDecision:decision,
+      actualFilesObserved:names.length,
+      authorizedFilesObserved:names.filter(n=>trusted&&
+        n===TEMP_TASK_FILENAME).length,
+      unauthorizedFilesObserved:names.filter(n=>!trusted||
+        n!==TEMP_TASK_FILENAME).length,
+      parentReadbackMatched:matchingEntries&&matchingBytes&&
+        decision===expectedDecision
+    };
+  }finally{
+    // Cleanup is required even after a mismatched effect or I/O error.
+    try{
+      await rm(root,{recursive:true,force:true,maxRetries:3,retryDelay:50});
+      try{await lstat(root);}catch(error){
+        if(error?.code==='ENOENT')cleanupVerified=true;
+      }
+    }catch{cleanupVerified=false;}
+  }
+  return Object.freeze({...observed,cleanupVerified,
+    matched:observed.parentReadbackMatched&&cleanupVerified});
+}
+async function runSourceOwnedTemporaryEffectMatrix(fault){
+  const rows=[];
+  for(const detectorLabel of SCANNER_HYPOTHESES){
+    for(const source of CONTEXT_CHANNELS){
+      const deliberateFault=fault&&detectorLabel==='FLAGGED'&&
+        source==='TOOL_RESULT_UNTRUSTED';
+      const result=await inspectSingleTemporaryEffect(source,deliberateFault);
+      rows.push(Object.freeze({
+        hypotheticalScannerObservation:detectorLabel,
+        ...result
+      }));
+    }
+  }
+  const baseline=rows.slice(0,CONTEXT_CHANNELS.length);
+  const independent=rows.every((r,i)=>{
+    const b=baseline[i%CONTEXT_CHANNELS.length];
+    // Fault mode deliberately changes only one observation, so the
+    // invariant still checks *authorization decisions*, not file outcomes.
+    return r.sourceContext===b.sourceContext&&
+      r.observedDecision===b.observedDecision&&
+      r.expectedDecision===b.expectedDecision;
+  });
+  const matched=rows.filter(x=>x.matched).length;
+  const authorized=rows.reduce((n,x)=>n+x.authorizedFilesObserved,0);
+  const unauthorized=rows.reduce((n,x)=>n+x.unauthorizedFilesObserved,0);
+  const allCleaned=rows.every(x=>x.cleanupVerified);
+  const pass=!fault&&matched===rows.length&&allCleaned&&independent&&
+    authorized===SCANNER_HYPOTHESES.length&&unauthorized===0;
+  const failAsExpected=fault&&matched===rows.length-1&&allCleaned&&
+    independent&&authorized===SCANNER_HYPOTHESES.length&&unauthorized===1;
+  return Object.freeze({
+    reportSchemaVersion:1,status:pass?'PASS':'FAIL',
+    exitCode:pass?0:1,
+    ruleCode:pass?'TEMP_FS_READBACK_MATCHES_SOURCE_BOUND_AUTHORITY':
+      failAsExpected?'TEMP_FS_UNAUTHORIZED_EFFECT_OBSERVED':
+      'TEMP_FS_EFFECT_WITNESS_MISMATCH',
+    scope:TEMP_EFFECT_SCOPE,
+    checked:rows.length,matched,
+    authorizedWritesReadBack:authorized,
+    unauthorizedWritesReadBack:unauthorized,
+    deniedUntrustedWriteRequests:rows.filter(x=>
+      x.sourceContext!=='OWNER_EXPLICIT'&&
+      x.observedDecision==='DENY').length,
+    cleanupVerified:allCleaned,
+    gatewayDecisionIndependentOfDetectorLabel:independent,
+    cases:Object.freeze(rows),
+    evidenceKind:'PARENT_READBACK_OF_REAL_FIRST_PARTY_TEMP_FILES',
+    testFaultInjected:fault,
+    sourceOwnedTemporaryPathsOnly:true,
+    temporaryPathsReturned:false,
+    realFileEffectsObserved:true,
+    realOwnerAuthenticated:false,realAgentBehaviorObserved:false,
+    realMcpToolCallObserved:false,externalMcpContacted:false,
+    externalScannerExecuted:false,independentBetaVerified:false,
+    securityCertified:false,releaseAuthorized:false
+  });
+}
+/** Public CLI can only call the normal source-owned matrix, no fault mode. */
+export async function runFixedTemporaryFileEffectSelftest(args=[]){
+  if(!noArgs(args))return tempRejected;
+  try{return await runSourceOwnedTemporaryEffectMatrix(false);}
+  catch{return tempRejected;}
+}
+/** Direct source test only: deliberately commit one unauthorized temp file. */
+export async function runFixedTemporaryFileEffectFaultSelftest(args=[]){
+  if(!noArgs(args))return tempRejected;
+  try{return await runSourceOwnedTemporaryEffectMatrix(true);}
+  catch{return tempRejected;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  const result=argv.length===1&&argv[0]==='--scoped-authority-matrix'?
+  const result=argv.length===1&&argv[0]==='--temp-file-effect-witness'?
+    await runFixedTemporaryFileEffectSelftest():
+    argv.length===1&&argv[0]==='--scoped-authority-matrix'?
     runFixedScopedAuthoritySelftest():
     argv.length===1&&argv[0]==='--context-provenance-matrix'?
     runFixedContextProvenanceSelftest():
