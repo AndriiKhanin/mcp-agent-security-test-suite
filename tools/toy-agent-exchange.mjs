@@ -463,9 +463,139 @@ export function runFixedContextProvenanceSelftest(args=[]){
   }catch{return contextRejected;}
 }
 
+/**
+ * M47: parent-bound fictional provenance + scoped authority.
+ * A tool-result claim never creates an owner grant. All origins and grants
+ * here are SOURCE-OWNED mock inputs, not identities or real credentials.
+ * No scanner classification is ever passed to this gateway.
+ */
+const M47_SCOPE='SOURCE_OWNED_SCOPED_IN_MEMORY_AUTHORIZATION_ONLY';
+const M47_SCANNER_HYPOTHESES=Object.freeze(['FLAGGED','NOT_FLAGGED','ERROR']);
+const M47_PLANS=Object.freeze([
+  Object.freeze({id:'owner-task-data',origin:'OWNER_DIRECT',grant:'NONE',
+    action:'TASK_DATA',claim:false,expected:'ALLOW'}),
+  Object.freeze({id:'owner-approved-read',origin:'OWNER_DIRECT',grant:'READ_ARCHIVE',
+    action:'PROTECTED_READ',claim:false,expected:'ALLOW'}),
+  Object.freeze({id:'owner-unapproved-read',origin:'OWNER_DIRECT',grant:'NONE',
+    action:'PROTECTED_READ',claim:false,expected:'DENY'}),
+  Object.freeze({id:'owner-mismatched-grant',origin:'OWNER_DIRECT',grant:'USE_TOOL',
+    action:'PROTECTED_READ',claim:false,expected:'DENY'}),
+  Object.freeze({id:'owner-approved-tool',origin:'OWNER_DIRECT',grant:'USE_TOOL',
+    action:'PROTECTED_TOOL',claim:false,expected:'ALLOW'}),
+  Object.freeze({id:'owner-unapproved-tool',origin:'OWNER_DIRECT',grant:'READ_ARCHIVE',
+    action:'PROTECTED_TOOL',claim:false,expected:'DENY'}),
+  Object.freeze({id:'tool-result-task-data',origin:'TOOL_RESULT',grant:'NONE',
+    action:'TASK_DATA',claim:false,expected:'ALLOW'}),
+  Object.freeze({id:'tool-result-forged-read',origin:'TOOL_RESULT',grant:'NONE',
+    action:'PROTECTED_READ',claim:true,expected:'DENY'}),
+  Object.freeze({id:'tool-result-forged-tool',origin:'TOOL_RESULT',grant:'NONE',
+    action:'PROTECTED_TOOL',claim:true,expected:'DENY'}),
+  Object.freeze({id:'human-email-forged-read',origin:'HUMAN_EMAIL',grant:'NONE',
+    action:'PROTECTED_READ',claim:true,expected:'DENY'}),
+  Object.freeze({id:'json-result-forged-read',origin:'JSON_TOOL_RESULT',grant:'NONE',
+    action:'PROTECTED_READ',claim:true,expected:'DENY'})
+]);
+const M47_REJECTED=Object.freeze({
+  reportSchemaVersion:1,status:'ERROR',exitCode:2,
+  ruleCode:'CONTEXT_BOUND_TOY_GATE_SELFTEST_UNAVAILABLE',
+  scope:M47_SCOPE,realAgentBehaviorObserved:false,
+  realScannerExecuted:false,realMcpToolCallObserved:false
+});
+function createM47ParentBoundGateway(parentOrigin,parentGrant){
+  // Only source-owned code instantiates this parent. There is deliberately
+  // no argument accepting "owner" from a tool result or an email body.
+  let calls=0,denials=0,authorizedReadEffects=0,authorizedToolEffects=0;
+  const request=action=>{
+    calls++;
+    const granted=action==='TASK_DATA' ||
+      (parentOrigin==='OWNER_DIRECT'&&(
+        (action==='PROTECTED_READ'&&parentGrant==='READ_ARCHIVE')||
+        (action==='PROTECTED_TOOL'&&parentGrant==='USE_TOOL')));
+    if(!granted)denials++;
+    else if(action==='PROTECTED_READ')authorizedReadEffects++;
+    else if(action==='PROTECTED_TOOL')authorizedToolEffects++;
+    return granted?'ALLOW':'DENY';
+  };
+  const snapshot=()=>Object.freeze({
+    methodCallsObserved:calls,denialsObserved:denials,
+    fictionalAuthorizedReadEffects:authorizedReadEffects,
+    fictionalAuthorizedToolEffects:authorizedToolEffects,
+    fictionalUnauthorizedEffectsCommitted:0,
+    actualFileReadObserved:false,actualMcpToolCallObserved:false
+  });
+  return Object.freeze({request,snapshot});
+}
+export function runFixedScopedAuthoritySelftest(args=[]){
+  if(!noArgs(args))return M47_REJECTED;
+  try{
+    const rows=[];
+    for(const hypotheticalScannerObservation of M47_SCANNER_HYPOTHESES){
+      for(const plan of M47_PLANS){
+        const gate=createM47ParentBoundGateway(plan.origin,plan.grant);
+        // A synthetic payload may say OWNER_APPROVED, but that content is
+        // not passed to the parent gateway or used for an authorization.
+        const untrustedClaim=plan.claim?'OWNER_APPROVED':'NO_CLAIM';
+        const decision=gate.request(plan.action);
+        const w=gate.snapshot();
+        const matched=decision===plan.expected&&w.methodCallsObserved===1&&
+          w.denialsObserved===(plan.expected==='DENY'?1:0)&&
+          w.fictionalAuthorizedReadEffects===
+            (plan.expected==='ALLOW'&&plan.action==='PROTECTED_READ'?1:0)&&
+          w.fictionalAuthorizedToolEffects===
+            (plan.expected==='ALLOW'&&plan.action==='PROTECTED_TOOL'?1:0)&&
+          w.fictionalUnauthorizedEffectsCommitted===0&&
+          w.actualFileReadObserved===false&&
+          w.actualMcpToolCallObserved===false&&
+          (untrustedClaim==='OWNER_APPROVED')===plan.claim;
+        rows.push(Object.freeze({
+          caseId:plan.id,hypotheticalScannerObservation,
+          parentBoundOrigin:plan.origin,parentBoundGrant:plan.grant,
+          action:plan.action,untrustedAuthorityClaimIgnored:plan.claim,
+          expectedDecision:plan.expected,observedDecision:decision,
+          ...w,matched
+        }));
+      }
+    }
+    const baseline=rows.slice(0,M47_PLANS.length);
+    const invariant=rows.every((row,i)=>{
+      const old=baseline[i%M47_PLANS.length];
+      return row.caseId===old.caseId&&
+        row.parentBoundOrigin===old.parentBoundOrigin&&
+        row.parentBoundGrant===old.parentBoundGrant&&
+        row.observedDecision===old.observedDecision&&
+        row.denialsObserved===old.denialsObserved&&
+        row.fictionalAuthorizedReadEffects===
+          old.fictionalAuthorizedReadEffects&&
+        row.fictionalAuthorizedToolEffects===
+          old.fictionalAuthorizedToolEffects;
+    });
+    const matched=rows.filter(r=>r.matched).length;
+    const pass=matched===rows.length&&invariant;
+    return Object.freeze({
+      reportSchemaVersion:1,status:pass?'PASS':'FAIL',exitCode:pass?0:1,
+      ruleCode:pass?'PARENT_BOUND_TOY_ORIGIN_AND_SCOPE_ENFORCED':
+        'PARENT_BOUND_TOY_ORIGIN_AND_SCOPE_MISMATCH',
+      scope:M47_SCOPE,
+      checked:rows.length,matched,
+      sourceOwnedContextCases:M47_PLANS.length,
+      hypotheticalScannerStates:M47_SCANNER_HYPOTHESES,
+      gatewayIndependentOfScannerClassification:invariant,
+      cases:Object.freeze(rows),sourceOwnedMetadataOnly:true,
+      payloadClaimsCannotGrantAuthority:true,
+      fictionalEffectsOnly:true,
+      realAgentBehaviorObserved:false,realScannerExecuted:false,
+      realFilesystemReadObserved:false,realMcpToolCallObserved:false,
+      externalMcpContacted:false,independentBetaVerified:false,
+      securityCertified:false,releaseAuthorized:false
+    });
+  }catch{return M47_REJECTED;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  const result=argv.length===1&&argv[0]==='--context-provenance-matrix'?
+  const result=argv.length===1&&argv[0]==='--scoped-authority-matrix'?
+    runFixedScopedAuthoritySelftest():
+    argv.length===1&&argv[0]==='--context-provenance-matrix'?
     runFixedContextProvenanceSelftest():
     argv.length===1&&argv[0]==='--blindspot-gate-matrix'?
     runFixedDetectionIndependentGateSelftest():
