@@ -8,7 +8,9 @@ import {Readable} from 'node:stream';
 import {
   verifyFictionalBridgeOutcome,runFictionalFixtureBatchPreflight,
   exportFictionalDetectorCases,triageFictionalDetectorResults,
-  triageFictionalDetectorJson,runFictionalDetectorTriageStdin
+  triageFictionalDetectorJson,runFictionalDetectorTriageStdin,
+  compareFictionalDetectorBatch,compareFictionalDetectorBatchJson,
+  runFictionalDetectorBatchStdin
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -429,4 +431,52 @@ test('M38-C: source-only comparative mode does not expand unpublished package or
     import.meta.url),'utf8');
   assert.match(custody,/const MAX_EXCLUDED_FILES=240/);
   assert.match(custody,/if\(files.length>MAX_EXCLUDED_FILES\)denied\(\)/);
+});
+
+test('M39: two scanner aliases produce accurate aggregate and per-case classifications',async()=>{
+  const obs=[
+    ['NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED'],
+    ['FLAGGED','NOT_FLAGGED','ERROR','FLAGGED']
+  ];
+  const input={reportSchemaVersion:1,
+    sourceProfile:'m38-fictional-detector-cases-v1',
+    scanners:obs.map((observations,i)=>({
+      scannerId:'detector-'+(i+1),results:m38Input(observations).results
+    }))
+  };
+  const r=compareFictionalDetectorBatch(input);
+  assert.equal(r.status,'PASS');
+  assert.equal(r.scannerCount,2);
+  assert.deepEqual(r.totals,{TP:3,FP:1,FN:1,TN:2,ERROR:1});
+  assert.deepEqual(r.cases[0].classifications,
+    {TP:0,FP:1,FN:0,TN:1,ERROR:0});
+  assert.deepEqual(r.cases[1].classifications,
+    {TP:1,FP:0,FN:1,TN:0,ERROR:0});
+  assert.equal(r.resultsSelfReportedOnly,true);
+  assert.equal(r.limits.scannerExecuted,false);
+  const cli=m38Cli(['--compare-detector-batch'],JSON.stringify(input));
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),r);
+  const stream=Readable.from([Buffer.from(JSON.stringify(input))]);
+  assert.deepEqual(await runFictionalDetectorBatchStdin([],stream),r);
+  for(const change of [
+    x=>x.scanners.push(structuredClone(x.scanners[0])),
+    x=>x.scanners[0].scannerId='../secret',
+    x=>x.scanners[1].scannerId=x.scanners[0].scannerId,
+    x=>x.scanners[0].results[0].observed='UNKNOWN',
+    x=>x.scanners[0].results.reverse(),
+    x=>x.scanners[1].privateConfig='secret',
+    x=>x.scanners=[],
+    x=>x.scanners=Array(1),
+    x=>x.sourceProfile='unknown'
+  ]){
+    const bad=structuredClone(input);change(bad);
+    assert.equal(compareFictionalDetectorBatch(bad).status,'ERROR');
+  }
+  assert.equal(compareFictionalDetectorBatchJson(
+    '{"reportSchemaVersion":1,"reportSchemaVersion":1}').status,'ERROR');
+  assert.equal(compareFictionalDetectorBatchJson(' '.repeat(16385)).status,'ERROR');
+  const invalid=m38Cli(['--compare-detector-batch'],Buffer.from([0xff]));
+  assert.equal(invalid.status,2);
+  assert.ok(!invalid.stdout.includes('secret'));
 });

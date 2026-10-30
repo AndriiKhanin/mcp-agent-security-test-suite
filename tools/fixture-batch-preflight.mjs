@@ -273,7 +273,7 @@ export function triageFictionalDetectorJson(text){
   try{return triageFictionalDetectorResults(parseStrictJson(text));}
   catch{return M38_ERROR;}
 }
-async function boundedM38Stdin(stream){
+async function boundedM38Stdin(stream,maxBytes=M38_INPUT_MAX){
   return new Promise((done,reject)=>{
     let closed=false,bytes=0,timer;const parts=[];
     const cleanup=()=>{
@@ -289,7 +289,7 @@ async function boundedM38Stdin(stream){
     function onData(x){
       if(!Buffer.isBuffer(x)){finish(true);return;}
       bytes+=x.length;
-      if(bytes>M38_INPUT_MAX){finish(true);return;}
+      if(bytes>maxBytes){finish(true);return;}
       parts.push(x);
     }
     function onEnd(){finish(bytes===0);}
@@ -311,9 +311,88 @@ export async function runFictionalDetectorTriageStdin(args=[],stream=process.std
   }catch{return M38_ERROR;}
 }
 
+
+/**
+ * M39: compare up to eight independently self-reported detector observations.
+ * Scanner identifiers are local, non-identifying aliases. No executable
+ * configuration, scanner binaries, URLs or arbitrary log data are accepted.
+ */
+const M39_PROFILE='m39-fictional-detector-batch-v1';
+const M39_MAX_SCANNERS=8,M39_MAX_BYTES=16384;
+const M39_ERROR=Object.freeze({
+  reportSchemaVersion:1,profile:M39_PROFILE,status:'ERROR',exitCode:2,
+  ruleCode:'M39_INVALID_OR_UNREADABLE_BATCH',
+  resultsSelfReportedOnly:true,manualReviewRequired:true,limits:M38_LIMITS
+});
+export function compareFictionalDetectorBatch(input){
+  if(!ownRecord38(input,['reportSchemaVersion','sourceProfile','scanners'])||
+    input.reportSchemaVersion!==1||input.sourceProfile!==M38_EXPORT_PROFILE||
+    !Array.isArray(input.scanners)||
+    input.scanners.length<1||input.scanners.length>M39_MAX_SCANNERS||
+    !ownArray38(input.scanners,input.scanners.length))return M39_ERROR;
+  const seen=new Set(),scanners=[],totals={TP:0,FP:0,FN:0,TN:0,ERROR:0};
+  for(const scanner of input.scanners){
+    if(!ownRecord38(scanner,['scannerId','results'])||
+      typeof scanner.scannerId!=='string'||
+      !/^[a-z][a-z0-9-]{0,31}$/u.test(scanner.scannerId)||
+      seen.has(scanner.scannerId))return M39_ERROR;
+    seen.add(scanner.scannerId);
+    const qualified=triageFictionalDetectorResults({
+      reportSchemaVersion:1,sourceProfile:M38_EXPORT_PROFILE,
+      results:scanner.results
+    });
+    if(qualified.status!=='PASS')return M39_ERROR;
+    const outcomes=qualified.outcomes;
+    for(const key of Object.keys(totals))totals[key]+=outcomes[key];
+    scanners.push({
+      scannerId:scanner.scannerId,
+      outcomes:{...outcomes},
+      caseCount:qualified.caseCount,
+      classifications:qualified.results.map(({caseId,classification})=>({
+        caseId,classification
+      }))
+    });
+  }
+  const cases=M38_CASES.map(c=>{
+    const classifications={TP:0,FP:0,FN:0,TN:0,ERROR:0};
+    for(const scanner of scanners){
+      const row=scanner.classifications.find(r=>r.caseId===c.caseId);
+      classifications[row.classification]++;
+    }
+    return {caseId:c.caseId,expectedLabel:c.expectedLabel,classifications};
+  });
+  return {
+    reportSchemaVersion:1,profile:M39_PROFILE,status:'PASS',exitCode:0,
+    ruleCode:'SELF_REPORTED_DETECTOR_BATCH_COMPARED_ONLY',
+    sourceProfile:M38_EXPORT_PROFILE,scannerCount:scanners.length,
+    caseCount:M38_CASES.length,resultsSelfReportedOnly:true,
+    manualReviewRequired:true,noEstimatedPopulationPerformance:true,
+    scanners,cases,totals,limits:M38_LIMITS
+  };
+}
+export function compareFictionalDetectorBatchJson(text){
+  if(typeof text!=='string'||!text.trim()||
+    Buffer.byteLength(text,'utf8')>M39_MAX_BYTES)return M39_ERROR;
+  try{return compareFictionalDetectorBatch(parseStrictJson(text));}
+  catch{return M39_ERROR;}
+}
+export async function runFictionalDetectorBatchStdin(args=[],stream=process.stdin){
+  if(!ownArray38(args,0)||!stream||stream.isTTY===true||
+    typeof stream.on!=='function'||typeof stream.off!=='function'||
+    typeof stream.pause!=='function'||typeof stream.resume!=='function')
+    return M39_ERROR;
+  try{
+    const bytes=await boundedM38Stdin(stream,M39_MAX_BYTES);
+    return compareFictionalDetectorBatchJson(
+      new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  }catch{return M39_ERROR;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
-  const report=args.length===1&&args[0]==='--export-detector-cases'?
+  const report=args.length===1&&args[0]==='--compare-detector-batch'?
+      await runFictionalDetectorBatchStdin():
+    args.length===1&&args[0]==='--export-detector-cases'?
     exportFictionalDetectorCases():
     args.length===1&&args[0]==='--triage-detector-results'?
       await runFictionalDetectorTriageStdin():
