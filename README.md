@@ -817,6 +817,31 @@ MCP servers or Stable Bridge. See the
 [M25 test guide](.github/M25_APPROVAL_POLICY_EPOCH.md).
 The helper is source-only, outside the unpublished npm package.
 
+## Disposable OS-file effect readback (M31, source only)
+
+From a reviewed source checkout, run:
+
+```sh
+node tools/m31-os-effect-witness.mjs
+```
+
+Seven **disposable first-party OS workers** create, omit, corrupt, remove
+or rewrite a real inert marker in newly created temporary directories.
+A separate parent process checks actual disk metadata and exact bytes
+**twice**, so a worker's `COMMITTED` or `ABSENT` claim is never
+accepted as evidence on its own. Two deceptive cases expose the
+hypothetical loss/duplicate result from blindly trusting claims; two
+mutation cases show how once-valid local evidence can become stale.
+
+`7/7 PASS` means these controlled differences and scratch cleanup were
+**observed**, not that a real remote business effect was verified.
+**All guarded recovery dispositions stay QUARANTINE** (zero automatic
+releases), even for valid local files. This helper performs local
+disposable OS file I/O, but accepts no user path, target, credential or
+command; no external MCP, agent/LLM, production effect or Stable Bridge.
+See [M31 scope and evidence](.github/M31_OS_EFFECT_WITNESS.md).
+Source-only: excluded from the unpublished 80-path npm candidate.
+
 ## Two signed outcome statements are not verified effects (M30, source only)
 
 From a reviewed public source checkout:
