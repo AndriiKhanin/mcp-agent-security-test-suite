@@ -127,3 +127,40 @@ elsewhere, attest owner identity, execute an LLM or independent scanner,
 or authorize real MCP targets. Genuine OS containment, real endpoint
 credentials, production side-effect prevention and external beta
 remain separate tasks requiring review and explicit permission.
+
+## M51 — OS file-handle rights versus process isolation
+
+Run the fixed, first-party, nonpackaged lab:
+
+```sh
+node tools/m32-path-swap-lab.mjs --os-filehandle-rights-witness
+node --test test/m32-path-swap-lab.test.mjs
+```
+
+Three source-owned cases launch the exact M32 Node child under the same
+OS user. Each receives a fixed fictional file path through private IPC
+in a fresh parent-allocated temporary directory. No user path, command,
+shell, external MCP server or credentials can be selected.
+
+- **Read-only handle:** the child opens the file in `r` mode and attempts
+  to write through that descriptor. The OS must reject it; parent OS
+  readback must show unchanged contents.
+- **Writable handle:** the child opens a fixed file in `r+` mode,
+  performs a real write, and parent independently verifies the bytes.
+- **Path reopen counterexample:** the same child gets denied on an
+  `r` handle, then reopens the known file path with `r+`. The write
+  succeeds under the same OS identity. Parent observes the modification.
+  **A read-only handle does NOT sandbox the child or prevent access
+  through an independently opened path.**
+
+A direct test-only negative control falsely reports no write despite
+modifying the real file. Parent readback must catch the contradiction.
+The private child entrypoint requires IPC and the negative test fault
+is not exposed through the CLI. Temporary files are deleted and
+process reaping is observed. No paths, file data or secrets are returned.
+
+**Scope:** this tests actual OS-enforced file-descriptor operation rights
+on Windows and Linux, not a secure operating-system sandbox, process
+confinement, authenticated owner identity, real LLM/MCP safety, real
+scanner effectiveness or independent certification. External-target
+authorization, independent beta, audit and release remain separate.
