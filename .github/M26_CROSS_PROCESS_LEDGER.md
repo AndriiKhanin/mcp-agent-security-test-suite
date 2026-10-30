@@ -66,6 +66,11 @@ user process is involved.
 The tool and tests are **source-only** and not part of the fixed
 **unpublished 80-file npm candidate**. Independent security audit
 [#43](../issues/43), real-target approval [#21](../issues/21) and
-beta [#59](../issues/59) remain OPEN. Engineering acceptance requires
-Windows and Ubuntu Node20/22 GitHub CI 4/4 on the PR, plus a separate
-post-merge main push CI 4/4 on the exact merged SHA.
+beta [#59](../issues/59) remain OPEN. Engineering accepted on 2026-10-30: [PR #303](../pull/303) passed
+[PR CI #41012856455](../actions/runs/41012856455) **4/4** and
+merged as main SHA `c53dfad239b3c8af356e8050572920cde943e05c`.
+The independent [main CI #41013215418](../actions/runs/41013215418)
+passed **4/4 on that exact SHA** (Windows/Ubuntu Node20/22).
+Initial worker IPC close-callback and bounded M6-J handoff size
+failures were fixed before merging; no failure was waived.
+This is engineering evidence, not independent beta or production durability.
