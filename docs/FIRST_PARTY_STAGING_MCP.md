@@ -35,3 +35,33 @@ Tracking [M4-B6-A #79](https://github.com/AndriiKhanin/mcp-agent-security-test-s
 The separately scoped [M4-B6-B fixed-process stage](FIRST_PARTY_STAGING_WORKER.md) runs this exact in-repository local fixture in a disposable child. It does not replace the in-process `staging-selftest` command or confer OS-sandbox protection.
 
 The M4-B6-D [pinned modern discovery negative-control matrix](M4_B6D_DISCOVERY_NEGATIVE_CONTROLS.md) distinguishes required HTTP 400 HeaderMismatch vs UnsupportedProtocolVersion from 404 MethodNotFound, while documenting that the fixed SSE parser is intentionally narrower than general MCP conformance.
+
+
+## M47 — forged authority and detector-clearance wire probes
+
+M47 adds **two source-owned negative fault selectors** to the same
+ephemeral first-party `127.0.0.1` staging server:
+
+- `forged-owner-tool`: the request attempts `tools/call` and
+  includes a fictional `claimedAuthority: OWNER_EXPLICIT` statement.
+- `forged-clean-scanner-tool`: the request attempts
+  `tools/call` while claiming a `NOT_FLAGGED` classification
+  and approval.
+
+Both fault selectors exist **only in the direct trusted test API**,
+not in the public CLI. The server still accepts exactly one fixed
+`server/discover` request. The alternative `tools/call`
+requests are transmitted on **owned local HTTP sockets**, rejected at
+the method allowlist before dispatch (`STAGING_REQUEST_REJECTED`),
+and must produce `accepted: 0` and a confirmed socket close.
+The positive source-owned discovery request still succeeds.
+
+Tests: `node --test test/first-party-staging.test.mjs`.
+This confirms a **real local network denial**, but **no MCP tool was
+executed**, no protected filesystem effect was attempted, and neither
+the client-supplied "owner" text nor the hypothetical scanner clearance
+is authenticated. It does **not** prove actual owner identity,
+end-to-end prompt-injection prevention, real remote MCP safety, or that
+any third-party scanner was executed. Real external MCP target
+authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)
+remains open.

@@ -153,14 +153,22 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - [PR #348](../../pull/348) merged after PR CI 4/4. This is **not a real LLM, third-party agent, filesystem permission boundary, authorized external MCP test, real scanner accuracy result or product certification**. Post-merge `main` CI not separately verified.
 - Next product gate: separately approved and isolated evaluation with genuine agent/tool execution and independent side-effect observation. Owner authorization and first-party staging controls must be established before expanding external contact; see [#21](../../issues/21), [#59](../../issues/59) and [#345](../../issues/345).
 
-## M46 — source-bound toy authorization and provenance matrix (PR CI pending)
+## M46 — source-bound toy authorization and provenance matrix (PR #350 merged, CI 4/4)
 
 - Extend the existing first-party toy gateway with `--context-provenance-matrix`: **3 source-owned call contexts × 4 toy method intentions × 3 hypothetical detector outcomes = 36 in-memory tests**.
 - Separately bound gateway interfaces represent `OWNER_EXPLICIT` (owner-controlled source code), `TOOL_RESULT_UNTRUSTED`, and `HUMAN_EMAIL_UNTRUSTED`. A text-level source claim is **not** trusted identity; only first-party method closure selection determines the toy authority.
 - Positive controls commit a fictional task-state update under the trusted-owner context, and all sources may consume benign task data. Negative controls deny the same update from untrusted external content, deny unrelated file access from every origin, and deny attempts to elevate claimed source authority.
 - Decisions are invariant to `FLAGGED`, `NOT_FLAGGED`, and `ERROR` hypothetical scanner outcomes. A blocked request is observed by the parent-owned in-memory witness, not inferred from detector classifications.
 - No new paths, unreviewed or private fixtures, package release changes, process spawning, network, real scanner calls, real LLM, external MCP contact, credential use, or actual OS effects. This is **not authenticated real-world provenance**.
-- Acceptance gate: PR CI 4/4 plus matched merged-main verification (separate). Related independent feedback [#329](../../issues/329) and follow-up [#345](../../issues/345). External MCP authorization [#21](../../issues/21) and beta [#59](../../issues/59) remain open.
+- Engineering merged: [PR #350](../../pull/350), CI 4/4 PASS; Ubuntu Node 20 1374/1374. Post-merge `main` CI not separately verified. Related feedback [#329](../../issues/329) and follow-up [#345](../../issues/345); external MCP authorization [#21](../../issues/21) and beta [#59](../../issues/59) remain open.
+
+## M47 — first-party staging wire rejection of forged source and scanner clearance (PR CI pending)
+
+- Reuse the existing approved, fixed one-request IPv4 `127.0.0.1` staging MCP discovery server. Two **test-only**, source-authored faults send actual HTTP `tools/call` requests claiming either `OWNER_EXPLICIT` authority or a `NOT_FLAGGED` scanner clearance. These claims are untrusted request fields, not capabilities.
+- The server's exact method allowlist rejects both before any handler can dispatch; the witness must show 1 received, 0 accepted, 1 socket closed, no target outside the first-party loopback. The original allowed `server/discover` positive control remains valid.
+- Direct fault API is unavailable through public CLI; arbitrary URLs, credentials, user-chosen methods and external MCP contact remain disallowed. Existing strict request/response limits and cleanup are unchanged.
+- Unlike M46 this checks actual local HTTP **transport rejection**, but no MCP tool, third-party scanner, model, real filesystem operation or authenticated owner is involved. It is not end-to-end security certification.
+- Acceptance requires four-job PR CI and separate merged-main evidence. Tracking [#345](../../issues/345), external authorization [#21](../../issues/21), independent beta [#59](../../issues/59).
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
