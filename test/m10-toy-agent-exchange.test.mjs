@@ -642,3 +642,20 @@ test('M48: approval CLI denies runtime mode overrides or user data',()=>{
     assert.equal(denied.realScannerExecuted,false);
   }
 });
+
+/* TEMPORARY CI DIAGNOSTIC ONLY: removed before merging M48. */
+if(process.env.CI==='true'){
+  const {statSync}=await import('node:fs');
+  const repoRoot=fileURLToPath(new URL('../',import.meta.url));
+  let total=0,files=0;
+  function countTree(dir){
+    for(const ent of readdirSync(dir,{withFileTypes:true})){
+      const p=join(dir,ent.name);
+      if(ent.isDirectory())countTree(p);
+      else if(ent.isFile()){total+=statSync(p).size;files++;}
+    }
+  }
+  for(const root of ['.github','test','tools'])countTree(join(repoRoot,root));
+  process.stderr.write('M48_TEMP_CUSTODY_COUNT='+files+
+    ' M48_TEMP_CUSTODY_BYTES='+total+'\n');
+}
