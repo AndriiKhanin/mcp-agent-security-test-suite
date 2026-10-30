@@ -73,12 +73,12 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M30 — Two signed claims ≠ effect provenance** | Ephemeral dual Ed25519 signatures, signer-key diversity, false consensus and quarantine after conflicting or deceptive outcomes | **ENGINEERING ACCEPTED — PR/main 4/4** | [#314](../../issues/314), [PR #315](../../pull/315), [main CI #41023181163](../../actions/runs/41023181163), [guide](.github/M30_DUAL_SIGNER_QUORUM.md) | 14/14 source-owned crypto cases, PR/main CI 4/4; no independently verified effect provenance |
 | **M31 — Independent parent OS observation ≠ remote effect provenance** | Seven first-party disposable child/parent disk scenarios; false IPC claims, corrupted and drifting marker, conservative quarantine | **ENGINEERING ACCEPTED — PR/main 4/4** | [#317](../../issues/317), [PR #319](../../pull/319), [main CI #41025873482](../../actions/runs/41025873482), [guide](.github/M31_PARENT_OS_EFFECT_EVIDENCE.md) | Independent first/second OS reads, real scratch cleanup, exact negative-mutation oracle; PR + matched main CI 4/4 required |
 
-| **M32 — Deterministic OS path-swap TOCTOU** | Eight first-party IPC-barrier marker-swap/absence/anomaly cases exposing size-only false confidence | **IMPLEMENTATION IN PR — acceptance pending** | [#320](../../issues/320), [guide](.github/M32_OS_PATH_SWAP_TOCTOU.md) | 8/8 OS child observations and independent negative oracle; PR 4/4 then matched main 4/4 required |
+| **M32 — Deterministic OS path-swap TOCTOU** | Eight first-party IPC-barrier marker-swap/absence/anomaly cases exposing size-only false confidence | **ENGINEERING ACCEPTED — PR/main 4/4** | [#320](../../issues/320), [PR #321](../../pull/321), [main CI #41027413776](../../actions/runs/41027413776), [guide](.github/M32_OS_PATH_SWAP_TOCTOU.md) | 8/8 first-party OS cases; 1337/1337 Ubuntu20 tests; PR and exact main CI 4/4, no external effect proof |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M32-A/B/C — deterministic first-party path-swap before read (implementation in PR)
+## M32-A/B/C — deterministic first-party path-swap before read (engineering accepted)
 
 - [Issue #320](../../issues/320): source-only fixed
   `node tools/m32-path-swap-lab.mjs`, eight disposable OS child cases.
@@ -98,6 +98,15 @@ We will not claim a release is production-ready merely because a synthetic test 
   SHA-256 excluded-source custody and overflow deny kept.
   Acceptance requires PR CI **4/4** then separately matched main
   push CI **4/4**. No real MCP, Stable Bridge or business-effect proof.
+- **Accepted 2026-10-30:** [PR #321](../../pull/321)
+  [PR CI #41026392937](../../actions/runs/41026392937) **4/4 PASS**,
+  squash merged at exact main SHA
+  `0f66d2af9ca882cff8179fa06e799f28a7c548fb`, and independent
+  [main push CI #41027413776](../../actions/runs/41027413776)
+  **4/4 PASS on that same SHA**. [#320](../../issues/320) closed.
+  This remains source-only OS observation, not external attestation,
+  real agent security evaluation, exactly-once or release approval.
+
 
 ## M31-A/B/C — independent parent OS scratch observations (engineering accepted)
 
