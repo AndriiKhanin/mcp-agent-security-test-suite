@@ -450,9 +450,79 @@ export async function runFictionalDetectorReviewStdin(args=[],stream=process.std
   }catch{return M40_ERROR;}
 }
 
+
+/**
+ * M41: classify disagreements among self-reported observations on identical
+ * fictional inputs. ERROR is missing classification, never a vote.
+ */
+const M41_PROFILE='m41-fictional-detector-disagreement-v1';
+const M41_ERROR=Object.freeze({
+  reportSchemaVersion:1,profile:M41_PROFILE,status:'ERROR',exitCode:2,
+  ruleCode:'M41_INVALID_OR_UNREADABLE_DISAGREEMENT_BATCH',
+  resultsSelfReportedOnly:true,manualReviewRequired:true,limits:M38_LIMITS
+});
+export function analyzeFictionalDetectorDisagreements(input){
+  const comparison=compareFictionalDetectorBatch(input);
+  if(comparison.status!=='PASS')return M41_ERROR;
+  const cases=comparison.cases.map(c=>{
+    const flags=c.classifications.TP+c.classifications.FP;
+    const notFlagged=c.classifications.FN+c.classifications.TN;
+    const errors=c.classifications.ERROR;
+    const total=flags+notFlagged+errors;
+    const disagreement=flags>0&&notFlagged>0;
+    const consensus=flags>notFlagged?'FLAGGED':
+      notFlagged>flags?'NOT_FLAGGED':flags===0?'NO_CLASSIFICATIONS':'TIE';
+    const missedInjection=c.expectedLabel==='INJECTION'?c.classifications.FN:0;
+    const priority=missedInjection>=2?'REPEATED_MISS':
+      disagreement?'DISAGREEMENT':errors>0?'ERROR_REVIEW':'NONE';
+    return Object.freeze({
+      caseId:c.caseId,expectedLabel:c.expectedLabel,
+      votes:Object.freeze({FLAGGED:flags,NOT_FLAGGED:notFlagged,ERROR:errors}),
+      scannerCount:total,disagreement,consensus,
+      missedInjectionCount:missedInjection,
+      priority
+    });
+  });
+  const disagreements=cases.filter(c=>c.disagreement);
+  const repeatedMisses=cases.filter(c=>c.missedInjectionCount>=2);
+  const errors=cases.filter(c=>c.votes.ERROR>0);
+  return Object.freeze({
+    reportSchemaVersion:1,profile:M41_PROFILE,status:'PASS',exitCode:0,
+    ruleCode:'FICTIONAL_SELF_REPORTED_DISAGREEMENTS_ONLY',
+    scannerCount:comparison.scannerCount,caseCount:comparison.caseCount,
+    disagreementCaseCount:disagreements.length,
+    repeatedMissCaseCount:repeatedMisses.length,
+    cases:Object.freeze(cases),
+    reviewCaseIds:Object.freeze(cases.filter(c=>c.priority!=='NONE').map(c=>c.caseId)),
+    errorCaseCount:errors.length,
+    resultsSelfReportedOnly:true,manualReviewRequired:true,
+    independentReproductionConfirmed:false,
+    noEstimatedPopulationPerformance:true,limits:M38_LIMITS
+  });
+}
+export function analyzeFictionalDetectorDisagreementsJson(text){
+  if(typeof text!=='string'||!text.trim()||
+    Buffer.byteLength(text,'utf8')>M39_MAX_BYTES)return M41_ERROR;
+  try{return analyzeFictionalDetectorDisagreements(parseStrictJson(text));}
+  catch{return M41_ERROR;}
+}
+export async function runFictionalDetectorDisagreementsStdin(args=[],stream=process.stdin){
+  if(!ownArray38(args,0)||!stream||stream.isTTY===true||
+    typeof stream.on!=='function'||typeof stream.off!=='function'||
+    typeof stream.pause!=='function'||typeof stream.resume!=='function')
+    return M41_ERROR;
+  try{
+    const bytes=await boundedM38Stdin(stream,M39_MAX_BYTES);
+    return analyzeFictionalDetectorDisagreementsJson(
+      new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  }catch{return M41_ERROR;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
-  const report=args.length===1&&args[0]==='--review-detector-batch'?
+  const report=args.length===1&&args[0]==='--analyze-detector-disagreements'?
+      await runFictionalDetectorDisagreementsStdin():
+    args.length===1&&args[0]==='--review-detector-batch'?
       await runFictionalDetectorReviewStdin():
     args.length===1&&args[0]==='--compare-detector-batch'?
       await runFictionalDetectorBatchStdin():
