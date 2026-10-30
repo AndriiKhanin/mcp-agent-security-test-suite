@@ -1,6 +1,28 @@
 # Contributing
 
 
+
+## M40: generate a reviewer queue for fictional scanner findings
+
+After preparing the same local `detector-batch.json` file documented in M39,
+derive a short, machine-readable review queue:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\detector-batch.json | node tools/fixture-batch-preflight.mjs --review-detector-batch
+```
+
+Linux/macOS: `cat detector-batch.json | node tools/fixture-batch-preflight.mjs --review-detector-batch`.
+
+This produces a bounded JSON summary containing each scanner's sanitized
+alias, source-owned case ID, finding (`FN`, `FP`, or `ERROR`), and a
+categorical reviewer action. True positives and true negatives are included
+in the aggregate counts but omitted from the review queue. For each queued
+item, manually confirm the scanner's version, input handling and any rule
+configuration from independently collected evidence. Never interpret
+self-reported categories as independently reproduced proof. No external
+scanner runs, credentials, private logs, customer transcripts or MCP
+targets are involved. No network upload is performed.
+
 ## M39: compare multiple fictional scanner reports locally
 
 From a reviewed source checkout, export the same four public fictional cases

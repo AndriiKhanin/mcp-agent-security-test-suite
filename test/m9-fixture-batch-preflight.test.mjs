@@ -10,7 +10,9 @@ import {
   exportFictionalDetectorCases,triageFictionalDetectorResults,
   triageFictionalDetectorJson,runFictionalDetectorTriageStdin,
   compareFictionalDetectorBatch,compareFictionalDetectorBatchJson,
-  runFictionalDetectorBatchStdin
+  runFictionalDetectorBatchStdin,
+  reviewFictionalDetectorBatch,reviewFictionalDetectorBatchJson,
+  runFictionalDetectorReviewStdin
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -479,4 +481,46 @@ test('M39: two scanner aliases produce accurate aggregate and per-case classific
   const invalid=m38Cli(['--compare-detector-batch'],Buffer.from([0xff]));
   assert.equal(invalid.status,2);
   assert.ok(!invalid.stdout.includes('secret'));
+});
+
+test('M40: reviewer queue prioritizes FN, FP and ERROR without scanner execution',async()=>{
+  const input={reportSchemaVersion:1,sourceProfile:'m38-fictional-detector-cases-v1',
+    scanners:[
+      {scannerId:'scanner-one',results:m38Input([
+        'FLAGGED','NOT_FLAGGED','NOT_FLAGGED','FLAGGED'
+      ]).results},
+      {scannerId:'scanner-two',results:m38Input([
+        'NOT_FLAGGED','FLAGGED','ERROR','ERROR'
+      ]).results}
+    ]};
+  const report=reviewFictionalDetectorBatch(input);
+  assert.equal(report.status,'PASS');
+  assert.deepEqual(report.counts,{TP:2,FP:1,FN:1,TN:2,ERROR:2});
+  assert.equal(report.findingCount,4);
+  assert.deepEqual(report.reviewQueue.map(x=>x.finding),[
+    'FP','FN','ERROR','ERROR'
+  ]);
+  assert.equal(report.independentReproductionConfirmed,false);
+  assert.equal(report.resultsSelfReportedOnly,true);
+  assert.equal(report.manualReviewRequired,true);
+  assert.equal(report.limits.scannerExecuted,false);
+  const json=JSON.stringify(input);
+  const cli=m38Cli(['--review-detector-batch'],json);
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),report);
+  assert.ok(!cli.stdout.includes('Fictional ticket T42'));
+  assert.ok(!cli.stdout.includes('Fictional order Q17'));
+  assert.deepEqual(await runFictionalDetectorReviewStdin([],
+    Readable.from([Buffer.from(json)])),report);
+  for(const invalid of [
+    '',
+    '{"reportSchemaVersion":1,"reportSchemaVersion":1}',
+    JSON.stringify({...input,claim:'REAL_SCAN_VERIFIED'}),
+    JSON.stringify({...input,scanners:[...input.scanners,input.scanners[0]]}),
+    ' '.repeat(16385)
+  ])assert.equal(reviewFictionalDetectorBatchJson(invalid).status,'ERROR');
+  assert.equal(m38Cli(['--review-detector-batch'],
+    Buffer.from([0xff])).status,2);
+  assert.equal(m38Cli(['--review-detector-batch','--unsafe'],json).status,2);
+  assert.equal(Object.isFrozen(report.reviewQueue),true);
 });

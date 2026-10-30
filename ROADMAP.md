@@ -82,6 +82,14 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M38 — Independent fictional scanner comparisons** | Export two fixed clean/mixed tool-result pairs and classify self-reported third-party rule detector outcomes | **ENGINEERING ACCEPTED — PR/main CI 4/4; external results pending** | [#338](../../issues/338), [PR #339](../../pull/339), [main CI #41061833450](../../actions/runs/41061833450), [volunteer #329](../../issues/329), [guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md) | Four fixed fictional cases; 1363/1363 Ubuntu20; exact 4/4 PR/main; no scanner execution or beta claim |
 
 
+## M40 — local reviewer queue for independent fictional detector feedback (engineering in PR)
+
+- Extend the existing M39 strict four-case, 1–8-scanner batch format with `--review-detector-batch`; no new network, files, scanner process or real MCP target.
+- Emit categorized FN/FP/ERROR review actions with the approved case IDs and sanitized scanner aliases; retain overall TP/FP/FN/TN/ERROR counts.
+- Reuse source-owned M38 labels and M39 validation; reject duplicate keys, malformed/oversized stdin and unsupported CLI arguments without reflecting input.
+- Add CLI and source tests plus a contributor walkthrough; independent scanner execution, real-world assurance and publication remain unverified.
+- **Acceptance pending:** PR CI 4/4 and matched post-merge CI on `main`.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
