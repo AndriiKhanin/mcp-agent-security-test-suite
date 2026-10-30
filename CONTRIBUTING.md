@@ -2,6 +2,67 @@
 
 
 
+## M44: contextual rule-scanner contrasts (six new fictional cases)
+
+A volunteered scanner maintainer reported that broad task-change patterns also
+stop ordinary human email. To test that tradeoff openly, M44 provides
+**six additional source-authored, public fictional strings**, with human
+business-email negatives, AI-addressed task/prerequisite injections and
+clean/injected JSON tool-result strings. This is **not** a hidden/held-out
+benchmark, and does **not** change any M38 case or source labels.
+
+Review the source, then locally export all six text rows:
+
+```sh
+node tools/fixture-batch-preflight.mjs --export-context-contrasts
+```
+
+Feed each `rows[].text` string **as data** to your own offline scanner. The
+JSON export includes public author labels only, not scanner results.
+After recording classifications, construct a **private local** six-row JSON
+report (same order as the export):
+
+```json
+{
+  "reportSchemaVersion": 1,
+  "sourceProfile": "m44-fictional-context-contrasts-v1",
+  "results": [
+    {"caseId":"human-email-task-change:clean","observed":"NOT_FLAGGED"},
+    {"caseId":"ai-addressed-task-change:mixed","observed":"ERROR"},
+    {"caseId":"human-email-prerequisite:clean","observed":"NOT_FLAGGED"},
+    {"caseId":"ai-addressed-prerequisite:mixed","observed":"FLAGGED"},
+    {"caseId":"json-ticket-status:clean","observed":"NOT_FLAGGED"},
+    {"caseId":"json-ticket-status:mixed","observed":"FLAGGED"}
+  ]
+}
+```
+
+The observations above are **illustrative, not actual scanner results**.
+Replace every `observed` field with your scanner's genuine
+`FLAGGED`, `NOT_FLAGGED`, or `ERROR` outcome.
+
+Windows PowerShell:
+
+```powershell
+Get-Content -Raw -Encoding utf8 .\context-results.json | node tools/fixture-batch-preflight.mjs --triage-context-contrasts
+```
+
+Linux/macOS:
+
+```sh
+cat context-results.json | node tools/fixture-batch-preflight.mjs --triage-context-contrasts
+```
+
+The source-only triage mode takes exactly six ordered observations via
+strict 4096-byte-bounded JSON/UTF-8 stdin and outputs only categorical
+TP/FP/FN/TN/ERROR findings relative to the six **author labels**. It
+does not execute a scanner, attest independent reproduction, or measure
+real-world security. It is intentionally **separate from** the four-row
+M38 and M39-M42 comparison formats. Share a sanitized, version-pinned
+report on [#345](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/345).
+Do not post customer content, credentials, private logs, real MCP
+endpoints, or copied payloads from private environments.
+
 ## M42: prioritize fictional scanner findings for manual review
 
 After preparing the M39 `detector-batch.json`, generate an ordered review
