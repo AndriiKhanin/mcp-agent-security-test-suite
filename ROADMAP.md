@@ -98,6 +98,15 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - New tests cover split votes, tie, repeated misses, single-detector case, malformed JSON, invalid UTF-8, and CLI argument denial.
 - Engineering acceptance requires PR 4/4 and matched post-merge CI; external scanner results, beta, audit, and authorization remain separate.
 
+## M42 — deterministic fictional-detector issue priorities (engineering in PR)
+
+- Implement `--prioritize-detector-issues` on the same strict, offline M39 four-case batch.
+- Prioritize repeated self-reported injection misses (two or more), single misses, false positives, and scanner-error-only cases, with deterministic tie breaks and stable approved case IDs.
+- Output only categorized local-review recommendations; these are **review-order priorities**, not real vulnerability severity, external efficacy measurements or verified results.
+- Preserve existing 16 KiB bounded stdin, strict duplicate-free JSON, scanner-count/case-order controls, zero target contact, and frozen package/source custody.
+- Source/CLI regression covers repeated misses, counts, deterministic sorting, error precedence, no-findings case, malformed JSON, invalid UTF-8 and extra-flag denial.
+- Acceptance requires exact PR 4/4 and post-merge `main` CI; independent beta, external execution and publication remain separate.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
