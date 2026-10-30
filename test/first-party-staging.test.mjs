@@ -43,6 +43,56 @@ test('M4-B6-A: forged headers, wrong origin/host, version and path fail closed',
   }
 });
 
+
+test('M47: forged owner and clean-scanner tool calls fail over owned loopback',async()=>{
+  const clean=await runFirstPartyStagingSelftest();
+  assert.equal(clean.status,'PASS');
+  assert.equal(clean.accepted,1);
+  assert.equal(clean.allowedMethod,'server/discover');
+  for(const fault of ['forged-owner-tool','forged-clean-scanner-tool']){
+    const {result,attempts}=await observeFirstPartyMockAttempts(
+      ()=>runFirstPartyStagingSelftest({fault}));
+    assert.equal(result.status,'FAIL',fault);
+    assert.equal(result.failureCount,1,fault);
+    assert.deepEqual([result.checked,result.received,result.accepted],[1,1,0]);
+    assert.equal(result.findings.length,1);
+    assert.equal(result.findings[0].rule,'STAGING_REQUEST_REJECTED',fault);
+    assert.equal(result.responseClosedCount,0);
+    assert.equal(result.socketClosedCount,1);
+    assert.equal(result.externalTargetContacted,false);
+    assert.equal(result.operatorVerified,false);
+    assert.equal(result.allowedMethod,'server/discover');
+    assert.deepEqual(attempts,['staging-bind','staging-request']);
+    const output=JSON.stringify(result);
+    assert.ok(!output.includes('OWNER_EXPLICIT'));
+    assert.ok(!output.includes('trusted-owner'));
+    assert.ok(!output.includes('NOT_FLAGGED'));
+    assert.ok(!output.includes('APPROVED'));
+    assert.ok(!output.includes('never-executed'));
+    assert.ok(!output.includes('127.0.0.1'));
+  }
+  const after=await runFirstPartyStagingSelftest();
+  assert.equal(after.status,'PASS');
+  assert.equal(after.accepted,1);
+});
+
+test('M47: production CLI cannot select a forged-source wire fault',()=>{
+  for(const flag of [
+    '--fault=forged-owner-tool',
+    '--fault=forged-clean-scanner-tool',
+    '--method=tools/call',
+    '--source=OWNER_EXPLICIT',
+    '--scanner-observation=NOT_FLAGGED'
+  ]){
+    const response=cli('staging-selftest',flag);
+    assert.equal(response.status,2,response.stderr);
+    const report=JSON.parse(response.stdout);
+    assert.equal(report.status,'ERROR');
+    assert.equal(report.errorCode,'INVALID_CLI_ARGUMENTS');
+    assert.ok(!response.stdout.includes(flag));
+  }
+});
+
 test('M4-B6-A: malformed and oversized inputs never dispatch discovery',async()=>{
   for(const fault of ['invalid-json','oversized-request']){
     const r=await runFirstPartyStagingSelftest({fault});
