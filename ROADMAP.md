@@ -70,11 +70,11 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M29 — Signed receipt authenticity ≠ verified outcome** | Real ephemeral Ed25519 signatures with exact operation/marker/epoch binding, invalid and replayed receipt controls, and deceptive signed outcome comparison | **ENGINEERING ACCEPTED — PR/main 4/4** | [#311](../../issues/311), [PR #312](../../pull/312), [main CI #41020234312](../../actions/runs/41020234312), [M28/M29 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 12/12 first-party signed cases, guarded quarantine; external signer never verified |
 
-| **M30 — Two signed claims ≠ effect provenance** | Ephemeral dual Ed25519 signatures, signer-key diversity, false consensus and quarantine after conflicting or deceptive outcomes | **IN PROGRESS — source-only PR CI required** | [#314](../../issues/314), [guide](.github/M30_DUAL_SIGNER_QUORUM.md) | 14/14 source-owned crypto cases, 4/4 PR and independently matched main CI; no real signer trust |
+| **M30 — Two signed claims ≠ effect provenance** | Ephemeral dual Ed25519 signatures, signer-key diversity, false consensus and quarantine after conflicting or deceptive outcomes | **ENGINEERING ACCEPTED — PR/main 4/4** | [#314](../../issues/314), [PR #315](../../pull/315), [main CI #41023181163](../../actions/runs/41023181163), [guide](.github/M30_DUAL_SIGNER_QUORUM.md) | 14/14 source-owned crypto cases, PR/main CI 4/4; no independently verified effect provenance |
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M30-A/B/C — dual-signer agreement still does not prove real effects (in progress)
+## M30-A/B/C — dual-signer agreement still does not prove real effects (engineering accepted)
 
 - [Issue #314](../../issues/314): fixed source-only
   `node tools/m30-dual-signer-illusion.mjs` generates **new ephemeral
@@ -101,6 +101,16 @@ We will not claim a release is production-ready merely because a synthetic test 
   reconciliation, user MCP, real files/credentials, model calls,
   telemetry, Stable Bridge or publication. Unpublished 80-file
   package and #21/#43/#59 gates remain unchanged.
+  [PR #315](../../pull/315) passed
+  [PR CI #41022817744](../../actions/runs/41022817744) **4/4**
+  (Windows/Ubuntu Node20/22), merged at exact main SHA
+  `77dfbb5bf932797813ba21c266c2519bc455e67a`, and independently
+  [main CI #41023181163](../../actions/runs/41023181163) passed
+  **4/4 on that same SHA**. M6-J's excluded-source custody grew from
+  bounded 224 to **240** files after the actual source count reached
+  227; all paths remain hashed and the 241st-file reject control
+  passed. This is first-party engineering acceptance only, not proof
+  of independent effect truth, trusted signers or real-world release.
 
 ## M29-A/B/C — signed outcome authenticity versus trusted effect provenance (engineering accepted)
 
