@@ -76,12 +76,12 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M32 — Deterministic OS path-swap TOCTOU** | Eight first-party IPC-barrier marker-swap/absence/anomaly cases exposing size-only false confidence | **ENGINEERING ACCEPTED — PR/main 4/4** | [#320](../../issues/320), [PR #321](../../pull/321), [main CI #41027413776](../../actions/runs/41027413776), [guide](.github/M32_OS_PATH_SWAP_TOCTOU.md) | 8/8 first-party OS cases; 1337/1337 Ubuntu20 tests; PR and exact main CI 4/4, no external effect proof |
 
 | **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
-| **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING IN PR — CI/acceptance pending** | [#326](../../issues/326), [getting started](docs/GETTING_STARTED.md) | No fake real-project vulnerabilities, categorical source-only report, closed no-echo boundary, 4/4 PR/main CI |
+| **M35 — Explainable offline report** | Human-readable M34/M24 onboarding evidence with separate fictional controls and NOT TESTED scope | **ENGINEERING ACCEPTED — PR/main 4/4** | [#326](../../issues/326), [PR #327](../../pull/327), [main CI #41033817795](../../actions/runs/41033817795), [getting started](docs/GETTING_STARTED.md) | 1350/1350 Ubuntu20; no real-target scores, exact 4/4 PR/main CI, bounded 240-file custody |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M35-A/B/C — explainable offline report, not a vulnerability scan (engineering in PR)
+## M35-A/B/C — explainable offline report, not a vulnerability scan (engineering accepted)
 
 - [Issue #326](../../issues/326). Source-only
   `node tools/m35-offline-onboarding-report.mjs` accepts the
@@ -104,9 +104,15 @@ We will not claim a release is production-ready merely because a synthetic test 
   files (tool + test) fill the existing M6-J 240-file custody cap,
   without weakening complete SHA-256 inventory or its 241st-file
   overflow denial. Unpublished npm 80-path candidate unchanged.
-- **Acceptance pending:** PR CI Windows/Ubuntu Node20/22 **4/4**,
-  separately matched exact post-merge main CI **4/4**. Independent
-  beta #59, audit #43, real-target permission #21 remain open.
+- **Accepted 2026-10-30:** [PR #327](../../pull/327)
+  [PR CI #41033447378](../../actions/runs/41033447378)
+  **4/4 PASS** (Windows/Ubuntu, Node20/22);
+  Ubuntu20 **1350/1350 tests**, 0 failures/skips.
+  Squash merge SHA `a5b9245178ce375dbcd08bd0eb82477c8760d8ac`;
+  independently [main CI #41033817795](../../actions/runs/41033817795)
+  **4/4 PASS on exact same SHA**. [#326](../../issues/326)
+  closed for engineering only. The separate external gates #21
+  (target authority), #43 (audit) and #59 (independent beta) remain OPEN.
 
 ## M34-A/B/C — common MCP client config to inert descriptor (engineering accepted)
 
