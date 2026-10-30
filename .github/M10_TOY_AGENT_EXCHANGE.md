@@ -128,3 +128,42 @@ No OS file target, external MCP endpoint, model, API key or executable
 is accepted. The no-argument five-case selftest remains unchanged.
 Future independent real-agent tests require separate owner approval,
 isolated operation and real side-effect witnesses.
+
+## M46 — origin- and scope-bound toy permission checks
+
+The next source-only matrix distinguishes **where a purported instruction
+entered the system** from **who is allowed to authorize an action**.
+A tool result, a human-to-human email, and a JSON tool-result field can carry
+a literal `OWNER_APPROVED` claim, but such content is never eligible to grant
+authority. In this toy model, the parent chooses the source channel and the
+owner's fictional grant **before** the request. The toy gateway reads those
+parent-owned values, not the contents of a tool result or a detector's label.
+
+Run locally in the reviewed checkout:
+
+```sh
+node tools/toy-agent-exchange.mjs --context-authority-matrix
+node --test test/m10-toy-agent-exchange.test.mjs
+```
+
+There are **33 source-owned in-memory trials** (11 fixed origin/scope/action
+cases, each repeated with three *hypothetical* scanner classifications).
+The test includes allowed task-data consumption, explicitly authorized
+fictional read/tool use by the owner, denied owner requests without the
+right scope, and denied untrusted-origin requests claiming owner approval.
+A scope allowing a fictional tool is not equivalent to a scope allowing a
+fictional file read.
+
+The gateway counts every toy request. Allowed protected operations only
+increment **fictional in-memory counters**; denied requests do not change
+those counters. No real file, network, MCP target, credential, user account,
+or agent is contacted. The scanner outcomes are not measured and never
+enter the gateway. The source metadata in this test is written by the test
+author; it is **not real signed provenance or identity attestation**.
+Therefore this test cannot prove correct provenance mapping in a real
+framework or resistance to compromised parent code.
+
+These controls illustrate the intended application invariant:
+**a content claim or clean scanner result cannot confer privileges**.
+Real-agent provenance and approved action gating require separate
+integration engineering, credentials and owner authorization.
