@@ -65,3 +65,42 @@ end-to-end prompt-injection prevention, real remote MCP safety, or that
 any third-party scanner was executed. Real external MCP target
 authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)
 remains open.
+
+## M49 — isolated real loopback tool-call effects, test-only
+
+M49 extends **only the existing nonpackaged** `test/first-party-staging.test.mjs`
+with a separate test-owned, ephemeral IPv4 `127.0.0.1` HTTP server.
+The packaged `staging-selftest` remains **discovery-only**:
+it still rejects every `tools/call` method and receives no additional
+CLI flags, credentials, routes or user-specified destinations.
+
+```sh
+node --test test/first-party-staging.test.mjs
+```
+
+Six source-authored cases transmit a genuine, finite
+`Mcp-Method: tools/call` HTTP request using fixed MCP-shaped version
+metadata and a fictional status-writing tool. Only the *server-side
+source-authored* `OWNER_DIRECT + WRITE_TASK_STATUS` grant allows the tool
+handler to write a fixed fictional file into a freshly allocated
+test-owned temporary directory; parent code independently enumerates
+the directory and reads back the expected file bytes. An owner with
+a read-only grant is denied, as are untrusted tool results and human
+emails, even when the request body claims `OWNER_EXPLICIT` or
+`NOT_FLAGGED`. Denied calls must leave the temporary directory empty.
+
+A separate **direct test-only negative control** sends a request that
+returns HTTP 403 yet deliberately creates one fictional file. The
+independent disk readback must see that unexpected actual file and
+mark the trial mismatched. All directories are deleted in `finally`,
+and real socket-closure acknowledgments must settle. Reports contain
+no paths, ports, file contents or arbitrary request bodies.
+
+The test exercises actual first-party HTTP and OS temporary-file I/O.
+It is **not** a test of a real LLM, independent scanner, verified human
+authorization, process/OS sandbox, external-user MCP server, production
+agent integration, or third-party tool execution. The test-only
+grant is fixed in reviewed source, not cryptographic authentication.
+External-target authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)
+and independent beta [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+remain open.
