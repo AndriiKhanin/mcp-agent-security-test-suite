@@ -71,12 +71,35 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 | **M29 — Signed receipt authenticity ≠ verified outcome** | Real ephemeral Ed25519 signatures with exact operation/marker/epoch binding, invalid and replayed receipt controls, and deceptive signed outcome comparison | **ENGINEERING ACCEPTED — PR/main 4/4** | [#311](../../issues/311), [PR #312](../../pull/312), [main CI #41020234312](../../actions/runs/41020234312), [M28/M29 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 12/12 first-party signed cases, guarded quarantine; external signer never verified |
 
 | **M30 — Two signed claims ≠ effect provenance** | Ephemeral dual Ed25519 signatures, signer-key diversity, false consensus and quarantine after conflicting or deceptive outcomes | **ENGINEERING ACCEPTED — PR/main 4/4** | [#314](../../issues/314), [PR #315](../../pull/315), [main CI #41023181163](../../actions/runs/41023181163), [guide](.github/M30_DUAL_SIGNER_QUORUM.md) | 14/14 source-owned crypto cases, PR/main CI 4/4; no independently verified effect provenance |
-| **M31 — Independent parent OS observation ≠ remote effect provenance** | Seven first-party disposable child/parent disk scenarios; false IPC claims, corrupted and drifting marker, conservative quarantine | **IMPLEMENTATION IN PR — acceptance pending** | [#317](../../issues/317), [guide](.github/M31_PARENT_OS_EFFECT_EVIDENCE.md) | Independent first/second OS reads, real scratch cleanup, exact negative-mutation oracle; PR + matched main CI 4/4 required |
+| **M31 — Independent parent OS observation ≠ remote effect provenance** | Seven first-party disposable child/parent disk scenarios; false IPC claims, corrupted and drifting marker, conservative quarantine | **ENGINEERING ACCEPTED — PR/main 4/4** | [#317](../../issues/317), [PR #319](../../pull/319), [main CI #41025873482](../../actions/runs/41025873482), [guide](.github/M31_PARENT_OS_EFFECT_EVIDENCE.md) | Independent first/second OS reads, real scratch cleanup, exact negative-mutation oracle; PR + matched main CI 4/4 required |
+
+| **M32 — Deterministic OS path-swap TOCTOU** | Eight first-party IPC-barrier marker-swap/absence/anomaly cases exposing size-only false confidence | **IMPLEMENTATION IN PR — acceptance pending** | [#320](../../issues/320), [guide](.github/M32_OS_PATH_SWAP_TOCTOU.md) | 8/8 OS child observations and independent negative oracle; PR 4/4 then matched main 4/4 required |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M31-A/B/C — independent parent OS scratch observations (implementation in PR)
+## M32-A/B/C — deterministic first-party path-swap before read (implementation in PR)
+
+- [Issue #320](../../issues/320): source-only fixed
+  `node tools/m32-path-swap-lab.mjs`, eight disposable OS child cases.
+  Parent observes initial bytes and metadata; an owned child performs a
+  deterministic IPC-barrier mutation before the next parent file read.
+- **M32-A:** same-size marker rewrite, removal, creation, corrupt or
+  oversized marker, unexpected extra file, and two stable controls.
+  Two changed/invalid cases still pass naive size-only checks; an
+  honest post-barrier observer reports changed or invalid evidence.
+- **M32-B:** independent per-row oracle checks parent observations,
+  metadata presence, failed size-only comparison, child process PID and
+  clean exit, barrier order, temp cleanup and all guarded QUARANTINE.
+  Mutation controls reject false effects, release, hidden drift,
+  getter-bearing, missing/reordered rows and raw-input echo.
+- **M32-C:** [limits](.github/M32_OS_PATH_SWAP_TOCTOU.md), README,
+  80-path frozen unpublished npm candidate unchanged, M6-J complete
+  SHA-256 excluded-source custody and overflow deny kept.
+  Acceptance requires PR CI **4/4** then separately matched main
+  push CI **4/4**. No real MCP, Stable Bridge or business-effect proof.
+
+## M31-A/B/C — independent parent OS scratch observations (engineering accepted)
 
 - [Issue #317](../../issues/317) adds a source-only zero-argument
   owned child/parent runner. Each of seven fixed scenarios uses a new
@@ -96,7 +119,12 @@ We will not claim a release is production-ready merely because a synthetic test 
   M6-J hashes the added excluded-source files within its bounded
   240-file index. Acceptance requires PR CI **4/4** followed by
   independently matched main-push CI **4/4**.
-- **Not accepted until CI evidence:** real OS scratch I/O is not a
+- **Engineering acceptance (2026-10-30):** [PR #319](../../pull/319)
+  [PR CI #41025402415](../../actions/runs/41025402415) **4/4 PASS**,
+  exact merged main SHA `631ac0e5bcc4af94ef5dbeb928d4494937eb6ef9`,
+  independently [main CI #41025873482](../../actions/runs/41025873482)
+  **4/4 on that SHA**. [Issue #317](../../issues/317) closed.
+  The actual OS scratch I/O is not a
   business effect, authenticated independent observer, authorized
   remote MCP connection or exactly-once recovery. #21/#43/#59 OPEN.
 
