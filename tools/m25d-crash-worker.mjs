@@ -138,8 +138,16 @@ if(!validBoot){
     }else if(msg.type==='CLOSE'){
       // Graceful cleanup is allowed only for the surviving, fresh worker.
       server.close(()=>{
-        process.send({type:'CLOSED',effects,socketsRemaining:sockets.size},
-          ()=>process.exit(0));
+        // The server close callback can precede Socket close on Windows.
+        // Do not claim socket cleanup before the actual close event.
+        const remaining=[...sockets];
+        Promise.all(remaining.map(socket=>new Promise(done=>{
+          if(!sockets.has(socket)){done();return;}
+          socket.once('close',done);
+        }))).then(()=>{
+          process.send({type:'CLOSED',effects,
+            socketsRemaining:sockets.size},()=>process.exit(0));
+        });
       });
       server.closeAllConnections();
     }
