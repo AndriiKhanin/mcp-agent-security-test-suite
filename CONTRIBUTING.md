@@ -1,5 +1,30 @@
 # Contributing
 
+## Independent detector comparisons (M38, fictional only)
+
+Independent security-tool maintainers can review and classify exactly
+four **first-party fictional** tool-result strings without modifying our
+runner or providing a real MCP target:
+
+```sh
+node tools/fixture-batch-preflight.mjs --export-detector-cases
+```
+
+Use your own rule-based scanner locally, on disposable test material.
+Report all clean/mixed classifications, including **misses, false
+positives and errors**, not just successes. The opt-in
+`--triage-detector-results` mode consumes one tiny, bounded, strict
+JSON document over local stdin and calculates only the confusion
+matrix **relative to our author-written labels**. This does not run
+or verify the external scanner. Follow the
+[M38 reviewer guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md#m38--independent-scanner-comparison-on-fixed-fictional-tool-results)
+and [comparison Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
+Report the scanner's public version/commit and rule settings manually,
+with no credentials, customer examples, URLs or private logs. This
+comparison is distinct from the independently executed beta protocol
+[#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
+
+
 This is an early independent OSS release. Contributions are welcome through GitHub Issues and pull requests.
 
 Start with [Getting Started](docs/GETTING_STARTED.md): run `node examples/offline-ci-check.mjs` to see one fictional PASS and one deliberately detected FAIL. A [reviewed CI template](examples/offline-contract-check.yml) uses pinned Actions and minimal permissions.
