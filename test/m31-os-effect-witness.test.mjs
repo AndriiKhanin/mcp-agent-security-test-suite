@@ -18,7 +18,7 @@ const specs=[
 ];
 const reference=()=>specs.map(([id,claim,first,second,firstAgrees,
     secondAgrees,lost,duplicate,drift,mutated])=>({
-  id,claim,workerStarted:true,differentProcess:true,actionAck:true,
+  id,claim,claimReported:true,workerStarted:true,differentProcess:true,actionAck:true,
   mutationAck:mutated,firstReadback:first,secondReadback:second,
   firstClaimMatches:firstAgrees,secondClaimMatches:secondAgrees,
   readbackDrift:drift,hypotheticalClaimOnlyLost:lost,
@@ -60,6 +60,7 @@ test('M31-B: source-authored real OS readback oracle requires seven cases',()=>{
 test('M31-B: fake child, effect, drift, cleanup and release witnesses fail closed',()=>{
   const changes=[
     [0,'workerStarted',false],[1,'differentProcess',false],
+    [0,'claimReported',false],
     [2,'actionAck',false],[5,'mutationAck',false],
     [1,'firstReadback','VALID'],[2,'firstReadback','ABSENT'],
     [4,'firstReadback','VALID'],[5,'secondReadback','VALID'],
