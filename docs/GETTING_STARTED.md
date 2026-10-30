@@ -1,5 +1,35 @@
 ## M35 — first-party readable offline onboarding (source checkout)
 
+
+## M36 — local distribution doctor (no publication)
+
+In a reviewed source checkout with Git, Node.js 20/22 and bundled npm,
+run exactly this command:
+
+```sh
+node tools/reviewer-handoff.mjs doctor
+```
+
+The helper is **source-only**, not part of the frozen 80-file npm
+candidate. It combines the existing M6-J hashed handoff, real temporary
+`npm pack --offline --ignore-scripts`, offline local install, and
+source/installed-byte comparison. It cleans temporary local archives.
+The JSON `status: "PASS"` is a local diagnostic only; check
+`distributionDecision: "BLOCKED_PENDING_INDEPENDENT_GATES_AND_OWNER"`,
+`releaseReady: false`, `published: false`, and the open gates
+[#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59),
+[#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43),
+[#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21).
+This diagnostic does not independently authenticate Git HEAD, verify
+checkout cleanliness, verify a release signature or approve production.
+
+The tool takes **no flags or user paths** after `doctor`.
+An unsupported argument returns exit 2 and a bounded generic ERROR;
+never provide credentials or production projects. A successful local
+preflight exits 0, but a real release still needs independent assessment,
+reviewed owner approval and separately anchored artifact identity.
+
+
 This is a zero-contact **configuration shape report**, not a vulnerability
 scan. It accepts one approved MCP client JSON entry in `mcpServers`
 or `servers` (see [M34 input limits](../.github/M34_CLIENT_CONFIG_IMPORT.md)).
