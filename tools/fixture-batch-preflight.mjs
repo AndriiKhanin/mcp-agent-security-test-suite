@@ -518,9 +518,90 @@ export async function runFictionalDetectorDisagreementsStdin(args=[],stream=proc
   }catch{return M41_ERROR;}
 }
 
+
+/**
+ * M42: deterministic REVIEW priority, not exploit severity. Rank the four
+ * source-owned fictional cases by independent self-reported missed labels,
+ * false positives and errors. Never invent vulnerabilities or recommendations
+ * to modify a scanner's rules without independent reproduction.
+ */
+const M42_PROFILE='m42-fictional-issue-priority-v1';
+const M42_ERROR=Object.freeze({
+  reportSchemaVersion:1,profile:M42_PROFILE,status:'ERROR',exitCode:2,
+  ruleCode:'M42_INVALID_OR_UNREADABLE_PRIORITY_BATCH',
+  resultsSelfReportedOnly:true,manualReviewRequired:true,limits:M38_LIMITS
+});
+export function prioritizeFictionalDetectorIssues(input){
+  const comparisons=compareFictionalDetectorBatch(input);
+  if(comparisons.status!=='PASS')return M42_ERROR;
+  const rows=comparisons.cases.map((c,ordinal)=>{
+    const {TP,FP,FN,TN,ERROR:errors}=c.classifications;
+    const misses=c.expectedLabel==='INJECTION'?FN:0;
+    const falsePositives=c.expectedLabel==='BENIGN'?FP:0;
+    const votingSplit=(TP+FP)>0&&(FN+TN)>0;
+    const priority=misses>=2?'P1_REPEATED_INJECTION_MISS':
+      misses>0?'P2_INJECTION_MISS':
+      falsePositives>0?'P3_FALSE_POSITIVE':
+      errors>0?'P4_SCANNER_ERROR':'NO_FINDING';
+    const priorityOrder=misses>=2?1:misses>0?2:
+      falsePositives>0?3:errors>0?4:5;
+    const recommendation=misses>0?'REPRODUCE_MISSED_INJECTION':
+      falsePositives>0?'REPRODUCE_FALSE_POSITIVE':
+      errors>0?'INVESTIGATE_SCANNER_ERROR':'NO_ACTION';
+    return {
+      caseId:c.caseId,expectedLabel:c.expectedLabel,priority,
+      priorityOrder,sourceOrdinal:ordinal,
+      affectedScannerCount:misses+falsePositives+errors,
+      missedInjectionCount:misses,falsePositiveCount:falsePositives,
+      errorCount:errors,votingSplit,recommendation
+    };
+  }).sort((a,b)=>a.priorityOrder-b.priorityOrder||
+    b.missedInjectionCount-a.missedInjectionCount||
+    b.falsePositiveCount-a.falsePositiveCount||
+    b.errorCount-a.errorCount||a.sourceOrdinal-b.sourceOrdinal);
+  const findings=rows.filter(x=>x.priority!=='NO_FINDING').map(
+    ({sourceOrdinal,priorityOrder,...item})=>Object.freeze(item));
+  const counts=Object.freeze({
+    missedInjections:comparisons.totals.FN,
+    falsePositives:comparisons.totals.FP,
+    scannerErrors:comparisons.totals.ERROR,
+    casesNeedingReview:findings.length
+  });
+  return Object.freeze({
+    reportSchemaVersion:1,profile:M42_PROFILE,status:'PASS',exitCode:0,
+    ruleCode:'SELF_REPORTED_FICTIONAL_ISSUES_PRIORITIZED_ONLY',
+    sourceProfile:M38_EXPORT_PROFILE,scannerCount:comparisons.scannerCount,
+    caseCount:comparisons.caseCount,
+    findings:Object.freeze(findings),counts,
+    priorityMeaning:'REVIEW_ORDER_ONLY_NOT_REAL_WORLD_SEVERITY',
+    independentReproductionConfirmed:false,
+    resultsSelfReportedOnly:true,manualReviewRequired:true,
+    noEstimatedPopulationPerformance:true,limits:M38_LIMITS
+  });
+}
+export function prioritizeFictionalDetectorIssuesJson(text){
+  if(typeof text!=='string'||!text.trim()||
+    Buffer.byteLength(text,'utf8')>M39_MAX_BYTES)return M42_ERROR;
+  try{return prioritizeFictionalDetectorIssues(parseStrictJson(text));}
+  catch{return M42_ERROR;}
+}
+export async function runFictionalDetectorPrioritiesStdin(args=[],stream=process.stdin){
+  if(!ownArray38(args,0)||!stream||stream.isTTY===true||
+    typeof stream.on!=='function'||typeof stream.off!=='function'||
+    typeof stream.pause!=='function'||typeof stream.resume!=='function')
+    return M42_ERROR;
+  try{
+    const bytes=await boundedM38Stdin(stream,M39_MAX_BYTES);
+    return prioritizeFictionalDetectorIssuesJson(
+      new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  }catch{return M42_ERROR;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
-  const report=args.length===1&&args[0]==='--analyze-detector-disagreements'?
+  const report=args.length===1&&args[0]==='--prioritize-detector-issues'?
+      await runFictionalDetectorPrioritiesStdin():
+    args.length===1&&args[0]==='--analyze-detector-disagreements'?
       await runFictionalDetectorDisagreementsStdin():
     args.length===1&&args[0]==='--review-detector-batch'?
       await runFictionalDetectorReviewStdin():
