@@ -11,6 +11,7 @@ node tools/reviewer-handoff.mjs doctor
 
 This SOURCE-ONLY doctor (not included in the npm tarball) **actually
 packs and installs a disposable offline local npm candidate** and
+checks local archive SHA-256, SHA-512 and npm integrity and
 reconciles 80 packaged source files plus up to 240 fully SHA-256-indexed
 excluded test/tool/CI files using existing M6-J checks. A JSON
 `PASS` means only local package-byte and install-custody checks
