@@ -153,6 +153,26 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - [PR #348](../../pull/348) merged after PR CI 4/4. This is **not a real LLM, third-party agent, filesystem permission boundary, authorized external MCP test, real scanner accuracy result or product certification**. Post-merge `main` CI not separately verified.
 - Next product gate: separately approved and isolated evaluation with genuine agent/tool execution and independent side-effect observation. Owner authorization and first-party staging controls must be established before expanding external contact; see [#21](../../issues/21), [#59](../../issues/59) and [#345](../../issues/345).
 
+## M46 — parent-bound instruction origin and toy scope enforcement (PR CI pending)
+
+- Add `--context-authority-matrix` to the **existing source-only M10 toy
+  gateway**, exercising 11 fixed, reviewed origin/scope/action cases across
+  three hypothetical scanner labels (33 in-memory trials).
+- A tool result, JSON tool field or human email claiming "owner approved"
+  cannot create a permission: only source-authored parent-owned metadata
+  drives the toy gateway. Explicit owner grants allow only matching
+  fictional scoped actions; wrong/absent grants deny.
+- Preserve no-arg M10 five-case output and M45 `--blindspot-gate-matrix`.
+  Count authorized toy effects and denied requests separately. No scanner,
+  real model, filesystem, MCP endpoint, network or credential operation.
+- **Important limitation:** all provenance labels and grants are supplied
+  by our test code, not cryptographically verified, and allowed effects
+  exist only in JavaScript memory. This is not proof of a real agent's
+  privilege separation or provenance integrity.
+- CI acceptance requires four OS/runtime jobs; post-merge `main` CI,
+  real integration and beta/audit authorization remain distinct gates.
+  [Context testing #345](../../issues/345) tracks later work.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
