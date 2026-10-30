@@ -70,7 +70,37 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M29 — Signed receipt authenticity ≠ verified outcome** | Real ephemeral Ed25519 signatures with exact operation/marker/epoch binding, invalid and replayed receipt controls, and deceptive signed outcome comparison | **ENGINEERING ACCEPTED — PR/main 4/4** | [#311](../../issues/311), [PR #312](../../pull/312), [main CI #41020234312](../../actions/runs/41020234312), [M28/M29 guide](.github/M28_INDOUBT_RECOVERY_AMBIGUITY.md) | 12/12 first-party signed cases, guarded quarantine; external signer never verified |
 
+| **M30 — Two signed claims ≠ effect provenance** | Ephemeral dual Ed25519 signatures, signer-key diversity, false consensus and quarantine after conflicting or deceptive outcomes | **IN PROGRESS — source-only PR CI required** | [#314](../../issues/314), [guide](.github/M30_DUAL_SIGNER_QUORUM.md) | 14/14 source-owned crypto cases, 4/4 PR and independently matched main CI; no real signer trust |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M30-A/B/C — dual-signer agreement still does not prove real effects (in progress)
+
+- [Issue #314](../../issues/314): fixed source-only
+  `node tools/m30-dual-signer-illusion.mjs` generates **new ephemeral
+  Ed25519 keypairs for each of 14 fictional recovery claims**. It
+  verifies two actual cryptographic signatures, two source-owned
+  issuer/key anchors, exact operation/marker/epoch binding, time
+  windows, single-use nonces and distinct public keys.
+- **M30-A:** a deliberately vulnerable signed-quorum-only resolver
+  treats two agreeing claims as effect truth. Two separate adversarial
+  worlds prove this would **lose an operation** that was never
+  performed or **duplicate an effect** already performed. Conflicting
+  receipts, signature tampering, rogue signers, one key under two
+  aliases, nonce reuse, wrong scope and expiry cannot form a valid
+  source-owned cryptographic quorum.
+- **M30-B:** independent per-field oracle rejects any false
+  crypto acceptance, missed lost/duplicate witness, forged real-effect
+  provenance, premature release of quarantine and getter-driven input
+  side effects. **Every guarded result remains QUARANTINED**, even
+  if two ephemeral first-party signatures verify.
+- **M30-C:** [scope guide](.github/M30_DUAL_SIGNER_QUORUM.md),
+  README, fixed no-argument CLI, Windows/Ubuntu Node20/22 PR and
+  separate post-merge main CI **4/4**. No real independently trusted
+  identity, authenticated outcome observation, exactly-once
+  reconciliation, user MCP, real files/credentials, model calls,
+  telemetry, Stable Bridge or publication. Unpublished 80-file
+  package and #21/#43/#59 gates remain unchanged.
 
 ## M29-A/B/C — signed outcome authenticity versus trusted effect provenance (engineering accepted)
 

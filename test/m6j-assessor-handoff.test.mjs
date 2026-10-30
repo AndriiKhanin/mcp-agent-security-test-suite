@@ -54,7 +54,7 @@ test('M6-J: local handoff includes shipped source, actual temporary archive and 
   assert.equal(s.localArchive.npmIntegrity,
     'sha512-'+Buffer.from(s.localArchive.sha512,'hex').toString('base64'));
   assert.match(s.localArchive.installedIndexSha256,/^[0-9a-f]{64}$/);
-  assert.ok(s.excludedReview.fileCount>=50&&s.excludedReview.fileCount<=224);
+  assert.ok(s.excludedReview.fileCount>=50&&s.excludedReview.fileCount<=240);
   assert.equal(s.excludedReview.files.length,s.excludedReview.fileCount);
   assert.deepEqual(s.excludedReview.files.map(x=>x.path),
     [...s.excludedReview.files.map(x=>x.path)].sort());
@@ -68,6 +68,9 @@ test('M6-J: local handoff includes shipped source, actual temporary archive and 
     'test/m6j-assessor-handoff.test.mjs',
     'tools/reviewer-receipt.mjs',
     'tools/reviewer-archive.mjs',
+    '.github/M30_DUAL_SIGNER_QUORUM.md',
+    'test/m30-dual-signer-illusion.test.mjs',
+    'tools/m30-dual-signer-illusion.mjs',
     'tools/reviewer-handoff.mjs',
     'tools/m18-symbolic-evaluation.mjs',
     'test/m18-symbolic-evaluation.test.mjs',
@@ -167,9 +170,9 @@ test('M6-J: internally consistent but invented excluded digest still mismatches 
   assert.equal(validateHandoff(x),true);
   assert.equal(verifyHandoff(x),false);
 });
-test('M6-J: expanded custody stays bounded at 224 fully indexed files',()=>{
+test('M6-J: expanded custody stays bounded at 240 fully indexed files',()=>{
   const x=sample();
-  while(x.excludedReview.files.length<=224){
+  while(x.excludedReview.files.length<=240){
     const i=x.excludedReview.files.length;
     x.excludedReview.files.push({
       path:'tools/zz-fictional-excluded-bound-'+String(i).padStart(3,'0')+'.mjs',
@@ -180,7 +183,7 @@ test('M6-J: expanded custody stays bounded at 224 fully indexed files',()=>{
   x.excludedReview.fileCount=x.excludedReview.files.length;
   x.excludedReview.indexSha256=sha(Buffer.from(
     JSON.stringify(x.excludedReview.files),'utf8'));
-  assert.equal(x.excludedReview.fileCount,225);
+  assert.equal(x.excludedReview.fileCount,241);
   assert.throws(()=>validateHandoff(x),/M6J_INVALID_LOCAL_PACKET/);
 });
 test('M6-J: noncanonical/malformed/oversize/private/invalid UTF-8 receipt never leaks',()=>{
