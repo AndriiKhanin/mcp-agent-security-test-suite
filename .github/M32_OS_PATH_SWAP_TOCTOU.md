@@ -62,3 +62,15 @@ Acceptance requires Windows/Ubuntu x Node20/22 **4/4 PR CI**, a merge
 and **independently matched main-push 4/4 CI on the exact merged SHA**.
 Independent beta [#59](../issues/59), audit [#43](../issues/43)
 and external target authorization [#21](../issues/21) remain open.
+
+## Engineering acceptance (2026-10-30)
+
+[PR #321](../pull/321) passed [PR CI #41026392937](../actions/runs/41026392937)
+**4/4** on Windows/Ubuntu Node.js 20/22. The exact merged main
+commit is `0f66d2af9ca882cff8179fa06e799f28a7c548fb`; separately
+[main CI #41027413776](../actions/runs/41027413776) passed **4/4
+on that same SHA**. Ubuntu Node20 executed **1337/1337 tests, zero
+failures/skips**. [#320](../issues/320) closed for first-party
+engineering scope only. External observer trust, remote effect proof,
+release, independent beta, audit and real-target authorization
+remain unverified.
