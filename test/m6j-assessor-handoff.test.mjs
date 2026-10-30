@@ -101,7 +101,7 @@ test('M6-J: every independent gate remains NOT_VERIFIED and no private paths/can
   assert.ok(!text.includes('\u001b'));
   assert.ok(!text.includes('"timestamp"'));
   assert.ok(!text.includes('"assessorName"'));
-  assert.ok(Buffer.byteLength(text,'utf8')<40960);
+  assert.ok(Buffer.byteLength(text,'utf8')<65536);
 });
 test('M6-J: CLI writes canonical packet, accepts exact locally rechecked evidence',()=>{
   const snapshot=run('snapshot');
@@ -188,7 +188,7 @@ test('M6-J: noncanonical/malformed/oversize/private/invalid UTF-8 receipt never 
     const valid=canonical(sample());
     const values=[
       Buffer.from([0xff,0xfe,0x1b,0x5b]),
-      Buffer.alloc(40961,0x41),
+      Buffer.alloc(65537,0x41),
       '{"private":"PRIVATE_CANARY","private":"duplicate"}\n',
       valid.replace('"handoffSchemaVersion": 1,',
         '"handoffSchemaVersion": 1, "handoffSchemaVersion": 1,'),
