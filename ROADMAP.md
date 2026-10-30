@@ -75,12 +75,12 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M32 — Deterministic OS path-swap TOCTOU** | Eight first-party IPC-barrier marker-swap/absence/anomaly cases exposing size-only false confidence | **ENGINEERING ACCEPTED — PR/main 4/4** | [#320](../../issues/320), [PR #321](../../pull/321), [main CI #41027413776](../../actions/runs/41027413776), [guide](.github/M32_OS_PATH_SWAP_TOCTOU.md) | 8/8 first-party OS cases; 1337/1337 Ubuntu20 tests; PR and exact main CI 4/4, no external effect proof |
 
-| **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING IN PR — CI/acceptance pending** | [#323](../../issues/323), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, 4/4 PR + matched main CI |
+| **M34 — Self-service existing MCP config import** | Import one inert Claude-style or VS Code-style server entry into existing validate-only adapter descriptor | **ENGINEERING ACCEPTED — PR/main 4/4** | [#323](../../issues/323), [PR #324](../../pull/324), [main CI #41030636334](../../actions/runs/41030636334), [guide](.github/M34_CLIENT_CONFIG_IMPORT.md) | Default private no-echo report, explicit local export, M24 roundtrip, exact 4/4 PR and main CI; no real server contact |
 
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M34-A/B/C — common MCP client config to inert descriptor (engineering in PR)
+## M34-A/B/C — common MCP client config to inert descriptor (engineering accepted)
 
 - [Issue #323](../../issues/323): source-only stdin bridge
   `node tools/m34-client-config-bridge.mjs` converts exactly one narrowly
@@ -98,9 +98,15 @@ We will not claim a release is production-ready merely because a synthetic test 
   and README, source-only code outside unpublished 80-path npm
   candidate; M6-J full indexed SHA-256 excluded-source inventory and
   241st-entry overflow denial preserved.
-- **Pending:** PR CI Windows/Ubuntu Node20/22 **4/4**, then independent
-  post-merge main-push **4/4 on exact SHA** before acceptance. Independent
-  beta #59, external target approval #21, audit #43 remain open.
+- **Accepted 2026-10-30:** [PR #324](../../pull/324)
+  [PR CI #41030205354](../../actions/runs/41030205354)
+  **4/4 PASS** (Ubuntu/Windows Node20/22), exact squash merge SHA
+  `57e8a1ec962448af22015f50a330abf48086c843`.
+  Independent [main push CI #41030636334](../../actions/runs/41030636334)
+  **4/4 PASS on same SHA**; Ubuntu20 **1344/1344 tests**.
+  [Issue #323](../../issues/323) closed for first-party engineering
+  scope only. Independent beta #59, real target approval #21
+  and external security audit #43 remain open.
 
 ## M32-A/B/C — deterministic first-party path-swap before read (engineering accepted)
 
