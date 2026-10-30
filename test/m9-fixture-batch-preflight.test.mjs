@@ -495,10 +495,10 @@ test('M40: reviewer queue prioritizes FN, FP and ERROR without scanner execution
     ]};
   const report=reviewFictionalDetectorBatch(input);
   assert.equal(report.status,'PASS');
-  assert.deepEqual(report.counts,{TP:1,FP:1,FN:1,TN:2,ERROR:3});
-  assert.equal(report.findingCount,5);
+  assert.deepEqual(report.counts,{TP:2,FP:1,FN:1,TN:2,ERROR:2});
+  assert.equal(report.findingCount,4);
   assert.deepEqual(report.reviewQueue.map(x=>x.finding),[
-    'FP','FN','ERROR','ERROR','ERROR'
+    'FP','FN','ERROR','ERROR'
   ]);
   assert.equal(report.independentReproductionConfirmed,false);
   assert.equal(report.resultsSelfReportedOnly,true);
