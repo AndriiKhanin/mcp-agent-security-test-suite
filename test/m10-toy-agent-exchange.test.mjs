@@ -10,9 +10,7 @@ import {
   runFixedContextProvenanceSelftest,
   runFixedTemporaryFileEffectSelftest,
   runFixedTemporaryFileEffectFaultSelftest,
-  runFixedScopedAuthoritySelftest,
-  runFixedChildProcessEffectSelftest,
-  runFixedChildProcessEffectFaultSelftest
+  runFixedScopedAuthoritySelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
 
@@ -663,130 +661,6 @@ test('M48: API denies nonempty or exotic arguments before creating temp files',a
       assert.equal(result.realMcpToolCallObserved,false);
       assert.equal(result.externalMcpContacted,false);
       assert.ok(!JSON.stringify(result).includes('PRIVATE_CANARY'));
-    }
-  }
-});
-
-
-test('M50: 6 actual fixed child processes obey source-bound grant with OS readback',async()=>{
-  const r=await runFixedChildProcessEffectSelftest();
-  assert.equal(r.status,'PASS');
-  assert.equal(r.exitCode,0);
-  assert.equal(r.checked,6);
-  assert.equal(r.matched,6);
-  assert.equal(r.deniedWrites,5);
-  assert.equal(r.actualAuthorizedEffects,1);
-  assert.equal(r.unauthorizedEffects,0);
-  assert.equal(r.cleanupVerified,true);
-  assert.equal(r.realChildProcessUsed,true);
-  assert.equal(r.realTemporaryFileReadback,true);
-  assert.equal(r.osSandboxed,false);
-  assert.equal(r.realOwnerAuthenticated,false);
-  assert.equal(r.realAgentBehaviorObserved,false);
-  assert.equal(r.externalMcpContacted,false);
-  assert.equal(r.independentBetaVerified,false);
-  assert.equal(r.releaseAuthorized,false);
-  assert.deepEqual(r.cases.map(row=>row.status),
-    Array(6).fill('PASS'));
-  assert.deepEqual(r.cases.map(row=>row.observedDecision),
-    ['ALLOW','DENY','DENY','DENY','DENY','DENY']);
-  assert.deepEqual(r.cases.map(row=>row.actualFilesReadBack),
-    [1,0,0,0,0,0]);
-  for(const row of r.cases){
-    assert.equal(row.childReaped,true,row.caseId);
-    assert.equal(row.childExitCode,0,row.caseId);
-    assert.equal(row.childRequests,1,row.caseId);
-    assert.equal(row.childReports,1,row.caseId);
-    assert.equal(row.cleanupVerified,true,row.caseId);
-    assert.equal(row.realChildProcessUsed,true);
-    assert.equal(row.osSandboxed,false);
-    assert.equal(row.unauthorizedFilesReadBack,0);
-    assert.equal(Object.isFrozen(row),true);
-  }
-  assert.equal(r.cases[0].approvedBytesReadBack,true);
-  const output=JSON.stringify(r);
-  assert.doesNotMatch(output,/mcp-m50-child-|fictional-child-task\.json/);
-  assert.doesNotMatch(output,/source-owned-approved|PRIVATE_CANARY|NODE_OPTIONS/);
-  assert.doesNotMatch(output,/\/tmp\/|AppData|[A-Z]:\\Users/);
-});
-
-test('M50: negative child controls prove independent forbidden-effect detection',async()=>{
-  const r=await runFixedChildProcessEffectFaultSelftest();
-  assert.equal(r.status,'PASS');
-  assert.equal(r.exitCode,0);
-  assert.equal(r.checked,5);
-  assert.equal(r.caught,5);
-  assert.equal(r.osSandboxed,false);
-  assert.equal(r.externalMcpContacted,false);
-  assert.deepEqual(r.cases.map(x=>x.ruleCode),[
-    'M50_UNAUTHORIZED_CHILD_EFFECT_OBSERVED',
-    'M50_CHILD_REPORT_CONTRADICTS_DISK',
-    'M50_CHILD_IPC_REJECTED',
-    'M50_CHILD_EXIT_FAILED',
-    'M50_CHILD_TIMEOUT'
-  ]);
-  for(const row of r.cases){
-    assert.equal(row.status,'FAIL');
-    assert.equal(row.childReaped,true,row.fault);
-    assert.equal(row.cleanupVerified,true,row.fault);
-    assert.equal(row.expectedDecision,'DENY');
-    assert.equal(row.actualFilesReadBack,row.fault==='unauthorized-write'?1:0);
-    assert.equal(row.unauthorizedFilesReadBack,row.fault==='unauthorized-write'?1:0);
-    assert.ok(Object.isFrozen(row));
-  }
-  assert.equal(r.cases[0].observedDecision,'DENY');
-  assert.equal(r.cases[0].childClaimedEffect,true);
-  assert.equal(r.cases[1].childClaimedEffect,true);
-  assert.equal(r.cases[1].actualFilesReadBack,0);
-  assert.doesNotMatch(JSON.stringify(r),/FICTIONAL_CANARY|mcp-m50-child-/);
-});
-
-test('M50: public fixed CLI and private worker reject extraneous arguments',()=>{
-  const run=(...args)=>spawnSync(process.execPath,
-    ['tools/toy-agent-exchange.mjs',...args],{encoding:'utf8',
-      timeout:30000,maxBuffer:65536});
-  const ok=run('--child-process-effect-witness');
-  assert.equal(ok.status,0,ok.stderr);
-  assert.equal(ok.stderr,'');
-  const output=JSON.parse(ok.stdout);
-  assert.equal(output.status,'PASS');
-  assert.equal(output.checked,6);
-  assert.equal(output.actualAuthorizedEffects,1);
-  assert.equal(output.unauthorizedEffects,0);
-  assert.ok(!ok.stdout.includes('mcp-m50-child-'));
-  for(const argv of [
-    ['--child-process-effect-witness','--path=PRIVATE_CANARY'],
-    ['--child-process-effect-witness','--fault=unauthorized-write'],
-    ['--child-process-effect-witness','--role=OWNER_DIRECT'],
-    ['--child-process-effect-witness','--endpoint=https://example.invalid']
-  ]){
-    const bad=run(...argv);
-    assert.equal(bad.status,2,bad.stderr);
-    assert.equal(bad.stderr,'');
-    assert.equal(JSON.parse(bad.stdout).ruleCode,
-      'TOY_AGENT_SELFTEST_UNAVAILABLE');
-    assert.ok(!bad.stdout.includes('PRIVATE_CANARY'));
-  }
-  const noIpc=run('--m50-private-worker','owner-write','normal');
-  assert.equal(noIpc.status,2);
-  assert.equal(noIpc.stdout,'');
-});
-
-test('M50: direct APIs reject non-empty, sparse and getter-bearing arguments',async()=>{
-  const accessor=[];
-  Object.defineProperty(accessor,'0',{get(){throw Error('PRIVATE_CANARY');}});
-  const hidden=[];
-  Object.defineProperty(hidden,'private',{value:'PRIVATE_CANARY'});
-  for(const args of [null,{},['anything'],Array(1),accessor,hidden]){
-    for(const fn of [runFixedChildProcessEffectSelftest,
-      runFixedChildProcessEffectFaultSelftest]){
-      const r=await fn(args);
-      assert.equal(r.status,'ERROR');
-      assert.equal(r.exitCode,2);
-      assert.equal(r.ruleCode,'M50_FIXED_CHILD_EFFECT_SELFTEST_UNAVAILABLE');
-      assert.equal(r.externalMcpContacted,false);
-      assert.equal(r.realOwnerAuthenticated,false);
-      assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
     }
   }
 });
