@@ -171,3 +171,36 @@ the same provenance guarantees hold in an adversarial process.
 
 The no-argument original five-case toy selftest and the M45
 `--blindspot-gate-matrix` remain unchanged.
+
+## M47 — fine-grained fictional owner-grant scopes
+
+M46 checks who owns the *ingress* interface: an owner method is available
+only through the parent's source-owned owner closure. M47 adds a separate
+question: **does this owner have the precise grant for this action?**
+
+```sh
+node tools/toy-agent-exchange.mjs --scoped-authority-matrix
+node --test test/m10-toy-agent-exchange.test.mjs
+```
+
+The fixed offline matrix evaluates **11 parent-authored combinations** of
+source origin, owner grant, and requested toy action, repeated across three
+hypothetical scanner labels (`FLAGGED`, `NOT_FLAGGED`, `ERROR`):
+**33 total toy cases**. The allowed positives are ordinary task-data
+handling and owner-initiated actions backed by the matching fictional
+`READ_ARCHIVE` or `USE_TOOL` grant. An owner-originated read with a
+tool-only grant, or a tool action with a read-only grant, is **denied**.
+Untrusted tool results, JSON result fields, and human emails never gain a
+grant by asserting `OWNER_APPROVED`.
+
+Only the **source-owned parent** creates context and grant values in this
+demonstration. The permission decision does not depend on the detector
+label. Denials must produce zero unauthorized fictional effects; two
+allowed owner actions increment **memory-only** authorized counters.
+There is no real file read, execution, API/MCP call, model, signature
+validation, owner identity attestation, or third-party scanner execution.
+
+M47 supplements (but does not replace) the M46 channel comparison or
+M45 blindspot matrix. Real grants and trustworthy provenance are future
+integration requirements; this matrix alone cannot establish that either
+would be enforced in a deployed agent.
