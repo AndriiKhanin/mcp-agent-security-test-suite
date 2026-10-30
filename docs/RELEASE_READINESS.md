@@ -1,5 +1,42 @@
 # v0.0.10 stable release readiness — preflight, NOT a release
 
+
+## M36 — one-command offline candidate doctor (engineering CI pending)
+
+From a reviewed **source checkout**, run:
+
+```sh
+node tools/reviewer-handoff.mjs doctor
+```
+
+This extends the existing first-party M6-J reviewer handoff without
+creating another release tool or source file. It executes actual
+disposable local offline npm package + install checks and full local
+source-byte SHA-256 custody: exact **80 packaged paths** and at most
+**240 excluded .github/test/tools paths**. It returns a JSON v1 report
+with locally computed package source index, excluded source index,
+temporary raw archive SHA-256 and installed-file index. It never
+copies the excluded test/tool source into the package, publishes an
+artifact, contacts the registry or invokes a user MCP server.
+
+`PASS` means ONLY local technical evidence was computed and reconciled.
+The tool always returns `distributionDecision:
+BLOCKED_PENDING_INDEPENDENT_GATES_AND_OWNER` and all publication,
+independence, target-authority, signing and checkout-authentication
+booleans **false**. It does not independently attest Git provenance
+or release artifact identity. Invalid use/failure returns constant
+`M36_OFFLINE_DISTRIBUTION_PRECHECK_UNAVAILABLE` and exit 2, without
+echoing private path/token values. No stable tag, registry publication
+or retained `.tgz` file is produced.
+
+This command needs the source checkout and npm; the SOURCE-ONLY helper
+is intentionally excluded from the frozen 80-file npm candidate.
+It does not replace #43 independent audit, #59 genuine external beta,
+#21 verified external MCP target approvals or owner's explicit release
+decision. M36 engineering CI must pass 4/4 on PR and separately
+on exact merged main SHA before marking it accepted.
+
+
 **Issue:** [R0 #26](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/26)  
 **Candidate source version:** `0.0.10-rc.1` (do not silently bump it)  
 **Disposition:** **R0–R4, R5-A and M5-01/02/03/04/05 engineering accepted** (R3 internal, R5-A heuristic; not an independent audit or beta validation). [M4-B0 PR #62](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/62) and [post-merge main CI #39962836679](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39962836679): **4/4 PASS, 397/397 tests per job**. Subsequently [M4-B1 PR #65](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/65) and [main CI #39966437277](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39966437277) confirmed **4/4 PASS, 407/407 tests per job**, only for fixed first-party local mocks. The subsequent offline [M4-B2 PR #68](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/68) and [main CI #39972783779](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39972783779) confirmed **4/4 PASS, 417/417 tests per job**. Following [M4-B3 PR #71](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/71), [main CI #39979727977](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/39979727977) confirmed **4/4 PASS, 428/428 tests per job** for mock-only pre-effect admission. No verified user-owner authorization exists. This universal descriptor validation does not authorize actual target connections. Independent beta gate [M5-06 #59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) and security gate [R5-B #43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) OPEN. Stable `v0.0.10` remains **NOT RELEASED**; no tag, persistent release tarball, GitHub Release, npm publication or destination approval is implied.
