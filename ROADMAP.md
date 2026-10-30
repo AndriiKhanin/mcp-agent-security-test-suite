@@ -62,7 +62,35 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M25-D — Actual disposable gate OS process crash/relaunch** | Parent-owned IPC and real process exit distinguish stale-approval rejection from unsafe reexecution | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#299](../../issues/299), [PR #300](../../pull/300), [main CI #41008307216](../../actions/runs/41008307216), [guide](.github/M25D_OS_PROCESS_RESTART.md) | 3/3 observed toy cases, negative mutations, independent PR/main CI; real durability unverified |
 
+| **M26 — Disposable cross-process spent-key ledger** | Guarded spent-key claim survives owned OS child crash; two concurrent workers race on exclusive marker; deliberately transient comparator exposes replay | **ENGINEERING IN PROGRESS — PR/main CI pending** | [#302](../../issues/302), [guide](.github/M26_CROSS_PROCESS_LEDGER.md) | Three OS+disk scenarios; mutation/no-echo controls; separate PR and main CI 4/4; no power-loss claim |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M26-A/B/C — disposable cross-process replay ledger (engineering in progress)
+
+- [Issue #302](../../issues/302) adds source-only
+  `node tools/m26-cross-process-ledger.mjs`. Only owned Node workers,
+  source-constant fictionally named keys and a newly created private
+  OS scratch directory are used; **real temporary disk writes occur**.
+  No external MCP, real credentials, customer files, real model,
+  caller-selected processes/paths or Stable Bridge.
+- **M26-A:** guarded worker atomically creates and `fsync`s a marker
+  before acknowledging a synthetic effect. Parent confirms the actual
+  child process exit after SIGKILL, then a different child rejects that
+  spent key (409) and permits a distinct new key (200). Deliberately
+  transient in-memory-only policy exposes the old key's replay.
+- **M26-B:** two separate guarded workers must both confirm PREPARED
+  before either is RELEASED for the same source-owned key. Exactly one
+  exclusive file claim/fictional effect is allowed; the other is denied.
+  Parent separately witnesses effects, marker files, child closure and
+  deletion of the entire scratch directory.
+- **M26-C:** independent mutated witness tests, direct-worker denial,
+  no-echo fixed CLI, [limitations](.github/M26_CROSS_PROCESS_LEDGER.md)
+  and frozen unpublished **80-path** package. Passing does **not**
+  prove power-loss durability, real authorization or a production
+  transactional store. Independent review/beta/target gates
+  #43/#59/#21 remain OPEN. Require Windows/Ubuntu Node20/22
+  PR CI **4/4**, then separate exact-SHA main push **4/4**.
 
 ## M25-D — actual first-party worker process termination (engineering accepted)
 

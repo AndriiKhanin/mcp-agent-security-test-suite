@@ -817,6 +817,33 @@ MCP servers or Stable Bridge. See the
 [M25 test guide](.github/M25_APPROVAL_POLICY_EPOCH.md).
 The helper is source-only, outside the unpublished npm package.
 
+## Disposable disk-backed replay ledger across OS workers (M26, source only)
+
+In a reviewed first-party checkout run:
+
+```sh
+node tools/m26-cross-process-ledger.mjs
+```
+
+M26 extends the earlier real-process crash and in-process replay tests.
+It creates its own private temporary directory, starts disposable Node
+workers, stores **fixed fictional spent-key markers** with exclusive
+file creation and `fsync`, and observes a **real child termination**.
+The protected new worker denies a previously used key; an intentionally
+broken in-memory-only comparator accepts the replay. Two simultaneously
+prepared workers then demonstrate that exactly one can claim a shared
+key. Source-owned files are deleted after each scenario.
+
+`3/3 PASS` means both guarded results and the intentionally vulnerable
+comparison were *witnessed*, not that the toy unsafe mode is secure.
+**Unlike previous in-memory tests, M26 really writes disposable files**
+in the OS temporary directory, but does not inspect real user files.
+It does not establish power-loss storage durability, real authenticated
+permission handling, external MCP security or independent beta evidence.
+No user-provided path, executable, endpoint, secret or Stable Bridge
+action. See [M26 scope and controls](.github/M26_CROSS_PROCESS_LEDGER.md).
+This is not part of the unpublished fixed 80-file package.
+
 ## Concurrent first-party replay race (M17, source only)
 
 From a **reviewed source checkout**, run:
