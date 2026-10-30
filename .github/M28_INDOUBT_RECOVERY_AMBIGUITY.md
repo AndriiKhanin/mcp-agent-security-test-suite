@@ -74,3 +74,49 @@ Windows/Ubuntu × Node20/22, merged as exact main SHA
 [main CI #41017290535](../actions/runs/41017290535) passed
 **4/4 on the same SHA**. These are first-party synthetic tests, not
 independent beta, authenticated real-world reconciliation or release authorization.
+
+
+## M29 extension — authentic signature is not authentic effect provenance
+
+From a reviewed source checkout:
+
+```sh
+node tools/m29-signed-receipt-provenance.mjs
+```
+
+This experiment complements the unsigned fake-claim rejection of M28.
+It generates **ephemeral Ed25519 keypairs** and 12 fixed signed/unsigned
+fictional receipt variants, then verifies the **actual cryptographic
+signature** using a source-owned temporary public-key anchor. The
+receipt body binds an exact operation, M28 marker SHA-256, logical epoch,
+one-time nonce, outcome and validity window. It checks changed signed
+content, mismatched operation/marker/epoch, expired timestamp, rogue
+signer, nonce reuse and missing signature. No private keys are stored,
+exported, printed or used with actual customers.
+
+The key distinction is between these two facts:
+
+- A valid Ed25519 signature establishes that *someone with the matching
+  private key signed these bytes*. That does **not** establish the
+  signer's independently authenticated organizational identity, access
+  to a real effect observer, or the **truth of the outcome**.
+- In two fixed negative controls, this first-party source-owned signer
+  correctly signs an **incorrect** outcome. A deliberately unsafe
+  signature-only resolver then **loses** an operation that never happened
+  or **duplicates** one that already happened. The guarded policy does
+  not let even a mathematically valid synthetic signature **release
+  quarantine** until an independently authenticated outcome-observation
+  authority exists. That external authority is **not available here**.
+
+The zero-argument M29 command reports only source-authored categorical
+case IDs, boolean witnesses and counts. Expected `12/12 PASS`
+means all **limits and negative cases were witnessed**, **not** that
+real outcome authentication, exactly-once execution or safe automatic
+recovery has been implemented. There is no remote signer, MCP server,
+user-provided identity key, actual side effect, credentials, network
+contact, real operating-system attestation, telemetry or Stable Bridge.
+
+M29 code/tests are source-only and excluded from the frozen 80-file
+package. The M6-J excluded-source handoff continues to hash both added
+files. Independent beta #59, independent audit #43 and real-target
+authorization #21 remain open.
