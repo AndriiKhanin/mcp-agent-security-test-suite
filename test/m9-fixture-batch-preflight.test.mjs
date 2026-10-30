@@ -12,7 +12,10 @@ import {
   compareFictionalDetectorBatch,compareFictionalDetectorBatchJson,
   runFictionalDetectorBatchStdin,
   reviewFictionalDetectorBatch,reviewFictionalDetectorBatchJson,
-  runFictionalDetectorReviewStdin
+  runFictionalDetectorReviewStdin,
+  analyzeFictionalDetectorDisagreements,
+  analyzeFictionalDetectorDisagreementsJson,
+  runFictionalDetectorDisagreementsStdin
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -523,4 +526,56 @@ test('M40: reviewer queue prioritizes FN, FP and ERROR without scanner execution
     Buffer.from([0xff])).status,2);
   assert.equal(m38Cli(['--review-detector-batch','--unsafe'],json).status,2);
   assert.equal(Object.isFrozen(report.reviewQueue),true);
+});
+
+test('M41: independent vote split, repeated injection misses and error abstention',async()=>{
+  const observations=[
+    ['NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED'],
+    ['FLAGGED','NOT_FLAGGED','NOT_FLAGGED','NOT_FLAGGED'],
+    ['ERROR','NOT_FLAGGED','FLAGGED','ERROR']
+  ];
+  const input={reportSchemaVersion:1,sourceProfile:'m38-fictional-detector-cases-v1',
+    scanners:observations.map((o,i)=>({
+      scannerId:'scanner-'+(i+1),results:m38Input(o).results
+    }))
+  };
+  const report=analyzeFictionalDetectorDisagreements(input);
+  assert.equal(report.status,'PASS');
+  assert.equal(report.scannerCount,3);
+  assert.equal(report.disagreementCaseCount,4);
+  assert.equal(report.repeatedMissCaseCount,1);
+  assert.equal(report.errorCaseCount,2);
+  assert.deepEqual(report.cases[0].votes,
+    {FLAGGED:1,NOT_FLAGGED:1,ERROR:1});
+  assert.equal(report.cases[0].consensus,'TIE');
+  assert.equal(report.cases[1].priority,'REPEATED_MISS');
+  assert.equal(report.cases[1].missedInjectionCount,2);
+  assert.equal(report.cases[1].consensus,'NOT_FLAGGED');
+  assert.equal(report.cases[2].priority,'DISAGREEMENT');
+  assert.equal(report.cases[3].consensus,'TIE');
+  assert.equal(report.reviewCaseIds.length,4);
+  assert.equal(report.independentReproductionConfirmed,false);
+  assert.equal(report.limits.scannerExecuted,false);
+  const data=JSON.stringify(input);
+  const cli=m38Cli(['--analyze-detector-disagreements'],data);
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),report);
+  assert.ok(!cli.stdout.includes('Fictional ticket T42'));
+  const streamed=await runFictionalDetectorDisagreementsStdin([],
+    Readable.from([Buffer.from(data)]));
+  assert.deepEqual(streamed,report);
+  const single={...input,scanners:[input.scanners[0]]};
+  const alone=analyzeFictionalDetectorDisagreements(single);
+  assert.equal(alone.disagreementCaseCount,0);
+  assert.equal(alone.repeatedMissCaseCount,0);
+  for(const bad of [
+    '',
+    '{"reportSchemaVersion":1,"reportSchemaVersion":1}',
+    JSON.stringify({...input,claimedRealScan:true}),
+    JSON.stringify({...input,scanners:[input.scanners[0],input.scanners[0]]}),
+    ' '.repeat(16385)
+  ])assert.equal(analyzeFictionalDetectorDisagreementsJson(bad).status,'ERROR');
+  assert.equal(m38Cli(['--analyze-detector-disagreements'],
+    Buffer.from([0xff])).status,2);
+  assert.equal(m38Cli(['--analyze-detector-disagreements','--target'],data).status,2);
 });
