@@ -173,6 +173,14 @@ async function runScenario(spec){
     const differentProcess=worker.child.pid!==process.pid;
     const actionAck=(await exchange(worker,{
       type:'ACTION',action:spec.action},'ACTION_ACK')).type==='ACTION_ACK';
+    const reported=await exchange(worker,{
+      type:'CLAIM',outcome:spec.claim},'OUTCOME_CLAIM');
+    // The outcome now comes across a real child IPC boundary and is
+    // contrasted with parent-owned disk I/O, never treated as proof.
+    const claimReported=reported?.type==='OUTCOME_CLAIM'&&
+      Object.keys(reported).length===2&&
+      ['COMMITTED','ABSENT'].includes(reported.outcome);
+    const claim=claimReported?reported.outcome:'INVALID';
     const first=observeOwnedDisk(root);
     let mutationAck=false;
     if(spec.mutate){
@@ -182,14 +190,14 @@ async function runScenario(spec){
     const second=observeOwnedDisk(root);
     const cleanExit=await close(worker);
     observation={
-      id:spec.id,claim:spec.claim,workerStarted,differentProcess,
+      id:spec.id,claim,claimReported,workerStarted,differentProcess,
       actionAck,mutationAck,firstReadback:first,secondReadback:second,
-      firstClaimMatches:claimMatches(spec.claim,first),
-      secondClaimMatches:claimMatches(spec.claim,second),
+      firstClaimMatches:claimMatches(claim,first),
+      secondClaimMatches:claimMatches(claim,second),
       readbackDrift:first!==second,
-      hypotheticalClaimOnlyLost:spec.claim==='COMMITTED'&&
+      hypotheticalClaimOnlyLost:claim==='COMMITTED'&&
         first==='ABSENT'?1:0,
-      hypotheticalClaimOnlyDuplicate:spec.claim==='ABSENT'&&
+      hypotheticalClaimOnlyDuplicate:claim==='ABSENT'&&
         first==='VALID'?1:0,
       guardedDisposition:'QUARANTINE',guardedTransitions:0,
       cleanExit,sourceOwnedOnly:true
@@ -207,7 +215,7 @@ async function runScenario(spec){
 }
 function expectedFields(spec){
   return [
-    ['id',spec.id],['claim',spec.claim],
+    ['id',spec.id],['claim',spec.claim],['claimReported',true],
     ['workerStarted',true],['differentProcess',true],
     ['actionAck',true],['mutationAck',!!spec.mutate],
     ['firstReadback',spec.first],['secondReadback',spec.second],
