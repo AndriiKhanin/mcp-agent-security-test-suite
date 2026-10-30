@@ -4,7 +4,7 @@
  * later read. This is not secure filesystem attestation or effect proof.
  */
 import {fork} from 'node:child_process';
-import {mkdtemp,writeFile,readFile,readdir,rm,lstat} from 'node:fs/promises';
+import {mkdtemp,writeFile,readFile,readdir,rm,lstat,open} from 'node:fs/promises';
 import {mkdtempSync,rmSync,existsSync,readdirSync,lstatSync,
   readFileSync} from 'node:fs';
 import {join,resolve,dirname} from 'node:path';
@@ -468,13 +468,161 @@ export async function runFixedChildProcessEffectFaultSelftest(args=[]){
   }catch{return M50_ERROR;}
 }
 
+
+
+/** M51: real OS file-handle rights; never claim same-user sandboxing. */
+const M51_SCOPE='OS_HANDLE_RIGHTS_NOT_PROCESS_CONFINEMENT';
+const M51_ORIGINAL='FICTIONAL-ORIGINAL\n',M51_CHANGED='FICTIONAL-MODIFIED\n';
+const M51_IDS=['RO','RW','REOPEN','LIAR'];
+const M51_ERROR=Object.freeze({status:'ERROR',exitCode:2,
+  ruleCode:'M51_FIXED_OS_HANDLE_TEST_UNAVAILABLE',
+  osSandboxed:false,externalMcpContacted:false});
+async function m51Worker(){
+  const id=process.argv[3];
+  if(process.argv.length!==4||!process.send||!M51_IDS.includes(id))
+    return 2;
+  try{
+    const msg=await new Promise((resolve,reject)=>{
+      process.once('message',resolve);
+      process.send({kind:'M51_READY',id},err=>{if(err)reject(err);});
+    });
+    if(!m50Exact(msg,['kind','id','path'])||
+      msg.kind!=='M51_PATH'||msg.id!==id||
+      typeof msg.path!=='string'||!msg.path)return 2;
+    const ro=id==='RO'||id==='REOPEN';
+    const h=await open(msg.path,ro?'r':'r+');
+    let denied=false;
+    try{
+      try{await h.write(M51_CHANGED,0,'utf8');}
+      catch(e){
+        if(!['EBADF','EACCES','EPERM','EINVAL'].includes(e?.code))return 2;
+        denied=true;
+      }
+    }finally{await h.close();}
+    if(id==='REOPEN'&&denied){
+      const writable=await open(msg.path,'r+');
+      try{await writable.write(M51_CHANGED,0,'utf8');}
+      finally{await writable.close();}
+    }
+    return await new Promise(resolve=>{
+      process.send({kind:'M51_REPORT',id,denied,
+        claimedChanged:id==='RW'||id==='REOPEN'},err=>{
+        if(process.connected)process.disconnect();resolve(err?2:0);
+      });
+    });
+  }catch{return 2;}
+}
+async function m51Case(id){
+  const root=await mkdtemp(join(tmpdir(),'m51-owned-'));
+  const file=join(root,'fictional.txt');
+  let claimed=null,denied=null,exitCode=null,reaped=false;
+  let received=0,reported=0,readback='UNKNOWN',failure=null,clean=false;
+  try{
+    await writeFile(file,M51_ORIGINAL,{flag:'wx',mode:0o600});
+    const child=fork(fileURLToPath(import.meta.url),
+      ['--m51-private-worker',id],{
+        execArgv:[],shell:false,windowsHide:true,
+        cwd:dirname(fileURLToPath(import.meta.url)),
+        env:{NODE_NO_WARNINGS:'1'},stdio:['ignore','ignore','ignore','ipc']
+      });
+    await new Promise(resolve=>{
+      let settled=false,timer,hard;
+      const end=()=>{if(settled)return;settled=true;
+        clearTimeout(timer);clearTimeout(hard);resolve();};
+      const abort=code=>{failure??=code;child.kill();};
+      timer=setTimeout(()=>{
+        abort('M51_TIMEOUT');
+        hard=setTimeout(()=>{child.kill('SIGKILL');end();},1000);
+      },8000);
+      child.on('message',m=>{
+        if(settled)return;
+        if(m?.kind==='M51_READY'&&received===0&&
+          m50Exact(m,['kind','id'])&&m.id===id){
+          received++;
+          child.send({kind:'M51_PATH',id,path:file},
+            e=>{if(e)abort('M51_IPC');});
+        }else if(m?.kind==='M51_REPORT'&&received===1&&reported===0&&
+          m50Exact(m,['kind','id','denied','claimedChanged'])&&m.id===id&&
+          typeof m.denied==='boolean'&&
+          typeof m.claimedChanged==='boolean'){
+          reported++;denied=m.denied;claimed=m.claimedChanged;
+        }else abort('M51_IPC');
+      });
+      child.once('error',()=>abort('M51_LAUNCH'));
+      child.once('exit',(code,signal)=>{
+        reaped=true;exitCode=code;
+        if((code!==0||signal)&&!failure)failure='M51_EXIT';
+        end();
+      });
+    });
+    const entries=await readdir(root);
+    if(entries.length!==1||entries[0]!=='fictional.txt')
+      failure??='M51_ENTRIES';
+    else{
+      const bytes=await readFile(file,'utf8');
+      readback=bytes===M51_ORIGINAL?'UNCHANGED':
+        bytes===M51_CHANGED?'MODIFIED':'UNKNOWN';
+    }
+  }catch{failure??='M51_OS_READBACK';}
+  finally{
+    try{await rm(root,{recursive:true,force:true,maxRetries:3,retryDelay:50});
+      try{await lstat(root);}catch(e){clean=e?.code==='ENOENT';}
+    }catch{clean=false;}
+  }
+  const ro=id==='RO'||id==='REOPEN';
+  const changed=id!=='RO';
+  if(!failure&&(!reaped||received!==1||reported!==1))
+    failure='M51_CHILD_UNCONFIRMED';
+  if(!failure&&denied!==ro)failure='M51_HANDLE_RIGHTS';
+  if(!failure&&readback!==(changed?'MODIFIED':'UNCHANGED'))
+    failure='M51_DISK_MISMATCH';
+  if(!failure&&claimed!==changed)failure='M51_FALSE_CHILD_EFFECT_CLAIM';
+  if(!clean)failure='M51_CLEANUP';
+  return Object.freeze({caseId:id,status:failure?'FAIL':'PASS',
+    ruleCode:failure??'M51_HANDLE_EFFECT_MATCH',
+    handleWriteDenied:denied,childClaimedEffect:claimed,
+    actualFileEffect:readback,childReaped:reaped,childExitCode:exitCode,
+    cleanupVerified:clean,osSandboxed:false});
+}
+export async function runFixedOsHandleRightsSelftest(args=[]){
+  if(!m50NoArgs(args))return M51_ERROR;
+  try{
+    const cases=[];
+    for(const id of M51_IDS.slice(0,3))cases.push(await m51Case(id));
+    const pass=cases.every(c=>c.status==='PASS')&&
+      cases[0].handleWriteDenied===true&&
+      cases[1].actualFileEffect==='MODIFIED'&&
+      cases[2].handleWriteDenied===true&&
+      cases[2].actualFileEffect==='MODIFIED';
+    return Object.freeze({status:pass?'PASS':'FAIL',exitCode:pass?0:1,
+      scope:M51_SCOPE,checked:3,matched:cases.filter(c=>c.status==='PASS').length,
+      realReadOnlyHandleWriteDenied:cases[0].handleWriteDenied===true,
+      writableHandlePositiveControl:cases[1].actualFileEffect==='MODIFIED',
+      sameUserPathReopenBypassConfirmed:
+        cases[2].handleWriteDenied===true&&cases[2].actualFileEffect==='MODIFIED',
+      cleanupVerified:cases.every(c=>c.cleanupVerified),
+      cases:Object.freeze(cases),realChildProcessUsed:true,
+      osSandboxed:false,arbitraryPathAccessPrevented:false,
+      externalMcpContacted:false,releaseAuthorized:false});
+  }catch{return M51_ERROR;}
+}
+/** Direct source-test only: actual write followed by a false IPC claim. */
+export async function runFixedOsHandleFalseReportSelftest(args=[]){
+  if(!m50NoArgs(args))return M51_ERROR;
+  try{return await m51Case('LIAR');}catch{return M51_ERROR;}
+}
+
 if(process.argv[1]&&
     resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  if(argv[0]==='--m50-private-worker'){
+  if(argv[0]==='--m51-private-worker'){
+    process.exitCode=await m51Worker();
+  }else if(argv[0]==='--m50-private-worker'){
     process.exitCode=await runM50Worker();
   }else{
-    const report=argv.length===1&&argv[0]==='--child-process-effect-witness'?
+    const report=argv.length===1&&argv[0]==='--os-filehandle-rights-witness'?
+      await runFixedOsHandleRightsSelftest():
+      argv.length===1&&argv[0]==='--child-process-effect-witness'?
       await runFixedChildProcessEffectSelftest():await runPathSwapLab(argv);
     process.stdout.write(JSON.stringify(report)+'\n');
     process.exitCode=report.exitCode;

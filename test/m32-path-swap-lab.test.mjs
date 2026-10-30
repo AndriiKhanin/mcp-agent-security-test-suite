@@ -5,7 +5,8 @@ import {spawnSync} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {runPathSwapLab,summarizePathSwap,
-  runFixedChildProcessEffectSelftest,runFixedChildProcessEffectFaultSelftest}
+  runFixedChildProcessEffectSelftest,runFixedChildProcessEffectFaultSelftest,
+  runFixedOsHandleRightsSelftest,runFixedOsHandleFalseReportSelftest}
   from '../tools/m32-path-swap-lab.mjs';
 
 const cases=Object.freeze([
@@ -287,6 +288,75 @@ test('M50: direct APIs reject non-empty, sparse and getter-bearing arguments',as
       assert.equal(r.ruleCode,'M50_FIXED_CHILD_EFFECT_SELFTEST_UNAVAILABLE');
       assert.equal(r.externalMcpContacted,false);
       assert.equal(r.realOwnerAuthenticated,false);
+      assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
+    }
+  }
+});
+
+
+
+
+test('M51: actual read-only FD refusal, writable positive and path bypass',async()=>{
+  const r=await runFixedOsHandleRightsSelftest();
+  assert.equal(r.status,'PASS',JSON.stringify(r));
+  assert.deepEqual([r.checked,r.matched,r.exitCode],[3,3,0]);
+  assert.equal(r.realReadOnlyHandleWriteDenied,true);
+  assert.equal(r.writableHandlePositiveControl,true);
+  assert.equal(r.sameUserPathReopenBypassConfirmed,true);
+  assert.equal(r.cleanupVerified,true);
+  assert.equal(r.osSandboxed,false);
+  assert.equal(r.arbitraryPathAccessPrevented,false);
+  assert.equal(r.externalMcpContacted,false);
+  assert.deepEqual(r.cases.map(x=>[
+    x.caseId,x.handleWriteDenied,x.actualFileEffect
+  ]),[
+    ['RO',true,'UNCHANGED'],['RW',false,'MODIFIED'],
+    ['REOPEN',true,'MODIFIED']
+  ]);
+  for(const row of r.cases){
+    assert.equal(row.status,'PASS');
+    assert.equal(row.childReaped,true);
+    assert.equal(row.childExitCode,0);
+    assert.equal(row.cleanupVerified,true);
+  }
+  assert.doesNotMatch(JSON.stringify(r),/m51-owned-|fictional\.txt|FICTIONAL-/);
+});
+
+test('M51: lying child cannot override independent parent OS readback',async()=>{
+  const r=await runFixedOsHandleFalseReportSelftest();
+  assert.equal(r.status,'FAIL');
+  assert.equal(r.ruleCode,'M51_FALSE_CHILD_EFFECT_CLAIM');
+  assert.equal(r.childClaimedEffect,false);
+  assert.equal(r.actualFileEffect,'MODIFIED');
+  assert.equal(r.childReaped,true);
+  assert.equal(r.cleanupVerified,true);
+});
+
+test('M51: only fixed CLI; no private worker or user path',()=>{
+  const ok=run('tools/m32-path-swap-lab.mjs','--os-filehandle-rights-witness');
+  assert.equal(ok.status,0,ok.stderr);
+  assert.equal(JSON.parse(ok.stdout).sameUserPathReopenBypassConfirmed,true);
+  for(const arg of ['--path=PRIVATE_CANARY','--target=https://example.invalid']){
+    const bad=run('tools/m32-path-swap-lab.mjs',
+      '--os-filehandle-rights-witness',arg);
+    assert.equal(bad.status,2);
+    assert.equal(JSON.parse(bad.stdout).ruleCode,'M32_ARGUMENTS_NOT_ALLOWED');
+    assert.ok(!bad.stdout.includes('PRIVATE_CANARY'));
+  }
+  const w=run('tools/m32-path-swap-lab.mjs','--m51-private-worker','RO');
+  assert.equal(w.status,2);
+  assert.equal(w.stdout,'');
+});
+
+test('M51: invalid API arguments fail closed',async()=>{
+  const getter=[];
+  Object.defineProperty(getter,'0',{get(){throw Error('PRIVATE_CANARY');}});
+  for(const args of [null,{},['UNSAFE'],Array(1),getter]){
+    for(const fn of [runFixedOsHandleRightsSelftest,
+      runFixedOsHandleFalseReportSelftest]){
+      const r=await fn(args);
+      assert.equal(r.status,'ERROR');
+      assert.equal(r.osSandboxed,false);
       assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
     }
   }
