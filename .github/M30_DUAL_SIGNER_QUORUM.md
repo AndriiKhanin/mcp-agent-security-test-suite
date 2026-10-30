@@ -75,7 +75,14 @@ source-custody ledger must still hash every new file. Independent
 beta [#59](../issues/59), third-party audit [#43](../issues/43) and
 authorization for real MCP targets [#21](../issues/21) stay OPEN.
 
-Engineering acceptance requires **4/4 GitHub Actions checks on the PR**
-and then an independent **4/4 run on the exact post-merge `main`
-SHA**: Ubuntu/Windows × Node.js 20/22. The developer's tests cannot
-substitute for independent real-agent or effect-observer evaluation.
+Engineering acceptance (2026-10-30): [PR #315](../pull/315) passed
+[PR CI #41022817744](../actions/runs/41022817744) **4/4** on
+Ubuntu/Windows × Node20/22, merged at exact main commit
+`77dfbb5bf932797813ba21c266c2519bc455e67a`, and independently
+[main CI #41023181163](../actions/runs/41023181163) passed
+**4/4 on that same commit**. M6-J's bounded source-custody index was
+increased to **240 fully hashed files**, including every new M30 file,
+with an explicit overflow-denial test for file 241; unpublished
+**80-path npm package custody** did not change. These are developer-run
+first-party controls, not independent real-agent evaluation, authenticated
+effect truth, signing authority enrollment or a release.
