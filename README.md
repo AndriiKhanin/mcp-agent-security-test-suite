@@ -1,5 +1,19 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Parent-read OS marker evidence versus deceptive child claims (M31)
+
+From a reviewed source checkout, run `node tools/m31-os-effect-witness.mjs`.
+Seven **fixed, first-party disposable OS process** cases compare a child's
+claimed fictional outcome with **two independent parent filesystem reads**,
+including a falsely committed claim, a falsely absent claim, corrupt marker,
+and two changes between observations. The test expects one hypothetical
+lost operation, one hypothetical duplicate and seven guarded `QUARANTINE`
+decisions. It never reads user-selected files or connects to any MCP server.
+A local OS marker is **not authenticated external effect provenance** and
+does not establish exactly-once semantics, production recovery or security
+certification. See the [M31 scope guide](.github/M31_PARENT_OS_EFFECT_EVIDENCE.md).
+
+
 **Release candidate for validation before the stable v0.0.10 release.** Synthetic contract tests only; not a vulnerability scanner or security certification.
 
 Zero-runtime-dependency Node.js 20+ project for synthetic security-contract tests for MCP-shaped tools and agent execution. Offline-first: no **external/user-owned** MCP server, credentials, real tool execution, live vulnerability scanning, independent OAuth verification or security certification. M4-B6-A adds only a first-party ephemeral modern MCP-shaped staging listener on 127.0.0.1. The optional first-party `loopback` command opens a temporary **local-only IPv4 127.0.0.1 socket**; it never contacts an external target.
