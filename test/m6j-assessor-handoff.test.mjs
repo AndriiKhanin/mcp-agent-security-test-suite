@@ -13,7 +13,7 @@ import {tmpdir} from 'node:os';
 import {dirname,resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {
-  buildHandoff,validateHandoff,verifyHandoff,canonical
+  buildHandoff,validateHandoff,verifyHandoff,canonical,runDistributionDoctor
 } from '../tools/reviewer-handoff.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
@@ -242,4 +242,131 @@ test('M6-J: no release commands, symlink inputs, additional args or shipped path
     assert.equal(Object.keys(pkg[k]??{}).length,0);
   for(const k of ['prepack','publish','prepublishOnly','postinstall'])
     assert.equal(Object.hasOwn(pkg.scripts,k),false);
+});
+
+
+test('M36-A: distribution doctor proves local source/archive/installed only, never release',()=>{
+  const report=runDistributionDoctor();
+  assert.equal(report.reportSchemaVersion,1);
+  assert.equal(report.profile,'m36-offline-distribution-doctor-v1');
+  assert.equal(report.status,'PASS');
+  assert.equal(report.exitCode,0);
+  assert.equal(report.ruleCode,'LOCAL_SOURCE_ARCHIVE_INSTALL_MATCH');
+  assert.equal(report.evidenceKind,'SELF_GENERATED_LOCAL_EVIDENCE_ONLY');
+  assert.equal(report.candidateVersion,'0.0.10-rc.1');
+  assert.equal(report.packagePathCount,80);
+  assert.equal(report.excludedSourceFileCount,240);
+  assert.equal(report.excludedSourceFileCap,240);
+  for(const name of [
+    'sourceIndexSha256','archiveSha256','installedIndexSha256',
+    'excludedSourceIndexSha256'
+  ])assert.match(report[name],/^[a-f0-9]{64}$/,name);
+  assert.match(report.archiveSha512,/^[a-f0-9]{128}$/);
+  assert.equal(report.archiveNpmIntegrity,
+    'sha512-'+Buffer.from(report.archiveSha512,'hex').toString('base64'));
+  assert.equal(report.archivedAndInstalledLocally,true);
+  assert.equal(report.targetContact,'NOT_ATTEMPTED');
+  assert.equal(report.sourceContact,'LOCAL_ONLY');
+  assert.equal(report.nextGates.length,4);
+  for(const name of [
+    'releaseReady','releaseApproved','externalTargetAuthorized',
+    'independentAuditVerified','independentBetaVerified','published',
+    'checkoutCleanlinessVerified','sourceRevisionIndependentlyVerified',
+    'artifactDigestIndependentlyAnchored'
+  ])assert.equal(report[name],false,name);
+  assert.equal(Object.isFrozen(report),true);
+  const text=JSON.stringify(report);
+  for(const unexpected of [
+    'PRIVATE_CANARY',process.cwd(),'.tgz','node_modules','mcp.example.org'
+  ])assert.ok(!text.includes(unexpected),unexpected);
+});
+test('M36-B: doctor CLI output preserves exact privacy/authority boundary',()=>{
+  const result=run('doctor');
+  assert.equal(result.error,undefined);
+  assert.equal(result.status,0,result.stderr);
+  assert.equal(result.stderr,'');
+  const report=JSON.parse(result.stdout);
+  assert.equal(report.profile,'m36-offline-distribution-doctor-v1');
+  assert.equal(report.ruleCode,'LOCAL_SOURCE_ARCHIVE_INSTALL_MATCH');
+  assert.equal(report.packagePathCount,80);
+  assert.equal(report.excludedSourceFileCount,240);
+  assert.equal(report.releaseReady,false);
+  assert.equal(report.independentAuditVerified,false);
+  assert.equal(report.checkoutCleanlinessVerified,false);
+  assert.equal(report.archivedAndInstalledLocally,true);
+  assert.equal(report.targetContact,'NOT_ATTEMPTED');
+  assert.equal(result.stdout,JSON.stringify(report,null,2)+'\n');
+  assert.ok(!result.stdout.includes(process.cwd()));
+  assert.ok(!result.stdout.includes('PRIVATE_CANARY'));
+  assert.equal(report.sourceIndexSha256,sample().packagedSource.indexSha256);
+  assert.equal(report.excludedSourceIndexSha256,sample().excludedReview.indexSha256);
+});
+test('M36-B: no target/project/publish arguments and unsafe JS arrays reject without echo',()=>{
+  const refused=[
+    ['doctor','--publish'],
+    ['doctor','--target=https://PRIVATE_CANARY'],
+    ['doctor','--approve'],
+    ['doctor','--yes'],
+    ['doctor','PRIVATE_CANARY'],
+    ['doctor','--json'],
+    ['doctor','--output','PRIVATE_CANARY'],
+    ['doctor','--no-audit']
+  ];
+  for(const args of refused){
+    const result=run(...args);
+    assert.equal(result.status,2,result.stderr);
+    assert.equal(result.stderr,'');
+    const report=JSON.parse(result.stdout);
+    assert.equal(report.status,'ERROR');
+    assert.equal(report.exitCode,2);
+    assert.equal(report.ruleCode,'M36_LOCAL_PREFLIGHT_UNAVAILABLE');
+    assert.equal(report.archivedAndInstalledLocally,false);
+    assert.equal(report.releaseApproved,false);
+    assert.equal(report.releaseReady,false);
+    assert.equal(report.published,false);
+    assert.equal(report.externalTargetAuthorized,false);
+    assert.equal(report.independentBetaVerified,false);
+    assert.ok(!result.stdout.includes('PRIVATE_CANARY'));
+    assert.ok(!result.stdout.includes('https://'));
+  }
+  for(const args of [
+    ['--target=PRIVATE_CANARY'],
+    [,'--publish'],
+    Object.assign(Object.create(null),{0:'doctor',length:1}),
+    [null],
+    ['doctor']
+  ]){
+    const report=runDistributionDoctor(args);
+    assert.equal(report.status,'ERROR');
+    assert.equal(report.exitCode,2);
+    assert.equal(report.releaseReady,false);
+    assert.equal(report.published,false);
+  }
+  let invoked=0;
+  const getter=[];
+  Object.defineProperty(getter,'0',{
+    enumerable:true,get(){invoked++;throw Error('PRIVATE_CANARY');}
+  });
+  getter.length=1;
+  assert.equal(runDistributionDoctor(getter).status,'ERROR');
+  assert.equal(invoked,0);
+  assert.equal(runDistributionDoctor(Object.create([])).status,'ERROR');
+});
+test('M36-C: doctor is excluded from pinned 80-path package and has no release APIs',()=>{
+  const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));
+  const shipped=JSON.parse(readFileSync(join(root,
+    'test/expected-package-files.json'),'utf8'));
+  assert.equal(shipped.length,80);
+  assert.ok(!shipped.includes('tools/reviewer-handoff.mjs'));
+  assert.ok(!pkg.files.includes('tools'));
+  for(const name of ['publish','prepublish','prepublishOnly',
+    'postpublish','prepack','postpack','postinstall'])
+    assert.equal(Object.hasOwn(pkg.scripts,name),false);
+  const tool=readFileSync(handoff,'utf8');
+  assert.match(tool,/export function runDistributionDoctor/);
+  assert.match(tool,/LOCAL_SOURCE_ARCHIVE_INSTALL_MATCH/);
+  assert.match(tool,/const MAX_EXCLUDED_FILES=240/);
+  assert.match(tool,/releaseReady:false/);
+  assert.match(tool,/checkoutCleanlinessVerified:false/);
+  assert.doesNotMatch(tool,/from ['"]node:(?:http|https|net|tls)['"]/);
 });
