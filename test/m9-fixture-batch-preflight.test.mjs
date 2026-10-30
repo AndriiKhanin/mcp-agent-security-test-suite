@@ -636,3 +636,29 @@ test('M42: priority order is stable and represents review urgency, never severit
     Buffer.from([0xff])).status,2);
   assert.equal(m38Cli(['--prioritize-detector-issues','--real'],json).status,2);
 });
+
+test('M43: replay published firstwatch 0.2.0/0.3.0 categories without executing scanner',()=>{
+  // These observations come from a volunteer's public GitHub issue comments.
+  // This test replays reported classifications; it does not run firstwatch,
+  // authenticate scanner output, prove independent reproduction or beta status.
+  const publicObservations=[
+    {version:'0.2.0',source:'issuecomment-6529063336'},
+    {version:'0.3.0',source:'issuecomment-6529886202'}
+  ];
+  for(const report of publicObservations){
+    assert.match(report.version,/^0\.[23]\.0$/);
+    assert.match(report.source,/^issuecomment-[0-9]+$/);
+    const replay=triageFictionalDetectorResults(m38Input([
+      'NOT_FLAGGED','NOT_FLAGGED','NOT_FLAGGED','NOT_FLAGGED'
+    ]));
+    assert.equal(replay.status,'PASS');
+    assert.deepEqual(replay.outcomes,{TP:0,FP:0,FN:2,TN:2,ERROR:0});
+    assert.deepEqual(replay.results.map(x=>x.classification),
+      ['TN','FN','TN','FN']);
+    assert.equal(replay.resultsSelfReportedOnly,true);
+    assert.equal(replay.manualReviewRequired,true);
+    assert.equal(replay.limits.scannerExecuted,false);
+    assert.equal(replay.limits.independentlyReproduced,false);
+    assert.equal(replay.limits.independentBetaVerified,false);
+  }
+});
