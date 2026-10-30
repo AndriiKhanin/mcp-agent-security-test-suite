@@ -64,7 +64,33 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 
 | **M26 — Disposable cross-process spent-key ledger** | Guarded spent-key claim survives owned OS child crash; two concurrent workers race on exclusive marker; deliberately transient comparator exposes replay | **ENGINEERING ACCEPTED — PR/main CI 4/4** | [#302](../../issues/302), [PR #303](../../pull/303), [main CI #41013215418](../../actions/runs/41013215418), [guide](.github/M26_CROSS_PROCESS_LEDGER.md) | Three OS+disk scenarios witnessed; separately checked main 4/4; no power-loss durability claim |
 
+| **M27 — In-doubt effect crash / recovery boundary** | Disposable child forced to exit after fsynced pending reservation, with/without observed synthetic effect; guarded quarantine vs unsafe retry | **M27-A/B/C IN PROGRESS — PR/CI PENDING** | [#305](../../issues/305), [guide](.github/M27_INDOUBT_CRASH_RECOVERY.md) | 3 owned OS crash cases, independent negative controls, 4/4 PR/main CI; no exactly-once claim |
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
+
+## M27-A/B/C — unresolved-claim crash windows (engineering in progress)
+
+- [Issue #305](../../issues/305): `node tools/m27-indoubt-crash-replay.mjs`
+  owns a private temporary OS directory and fixed Node child workers.
+  It records a fictional pending marker using exclusive `wx` and `fsync`,
+  then forcibly terminates the process **before** any effect or **after**
+  an IPC-witnessed effect but before an acknowledgement.
+- **M27-A:** a guarded new worker rejects unresolved old-key replay
+  with symbolic 423 in either crash window, while a different key remains
+  allowed (200). A deliberately broken comparator admits an
+  **additional witnessed synthetic effect** after the old effect and crash.
+  Do not auto-expire an unresolved claim or call its outcome "success".
+- **M27-B:** independent source-owned effect, marker, process-exit,
+  fresh-key, no-ack, cleanup and bad-policy mutation witnesses. Strictly
+  distinguish **at-most-once quarantine** from **exactly-once recovery**:
+  crashing before an effect can leave a legitimately pending operation
+  unavailable until independently authorized reconciliation.
+- **M27-C:** [scope guide](.github/M27_INDOUBT_CRASH_RECOVERY.md),
+  source-only tests and README. Require PR and separate matched main
+  CI **4/4** (Windows/Ubuntu Node 20/22). 80-path unpublished npm
+  candidate unchanged. Real credentials, external MCP, production
+  database, actual user effect, Stable Bridge and real model excluded.
+  Independent beta/audit/authorization gates #59/#43/#21 remain OPEN.
 
 ## M26-A/B/C — disposable cross-process replay ledger (engineering accepted)
 
