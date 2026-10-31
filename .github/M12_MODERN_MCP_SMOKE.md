@@ -1,158 +1,35 @@
-# M12-A/B/C — Modern MCP 2026-07-28 first-party Streamable HTTP subset
+# M12 — first-party modern MCP 2026-07-28 test matrix
 
-**Tracking:** [Issue #242](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/242)  
-**Scope:** fixed, source-owned loopback test. This is **not complete MCP conformance**, not a general MCP server, real AI agent, real security scan or certification.
+Source-only local tests on temporary `127.0.0.1` listeners. **Not complete MCP conformance**, not a real AI agent, injection detector, sandbox, authenticated authorization, or an external MCP scan. No unreviewed endpoint, credentials, user-selected command/path or real system action.
 
-## Why this exists
+**Complete original historical engineering notes:** [source at fixed verified commit](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/blob/7fd578f3fcdd914206c32bf26ed53003583b291b/.github/M12_MODERN_MCP_SMOKE.md). The full text remains available in Git history, and milestone evidence is preserved in [ROADMAP.md](../ROADMAP.md). This shorter operational index does not change any existing source/test cases or their expected results.
 
-Earlier M11 tests deliberately used a narrow *MCP-shaped* fictional
-`tools/call` response. M12 exercises the **actual modern-era request
-envelope** on disposable first-party `127.0.0.1` HTTP listeners.
-It follows the published [2026-07-28 Streamable HTTP transport](
-https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http)
-and [tools message shapes](
-https://modelcontextprotocol.io/specification/2026-07-28/server/tools)
-for a **small subset** of their functionality.
-
-The modern era is *stateless*: there is no legacy `initialize` handshake,
-no protocol-level session ID, and every request declares its protocol
-version, client capabilities and clientInfo in `params._meta`.
-Modern HTTP requires `MCP-Protocol-Version` and `Mcp-Method` headers,
-plus `Mcp-Name` on `tools/call`; they must agree with JSON body fields.
-The client declares `Accept: application/json, text/event-stream`.
-
-This source-owned demonstration deliberately sends exactly three
-**separate** POST requests to one temporary listener:
-
-1. `server/discover` — advertises protocol version and a single
-   fictional `tools` capability. Its response is
-   `resultType: "complete"` and includes source-authored serverInfo in
-   `result._meta`.
-2. `tools/list` — reports one fixed fictional ticket-status tool
-   and its JSON Schema. This is a list response, not a tool execution.
-3. `tools/call` — calls only that fixed fictitious tool with
-   `FICTIONAL-Q17`. The result uses `resultType: "complete"`,
-   `content`, `isError:false` and serverInfo. Its text contains
-   legitimate fictional task data **and** an embedded instruction,
-   which remains untrusted data. Only the exact byte-validated result
-   reaches the M10 source-owned stateful toy-agent gate.
-
-**The three-step sequence is our demo's sequence, not a mandatory
-handshake imposed on modern MCP**. No third-party endpoint is contacted.
-
-## Usage
-
-From a reviewed source checkout with Node.js 20 or 22:
+## M12-A/B/C — three separate modern JSON POSTs
 
 ```sh
 node tools/m12-modern-http-smoke.mjs
 node --test test/m12-modern-http-smoke.test.mjs
 ```
 
-The zero-argument selftest runs **18 source-authored controls**: one
-expected PASS and **17 expected FAIL**. Negative controls cover
-missing/mismatched method/name/protocol headers; unsupported protocol;
-legacy `initialize`; wrong origin; malformed or duplicate-key JSON;
-replayed or forged tool reply; unreviewed tool text; wrong content
-type; redirect; oversized body; and a bounded hanging response.
+18 fixed controls: one expected PASS, 17 expected FAIL. One owned listener receives `server/discover`, `tools/list`, then fixed fictional `tools/call` for `FICTIONAL-Q17`. This sequence is a **demo**, not a required handshake. Validate `MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`, body `_meta`, JSON-RPC ID, UTF-8, data bounds, tool text, and socket closure. Refuse wrong header/protocol/method, legacy `initialize`, origin mismatch, malformed/duplicate JSON, forged/replayed reply, wrong content type, redirect, oversize or timeout. Embedded text is **data**, never executable authority. See [Issue #242](../issues/242).
 
-For every test, the owned listener observes actual HTTP requests and
-their accepted/denied decisions. The tool-result client checks the
-exact JSON-RPC response ID and structure, fixed source-owned content,
-bounds and UTF-8 before the M10 gateway can consume it. No response
-text or local port is echoed in the public symbolic report. Every TCP
-connection is checked for close.
-
-## Security and completeness limits
-
-- **Not complete MCP conformance**: this demo covers only JSON-body
-  responses for three fixed methods. It does not implement SSE
-  streaming, subscriptions, MRTR, `x-mcp-header` parameter routing,
-  flexible tool catalogs, general authentication, backward
-  compatibility negotiation, or real external targets. The existing
-  M4 standalone discovery SSE tests remain a separate surface.
-- The test listener is **not a remotely accessible MCP service**.
-  Both ends are fixed reviewed source; host is literal `127.0.0.1`
-  and the port is allocated by the OS. No user-supplied address,
-  credential, command, process, file path or arbitrary tool can be
-  passed to the zero-argument CLI.
-- **No real AI agent, LLM, semantic prompt-injection evaluation,
-  unrelated OS file read, private data or client-controlled
-  execution**. The embedded instruction is not parsed or executed.
-- Declared server capabilities and identity are **fictional**, not
-  independent trust or authorization evidence. No OS sandbox or
-  real authentication is claimed.
-- The protected M4 discovery-only staging server is unchanged:
-  its `tools/call` denial remains enforced. M12's separate
-  disposable test mock must not broaden that authorization.
-- All changes are source-only and outside the exact **80-path
-  unpublished npm candidate**. Every added file remains under
-  M6-J's bounded SHA-256 excluded-source custody.
-- External targets require separate owner authorization
-  [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21);
-  independent audit
-  [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43)
-  and beta
-  [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
-  remain open.
-
-Engineering acceptance requires full **4/4** Windows/Ubuntu Node.js
-20/22 PR CI, squash merge, and an independently verified **4/4**
-post-merge main push CI. None of these results authorizes release.
-
-
-## M12-G/H/I — Request-scoped SSE response checks
-
-**Tracking:** [Issue #246](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/246). This is an additional **source-only** first-party `127.0.0.1` test. The earlier JSON-response M12-A/B/C server and the M4 protected staging server are unchanged.
-
-The [MCP 2026-07-28 Streamable HTTP specification](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http) allows a server's single POST response to contain an SSE stream with related notifications before the final JSON-RPC response. This demo covers **only one finite request-scoped stream**, not `subscriptions/listen`, arbitrary notifications, SSE resumption, MRTR, authentication or a general MCP server.
-
-From a reviewed checkout with Node 20 or 22:
+## M12-G/H/I and J/K/L — bounded request-scoped SSE
 
 ```sh
 node tools/m12-modern-sse.mjs
 node --test test/m12-modern-sse.test.mjs
 ```
 
-The client sends exactly one source-owned modern `tools/call` POST with fixed `MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`, `Accept`, Origin and request `_meta`. The temporary server uses an OS-selected port on literal `127.0.0.1`. A valid SSE stream contains one `notifications/progress` notification bound to a fictional request token, followed by the exact fixed JSON-RPC final response ID. The server deliberately fragments bytes on the wire. The receiver bounds input to 8192 bytes, eight blocks, four comments, 4096 bytes/frame, and validates fatal UTF-8, event names, JSON duplicate keys, ordering, IDs and the exact reviewed tool result.
+Initial SSE matrix: 24 controls (4 accepted / 20 denied), expanded through framing hardening to **40 (4 accepted / 36 denied)**. A valid stream has one source-owned `notifications/progress` tied to the request token and exactly one matching final JSON-RPC result. Accept framed fragmented bytes, CRLF, legal comments and multiline data. Deny reordered/duplicate/missing progress/final, forged authority, trailing frames, wrong IDs, duplicate keys, invalid UTF-8, truncated or oversized frames, unsupported `id:`/`retry:`, wrong origin/content type, redirect and bounded hangs. Validate limits and socket closure before delivering data to M10. See [#246](../issues/246), [#248](../issues/248).
 
-**Fixed matrix: 24 controls**, comprising **four expected PASS** (fragmented, CRLF, SSE comments and multiline `data:`) and **20 expected FAIL** (final-first, duplicate/late final, unsolicited server request, wrong ID/progress token, fake authority, malformed/duplicate JSON, invalid UTF-8, too many comments, oversized or truncated frame, unknown event, missing final, wrong content type, redirect, bounded hanging response, wrong Origin or method).
+## M12-M/N/O — exact first-party response headers
 
-No untrusted tool-result text is passed to the M10 toy gateway **until the entire on-wire SSE response is validated**, including exactly one matching progress notification and one matching final response. All protected fictional effects remain zero. Every owned HTTP connection must close; failures use fixed non-echoing rule codes and never disclose response bodies, paths, ports or tokens.
+50 fixed SSE outcomes: 4 accepted / 46 denied. Verify literal `Content-Type: text/event-stream`, `Cache-Control: no-store`, `X-Accel-Buffering: no`, `Connection: close`, `Transfer-Encoding: chunked`; optionally Node's `Date`. Reject repeated header names from `rawHeaders`, Set-Cookie, synthetic session/auth, encoding/disposition/refresh, and wrong values. This is a **strict mock-specific contract**, not the general MCP HTTP standard. See [#250](../issues/250), [PR #251](../pull/251), subsequent [source-custody repair PR #253](../pull/253) and [main CI #40836248131](../actions/runs/40836248131).
 
-**Not complete MCP conformance. Not a real AI agent, LLM test, OS sandbox, credential validation, semantic prompt-injection detector or security certification.** Only first-party source-owned sockets are contacted. All new source-only files are included in M6-J's complete, bounded SHA-256 custody; the limit is expanded to **176**, and 177 files are still rejected. The exact **80-path unpublished npm candidate** remains unchanged.
+## M12-P/Q/R — exact first-party request headers
 
-External server authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21), independent security audit [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and independent beta [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) remain OPEN. Require 4/4 CI on Windows/Ubuntu Node20/22, merge and separately verified post-merge main push CI; no release is authorized.
+**60 fixed cases: 4 accepted / 56 denied.** The inbound POST requires precisely `Host`, `Origin`, `Content-Type`, `Accept`, `MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`, `Content-Length`, `Connection`; `Connection: close`, exact body and method, no duplicate/unlisted names. Ten denials include synthetic proxy/session/parameter/owner grants, User-Agent, keep-alive, Cookie, Authorization and duplicate Accept. Denials produce HTTP 400, no toy tool delivery and closed response/TCP sockets. [PR #256](../pull/256) and [main CI #40838079608](../actions/runs/40838079608) were 4/4 PASS.
 
+## Security and change constraints
 
-## M12-J/K/L — Fail-closed SSE framing hardening
-
-**Tracking:** [Issue #248](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/248). This continues the source-only first-party M12-G/H/I demonstration, without contacting any external MCP endpoint, running a real agent, or adding a general SSE transport.
-
-Run `node tools/m12-modern-sse.mjs` or `node --test test/m12-modern-sse.test.mjs` from the reviewed checkout. The fixed matrix now covers **40** outcomes: **4 expected PASS**, **36 expected FAIL**. Sixteen additional malformed on-wire cases reject missing/duplicated/forged progress events, altered final JSON-RPC IDs/fields, extra result content or server identity, mismatched result text, unknown `id:`/`retry:` control fields, duplicated `event:`, lone-CR framing, blank or extra final data and a trailing comment after completion. Initial keepalive comments remain allowed. After a complete final response, even comment-only frames fail closed; no later bytes can be interpreted as granting new authority.
-
-Each run checks actual owned HTTP request counts, response/TCP socket close witnesses and zero protected fictional effects. Rejected content never enters M10. Reports include fixed symbolic counters only, not the fictional fixture content. The unchanged unpublished npm candidate contains **80** reviewed paths; M6-J continues to hash every bounded excluded source. This is **not full MCP conformance**, semantic injection detection, real-agent testing, independent audit, real-target permission or release authorization. External gates [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21), [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59) remain open. Require PR CI 4/4 and a separate post-merge main CI 4/4 before engineering acceptance.
-
-
-## M12-M/N/O — Strict first-party response-header custody
-
-**Tracking:** [Issue #250](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/250). The owned SSE test now verifies the complete, literal HTTP response header contract **before parsing body bytes or delivering any result to M10**. Required first-party headers are `Content-Type: text/event-stream`, `Cache-Control: no-store`, `X-Accel-Buffering: no`, `Connection: close` and `Transfer-Encoding: chunked`; only Node's `Date` header is additionally permitted. Repeated response field names are rejected by inspecting `rawHeaders`, even if Node's normalized header map hides the duplication.
-
-The fixed selftest now has **50** cases: 4 accepted, 46 deliberately denied. Ten new negative controls send otherwise correct SSE bytes but add `Set-Cookie`, `Mcp-Session-Id`, `Authorization`, `Content-Encoding`, `Content-Disposition`, `Refresh`, duplicate `Content-Type`, or alter `Cache-Control`, `X-Accel-Buffering` or `Connection`. Every case asserts the real request, response close and TCP close, zero toy gateway deliveries on rejection, and a non-echoing symbolic report.
-
-This allowlist is **intentionally specific to this fixed Node 20/22 first-party mock**, not a list of all headers allowed by the MCP specification, not a general SSE client or proof of real-agent safety. No unreviewed endpoint, process, command, credential or external MCP server is contacted; the source-only files do not enter the unchanged **80-path unpublished candidate**. Release and external evaluation still require #21, #43 and #59.
-
-
-**Engineering acceptance:** [M12-M/N/O PR #251](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/251) passed [PR CI #40834338360](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40834338360) 4/4. The first post-merge [main run #40834843057](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40834843057) failed one unrelated M6-J source-handoff check on Windows Node22; this run is preserved, not relabeled. [M6-J repair PR #253](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/253) passed 4/4 and independently verified [main CI #40836248131](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40836248131) **4/4 PASS** on Windows/Ubuntu Node20/22. Release authorization and external gates #21/#43/#59 remain open.
-
-
-## M12-P/Q/R — First-party incoming request-header custody
-
-**Tracking:** [Issue #255](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/255). In addition to the accepted response-header contract, the same source-only, ephemeral `127.0.0.1` `tools/call` listener now demands exactly the reviewed request header names: `Host`, `Origin`, `Content-Type`, `Accept`, `MCP-Protocol-Version`, `Mcp-Method`, `Mcp-Name`, `Content-Length`, `Connection`. The case-insensitive `rawHeaders` validation rejects duplicates, missing and unknown headers, while existing checks still require the exact values, approved fixed request body, fixed method and `Connection: close`. This is a **single first-party Node20/22 demonstration**, not an interoperable general-purpose HTTP or MCP gateway.
-
-The fixed selftest now contains **60** outcomes: four accepted and 56 expected denials. Ten new denied requests explicitly transmit synthetic `Proxy-Authorization`, `Mcp-Session-Id`, `Mcp-Param-Owner`, an owner approval assertion, an extra source grant, `User-Agent`, `Connection: keep-alive`, `Cookie`, `Authorization`, and repeated `Accept`. Each fault requires a real HTTP 400 response, zero request admissions and toy gateway deliveries, response/socket cleanup, and no reflection of synthetic token text. No user-provided headers, addresses, local file paths, arbitrary methods or real credentials are accepted.
-
-The reviewed 80-path unpublished npm candidate is unchanged. Every excluded source byte remains in bounded M6-J SHA-256 custody. These tests do not establish external authorization, semantic prompt-injection resistance, real agent behavior, OS isolation, independent security audit or MCP-wide conformance. Gates #21, #43 and #59 remain OPEN. Require PR 4/4 CI and independent main push 4/4 CI prior to engineering acceptance.
-
-
-**Engineering acceptance:** [PR #256](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/256) merged as `fbc6f89`. [PR CI #40837699443](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40837699443) **4/4 PASS** and separately verified [main push CI #40838079608](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/40838079608) **4/4 PASS** on Windows/Ubuntu Node20/22. Source-only negative controls remain synthetic and do not grant access to external MCP targets. External authorization #21, independent audit #43 and beta #59 remain OPEN.
+Only reviewed Node 20/22 fixed source talks to owned ephemeral `127.0.0.1` HTTP. No user-specified hosts, live endpoints, real model decisions, unrelated OS file reads, credentials, semantic prompt-injection resilience claims, or generic MCP compliance. Real target gate [#21](../issues/21), independent security audit [#43](../issues/43), beta [#59](../issues/59) and owner publication decision remain OPEN. No test/control removal or behavior change is authorized by this guide consolidation. Maintain **240 excluded files / 2,000,000-byte cap** under M6-J; the **80-path unpublished npm candidate** is unchanged. Full historical rationale and exact prior CI receipts remain in the fixed source revision above and the roadmap.
