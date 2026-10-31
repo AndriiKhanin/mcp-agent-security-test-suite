@@ -371,3 +371,14 @@ test('M6-J: no release commands, symlink inputs, additional args or shipped path
   for(const k of ['prepack','publish','prepublishOnly','postinstall'])
     assert.equal(Object.hasOwn(pkg.scripts,k),false);
 });
+
+test('M54: superseded branch CI only; main and dispatch never coalesced',()=>{
+  const y=readFileSync(join(root,'.github/workflows/ci.yml'),'utf8');
+  assert.equal(y.split('concurrency:').length,2);
+  assert.ok(y.includes("group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}"));
+  assert.ok(y.includes("cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.event_name != 'workflow_dispatch' }}"));
+  for(const v of ['push:','pull_request:','workflow_dispatch:',
+    'node-version: [20, 22]','os: [ubuntu-latest, windows-latest]',
+    'persist-credentials: false','run: npm test',
+    'run: node examples/offline-ci-check.mjs'])assert.ok(y.includes(v),v);
+});
