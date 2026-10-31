@@ -62,6 +62,24 @@ Reports count TP/FP/FN/TN/ERROR **relative to author labels only**;
 no external scanner is launched, no real AI or MCP target is tested,
 and these six public examples do not establish detection accuracy.
 
+## Copyable privacy-safe scanner report (M56)
+
+After running your own scanner and filling every result, generate an
+issue-ready Markdown table from the strict local M38 or M44 inputs:
+
+```sh
+node tools/fixture-batch-preflight.mjs --issue-report-detector-results < detector-results.json
+node tools/fixture-batch-preflight.mjs --issue-report-context-contrasts < context-results.json
+```
+
+PowerShell: `Get-Content -Raw -Encoding utf8 .\\context-results.json | node tools/fixture-batch-preflight.mjs --issue-report-context-contrasts`.
+
+The output contains fixed public case IDs, source labels and TP/FP/FN/TN/ERROR
+only. Add your public scanner/version and reviewed commit manually before
+posting to [comparison issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
+Invalid or `UNTESTED` input fails closed with a generic error.
+No local input text, paths, credentials or real scanner evidence is copied.
+
 ## One-command local first run — no config required (M37)
 
 On Node.js 20+ in a reviewed source checkout, try both built-in adapter
