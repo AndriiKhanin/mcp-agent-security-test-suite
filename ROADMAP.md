@@ -247,7 +247,21 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M53 — one-command offline detector-result template (PR CI pending)
+## M54 — obsolete CI run coalescing (implementation under review)
+
+- The CI workflow retains `push`, `pull_request`, `workflow_dispatch`,
+  four Windows/Ubuntu Node20/22 jobs, full `npm test` and fixed smoke.
+  For non-main PR/feature refs, a newer run cancels **only earlier
+  obsolete runs of the same ref**; for `main`, explicit manual
+  dispatch and Git tags, unique run-ID groups prevent even pending-run
+  replacement.
+- Source regression checks both exact workflow expressions and retained
+  CI gates. No package or security-test logic changes, no extra source
+  paths, and **no relaxation** of M6-J 240-file/2MB custody.
+  See [Issue #366](../../issues/366). Acceptance needs full PR 4/4 and
+  separate exact post-merge `main` 4/4; neither is claimed yet.
+
+## M53 — one-command offline detector-result template (merged; PR CI 4/4)
 
 - A source-only `--export-detector-results-template` mode emits the exact
   M38 four-row JSON input with every observation set to `UNTESTED` (not yet observed). Testers replace values after running their
@@ -258,6 +272,11 @@ We will not claim a release is production-ready merely because a synthetic test 
   [Contributor instructions](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
   M6-J 240-path/2MB custody and 80-path unpublished package remain frozen.
   Independent beta #59, audit #43 and real-target authority #21 OPEN.
+
+- [PR #365](../../pull/365), [PR CI #41173417998](../../actions/runs/41173417998)
+  **4/4 PASS, 1394 tests/job**, zero failures/skips. Merged SHA
+  `21f0ad9f36b8d0379005c9765a7e3bffae045738`.
+  Separate post-merge main CI not independently verified.
 
 ## M38-A/B/C — four-case independent scanner comparison (accepted)
 
