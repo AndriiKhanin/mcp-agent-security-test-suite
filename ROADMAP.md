@@ -247,7 +247,21 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M54 — obsolete CI run coalescing (implementation under review)
+## M55 — six-case context-results template (PR CI pending)
+
+- Reuse M44's six separate first-party fictional contrasts: benign
+  human email, AI-addressed tool-result injection and clean/mixed JSON.
+  New `--export-context-results-template` prints six exact ordered
+  `UNTESTED` rows; independent testers replace them with observed
+  `FLAGGED | NOT_FLAGGED | ERROR` values, then run existing
+  `--triage-context-contrasts`. Incomplete rows fail closed.
+- No scanner launch, arbitrary path, credentials, external MCP, true
+  independent reproduction or efficacy estimate. M38 four-row baseline
+  unchanged. Strict source-only M6-J 240 files/2MB and unpublished npm
+  inventory preserved by consolidating duplicate first-party guide text.
+  Target: Windows/Ubuntu Node20/22 4/4 PR CI and exact main-push CI.
+
+## M54 — obsolete CI run coalescing (merged; PR CI 4/4)
 
 - The CI workflow retains `push`, `pull_request`, `workflow_dispatch`,
   four Windows/Ubuntu Node20/22 jobs, full `npm test` and fixed smoke.
@@ -258,8 +272,13 @@ We will not claim a release is production-ready merely because a synthetic test 
 - Source regression checks both exact workflow expressions and retained
   CI gates. No package or security-test logic changes, no extra source
   paths, and **no relaxation** of M6-J 240-file/2MB custody.
-  See [Issue #366](../../issues/366). Acceptance needs full PR 4/4 and
-  separate exact post-merge `main` 4/4; neither is claimed yet.
+  [PR #368](../../pull/368) merged at
+  `e32feef224f7590ae5d3ce98aca6986d553553f9`;
+  [PR CI #41174171532](../../actions/runs/41174171532)
+  **4/4 PASS, 1395 tests/job**, zero errors/skips.
+  Separate main-push CI [#41174436612](../../actions/runs/41174436612)
+  was launched; final conclusion must be verified separately.
+  [Issue #366](../../issues/366).
 
 ## M53 — one-command offline detector-result template (merged; PR CI 4/4)
 
@@ -276,7 +295,8 @@ We will not claim a release is production-ready merely because a synthetic test 
 - [PR #365](../../pull/365), [PR CI #41173417998](../../actions/runs/41173417998)
   **4/4 PASS, 1394 tests/job**, zero failures/skips. Merged SHA
   `21f0ad9f36b8d0379005c9765a7e3bffae045738`.
-  Separate post-merge main CI not independently verified.
+  Independently matched [main CI #41173689064](../../actions/runs/41173689064)
+  **4/4 PASS** on exact merged SHA.
 
 ## M38-A/B/C — four-case independent scanner comparison (accepted)
 
