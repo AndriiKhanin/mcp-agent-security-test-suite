@@ -721,7 +721,7 @@ export async function runFictionalContextTriageStdin(args=[],stream=process.stdi
 /** M63: only compare complete author-labeled self-reports, never run scanners. */
 const M63_BAD=Object.freeze({status:'ERROR',exitCode:2,
   ruleCode:'INVALID_CONTEXT_VERSION_PAIR',resultsSelfReportedOnly:true});
-export function compareFictionalContextVersions(input){
+function compareFictionalContextVersionsChecked(input){
   if(!ownRecord38(input,['reportSchemaVersion','sourceProfile','baseline','candidate'])||
     input.reportSchemaVersion!==1||input.sourceProfile!==M44_PROFILE)return M63_BAD;
   const a=triageFictionalContextResults(input.baseline);
@@ -746,6 +746,10 @@ export function compareFictionalContextVersions(input){
     resultsSelfReportedOnly:true,realScannerExecuted:false,
     actionAuthorizationTested:false,externalMcpContacted:false,
     independentBetaVerified:false,securityCertified:false,releaseAuthorized:false});
+}
+export function compareFictionalContextVersions(input){
+  try{return compareFictionalContextVersionsChecked(input);}
+  catch{return M63_BAD;}
 }
 export async function runFictionalContextVersionsStdin(args=[],stream=process.stdin){
   if(!ownArray38(args,0)||!stream||stream.isTTY===true||
