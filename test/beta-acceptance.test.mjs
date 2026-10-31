@@ -200,8 +200,19 @@ test('M5-07: bad evaluator runner arguments remain generic even with fake secret
 
 
 test('P1 M5-07: Markdown fences are balanced and shell snippets cannot consume later sections',()=>{
-  const d=documented('docs/BETA_TESTING.md');
+  const full=documented('docs/BETA_TESTING.md');
+  const guideStart=full.indexOf('## F1 independent first-run beta — reviewed source candidate');
+  const legacyStart=full.indexOf('## M14 — optional capability tour');
+  assert.ok(guideStart>=0 && legacyStart>guideStart,'F1 guide must precede historical beta sections');
+  const guide=full.slice(guideStart,legacyStart);
+  const d=full.slice(legacyStart);
   const codeMarker=line=>['```','```sh','```powershell'].includes(line.trim());
+  const guideFences=guide.split('\n').filter(codeMarker);
+  assert.equal(guideFences.length,6,'F1 guide has exactly three complete shell blocks');
+  assert.equal(guideFences.filter(line=>line.trim()==='```sh').length,3);
+  assert.ok(guide.includes('node src/cli.mjs start --text'));
+  assert.ok(guide.includes('node tools/beta-review.mjs'));
+  assert.ok(guide.includes('externalTargetContacted:false'));
   const fences=d.split('\n').filter(codeMarker);
   assert.equal(fences.length,14,'7 complete code blocks are expected, including optional M14 tour');
   let open=null,blocks=[];
