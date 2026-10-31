@@ -245,6 +245,18 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
+## M61 — excluded-source M12 guide consolidation (engineering PR)
+
+- Preserve the full historical M12 modern protocol guide at immutable
+  `7fd578f3`; replace current source-only page with a compact operational
+  command/matrix reference. Add a regression test pinning the history link
+  and established 18/40/50/60-case coverage.
+- No executable security control, fixture, source file count or package
+  inventory is removed. Keep M6-J's strict **240 excluded paths /
+  2,000,000 bytes** and frozen **80-path** unpublished npm candidate.
+- Engineering acceptance requires 4/4 PR CI and independent 4/4
+  post-merge main CI. Real targets #21, audit #43 and beta #59 OPEN.
+
 ## M60 — source-owned one-shot toy approval replay (merged, verified)
 
 - **Engineering accepted, fictional-only:** [PR #379](../../pull/379)
