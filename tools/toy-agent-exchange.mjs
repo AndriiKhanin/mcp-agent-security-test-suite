@@ -846,9 +846,88 @@ export function runFixedToyApprovalPolicySelftest(args=[]){
   }catch{return M59_ERROR;}
 }
 
+
+/** M60: source-owned one-shot toy approval; no human-approval API. */
+const M60_SCOPE='SOURCE_OWNED_TOY_ONE_SHOT_APPROVAL_ONLY';
+const M60_PLANS=Object.freeze([
+ ['owner-once',['OWNER_OK'],['ALLOW'],1,'APPROVED'],
+ ['owner-replay',['OWNER_OK','OWNER_OK'],['ALLOW','DENY'],1,'APPROVED'],
+ ['tool-spoof',['TOOL_CLAIM'],['DENY'],0,'PENDING'],
+ ['email-spoof',['EMAIL_CLAIM'],['DENY'],0,'PENDING'],
+ ['scope-mismatch',['WRONG_SCOPE'],['DENY'],0,'PENDING'],
+ ['expired',['EXPIRE','OWNER_OK'],['DENY','DENY'],0,'EXPIRED'],
+ ['revoked',['REVOKE','OWNER_OK'],['DENY','DENY'],0,'REVOKED'],
+ ['rejected',['REJECT','OWNER_OK'],['DENY','DENY'],0,'REJECTED'],
+ ['spoof-then-owner',['TOOL_CLAIM','OWNER_OK'],['DENY','ALLOW'],1,'APPROVED'],
+ ['owner-then-spoof',['OWNER_OK','EMAIL_CLAIM'],['ALLOW','DENY'],1,'APPROVED']
+].map(Object.freeze));
+function m60Session(){
+ let phase='PENDING',effects=0,attempts=0;
+ const deny=()=>{attempts++;return 'DENY';};
+ const settle=next=>{attempts++;if(phase!=='PENDING')return 'DENY';
+   phase=next;return 'DENY';};
+ return Object.freeze({
+   owner:Object.freeze({
+     approve(scope){attempts++;
+       if(phase!=='PENDING'||scope!=='TASK_STATUS_WRITE')return 'DENY';
+       phase='APPROVED';effects++;return 'ALLOW';},
+     reject:()=>settle('REJECTED')
+   }),
+   untrusted:Object.freeze({claim:deny}),
+   controller:Object.freeze({
+     expire:()=>settle('EXPIRED'),revoke:()=>settle('REVOKED')
+   }),
+   evidence:()=>Object.freeze({phase,attempts,fictionalEffects:effects})
+ });
+}
+export function runFixedToyApprovalReplaySelftest(args=[]){
+ const error=Object.freeze({reportSchemaVersion:1,status:'ERROR',exitCode:2,
+   ruleCode:'TOY_APPROVAL_REPLAY_UNAVAILABLE',scope:M60_SCOPE,
+   realApprovalGranted:false,externalMcpContacted:false});
+ if(!noArgs(args))return error;
+ try{
+   // Only the M59 scoped pending toy action can enter this test.
+   if(m59Gate('OWNER_DIRECT','USE_TOOL','CAREFUL',true)
+     .request('PROTECTED_TOOL')!=='REQUIRE_APPROVAL')return error;
+   const cases=M60_PLANS.map(([caseId,steps,expected,effects,phase])=>{
+     const s=m60Session(),observed=steps.map(step=>{
+       switch(step){
+         case 'OWNER_OK':return s.owner.approve('TASK_STATUS_WRITE');
+         case 'WRONG_SCOPE':return s.owner.approve('OTHER_OPERATION');
+         case 'REJECT':return s.owner.reject();
+         case 'TOOL_CLAIM':case 'EMAIL_CLAIM':return s.untrusted.claim();
+         case 'EXPIRE':return s.controller.expire();
+         case 'REVOKE':return s.controller.revoke();
+         default:throw Error('BAD_SOURCE_PLAN');
+       }
+     }),w=s.evidence();
+     const matched=JSON.stringify(observed)===JSON.stringify(expected)&&
+       w.fictionalEffects===effects&&w.phase===phase&&
+       w.attempts===steps.length;
+     return Object.freeze({caseId,expected,observed,matched,...w});
+   });
+   const matched=cases.filter(x=>x.matched).length;
+   const totalEffects=cases.reduce((n,x)=>n+x.fictionalEffects,0);
+   const pass=matched===M60_PLANS.length&&totalEffects===4;
+   return Object.freeze({
+     reportSchemaVersion:1,status:pass?'PASS':'FAIL',exitCode:pass?0:1,
+     ruleCode:pass?'TOY_APPROVAL_REPLAY_MATCH':'TOY_APPROVAL_REPLAY_MISMATCH',
+     scope:M60_SCOPE,checked:cases.length,matched,totalEffects,
+     cases:Object.freeze(cases),sourceOwnedOwnerInterface:true,
+     realApprovalRequested:false,realApprovalGranted:false,
+     realAgentBehaviorObserved:false,realScannerExecuted:false,
+     realFilesystemReadObserved:false,realMcpToolCallObserved:false,
+     externalMcpContacted:false,independentBetaVerified:false,
+     securityCertified:false,releaseAuthorized:false
+   });
+ }catch{return error;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  const result=argv.length===1&&argv[0]==='--approval-policy-matrix'?
+  const result=argv.length===1&&argv[0]==='--approval-replay-matrix'?
+    runFixedToyApprovalReplaySelftest():
+    argv.length===1&&argv[0]==='--approval-policy-matrix'?
     runFixedToyApprovalPolicySelftest():
     argv.length===1&&argv[0]==='--temp-file-effect-witness'?
     await runFixedTemporaryFileEffectSelftest():
