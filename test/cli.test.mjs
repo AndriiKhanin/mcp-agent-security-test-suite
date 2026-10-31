@@ -104,3 +104,43 @@ test('F1 packaged client-config import: inert stdio, HTTPS, text and rejection',
   assert.equal(cli('start','--client-config',f,'--execute').status,2);
  }finally{rmSync(d,{recursive:true,force:true});}
 });
+
+test('F1: explicit one-server choice from multi-entry client settings is inert',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'mcp-f1-select-')),file=join(dir,'client.json');
+ try{
+  const fixture={servers:{
+   chosen:{type:'stdio',command:'node',args:['server.mjs']},
+   unselected:{type:'http',url:'https://mcp.example.org/mcp',
+    headers:{Authorization:'PRIVATE_F1_CANARY'}}
+  }};
+  writeFileSync(file,JSON.stringify(fixture));
+  const ambiguous=cli('start','--client-config',file);
+  assert.equal(ambiguous.status,2);
+  const selected=cli('start','--client-config',file,'--server','chosen');
+  assert.equal(selected.status,0,selected.stderr);
+  const report=JSON.parse(selected.stdout);
+  assert.equal(report.selectionEvidence,'EXPLICIT_SERVER_SELECTED');
+  assert.equal(report.descriptorEvidence,'CLIENT_CONFIG_VALIDATED_OFFLINE');
+  assert.equal(report.externalTargetContacted,false);
+  assert.equal(report.projectConnectionAuthorized,false);
+  assert.equal(report.executionEnabled,false);
+  assert.ok(!(selected.stdout+selected.stderr).includes('PRIVATE_F1_CANARY'));
+  assert.ok(!(selected.stdout+selected.stderr).includes('chosen'));
+  const t=cli('start','--client-config',file,'--server','chosen','--text');
+  assert.equal(t.status,0,t.stderr);
+  assert.match(t.stdout,/Server selection: EXPLICIT OFFLINE/);
+  assert.ok(!t.stdout.includes('PRIVATE_F1_CANARY'));
+  for(const choice of [
+   ['missing'],['CHOSEN'],['--execute'],['../chosen'],['chosen','extra']
+  ]){
+   const bad=cli('start','--client-config',file,'--server',...choice);
+   assert.equal(bad.status,2);
+   assert.equal(JSON.parse(bad.stdout).status,'ERROR');
+   assert.ok(!bad.stdout.includes('PRIVATE_F1_CANARY'));
+  }
+  fixture.servers.chosen={type:'stdio',command:'node',args:[],
+   env:{TOKEN:'PRIVATE_F1_CANARY'}};
+  writeFileSync(file,JSON.stringify(fixture));
+  assert.equal(cli('start','--client-config',file,'--server','chosen').status,2);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
