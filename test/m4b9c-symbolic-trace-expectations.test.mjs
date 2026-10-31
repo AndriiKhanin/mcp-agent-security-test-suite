@@ -365,7 +365,7 @@ test('M4-B9-C: CLI help offers only an inert local-file mode',()=>{
   const v=cli('help');
   assert.equal(v.status,0);
   const data=JSON.parse(v.stdout);
-  assert.equal(data.commands.length,30);
+  assert.equal(data.commands.length,31);
   assert.ok(data.commands.includes('adapter-trace-expect'));
   assert.ok(data.syntax.some(s=>s.startsWith(
     'node src/cli.mjs adapter-trace-expect '
