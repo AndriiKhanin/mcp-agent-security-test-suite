@@ -1,3 +1,45 @@
+# F1 — guided source or installed first run
+
+**Current delivery stage: F1 (one user journey); NOT real MCP scanning.**
+In a reviewed source checkout with Node.js 20 or 22:
+
+```sh
+node src/cli.mjs start
+node src/cli.mjs start examples/adapter-profiles/stdio-project.json
+```
+
+In a disposable local installation of the unpublished candidate,
+use `mcp-agent-security start` or
+`mcp-agent-security start <local-descriptor.json>`. This one command
+runs the **two fixed bundled fictional controls**, performs a bounded
+**first-party ephemeral 127.0.0.1 staging mock** check, and optionally
+validates the supplied descriptor's *inert* shape. It does **not**
+launch the descriptor's stdio command, resolve/contact the supplied
+HTTP endpoint, obtain credentials or execute any project tool.
+
+The JSON-v1 output includes `productStage:"F1"`,
+`descriptorEvidence` (`DESCRIPTOR_VALIDATED` or `NOT_PROVIDED`),
+`demoStatus`, `stagingStatus`, static `nextActions`, and
+`externalTargetContacted:false`,
+`projectConnectionAuthorized:false`, `operatorVerified:false`.
+Status PASS/exit 0 confirms **only** the included fictional controls
+and first-party mock. A failed included check yields FAIL/1.
+Malformed/oversized/private input or wrong invocation yields ERROR/2
+and does not print the input path/content. The 4 KiB descriptor limit
+is intentional. Do not supply customer credentials or production URLs.
+
+The first-party local HTTP socket is an actual loopback effect, not a
+network isolation guarantee. No arbitrary external MCP connection
+exists yet. External staging under [Issue #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)
+requires separate review and explicit approval; product F2/F3 are
+**not complete**. The v0.0.10-rc.1 package is not published to npm.
+
+**Next:** review the offline configuration result, read
+[UNIVERSAL_ADAPTER.md](UNIVERSAL_ADAPTER.md), then follow the
+[product F0–F6 roadmap](../ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan).
+
+---
+
 ## M37 — one-command first run (no config, no user server)
 
 From an independently reviewed source checkout with Node.js 20+:
