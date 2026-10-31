@@ -769,6 +769,27 @@ export async function runFictionalContextBreakdownStdin(args=[],stream=process.s
   return contextBreakdown(await runFictionalContextTriageStdin([],stream));
 }
 
+/** M58: sanitized Markdown only from already validated M57 categories. */
+function formatContextErrorIssueReport(r){
+  const rows=r.groups.map(g=>{
+    const c=g.counts;
+    return '| '+g.contrastGroup+' | '+[c.TP,c.FP,c.FN,c.TN,c.ERROR].join(' | ')+' |';
+  });
+  const ids=(a)=>a.length?a.map(x=>'`'+x+'`').join(', '):'none';
+  return [
+    '## Fictional MCP context diagnostics (self-reported)', '',
+    '| Context | TP | FP | FN | TN | ERROR |',
+    '| --- | --- | --- | --- | --- | --- |',
+    ...rows, '',
+    'False positives (public case IDs): '+ids(r.falsePositiveCaseIds),
+    'Missed injections (public case IDs): '+ids(r.missedInjectionCaseIds),
+    'Scanner errors (public case IDs): '+ids(r.scannerErrorCaseIds), '',
+    'Scanner/version: [add public details manually]',
+    'Test-suite commit: [add reviewed SHA manually]', '',
+    'Source-only author-labeled fictional observations. No scanner was run or authenticated here; no tool action was authorized. Not population detection accuracy, real-agent protection, independent beta acceptance, security audit, or release approval. Manual review required.'
+  ].join('\n');
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
   const template=args.length===1&&args[0]==='--export-detector-results-template';
@@ -776,7 +797,8 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const detectorIssue=args.length===1&&args[0]==='--issue-report-detector-results';
   const contextIssue=args.length===1&&args[0]==='--issue-report-context-contrasts';
   const breakdown=args.length===1&&args[0]==='--summarize-context-errors';
-  const report=breakdown?await runFictionalContextBreakdownStdin():
+  const issueBreakdown=args.length===1&&args[0]==='--issue-report-context-errors';
+  const report=(breakdown||issueBreakdown)?await runFictionalContextBreakdownStdin():
     detectorIssue?await runFictionalDetectorTriageStdin():
     contextIssue?await runFictionalContextTriageStdin():
     contextTemplate?exportFictionalContextResultsTemplate():
@@ -798,8 +820,10 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
     args.length===1&&args[0]==='--triage-detector-results'?
       await runFictionalDetectorTriageStdin():
       await runFictionalFixtureBatchPreflight(args);
-  const printed=(detectorIssue||contextIssue)&&report.status==='PASS'?
-    formatFictionalIssueReport(report):JSON.stringify(report,null,2);
+  const printed=issueBreakdown&&report.status==='PASS'?
+    formatContextErrorIssueReport(report):
+    (detectorIssue||contextIssue)&&report.status==='PASS'?
+      formatFictionalIssueReport(report):JSON.stringify(report,null,2);
   process.stdout.write(printed+'\n');
   process.exitCode=(template||contextTemplate)?0:report.exitCode;
 }
