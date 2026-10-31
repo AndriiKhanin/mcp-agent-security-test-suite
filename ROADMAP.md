@@ -245,30 +245,43 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
-## M62 — exact request-bound toy approval lifecycle (engineering PR)
+## M63 — paired fictional scanner-version regression gate (engineering PR)
 
-- Extend the existing M59/M60 synthetic owner-context policy with two
-  immutable request objects and one exact generation. Check owner-only
-  one-shot authorization, cross-request mismatch, stale generation,
-  revoke/rotate, spoof denial and scanner-hypothesis independence:
-  14 fixed plans × three labels = 42 expected results.
-- No user-supplied requests, grants, paths or endpoints. Only first-party
-  in-memory effects; no real authenticated owner, scanner, agent or MCP.
-  Preserve unchanged 240-file/2MB excluded-source custody and frozen
-  80-path npm candidate; acceptance requires 4/4 PR and main CI.
-  External authorization #21, audit #43 and beta #59 remain OPEN.
+- Reuse the **same six fixed M44 public author-labeled cases** twice,
+  as baseline and candidate observations for *one* scanner. New
+  `--compare-context-versions` reads strict, bounded, complete JSON
+  on stdin; it never launches a scanner or interprets fixture text.
+- Input shape: `{"reportSchemaVersion":1,"sourceProfile":"m44-fictional-context-contrasts-v1","baseline":<completed M44 results template>,"candidate":<completed M44 results template>}`.
+  Paste complete validated, genuinely observed six-row result objects in
+  place of the two angle-bracket placeholders.
+- Report per public case ID `IMPROVEMENT` (FN→TP or FP→TN),
+  `REGRESSION` (TP→FN or TN→FP), `UNKNOWN` (either scanner ERROR)
+  and `UNCHANGED`. `PASS` exit 0 means no regression/unknown **on
+  these source-authored fictional rows only**; `FAIL` or `REVIEW`
+  exit 1; malformed/incomplete private data exit 2 with no echo.
+- Full historic fixture-contributor guide remains pinned at M62 SHA;
+  condensed current quickstart frees strict source-custody headroom.
+  M6-J ceiling remains **240/2,000,000** with deny-on-overflow;
+  no additional npm candidate paths (still 80), external MCP targets,
+  live scanner/model invocation, independent beta or release approval.
+  PR and exact post-merge main CI 4/4 required before acceptance.
 
-## M61 — excluded-source M12 guide consolidation (engineering PR)
+## M62 — exact request-bound toy approval lifecycle (engineering accepted)
 
-- Preserve the full historical M12 modern protocol guide at immutable
-  `7fd578f3`; replace current source-only page with a compact operational
-  command/matrix reference. Add a regression test pinning the history link
-  and established 18/40/50/60-case coverage.
-- No executable security control, fixture, source file count or package
-  inventory is removed. Keep M6-J's strict **240 excluded paths /
-  2,000,000 bytes** and frozen **80-path** unpublished npm candidate.
-- Engineering acceptance requires 4/4 PR CI and independent 4/4
-  post-merge main CI. Real targets #21, audit #43 and beta #59 OPEN.
+- [Merged PR #383](../../pull/383), main SHA `fc1068606df11133a836b92675424bee37c4d123`; [main CI #41207018396](../../actions/runs/41207018396) **4/4 PASS** independently verified.
+- Two immutable source-owned toy request objects, exact generation and 42
+  expected trials: one-shot owner approvals, cross-request/stale/replay
+  denial, revoke/rotate and external spoof rejection across three
+  hypothetical detector labels. Fictional in-memory effects only.
+- Real authenticated owners, agent/scanner execution, external MCP target
+  contact and release permission remain **unverified/unapproved**.
+
+## M61 — excluded-source M12 guide consolidation (engineering accepted)
+
+- [Merged PR #382](../../pull/382), main SHA `92b64f602fa6bc2bd2294cf057ff57bf018f21f1`; [main CI #41206480016](../../actions/runs/41206480016) **4/4 PASS**.
+- Preserved full historical M12 guide at pinned `7fd578f3`, condensed
+  current index without losing original tests; 240 excluded files /
+  **1,989,550 bytes** after merge. Frozen 80-path npm candidate untouched.
 
 ## M60 — source-owned one-shot toy approval replay (merged, verified)
 
