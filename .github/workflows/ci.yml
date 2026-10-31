@@ -1,8 +1,7 @@
 name: CI
 
+# Cost-control: no automatic push/PR runs; operator-triggered release verification only.
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 concurrency:
