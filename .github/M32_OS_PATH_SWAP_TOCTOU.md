@@ -1,67 +1,40 @@
-# M32 — deterministic OS path-swap between metadata check and read
+# M32 — deterministic OS path-swap evidence
 
-**Source-only first-party security lab.** M31 established that reading a
-disposable OS marker is more informative than trusting a child IPC claim.
-M32 tests a narrower residual risk: **path-based checks can observe
-different files or different bytes across a lstat/read boundary**.
+Source-only first-party lab (Node.js 20/22): run
+`node tools/m32-path-swap-lab.mjs` for eight disposable IPC-barrier
+cases. Parent reads metadata, a fixed child mutates an OS temporary
+path, then parent reads again **after child exit**.
 
-From reviewed source on Node.js 20 or 22:
+| Case | Witness |
+| --- | --- |
+| STABLE_MARKER | Stable bytes are not external truth |
+| SWAP_SAME_SIZE | Same-size content replacement |
+| REMOVE_AFTER_STAT | Existing path removed |
+| CREATE_AFTER_ABSENCE | Absent path created |
+| REPLACE_CORRUPT | Invalid bytes |
+| REPLACE_OVERSIZE | Oversized bytes |
+| ADD_FOREIGN_ENTRY | Unexpected directory entry |
+| STABLE_ABSENT | Absence does not authenticate non-execution |
 
-    node tools/m32-path-swap-lab.mjs
-
-This command accepts no arguments. Each of eight fixed cases creates
-a distinct private temporary directory and one first-party child with
-a reduced environment. An IPC barrier ensures that the parent first
-observes the initial directory state and metadata, and the child then
-performs a fixed real OS mutation before the parent opens and reads the
-same filename again. The child exits cleanly before the second read,
-so a failing case does not depend on an unreliable sleep or race timing.
-
-## Eight bounded cases
-
-| Case | First parent state | After barrier | Key observation |
-| --- | --- | --- | --- |
-| STABLE_MARKER | PRIMARY | PRIMARY | Stable local data is not external truth |
-| SWAP_SAME_SIZE | PRIMARY | SWAPPED | Same byte length can hide different contents |
-| REMOVE_AFTER_STAT | PRIMARY | ABSENT | Previously present path disappears |
-| CREATE_AFTER_ABSENCE | ABSENT | PRIMARY | Previously absent path becomes present |
-| REPLACE_CORRUPT | PRIMARY | CORRUPT | Invalid replacement bytes |
-| REPLACE_OVERSIZE | PRIMARY | ANOMALY | Oversized replacement |
-| ADD_FOREIGN_ENTRY | PRIMARY | ANOMALY | Extra file invalidates exact inventory |
-| STABLE_ABSENT | ABSENT | ABSENT | Absence does not authenticate non-execution |
-
-Two changed/invalid cases would still pass a deliberately inadequate
-**marker-size-only** predicate: same-size content swap and extra
-unexpected directory entry. Six scenarios expose change or invalid
-evidence. The independent source-owned oracle checks both observations,
-metadata presence, inaccurate size-only conclusions, child PID/exit,
-deterministic barrier completion, cleanup and zero unsafe transitions.
-
-The guarded policy is **QUARANTINE in all eight cases**, even when local
-state looks stable. This is a first-party demonstration, not a
-cryptographically authenticated observer, robust inode pinning,
-atomic filesystem read transaction, signed external receipt, general
-sandbox, real business effect, automatic recovery or exactly-once
-guarantee. The parent can still be mistaken, and the filesystem might
-change after either observation. Cross-platform file identifiers and
-power-loss durability are **not** certified.
+Two changes fool size-only evidence (same-size swap, extra entry);
+six cases expose drift or invalid evidence. Source-owned checks cover
+both readbacks, child exit, IPC barrier, cleanup and zero unsafe
+transitions. Guarded policy is **QUARANTINE** in all eight cases.
+Neither local readback nor stable metadata proves a signed external
+effect, atomic filesystem transaction, sandbox, exactly-once execution
+or power-loss durability.
 
 ## Security and release boundary
 
-All files are source-owned inert markers in automatically generated
-OS temp directories; there is no caller-provided filesystem path,
-external service, user MCP target, credentials, real model/agent,
-Stable Bridge, privileged action, network call or telemetry. Error
-reports never echo file names, full paths or bytes. The actual worker
-rejects direct CLI calls.
-
-Files and tests remain outside the unpublished 80-path npm candidate.
-M6-J must continue indexing all excluded-source files with SHA-256,
-within the bounded 240-file cap and with its 241st-file deny control.
-Acceptance requires Windows/Ubuntu x Node20/22 **4/4 PR CI**, a merge
-and **independently matched main-push 4/4 CI on the exact merged SHA**.
-Independent beta [#59](../issues/59), audit [#43](../issues/43)
-and external target authorization [#21](../issues/21) remain open.
+Only first-party temporary files and fixed child processes;
+no user paths, external targets, credentials, real agents, telemetry
+or trusted OS sandbox. Error reports omit private paths and bytes.
+Sources remain outside the frozen unpublished 80-path npm candidate;
+M6-J retains SHA-256 custody (240 files maximum; 241st denied).
+Acceptance needs four Windows/Ubuntu Node20/22 CI jobs and exact
+post-merge main verification. External beta [#59](../issues/59),
+independent audit [#43](../issues/43) and target permission
+[#21](../issues/21) remain open.
 
 ## Engineering acceptance (2026-10-30)
 
@@ -107,3 +80,14 @@ are tested in `test/m32-path-swap-lab.test.mjs`.
 **Scope:** real OS handle restrictions, **not** filesystem confinement,
 verified identity, arbitrary hostile-process sandboxing, live MCP/LLM,
 external targets or certification. No user-selected path or credentials.
+
+## M52 — preopened handle counterexample (source-only)
+
+Direct test-only `runFixedPreopenedHandleSelftest()` starts the fixed M32
+child on a parent-created temporary file. The child opens a writable
+`r+` descriptor **before** opening a second, read-only `r` handle.
+The second handle rejects writes, but the previously held `r+` handle
+still changes bytes; the parent independently verifies the effect after
+child exit and removes the temporary directory. Invalid API arguments
+fail closed. This proves **absence of process confinement**, not an OS
+sandbox or a revocation mechanism. No user paths, external MCP, or LLM.

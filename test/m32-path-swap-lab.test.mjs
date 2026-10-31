@@ -6,7 +6,8 @@ import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {runPathSwapLab,summarizePathSwap,
   runFixedChildProcessEffectSelftest,runFixedChildProcessEffectFaultSelftest,
-  runFixedOsHandleRightsSelftest,runFixedOsHandleFalseReportSelftest}
+  runFixedOsHandleRightsSelftest,runFixedOsHandleFalseReportSelftest,
+  runFixedPreopenedHandleSelftest}
   from '../tools/m32-path-swap-lab.mjs';
 
 const cases=Object.freeze([
@@ -360,4 +361,21 @@ test('M51: invalid API arguments fail closed',async()=>{
       assert.ok(!JSON.stringify(r).includes('PRIVATE_CANARY'));
     }
   }
+});
+
+
+test('M52: preopened writable handle survives read-only denial',async()=>{
+  const r=await runFixedPreopenedHandleSelftest();
+  assert.equal(r.status,'PASS',JSON.stringify(r));
+  assert.equal(r.readOnlyHandleWriteDenied,true);
+  assert.equal(r.retainedWritableHandleEffectObserved,true);
+  assert.equal(r.childReaped,true);
+  assert.equal(r.cleanupVerified,true);
+  assert.equal(r.osSandboxed,false);
+  assert.equal(r.confinementProven,false);
+  assert.equal(r.externalMcpContacted,false);
+  assert.doesNotMatch(JSON.stringify(r),/m51-owned-|fictional\\.txt|FICTIONAL-/);
+  const invalid=await runFixedPreopenedHandleSelftest(['PRIVATE_CANARY']);
+  assert.equal(invalid.status,'ERROR');
+  assert.doesNotMatch(JSON.stringify(invalid),/PRIVATE_CANARY/);
 });
