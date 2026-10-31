@@ -21,7 +21,8 @@ import {
   runFictionalDetectorPrioritiesStdin,
   exportFictionalContextContrasts,exportFictionalContextResultsTemplate,
   triageFictionalContextResults,
-  triageFictionalContextJson,runFictionalContextTriageStdin,summarizeFictionalContextBreakdown
+  triageFictionalContextJson,runFictionalContextTriageStdin,summarizeFictionalContextBreakdown,
+  compareFictionalContextVersions
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -902,4 +903,40 @@ test('M58: issue-ready contextual FP/FN/error report never echoes input',()=>{
   const extra=m38Cli(['--issue-report-context-errors','PRIVATE_CANARY']);
   assert.equal(extra.status,2);
   assert.doesNotMatch(extra.stdout,/PRIVATE_CANARY/);
+});
+
+
+test('M63: version comparison exposes FP regression, FN improvement, unknown',()=>{
+ const a=clone(exportFictionalContextResultsTemplate()),b=clone(a);
+ a.results.forEach(r=>r.observed='NOT_FLAGGED');
+ ['NOT_FLAGGED','FLAGGED','FLAGGED','NOT_FLAGGED','ERROR',
+   'NOT_FLAGGED'].forEach((v,i)=>b.results[i].observed=v);
+ const input={reportSchemaVersion:1,sourceProfile:a.sourceProfile,baseline:a,candidate:b};
+ const result=compareFictionalContextVersions(input);
+ assert.deepEqual([result.status,result.regressions,result.improvements,result.unknown],
+   ['FAIL',1,1,1]);
+ assert.deepEqual(result.changes.map(x=>x.state),
+   ['UNCHANGED','IMPROVEMENT','REGRESSION','UNCHANGED','UNKNOWN','UNCHANGED']);
+ assert.ok(Object.isFrozen(result.changes)&&Object.isFrozen(result.changes[0]));
+ assert.equal(result.realScannerExecuted,false);
+ const hostile=new Proxy({}, {getPrototypeOf(){throw Error('PRIVATE_CANARY');}});
+ assert.equal(compareFictionalContextVersions(hostile).status,'ERROR');
+ const cli=m38Cli(['--compare-context-versions'],JSON.stringify(input));
+ assert.equal(cli.status,1,cli.stderr);
+ assert.deepEqual(JSON.parse(cli.stdout),result);
+ b.results[2].observed='NOT_FLAGGED';b.results[4].observed='NOT_FLAGGED';
+ assert.equal(compareFictionalContextVersions(input).status,'PASS');
+ b.results[4].observed='ERROR';
+ assert.equal(compareFictionalContextVersions(input).status,'REVIEW');
+ b.results[4].observed='UNTESTED';
+ assert.equal(compareFictionalContextVersions(input).status,'ERROR');
+ b.results[4].observed='NOT_FLAGGED';input.secret='PRIVATE_CANARY';
+ assert.equal(compareFictionalContextVersions(input).status,'ERROR');
+ const bad=m38Cli(['--compare-context-versions'],JSON.stringify(input));
+ assert.equal(bad.status,2);assert.doesNotMatch(bad.stdout,/PRIVATE_CANARY/);
+ for(const invalid of [null,{},['PRIVATE_CANARY']])
+   assert.equal(compareFictionalContextVersions(invalid).status,'ERROR');
+ const extra=m38Cli(['--compare-context-versions','PRIVATE_CANARY']);
+ assert.equal(extra.status,2);assert.doesNotMatch(extra.stdout,/PRIVATE_CANARY/);
+ assert.equal(m38Cli(['--compare-context-versions'],Buffer.from([0xff])).status,2);
 });

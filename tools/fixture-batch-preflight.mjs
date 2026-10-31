@@ -717,6 +717,51 @@ export async function runFictionalContextTriageStdin(args=[],stream=process.stdi
   }catch{return M44_ERROR;}
 }
 
+
+/** M63: only compare complete author-labeled self-reports, never run scanners. */
+const M63_BAD=Object.freeze({status:'ERROR',exitCode:2,
+  ruleCode:'INVALID_CONTEXT_VERSION_PAIR',resultsSelfReportedOnly:true});
+function compareFictionalContextVersionsChecked(input){
+  if(!ownRecord38(input,['reportSchemaVersion','sourceProfile','baseline','candidate'])||
+    input.reportSchemaVersion!==1||input.sourceProfile!==M44_PROFILE)return M63_BAD;
+  const a=triageFictionalContextResults(input.baseline);
+  const b=triageFictionalContextResults(input.candidate);
+  if(a.status!=='PASS'||b.status!=='PASS')return M63_BAD;
+  let regressions=0,improvements=0,unknown=0;
+  const changes=a.results.map((old,i)=>{
+    const now=b.results[i],correct=x=>x==='TP'||x==='TN';
+    const state=old.classification==='ERROR'||now.classification==='ERROR'?
+      'UNKNOWN':correct(old.classification)===correct(now.classification)?
+      'UNCHANGED':correct(now.classification)?'IMPROVEMENT':'REGRESSION';
+    if(state==='REGRESSION')regressions++;
+    if(state==='IMPROVEMENT')improvements++;
+    if(state==='UNKNOWN')unknown++;
+    return Object.freeze({caseId:old.caseId,expectedLabel:old.expectedLabel,
+      before:old.classification,after:now.classification,state});
+  });
+  const status=regressions?'FAIL':unknown?'REVIEW':'PASS';
+  return Object.freeze({reportSchemaVersion:1,profile:'m63-paired-context-v1',
+    status,exitCode:status==='PASS'?0:1,checked:changes.length,
+    regressions,improvements,unknown,changes:Object.freeze(changes),
+    resultsSelfReportedOnly:true,realScannerExecuted:false,
+    actionAuthorizationTested:false,externalMcpContacted:false,
+    independentBetaVerified:false,securityCertified:false,releaseAuthorized:false});
+}
+export function compareFictionalContextVersions(input){
+  try{return compareFictionalContextVersionsChecked(input);}
+  catch{return M63_BAD;}
+}
+export async function runFictionalContextVersionsStdin(args=[],stream=process.stdin){
+  if(!ownArray38(args,0)||!stream||stream.isTTY===true||
+    typeof stream.on!=='function'||typeof stream.off!=='function'||
+    typeof stream.pause!=='function'||typeof stream.resume!=='function')return M63_BAD;
+  try{
+    const bytes=await boundedM38Stdin(stream,8192);
+    const text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+    return compareFictionalContextVersions(parseStrictJson(text));
+  }catch{return M63_BAD;}
+}
+
 /* M56: render only source-owned categories; never echo scanner inputs. */
 function formatFictionalIssueReport(report){
   const counts=report.counts??report.outcomes;
@@ -798,7 +843,9 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const contextIssue=args.length===1&&args[0]==='--issue-report-context-contrasts';
   const breakdown=args.length===1&&args[0]==='--summarize-context-errors';
   const issueBreakdown=args.length===1&&args[0]==='--issue-report-context-errors';
-  const report=(breakdown||issueBreakdown)?await runFictionalContextBreakdownStdin():
+  const report=args.length===1&&args[0]==='--compare-context-versions'?
+    await runFictionalContextVersionsStdin():
+    (breakdown||issueBreakdown)?await runFictionalContextBreakdownStdin():
     detectorIssue?await runFictionalDetectorTriageStdin():
     contextIssue?await runFictionalContextTriageStdin():
     contextTemplate?exportFictionalContextResultsTemplate():
