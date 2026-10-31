@@ -42,7 +42,6 @@ test('F1 start validates inert descriptor and rejects private path',()=>{
  assert.equal(cli('start','--unsafe').status,2);
 });
 
-// F1 text is an explicit local-only view; no caller fields are interpolated.
 test('F1 text and JSON show the same fixed offline results',()=>{
  const json=JSON.parse(cli('start').stdout),r=cli('start','--text');
  assert.equal(r.status,json.exitCode);assert.equal(r.stderr,'');
