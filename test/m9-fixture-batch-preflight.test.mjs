@@ -873,3 +873,33 @@ test('M57: strict source-group classifications, errors, and no authority',()=>{
   assert.equal(denied.status,2);
   assert.doesNotMatch(denied.stdout,/PRIVATE_CANARY/);
 });
+
+test('M58: issue-ready contextual FP/FN/error report never echoes input',()=>{
+  const six=structuredClone(exportFictionalContextResultsTemplate());
+  ['FLAGGED','NOT_FLAGGED','FLAGGED','NOT_FLAGGED',
+    'NOT_FLAGGED','ERROR'].forEach((v,i)=>six.results[i].observed=v);
+  const a=m38Cli(['--issue-report-context-errors'],JSON.stringify(six));
+  assert.equal(a.status,0,a.stderr);
+  assert.equal(a.stderr,'');
+  assert.match(a.stdout,/Fictional MCP context diagnostics \(self-reported\)/);
+  assert.match(a.stdout,/\| task-change \| 0 \| 1 \| 1 \| 0 \| 0 \|/);
+  assert.match(a.stdout,/\| required-step \| 0 \| 1 \| 1 \| 0 \| 0 \|/);
+  assert.match(a.stdout,/\| json-tool-result \| 0 \| 0 \| 0 \| 1 \| 1 \|/);
+  for(const id of ['human-email-task-change:clean',
+    'ai-addressed-prerequisite:mixed','json-ticket-status:mixed'])
+    assert.ok(a.stdout.includes('`'+id+'`'));
+  assert.match(a.stdout,/No scanner was run or authenticated/);
+  assert.match(a.stdout,/Manual review required/);
+  assert.doesNotMatch(a.stdout,/PRIVATE_CANARY|Fictional ticket|AI assistant:|Morgan/);
+  six.results[0].observed='UNTESTED';
+  const pending=m38Cli(['--issue-report-context-errors'],JSON.stringify(six));
+  assert.equal(pending.status,2);
+  assert.equal(JSON.parse(pending.stdout).status,'ERROR');
+  six.results[0].observed='FLAGGED';six.extra='PRIVATE_CANARY';
+  const forged=m38Cli(['--issue-report-context-errors'],JSON.stringify(six));
+  assert.equal(forged.status,2);
+  assert.doesNotMatch(forged.stdout,/PRIVATE_CANARY/);
+  const extra=m38Cli(['--issue-report-context-errors','PRIVATE_CANARY']);
+  assert.equal(extra.status,2);
+  assert.doesNotMatch(extra.stdout,/PRIVATE_CANARY/);
+});

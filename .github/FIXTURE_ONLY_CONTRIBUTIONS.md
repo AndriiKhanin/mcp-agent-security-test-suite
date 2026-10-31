@@ -15,8 +15,9 @@ four/six-row JSON. Replace all `UNTESTED` with genuine
 `--triage-detector-results`, `--triage-context-contrasts`,
 `--issue-report-detector-results` and
 `--issue-report-context-contrasts` provide categorical
-counts or safe Issue text. M57 `--summarize-context-errors`
-separates contextual FP/FN/errors. See [README](../README.md) for
+counts or safe Issue text. M57 `--summarize-context-errors` classifies contextual FP/FN/errors;
+M58 `--issue-report-context-errors` produces a sanitized Markdown
+report with counts and public case IDs only. See [README](../README.md) for
 full commands.
 
 Only **author-labeled fictional** TP/FP/FN/TN/ERROR are counted, not
@@ -25,7 +26,8 @@ certification. Share only sanitized scanner version, reviewed source SHA,
 results and FP/FN notes at [Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
 Never post credentials, user files, customer text or real MCP targets.
 Beta [#59](../issues/59), audit [#43](../issues/43), external permission
-[#21](../issues/21) remain open. Fixture-only JSON PRs are welcome.
+[#21](../issues/21) remain open. A fixture-only PR is welcome.
+This source-only comparison is not a prompt-injection detector.
 
 ## Privacy indicators and manual review (M9-J/K/L)
 
@@ -67,60 +69,19 @@ Run `node tools/toy-agent-batch.mjs` for fixed synthetic cases.
 These fixed local mocks do not contact an external MCP server
 or prove a deployed agent resists prompt injection.
 
-## Read one clear, privacy-safe fictional review (M9-G/H/I)
+## Offline synthetic contributor checks (M9-E/F/G)
 
-For a brief summary of the entire reviewed fictional fixture set:
-
-```sh
-node tools/fixture-contributor-summary.mjs
-```
-
-The command combines the M9-E fixed policy batch and M9-F 43-per-fixture
-synthetic negative mutation sensitivity check. It reports only the
-number of fictional scenarios checked, fixed controls matched,
-symbolic denials, and corrupted reports rejected — **no case names,
-file paths, injected instructions, tokens or customer data**.
-
-It is **not a real agent** evaluation, independent beta test or
-prompt-injection detector. This is a first-party synthetic contributor
-convenience tool; a green result does not authorize any live MCP probe.
-
-## Check that corrupted symbolic results cannot pass (M9-F)
-
-To verify the fictional policy report's negative controls across **all**
-contributor fixtures, use:
-
-```sh
-node tools/fictional-negative-control-matrix.mjs
-```
-
-The source-only matrix challenges the independent M9-E report validator
-with 43 fixed, intentionally corrupted symbolic outcomes **per fixture**.
-Every mutation must fail while the pristine result passes. The command
-accepts no additional arguments, prints no fixture text or path, and
-runs no agent or MCP server. This is **not a real agent** attack evaluation
-or semantic prompt-injection detection. See the
-[negative-control guide](M9_NEGATIVE_MUTATION_MATRIX.md).
-
-## One-command check for all fictional proposals (M9-E)
-
-After adding a **fictional** `.json` fixture, you can validate the
-entire repo-owned contribution collection with:
-
-```sh
-node tools/fixture-batch-preflight.mjs
-```
-
-No filename or argument is needed. This checks every fixture file in
-`.github/fixture-proposals/` using the strict schema validator and four
-source-owned in-memory M9-C policy probes for each. It permits at most
-16 regular JSON files; unexpected entries, invalid shapes, and failed
-symbolic controls reject the batch. The report contains only counts and
-ordinals, not fixture names, private paths or embedded instructions.
-
-This is **not a real agent** test or a prompt-injection detector. It cannot
-determine whether your injection wording would affect a deployed agent.
-See the [batch preflight guide](M9_FIXTURE_BATCH_PREFLIGHT.md).
+Run `node tools/fixture-batch-preflight.mjs` to validate all fixed
+fictional fixture proposals (maximum 16 files) against schema and
+four source-owned in-memory policy controls.
+`node tools/fictional-negative-control-matrix.mjs` then tests
+43 corrupted symbolic reports per fixture; intact reports must pass
+and corrupted variants must fail.
+`node tools/fixture-contributor-summary.mjs` prints a privacy-safe
+count-only summary. None runs an AI agent or real MCP server,
+interprets contributor instructions, proves real attack resistance,
+or authorizes a live target. See [batch preflight](M9_FIXTURE_BATCH_PREFLIGHT.md)
+and [negative controls](M9_NEGATIVE_MUTATION_MATRIX.md).
 
 ## Supported proposal (v1)
 
@@ -147,50 +108,25 @@ security expectations and limits identical.
   This validation is **not a secret scanner**; the author must sanitize
   every field manually before creating a public PR.
 
-## Verify your fixture without a runner modification
+## Verify fictional fixture and policy without changing the runner
 
-From a reviewed public source checkout, using Node.js 20 or 22:
+From a reviewed Node.js 20/22 checkout, validate only a
+regular JSON file under `.github/fixture-proposals/`:
 
 ```sh
 node tools/fixture-proposal-check.mjs .github/fixture-proposals/mixed-tool-result-file-read.json
+node tools/fixture-policy-bridge.mjs .github/fixture-proposals/mixed-tool-result-file-read.json
 node --test test/m8-fixture-proposals.test.mjs
 ```
 
-Replace the filename in the first command with your proposed fixture.
-The CLI accepts exactly one direct regular file inside the approved
-directory. It rejects malformed/duplicate-key JSON, unexpected schema
-fields, unauthorized target flags, extra arguments, symlinks and oversized
-inputs without echoing private input or paths. Reports contain only fixed
-status codes and Boolean limits. The test discovers all proposed fixtures,
-so a **fixture-only PR** gets checked even without changing the runner.
-
-A `PASS` means only **fictional fixture shape accepted**. It does
-**not** execute an MCP tool, open an unrelated file, contact a target,
-run an AI agent, detect prompt injection, prove the agent resists an
-attack or certify security. The project is **not a prompt-injection detector**
-at this stage. Runner support and actual model/agent-behavior testing require
-a separately scoped implementation, positive/negative controls, security
-review and authorization before any non-fictional execution.
-
-## Optional fixed policy gate checks (M9-C)
-
-After validating your proposal's shape, run the source-only policy bridge:
-
-```sh
-node tools/fixture-policy-bridge.mjs .github/fixture-proposals/mixed-tool-result-file-read.json
-```
-
-Substitute your own fictional JSON filename in the same directory. CI
-automatically discovers every proposal and checks the same four fixed
-in-memory controls: task data allowed as data, unrelated file read denied,
-extra tool call denied, and tool-result authority spoofing denied.
-The file content is never executed or passed to an AI agent.
-
-This is **not a semantic test** of the injected instructions and **not a
-prompt-injection detector**. A successful fixed-gate check verifies only
-source-owned synthetic policy rules, not whether a real model would
-ignore your particular malicious-looking text. See the
-[policy bridge specification](M9_FIXTURE_POLICY_BRIDGE.md).
+Use your own **sanitized fictional** filename in place of the example.
+The validator refuses symlinks, extra args, duplicate JSON keys,
+unsupported fields and oversize/private-looking inputs without
+echoing them. Fixed in-memory controls allow task data as data but
+deny unrelated file reads, extra tool calls and forged tool-result
+authority. These are **schema and symbolic policy checks only**,
+not a live model test, security certification or external approval.
+See [policy bridge](M9_FIXTURE_POLICY_BRIDGE.md).
 
 ## Submit and review
 
