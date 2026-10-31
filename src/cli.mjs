@@ -10,7 +10,7 @@ import { runLoopbackHttpScenario } from './loopback-http-mock.mjs';
 import { runFirstPartyStagingSelftest } from './first-party-staging-mcp.mjs';
 import { runFirstPartyStagingProcessSelftest } from './staging-process-harness.mjs';
 import { parseStrictJson } from './strict-json.mjs';
-import { inspectProjectAdapter, previewProjectOnboarding, createOfflineAdapterTemplate, auditOfflineProjectFixtureBundle, auditSymbolicProjectTrace, auditSymbolicTraceExpectations, previewOfflineAdapterQuickstart, createOfflineAdopterKit, verifyOfflineAdopterKit } from './project-adapter.mjs';
+import { inspectProjectAdapter, previewProjectOnboarding, createOfflineAdapterTemplate, auditOfflineProjectFixtureBundle, auditSymbolicProjectTrace, auditSymbolicTraceExpectations, previewOfflineAdapterQuickstart, createOfflineAdopterKit, verifyOfflineAdopterKit, importOfflineClientConfig } from './project-adapter.mjs';
 import { evaluateAdapterConsent } from './adapter-consent.mjs';
 import { runFirstPartyAdapterSelftest, runFixedModernStagingAdapterSelftest, runFixedOnboardingDemo } from './local-adapter-drivers.mjs';
 import { auditRecords, parseJsonl } from './trace.mjs';
@@ -107,7 +107,7 @@ function emitStartText(report) {
       !['PASS','FAIL'].includes(report.status) ||
       !['PASS','FAIL'].includes(report.demoStatus) ||
       !['PASS','FAIL'].includes(report.stagingStatus) ||
-      !['NOT_PROVIDED','DESCRIPTOR_VALIDATED'].includes(report.descriptorEvidence) ||
+      !['NOT_PROVIDED','DESCRIPTOR_VALIDATED','CLIENT_CONFIG_VALIDATED_OFFLINE'].includes(report.descriptorEvidence) ||
       report.externalTargetContacted!==false ||
       report.projectConnectionAuthorized!==false ||
       report.executionEnabled!==false || report.operatorVerified!==false)
@@ -117,13 +117,14 @@ function emitStartText(report) {
     'Result: '+report.status+' (first-party evidence only)',
     'Bundled fictional controls: '+report.demoStatus,
     'Disposable local MCP mock: '+report.stagingStatus,
-    'Local descriptor: '+(report.descriptorEvidence==='DESCRIPTOR_VALIDATED'?'VALIDATED OFFLINE':'NOT PROVIDED'),
+    'Local descriptor: '+(report.descriptorEvidence==='DESCRIPTOR_VALIDATED'?'VALIDATED OFFLINE':
+      report.descriptorEvidence==='CLIENT_CONFIG_VALIDATED_OFFLINE'?'CLIENT CONFIG VALIDATED OFFLINE':'NOT PROVIDED'),
     'User MCP server checked: NO',
     'User MCP server contacted: NO',
     'User project command executed: NO',
     'Operator ownership verified: NO',
     'This is NOT a security assessment of your MCP server.',
-    'Next: use start <local-descriptor.json> --text for inert descriptor validation.',
+    'Next: use start --client-config <single-client-config.json> --text for inert client-config validation.',
     'Real staging checks require separate owner authorization under Issue #21.',
     'For CI, omit --text to receive the stable JSON-v1 report.'
   ].join('\n')+'\n');
@@ -152,10 +153,11 @@ async function main() {
   const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
   const startText=command==='start' && args.at(-1)==='--text';
   const startArgs=startText?args.slice(0,-1):args;
+  const clientConfig=startArgs[0]==='start' && startArgs[1]==='--client-config';
   const noFile = command === 'start' || command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-guide' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest' || command === 'adapter-onboarding-demo';
   // Only two reviewed selectors are legal. Never treat template selection as
   // a file path, process command, URL, flag or caller-provided descriptor.
-  const validArgs=command==='start' ? (startArgs.length===1 || (startArgs.length===2 && !startArgs[1].startsWith('-')))
+  const validArgs=command==='start' ? (clientConfig ? (startArgs.length===3 && !startArgs[2].startsWith('-')) : (startArgs.length===1 || (startArgs.length===2 && !startArgs[1].startsWith('-'))))
     : (command==='adapter-template' || command==='adapter-kit')
     ? args.length===2 && ['stdio','streamable-http'].includes(args[1])
     : noFile ? args.length===1
@@ -165,7 +167,7 @@ async function main() {
       emitFictionalTerminalView(buildCliErrorReport('adapter-trace-expect','INVALID_CLI_ARGUMENTS'));
       return 2;
     }
-    process.stderr.write('USAGE: node src/cli.mjs start [local-descriptor.json] [--text] OR help|version|demo|adapter-guide|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs start [local-descriptor.json] [--text] OR start --client-config <single-client-config.json> [--text] OR help|version|demo|adapter-guide|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -227,9 +229,12 @@ async function main() {
       // F1: one installed-package entry point; caller's descriptor is inert.
       // The staging demo is always the *fixed first-party loopback*, never
       // derived from the supplied config or its embedded command/endpoint.
-      const descriptor=startArgs.length===2
-        ? previewProjectOnboarding(parseStrictJson(await readBoundedFile(startArgs[1],4096)))
-        : null;
+      const descriptor=clientConfig
+        ? previewProjectOnboarding(importOfflineClientConfig(
+            parseStrictJson(await readBoundedFile(startArgs[2],4096))))
+        : startArgs.length===2
+          ? previewProjectOnboarding(parseStrictJson(await readBoundedFile(startArgs[1],4096)))
+          : null;
       const demo=await runOfflineDemo();
       const staged=await runFixedOnboardingDemo();
       const findings=[];
@@ -240,14 +245,14 @@ async function main() {
         profile:'f1-guided-offline-first-run-v1',productStage:'F1',
         scope:'FICTIONAL_CHECKS_AND_FIXED_FIRST_PARTY_LOOPBACK_ONLY',
         demoStatus:demo.status,stagingStatus:staged.status,
-        descriptorEvidence:descriptor?'DESCRIPTOR_VALIDATED':'NOT_PROVIDED',
+        descriptorEvidence:clientConfig?'CLIENT_CONFIG_VALIDATED_OFFLINE':descriptor?'DESCRIPTOR_VALIDATED':'NOT_PROVIDED',
         supportedTransportProfiles:['stdio','streamable-http'],
         targetEvidence:'REAL_TARGET_NOT_ATTEMPTED',
         connectionStatus:'FIXED_FIRST_PARTY_STAGING_ONLY',
         externalTargetContacted:false,projectConnectionAuthorized:false,
         operatorVerified:false,executionEnabled:false,
         nextActions:[
-          {step:1,command:'mcp-agent-security start <local-descriptor.json>',
+          {step:1,command:'mcp-agent-security start --client-config <single-client-config.json>',
            meaning:'Optionally validate your descriptor offline; no user server is launched.'},
           {step:2,command:'mcp-agent-security start',
            meaning:'Repeat source-owned tests and the disposable local mock.'},
