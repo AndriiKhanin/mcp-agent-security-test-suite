@@ -48,13 +48,14 @@ From a reviewed source checkout (Node.js 20/22):
 node src/cli.mjs start --text
 node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text
 node src/cli.mjs start --client-config single-client-config.json --text
+node src/cli.mjs start --client-config client-config.json --server NAME --text
 node src/cli.mjs start  # JSON-v1 output for CI
 ```
 
 From the separately reviewed **locally installed** candidate the same
 entry point is `mcp-agent-security start [local-descriptor.json] [--text]` or
-`mcp-agent-security start --client-config <single-client-config.json> [--text]`.
-The optional descriptor or **single-server MCP client configuration**
+`mcp-agent-security start --client-config <client-config.json> [--server NAME] [--text]`.
+The optional descriptor or **single selected MCP client server entry**
 is read *locally*, strictly validated (up to
 4 KiB), and **never executed or connected**. The command runs two
 bundled fictional contract controls and a separate ephemeral

@@ -391,6 +391,7 @@ export function buildCliHelpResult() {
       'node src/cli.mjs start',
       'node src/cli.mjs start --text',
       'node src/cli.mjs start --client-config single-client-config.json --text',
+      'node src/cli.mjs start --client-config client-config.json --server NAME --text',
       'node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text',
       'node src/cli.mjs start examples/adapter-profiles/stdio-project.json',
       'node src/cli.mjs help',

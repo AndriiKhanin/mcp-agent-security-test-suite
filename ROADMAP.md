@@ -102,6 +102,19 @@ Do not invent M64/M65 merely to continue synthetic matrices.
   independently evaluated first-run usability and end-to-end user
   workflow remain before F1 acceptance.
 
+### F1 explicit server selection from a multi-entry client config
+
+A reviewed, bounded client config with 2–16 entries now requires
+`start --client-config <client-config.json> --server NAME [--text]`.
+Without `--server`, multi-entry input fails closed; the CLI never
+guesses a target. The exact named entry alone is interpreted under the
+original inert, credential-free schema. Unselected entries are not
+executed, contacted or reflected into output. Validation adds a fixed
+`selectionEvidence` enum, **not** the user-supplied server name.
+This does not authorize MCP execution or satisfy F2/#21.
+Windows/Node22 full regression for this *new* change is pending a
+fresh local receipt; no automatic GitHub Actions are requested.
+
 ### F1 direct client-config import — implementation under local qualification
 
 - Add `start --client-config <one-client-config.json> [--text]` to
