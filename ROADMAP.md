@@ -245,6 +245,27 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
+## M59 — restore scoped approval-decision experiment (PR CI pending)
+
+- Reconcile unfinished [proposal #354](../../issues/354) from
+  [old PR #356](../../pull/356) on the current `main` rather than
+  merging its outdated source history. The old Windows failure was
+  `M6J_INVALID_LOCAL_PACKET`, not accepted CI.
+- Source-only `node tools/toy-agent-exchange.mjs --approval-policy-matrix`
+  runs **108 fixed cases**: nine source-owned origin/grant/action plans ×
+  baseline/careful × seen/unseen external content × three hypothetical
+  detector labels. Expected 45 ALLOW / 60 DENY / three pending
+  `REQUIRE_APPROVAL`. No prompts for reads/forbidden operations;
+  pending approval never grants consent or commits an effect.
+- Scanner-independent deny for untrusted instructions and missing grants.
+  No real human approvals, real agent, model, live MCP, credential access,
+  or external actions. Existing M10/M45/M46/M47 and M48 real
+  temporary-file witness remain unchanged. See
+  [toy guide](.github/M10_TOY_AGENT_EXCHANGE.md).
+- M6-J strict 240 excluded files / 2,000,000 bytes and unpublished
+  npm 80-file inventory unchanged. Full PR and exact main-push CI
+  **4/4 required**; beta #59, audit #43 and target authority #21 OPEN.
+
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
 ## M58 — issue-ready contextual error summary (merged; PR/main CI 4/4)
