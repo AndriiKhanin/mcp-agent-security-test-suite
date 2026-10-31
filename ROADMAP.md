@@ -245,15 +245,34 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
-## M60 — single-use toy approval replay (source/test)
+## M60 — source-owned one-shot toy approval replay (merged, verified)
 
-- Ten first-party toy plans cover owner approval, replay, tool/email
-  spoofing, wrong scope, expiry, revocation, rejection and mixed order
-  after M59's eligible pending decision. No real approval is granted.
-- The original toy guide is consolidated into an existing packaged
-  documentation path with its original link preserved. Keep M6-J's
-  unchanged 240-file / 2,000,000-byte custody ceiling and frozen 80
-  npm package paths. External gates #21/#43/#59 remain OPEN.
+- **Engineering accepted, fictional-only:** [PR #379](../../pull/379)
+  merged at `971fd6d46fd855c08ad8c297bbeb0591da6c3db4`.
+  [PR CI #41192535715](../../actions/runs/41192535715) and
+  [main CI #41192781642](../../actions/runs/41192781642): **4/4 PASS**
+  each, Windows/Ubuntu Node 20/22; 1,402 tests in the inspected Windows
+  Node 22 PR job, no failures or skips.
+- Ten fixed source-owned toy lifecycle plans after M59's eligible pending
+  result verify one-shot approval, replay denial, wrong scope, expiry,
+  revocation, rejection and untrusted tool/email claims. Four total
+  *fictional* effects; no real person, agent, scanner or MCP endpoint.
+- **Hardening accepted:** [PR #380](../../pull/380) merged at
+  `7fd578f3fcdd914206c32bf26ed53003583b291b`.
+  [PR CI #41193080458](../../actions/runs/41193080458) and
+  [main CI #41193337594](../../actions/runs/41193337594): **4/4 PASS**
+  each. Freeze nested plan expectations and observed arrays so report
+  consumers cannot tamper with module-owned future selftest expectations.
+- Source custody: **240 tracked excluded files / 1,999,968 bytes**,
+  strict unchanged 2,000,000-byte cap; frozen unpublished **80-path** npm
+  candidate remains unchanged. Existing toy guide preserved under
+  `docs/NEGATIVE_CONTROLS.md` with a link stub at the original path.
+  **Next engineering prerequisite:** create headroom under the same cap
+  before adding further source-only tests; do not raise limits, silently
+  remove historical controls, or claim an independent security audit.
+- Real-target authority [#21](../../issues/21), independent security
+  review [#43](../../issues/43), independent beta [#59](../../issues/59)
+  and owner publication decision remain OPEN.
 
 ## M59 — source-owned scoped approval decisions (merged; PR/main CI 4/4)
 
