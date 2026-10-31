@@ -227,6 +227,15 @@ export function exportFictionalDetectorCases(args=[]){
     limits:M38_LIMITS
   });
 }
+/** M53: UNTESTED placeholder is deliberately invalid for final triage. */
+export function exportFictionalDetectorResultsTemplate(args=[]){
+  if(!ownArray38(args,0))return M38_ERROR;
+  return Object.freeze({reportSchemaVersion:1,
+    sourceProfile:M38_EXPORT_PROFILE,
+    results:Object.freeze(M38_CASES.map(({caseId})=>
+      Object.freeze({caseId,observed:'UNTESTED'})))
+  });
+}
 /**
  * Classifies four self-reported observations relative to author labels.
  * A valid JSON report != an independently executed detector test.
@@ -702,7 +711,9 @@ export async function runFictionalContextTriageStdin(args=[],stream=process.stdi
 
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
-  const report=args.length===1&&args[0]==='--export-context-contrasts'?
+  const template=args.length===1&&args[0]==='--export-detector-results-template';
+  const report=template?exportFictionalDetectorResultsTemplate():
+    args.length===1&&args[0]==='--export-context-contrasts'?
       exportFictionalContextContrasts():
     args.length===1&&args[0]==='--triage-context-contrasts'?
       await runFictionalContextTriageStdin():
@@ -720,5 +731,5 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
       await runFictionalDetectorTriageStdin():
       await runFictionalFixtureBatchPreflight(args);
   process.stdout.write(JSON.stringify(report,null,2)+'\n');
-  process.exitCode=report.exitCode;
+  process.exitCode=template?0:report.exitCode;
 }
