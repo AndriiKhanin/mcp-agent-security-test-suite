@@ -245,7 +245,7 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
-## M59 — restore scoped approval-decision experiment (PR CI pending)
+## M59 — source-owned scoped approval decisions (merged; PR/main CI 4/4)
 
 - Reconcile unfinished [proposal #354](../../issues/354) from
   [old PR #356](../../pull/356) on the current `main` rather than
@@ -262,9 +262,18 @@ independent beta [#59](../../issues/59), external security review
   or external actions. Existing M10/M45/M46/M47 and M48 real
   temporary-file witness remain unchanged. See
   [toy guide](.github/M10_TOY_AGENT_EXCHANGE.md).
-- M6-J strict 240 excluded files / 2,000,000 bytes and unpublished
-  npm 80-file inventory unchanged. Full PR and exact main-push CI
-  **4/4 required**; beta #59, audit #43 and target authority #21 OPEN.
+- [PR #377](../../pull/377) merged at
+  `c4a52464404f397202095ce56bff0edf5408b916`.
+  [PR CI #41184536607](../../actions/runs/41184536607)
+  **4/4 PASS, 1401 tests/job**, zero failures/skips;
+  [main CI #41184737777](../../actions/runs/41184737777)
+  **4/4 PASS** on the exact merged SHA. Old [PR #356](../../pull/356)
+  closed as superseded, [proposal #354](../../issues/354)
+  closed for source-only engineering scope.
+- M6-J Git excluded-source custody **240 files / 1,999,548 bytes**
+  remains under unchanged **2,000,000-byte** cap; frozen unpublished
+  80-path npm candidate unchanged. Beta #59, audit #43 and real target
+  authority #21 stay OPEN.
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
