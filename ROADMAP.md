@@ -247,7 +247,21 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M57 — separate contextual false positives, misses and errors (PR CI pending)
+## M58 — issue-ready contextual error summary (PR CI pending)
+
+- New source-only `--issue-report-context-errors` formats the strict
+  existing six-row M44/M57 observations as a copyable GitHub Issue.
+  Group totals TP/FP/FN/TN/ERROR, public source-owned FP/FN/ERROR IDs,
+  version/SHA blanks and explicit non-assurance notice. No arbitrary
+  input echo, real scanner, agent or MCP target execution.
+- `UNTESTED`, malformed/forged data and extra CLI args fail closed.
+  Existing M38/M44/M56 CLI modes unchanged. M6-J full source custody,
+  strict 240 files/2MB and frozen 80-file npm candidate preserved.
+  See [Issue #374](../../issues/374), [contributor guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
+  PR 4/4 and independent exact main CI 4/4 required; external
+  beta #59, audit #43 and real-target authority #21 remain OPEN.
+
+## M57 — separate contextual false positives, misses and errors (merged; PR CI 4/4)
 
 - `--summarize-context-errors` consumes the same strict
   six-case M44 observations. Separately reports FP/FN/TP/TN/ERROR
@@ -257,7 +271,11 @@ We will not claim a release is production-ready merely because a synthetic test 
   closed. No external scanner execution, authenticated provenance,
   user MCP, action approval, real-world accuracy or release claim.
   M6-J full custody, frozen npm candidate and all external gates
-  unchanged. PR and exact merged main CI 4/4 required.
+  unchanged. [PR #372](../../pull/372) merged at
+  `662dd02ebb5cea61caedb800dbc0fd6f02244ab8`;
+  [PR CI #41181092205](../../actions/runs/41181092205)
+  **4/4 PASS, 1398 tests/job**, zero failures/skips.
+  Separate exact main CI #41181368339 was still running when recorded.
 
 ## M56 — privacy-safe contributor issue reports (merged; PR/main CI 4/4)
 
