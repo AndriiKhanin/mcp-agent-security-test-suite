@@ -70,7 +70,7 @@ target is supported until authorization and implementation under
 Invalid/unreadable descriptors and extra arguments exit 2 without
 printing source path/content.
 
-[Independent F1 first-run beta guide](docs/F1_INDEPENDENT_FIRST_RUN_BETA.md) (voluntary, commit-pinned, fictional-only),
+[Independent F1 first-run beta guide](docs/BETA_TESTING.md#f1-independent-first-run-beta--reviewed-source-candidate) (voluntary, commit-pinned, fictional-only),
 [full walkthrough](docs/GETTING_STARTED.md#f1--guided-source-or-installed-first-run),
 [supported vs unsupported input matrix](docs/GETTING_STARTED.md#f1-supported-and-unsupported-project-inputs),
 [direct client-config import instructions](docs/GETTING_STARTED.md#f1-direct-single-server-client-config-import-unpublished-candidate)
