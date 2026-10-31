@@ -247,142 +247,77 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M38-A/B/C — four-case external rule-scanner comparison (engineering accepted)
+## M53 — one-command offline detector-result template (PR CI pending)
 
-- [Issue #338](../../issues/338), external opt-in
-  [comparison #329](../../issues/329): source-only
-  `tools/fixture-batch-preflight.mjs --export-detector-cases`
-  emits **exactly four fixed fictional text records** (two
-  BENIGN/INJECTION pairs); every text is checked against existing
-  reviewed public source fixture descriptions. No scanner, model
-  or MCP target is run.
-- **M38-A:** the historical no-argument static fixture batch command
-  stays unchanged; explicit export mode is the only operation
-  revealing the published fictional text.
-- **M38-B:** `--triage-detector-results` consumes 2048-byte bounded,
-  duplicate-free strict UTF-8 JSON over stdin, exactly four ordered
-  `FLAGGED | NOT_FLAGGED | ERROR` classifications. Reports
-  TP/FP/FN/TN/ERROR relative to author labels **only**. Unknown
-  outcomes are errors, not successes. Forged authority fields,
-  accessors, sparse arrays, wrong IDs and extra args fail closed;
-  stdout has only categorical findings, never user input.
-- **M38-C:** contribution guide, README, CONTRIBUTING and roadmap
-  include local Windows/Linux/macOS commands and voluntary sanitized
-  independent feedback instructions. At initial M38 engineering acceptance,
-  no external results had been observed; later Firstwatch self-reports are
-  documented under M43. Scanner output remains **not authenticated**, and
-  four author-labeled samples are not population-level effectiveness evidence.
-- **Source custody:** existing tool/test/docs modified only, no
-  new file paths at M6-J 240/240 SHA-256 custody cap; 241st file
-  denied. Unpublished npm candidate remains frozen 80 paths.
-- **Engineering accepted 2026-10-30:** [PR #339](../../pull/339)
-  [PR CI #41061123812](../../actions/runs/41061123812)
-  **4/4 PASS** Windows/Ubuntu Node20/22; Ubuntu20
-  **1363/1363 tests**, 0 failed/skipped. Squash-merged SHA
+- A source-only `--export-detector-results-template` mode emits the exact
+  M38 four-row JSON input with every observation set to `UNTESTED` (not yet observed). Testers replace values after running their
+  **own** scanner and use the existing `--triage-detector-results`.
+- Exact source case IDs, no credentials or paths, no scanner invocation,
+  strict direct API/CLI negatives; unfinished templates fail closed
+  before any TP/FP/FN/TN classification.
+  [Contributor instructions](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
+  M6-J 240-path/2MB custody and 80-path unpublished package remain frozen.
+  Independent beta #59, audit #43 and real-target authority #21 OPEN.
+
+## M38-A/B/C — four-case independent scanner comparison (accepted)
+
+- Two clean/mixed **fictional tool-result** pairs, author labels only;
+  local opt-in export and strict four-row stdin triage of TP/FP/FN/TN/
+  ERROR (ERROR is separate, never a success). Scanner observations are
+  self-reported, unauthenticated and cannot establish population accuracy
+  or agent safety. [Volunteer guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md),
+  [feedback issue #329](../../issues/329).
+- [PR #339](../../pull/339), [PR CI #41061123812](../../actions/runs/41061123812)
+  **4/4 PASS, 1363 tests/job**, merged
   `39e411a7926a5acf6e5abf392fcdfa0de2db59ec`;
-  independently [main CI #41061833450](../../actions/runs/41061833450)
-  **4/4 PASS on the identical SHA**. [Issue #338](../../issues/338)
-  closed for first-party engineering only. [Voluntary scanner
-  comparison #329](../../issues/329) remains OPEN awaiting
-  real independently submitted four-row classifications.
-  External beta #59, real-target authorization #21 and
-  independent audit #43 remain OPEN.
+  [main CI #41061833450](../../actions/runs/41061833450)
+  **4/4 on exact SHA**. No real target or scanner executed by suite;
+  external reviewer evidence #59 and security audit #43 OPEN.
 
-## M37-A/B/C — zero-config adopter first run (engineering accepted)
+## M37-A/B/C — offline no-config adopter walkthrough (accepted)
 
-- [Issue #335](../../issues/335). Source-only
-  `node tools/adapter-first-run-view.mjs --self-check`
-  (human readable) or exact `--self-check-json` (fixed schema)
-  merges M8 two-transport fictional adapter smoke (2/2) with
-  **two static M34/M35 client-format examples** (2/2, stdio/HTTPS).
-  Both re-evaluate the same five unrelated first-party fictional
-  controls, **not a scanner detection accuracy rate**.
-- **M37-A:** no user stdin/config, executable, credentials, remote
-  MCP, real LLM, network connection, DNS or filesystem side effects.
-  Output provides the exact M35 local private stdin route and
-  separate M36 local release doctor.
-- **M37-B:** direct strict source-owned report/arrays/transport
-  validation refuses extra approval/status fields, accessors,
-  sparse arrays, mismatched expectations and unauthorized CLI flags.
-  Persistent `riskRating:NOT_SCORED`, independent beta, audit,
-  release and target-authority flags false.
-- **M37-C:** reuse existing `tools/adapter-first-run-view.mjs`
-  and `test/m8-first-run-view.test.mjs`, plus README, roadmap and
-  getting started. **No new excluded-source files** at M6-J
-  240/240 SHA-256 custody limit; 241st-file denial remains.
-  Frozen unpublished 80-path npm candidate has no new paths
-  or new release permission.
-- **Accepted 2026-10-30:** [PR #336](../../pull/336)
-  [PR CI #41049886879](../../actions/runs/41049886879)
-  **4/4 PASS** Windows/Ubuntu Node20/22, Ubuntu20
-  **1358/1358** tests (0 failures, 0 skipped). Squash-merged
-  exact SHA `84a6e7d487e0dd022a4cbd7a748fa2703fc25743`;
-  independent [main CI #41050360958](../../actions/runs/41050360958)
-  **4/4 PASS on identical SHA**. [Issue #335](../../issues/335)
-  closed for first-party engineering only. External beta #59,
-  real MCP target authority #21 and independent audit #43 remain OPEN.
+- `node tools/adapter-first-run-view.mjs --self-check` (or
+  `--self-check-json`) runs two fixed transport mocks and two static
+  one-server client-config examples. It does not load user config,
+  launch arbitrary commands or connect to real MCP targets.
+  Results are fictional onboarding, **not actual scanner efficacy**.
+  [Getting started](docs/GETTING_STARTED.md).
+- [PR #336](../../pull/336), [PR CI #41049886879](../../actions/runs/41049886879)
+  **4/4 PASS, 1358 tests/job**, merged
+  `84a6e7d487e0dd022a4cbd7a748fa2703fc25743`;
+  [main CI #41050360958](../../actions/runs/41050360958)
+  **4/4 on exact SHA**. M6-J fixed custody, unpublished npm
+  inventory and open #21/#43/#59 gates preserved.
 
-## M36-A/B/C — local distribution doctor (engineering accepted)
+## M36-A/B/C — source-only distribution doctor (accepted)
 
-- [Issue #330](../../issues/330) tracks a source-only
-  `node tools/reviewer-handoff.mjs doctor` command. It reuses the
-  existing M6-J local source inventory, temporary offline npm
-  tarball + install validation, and SHA-256 comparison, without
-  expanding the unpublished npm 80-path package.
-- **M36-A:** bounded categorical JSON-v1 local preflight;
-  80 packaged file hashes, 240 fully indexed excluded files,
-  actual local pack/install evidence and local SHA-256 indexes.
-  It must never claim independently anchored Git, signing,
-  real MCP target security or publication approval.
-- **M36-B:** same existing source-only tool/test paths updated,
-  no extra .github/test/tools files. Deny extra arguments and
-  forged approval attempts. M6-J remains 240 maximum and
-  **241st-entry denial**; lifecycle script restrictions retained.
-- **M36-C:** [README](README.md),
-  [getting started](docs/GETTING_STARTED.md),
-  [release readiness](docs/RELEASE_READINESS.md); technical
-  [PR #331](../../pull/331) [PR CI #41036321059](../../actions/runs/41036321059)
-  **4/4 PASS**; squash merge SHA
-  `f13281d100634b9512ff698316b84927d1cec3f5`;
-  independent [main CI #41036858127](../../actions/runs/41036858127)
-  **4/4 PASS on exact same SHA**. Ubuntu20 1353/1353 tests.
-  [Issue #330](../../issues/330) closed for engineering only.
-- **Publication BLOCKED:** external beta #59, audit #43,
-  real-target authorization #21, and explicit owner release
-  decision remain independent requirements.
+`node tools/reviewer-handoff.mjs doctor` locally packs and installs a
+disposable offline npm candidate; checks its 80 packaged files against
+source plus 240 SHA-256 indexed excluded paths (241st denied), without
+publishing or running user commands. Rejects forged approval and extra
+arguments; does **not** authenticate independent artifact provenance.
+[Guide](docs/RELEASE_READINESS.md), [PR #331](../../pull/331),
+[PR CI #41036321059](../../actions/runs/41036321059) **4/4**,
+merged `f13281d100634b9512ff698316b84927d1cec3f5`,
+[main CI #41036858127](../../actions/runs/41036858127) **4/4**.
+Independent audit #43, beta #59, target authority #21, and publication
+permission remain OPEN.
 
-## M35-A/B/C — explainable offline report, not a vulnerability scan (engineering accepted)
+## M35-A/B/C — explainable offline onboarding report (accepted)
 
-- [Issue #326](../../issues/326). Source-only
-  `node tools/m35-offline-onboarding-report.mjs` accepts the
-  existing M34 one-server client-config format over bounded stdin.
-  Exact `--json` selects machine-readable output; default is an
-  English human-readable report with independent headings:
-  descriptor preflight, five **fixed first-party fictional**
-  controls, untested security dimensions, and next actions.
-- **M35-A:** Risk always `NOT_SCORED`; no real MCP server, LLM,
-  external effect, TLS/DNS/SSRF, credential handling or owner grant
-  evaluated. Valid shape exits 0; invalid/unsupported exits 2,
-  with controls explicitly **NOT_EVALUATED**.
-- **M35-B:** Source-owned categorical text, no user name/URL/command,
-  forged saved report rejected by private in-process issued-report
-  identity. Negative matrix: fraudulent approval/severity fields,
-  env/headers/secrets, malformed UTF-8/JSON, duplicate key, TTY,
-  oversize, accessor/prototype/sparse inputs and unsupported options.
-- **M35-C:** [copy-paste guidance](docs/GETTING_STARTED.md),
-  [README](README.md), this roadmap. Exactly two new excluded-source
-  files (tool + test) fill the existing M6-J 240-file custody cap,
-  without weakening complete SHA-256 inventory or its 241st-file
-  overflow denial. Unpublished npm 80-path candidate unchanged.
-- **Accepted 2026-10-30:** [PR #327](../../pull/327)
-  [PR CI #41033447378](../../actions/runs/41033447378)
-  **4/4 PASS** (Windows/Ubuntu, Node20/22);
-  Ubuntu20 **1350/1350 tests**, 0 failures/skips.
-  Squash merge SHA `a5b9245178ce375dbcd08bd0eb82477c8760d8ac`;
-  independently [main CI #41033817795](../../actions/runs/41033817795)
-  **4/4 PASS on exact same SHA**. [#326](../../issues/326)
-  closed for engineering only. The separate external gates #21
-  (target authority), #43 (audit) and #59 (independent beta) remain OPEN.
+`node tools/m35-offline-onboarding-report.mjs` reads one strictly
+bounded client-config JSON from stdin and separates descriptor
+preflight, five first-party fictional controls, untested dimensions
+and next actions. Output does not echo private names/paths/URLs or
+claim a real scan; risk is always `NOT_SCORED`. Malformed JSON/UTF-8,
+duplicate keys, secrets, unsupported fields, forged approvals and
+arbitrary flags fail closed. [Usage](docs/GETTING_STARTED.md),
+[PR #327](../../pull/327), [PR CI #41033447378](../../actions/runs/41033447378)
+**4/4 PASS, 1350 tests/job**, merged
+`a5b9245178ce375dbcd08bd0eb82477c8760d8ac`,
+[main CI #41033817795](../../actions/runs/41033817795) **4/4**.
+Unpublished npm 80-path inventory and M6-J 240-path limit unchanged;
+independent beta #59, security audit #43 and external target #21 OPEN.
 
 ## M34-A/B/C — common MCP client config to inert descriptor (engineering accepted)
 
