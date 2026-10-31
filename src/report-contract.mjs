@@ -390,6 +390,7 @@ export function buildCliHelpResult() {
     syntax:[
       'node src/cli.mjs start',
       'node src/cli.mjs start --text',
+      'node src/cli.mjs start --client-config examples/fictional-client-config.json --text',
       'node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text',
       'node src/cli.mjs start examples/adapter-profiles/stdio-project.json',
       'node src/cli.mjs help',
