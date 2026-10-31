@@ -11,7 +11,8 @@ import {
   runFixedTemporaryFileEffectSelftest,
   runFixedTemporaryFileEffectFaultSelftest,
   runFixedScopedAuthoritySelftest,runFixedToyApprovalPolicySelftest,
-  runFixedToyApprovalReplaySelftest
+  runFixedToyApprovalReplaySelftest,
+  runFixedToyApprovalBindingSelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
 
@@ -746,4 +747,47 @@ test('M60: one-shot toy owner resolution, spoof and replay',()=>{
  }
  for(const a of [null,{},['OWNER_OK'],Array(1)])
    assert.equal(runFixedToyApprovalReplaySelftest(a).status,'ERROR');
+});
+
+test('M62: bound approval forbids cross-request, stale and replayed grants',()=>{
+  const r=runFixedToyApprovalBindingSelftest();
+  assert.equal(r.status,'PASS');
+  assert.equal(r.exitCode,0);
+  assert.deepEqual([r.checked,r.matched,r.fictionalEffects],[42,42,21]);
+  assert.equal(r.detectorLabelIndependent,true);
+  assert.ok(Object.isFrozen(r)&&Object.isFrozen(r.cases));
+  for(const c of r.cases){
+    assert.equal(c.matched,true,c.caseId);
+    assert.deepEqual(c.observed,c.expected);
+    assert.ok(Object.isFrozen(c.observed)&&Object.isFrozen(c.expected));
+    assert.equal(c.attempts,c.observed.length);
+    if(['a-cross','a-stale','a-spoof','a-revoked','a-rotated',
+        'b-cross','b-stale'].includes(c.caseId))
+      assert.equal(c.fictionalEffects,0,c.caseId);
+  }
+  assert.throws(()=>{r.cases[0].expected[0]='DENY';},TypeError);
+  for(const key of ['realOwnerAuthenticated','realApprovalGranted',
+    'realAgentBehaviorObserved','realScannerExecuted',
+    'realFilesystemReadObserved','realMcpToolCallObserved',
+    'externalMcpContacted','independentBetaVerified',
+    'securityCertified','releaseAuthorized'])
+    assert.equal(r[key],false,key);
+  for(let i=0;i<14;i++)for(const off of [14,28])
+    assert.deepEqual(r.cases[i].observed,r.cases[i+off].observed);
+});
+test('M62: public no-args approval-binding CLI rejects untrusted options',()=>{
+  const run=(...args)=>spawnSync(process.execPath,
+    ['tools/toy-agent-exchange.mjs',...args],{encoding:'utf8'});
+  const expected=runFixedToyApprovalBindingSelftest();
+  const good=run('--approval-request-binding-matrix');
+  assert.equal(good.status,0,good.stderr);
+  assert.deepEqual(JSON.parse(good.stdout),expected);
+  for(const extra of ['--approve','--request=B','PRIVATE_CANARY']){
+    const bad=run('--approval-request-binding-matrix',extra);
+    assert.equal(bad.status,2);
+    assert.equal(JSON.parse(bad.stdout).status,'ERROR');
+    assert.doesNotMatch(bad.stdout,/PRIVATE_CANARY/);
+  }
+  for(const args of [null,{},['OWNER'],Array(1)])
+    assert.equal(runFixedToyApprovalBindingSelftest(args).status,'ERROR');
 });
