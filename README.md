@@ -47,12 +47,15 @@ From a reviewed source checkout (Node.js 20/22):
 ```sh
 node src/cli.mjs start --text
 node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text
+node src/cli.mjs start --client-config single-client-config.json --text
 node src/cli.mjs start  # JSON-v1 output for CI
 ```
 
 From the separately reviewed **locally installed** candidate the same
-entry point is `mcp-agent-security start [local-descriptor.json] [--text]`.
-The optional descriptor is read *locally*, strictly validated (up to
+entry point is `mcp-agent-security start [local-descriptor.json] [--text]` or
+`mcp-agent-security start --client-config <single-client-config.json> [--text]`.
+The optional descriptor or **single-server MCP client configuration**
+is read *locally*, strictly validated (up to
 4 KiB), and **never executed or connected**. The command runs two
 bundled fictional contract controls and a separate ephemeral
 **first-party 127.0.0.1 staging mock**, then emits a stable JSON-v1
@@ -67,7 +70,8 @@ Invalid/unreadable descriptors and extra arguments exit 2 without
 printing source path/content.
 
 [Full walkthrough](docs/GETTING_STARTED.md#f1--guided-source-or-installed-first-run),
-[supported vs unsupported input matrix](docs/GETTING_STARTED.md#f1-supported-and-unsupported-project-inputs)
+[supported vs unsupported input matrix](docs/GETTING_STARTED.md#f1-supported-and-unsupported-project-inputs),
+[direct client-config import instructions](docs/GETTING_STARTED.md#f1-direct-single-server-client-config-import-unpublished-candidate)
 and [finite product roadmap](ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan).
 Candidate `0.0.10-rc.1` remains **unpublished**.
 

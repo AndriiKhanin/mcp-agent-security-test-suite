@@ -104,7 +104,8 @@ requires separate review and explicit approval; product F2/F3 are
 | --- | --- | --- |
 | Nothing (`start --text`) | Two fictional checks and a fixed first-party temporary loopback demo | **No** |
 | A single **universal project descriptor** v1 with `stdio` or `streamable-http` transport (`start descriptor.json --text`) | Strictly reads up to 4 KiB and validates supported descriptor fields, then runs only unrelated fixed first-party checks | **No** |
-| Standard Claude-style `mcpServers` / VS Code-style `servers` client config directly | **Not accepted by packaged `start`**; source-only offline converter/report instructions in [M35](#m35--first-party-readable-offline-onboarding-source-checkout) | **No** |
+| One reviewed Claude-style `mcpServers` or VS Code-style `servers` client entry | `start --client-config local-client.json [--text]`: validates one strict, no-credential stdio/HTTPS profile and runs only the *same unrelated fixed mocks* | **No** |
+| Client config with several servers, `env`, `headers`, credentials, non-HTTPS URL or extra keys | Rejected; must first be reduced to a safe one-server review copy **without secrets** | **No** |
 | Operator-owned staging MCP HTTPS URL, HTTP session/token, or OAuth credentials | **Not connected or authenticated**; F2 and authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21) not accepted | **No** |
 | Arbitrary stdio executable, MCP tool call, production server or private agent workspace | **Never launched or contacted by `start`** | **No** |
 
@@ -112,6 +113,40 @@ requires separate review and explicit approval; product F2/F3 are
 The accepted descriptor's `protocolVersion` field is a **schema label**
 (`2025-11-25` or `2026-07-28`), not evidence that a real server of
 that version was contacted, negotiated or certified.
+
+### F1 direct single-server client-config import (unpublished candidate)
+
+In addition to the universal descriptor, the packaged CLI now accepts
+**one local client config** with either `mcpServers` (one stdio entry)
+or `servers` (one explicit stdio or HTTPS entry). The schema is
+closed: `env`, `headers`, tokens, OAuth, multiple server entries,
+unknown fields, unsafe command arguments and unsupported URLs are
+rejected. No client command is launched, endpoint contacted, DNS
+resolved, authentication performed or real security check claimed.
+
+For example, create a private `single-client-config.json` with
+**fictional** data only:
+
+```json
+{"mcpServers":{"fictional":{"command":"node","args":["server.mjs"]}}}
+```
+
+Then from the reviewed checkout run:
+
+```sh
+node src/cli.mjs start --client-config single-client-config.json --text
+node src/cli.mjs start --client-config single-client-config.json
+```
+
+The second form retains machine-readable JSON-v1 for CI; successful
+validation reports `descriptorEvidence:"CLIENT_CONFIG_VALIDATED_OFFLINE"`
+and `externalTargetContacted:false`. The optional `--text` view
+contains fixed labels only. Invalid input exits 2 and does not echo
+paths, server names or credential strings. The input is limited to
+4 KiB and direct symlinks are rejected by the existing bounded reader.
+For locally installed unpublished candidate use `mcp-agent-security`
+instead of `node src/cli.mjs`. **Do not upload genuine private
+client configs to GitHub or paste them into issues.**
 
 **Copyable first-run progression** (source checkout, no private data):
 

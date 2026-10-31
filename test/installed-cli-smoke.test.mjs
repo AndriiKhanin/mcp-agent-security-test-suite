@@ -140,6 +140,12 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.ok(!visible.stdout.trimStart().startsWith('{'));
 
 
+    const clientFile=join(temp,'client.json');
+    writeFileSync(clientFile,JSON.stringify({mcpServers:{safe:{command:'node',args:[]}}}));
+    const imported=invokeNode(executable,['start','--client-config',clientFile],temp,env);
+    assert.equal(imported.status,0);
+    assert.equal(JSON.parse(imported.stdout).descriptorEvidence,'CLIENT_CONFIG_VALIDATED_OFFLINE');
+
     const help = invokeNode(executable, ['--help'], temp, env);
     assert.equal(help.status, 0, 'installed CLI --help must pass');
     const helpReport=JSON.parse(help.stdout);

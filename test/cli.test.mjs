@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {dirname,resolve} from 'node:path';
+import {dirname,resolve,join} from 'node:path';
+import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
 const cwd=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 function cli(...args){return spawnSync(process.execPath,['src/cli.mjs',...args],{cwd,encoding:'utf8'});}
 test('passing synthetic scenario yields exit 0',()=>assert.equal(cli('scenario','fixtures/scenario-denial.json').status,0));
@@ -40,7 +42,6 @@ test('F1 start validates inert descriptor and rejects private path',()=>{
  assert.equal(cli('start','--unsafe').status,2);
 });
 
-// F1 text is an explicit local-only view; no caller fields are interpolated.
 test('F1 text and JSON show the same fixed offline results',()=>{
  const json=JSON.parse(cli('start').stdout),r=cli('start','--text');
  assert.equal(r.status,json.exitCode);assert.equal(r.stderr,'');
@@ -66,4 +67,40 @@ test('F1 text does not echo hostile arguments or accidental authority',()=>{
  assert.ok(!(bad.stdout+bad.stderr).includes('PRIVATE-DESCRIPTOR-MISSING'));
  assert.equal(cli('start','--text','examples/adapter-profiles/stdio-project.json').status,2);
  assert.equal(cli('start','examples/adapter-profiles/stdio-project.json','--text','extra').status,2);
+});
+
+test('F1 packaged client-config import: inert stdio, HTTPS, text and rejection',()=>{
+ const d=mkdtempSync(join(tmpdir(),'mcp-f1-import-'));
+ const f=join(d,'config.json');
+ const run=v=>{writeFileSync(f,JSON.stringify(v));return cli('start','--client-config',f);};
+ try{
+  for(const v of [
+   {mcpServers:{local:{command:'node',args:['server.mjs']}}},
+   {servers:{remote:{type:'http',url:'https://mcp.example.org/mcp'}}}
+  ]){
+   const p=run(v),j=JSON.parse(p.stdout);
+   assert.equal(p.status,0,p.stderr);
+   assert.equal(j.descriptorEvidence,'CLIENT_CONFIG_VALIDATED_OFFLINE');
+   assert.equal(j.externalTargetContacted,false);
+   assert.equal(j.projectConnectionAuthorized,false);
+   assert.equal(j.operatorVerified,false);
+   assert.ok(!p.stdout.includes('mcp.example.org'));
+   assert.ok(!p.stdout.includes('server.mjs'));
+   const t=cli('start','--client-config',f,'--text');
+   assert.equal(t.status,0);assert.match(t.stdout,/CLIENT CONFIG VALIDATED OFFLINE/);
+   assert.ok(!t.stdout.includes(f));
+  }
+  for(const v of [
+   {mcpServers:{local:{command:'node',args:[],env:{SECRET:'private'}}}},
+   {mcpServers:{a:{command:'node'},b:{command:'node'}}},
+   {servers:{a:{type:'http',url:'http://127.0.0.1/mcp'}}},
+   {servers:{a:{type:'http',url:'https://mcp.example.org/mcp',headers:{Authorization:'SECRET'}}}},
+   {mcpServers:{a:{command:'node',args:['--eval','PRIVATE']}}}
+  ]){
+   const p=run(v);assert.equal(p.status,2);assert.equal(JSON.parse(p.stdout).status,'ERROR');
+   assert.ok(!p.stdout.includes('SECRET')&&!p.stdout.includes('PRIVATE'));
+  }
+  assert.equal(cli('start','--client-config').status,2);
+  assert.equal(cli('start','--client-config',f,'--execute').status,2);
+ }finally{rmSync(d,{recursive:true,force:true});}
 });

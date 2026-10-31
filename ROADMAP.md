@@ -102,6 +102,23 @@ Do not invent M64/M65 merely to continue synthetic matrices.
   independently evaluated first-run usability and end-to-end user
   workflow remain before F1 acceptance.
 
+### F1 direct client-config import — implementation under local qualification
+
+- Add `start --client-config <one-client-config.json> [--text]` to
+  the **packaged CLI**, reusing strict local descriptor validation and
+  the same source-owned fictional/loopback first-run controls.
+- Supports one reviewed `mcpServers` or `servers` stdio/HTTPS
+  entry; rejects credential/env/header keys, multiple servers,
+  arbitrary execution and unapproved targets. Reports
+  `CLIENT_CONFIG_VALIDATED_OFFLINE`, **never** real server evidence.
+- Add CLI and installed-package regressions, bounded 4 KiB file
+  input, sanitized failure mode. No new npm package paths;
+  240-file/2 MB source-custody cap remains strict.
+- This is a **candidate** pending actual local test receipts;
+  no automatic GitHub Actions run will be triggered. F1 stays
+  **IN PROGRESS** until independent adopter/usability verification.
+  F2 owner-authorized staging #21 remains **BLOCKED**.
+
 ### Cost-controlled local verification policy (2026-10-31)
 
 - Development and intermediate PRs: run existing bundled
