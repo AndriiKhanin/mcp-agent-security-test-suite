@@ -726,6 +726,7 @@ test('M60: one-shot toy owner resolution, spoof and replay',()=>{
  for(const row of r.cases){
    assert.equal(row.matched,true,row.caseId);
    assert.deepEqual(row.observed,row.expected);
+   assert.ok(Object.isFrozen(row.expected)&&Object.isFrozen(row.observed));
    assert.equal(row.attempts,row.observed.length);
    if(['tool-spoof','email-spoof','scope-mismatch',
      'expired','revoked','rejected'].includes(row.caseId))
@@ -734,6 +735,7 @@ test('M60: one-shot toy owner resolution, spoof and replay',()=>{
  const run=(...a)=>spawnSync(process.execPath,
    ['tools/toy-agent-exchange.mjs',...a],{encoding:'utf8'});
  const ok=run('--approval-replay-matrix');
+ assert.throws(()=>{r.cases[0].expected[0]='DENY';},TypeError);
  assert.equal(ok.status,0,ok.stderr);
  assert.deepEqual(JSON.parse(ok.stdout),r);
  for(const arg of ['--approve','PRIVATE_CANARY']){
