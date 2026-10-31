@@ -11,11 +11,17 @@ It never launches, installs or contacts any scanner or real MCP server.
 node tools/fixture-batch-preflight.mjs --export-detector-cases
 ```
 
-The output contains four *public fictional* text cases with stable IDs,
-author-supplied BENIGN/INJECTION labels and explicit non-assurance flags.
-Test both the clean and mixed versions with your own detector and
-record `FLAGGED`, `NOT_FLAGGED` or `ERROR` for each. To classify your
-**self-reported** observations without uploading or contacting anything:
+Run the four fixed clean/mixed cases with your own scanner. Generate
+an editable result file (all outcomes initially `UNTESTED`, which triage refuses; **no scanner is executed by this tool**):
+
+```sh
+node tools/fixture-batch-preflight.mjs --export-detector-results-template > detector-results.json
+```
+
+Windows PowerShell: `node tools/fixture-batch-preflight.mjs --export-detector-results-template | Set-Content -Encoding utf8 .\\detector-results.json`.
+
+Replace **all** `UNTESTED` values with actual `FLAGGED`, `NOT_FLAGGED`
+or `ERROR` outcomes. Then classify your **self-reported** results offline:
 
 ```powershell
 Get-Content -Raw -Encoding utf8 .\detector-results.json | node tools/fixture-batch-preflight.mjs --triage-detector-results

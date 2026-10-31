@@ -7,7 +7,8 @@ import {test} from 'node:test';
 import {Readable} from 'node:stream';
 import {
   verifyFictionalBridgeOutcome,runFictionalFixtureBatchPreflight,
-  exportFictionalDetectorCases,triageFictionalDetectorResults,
+  exportFictionalDetectorCases,exportFictionalDetectorResultsTemplate,
+  triageFictionalDetectorResults,
   triageFictionalDetectorJson,runFictionalDetectorTriageStdin,
   compareFictionalDetectorBatch,compareFictionalDetectorBatchJson,
   runFictionalDetectorBatchStdin,
@@ -746,4 +747,34 @@ test('M44: local report classifies benign email, AI instruction and JSON cases',
     Buffer.from([0xff,0xfe]));
   assert.equal(badBytes.status,2);
   assert.equal(badBytes.stderr,'');
+});
+
+
+test('M53: generated template roundtrips without fabricated scanner results',()=>{
+  const template=exportFictionalDetectorResultsTemplate();
+  const source=exportFictionalDetectorCases();
+  assert.equal(template.reportSchemaVersion,1);
+  assert.equal(template.sourceProfile,source.profile);
+  assert.deepEqual(template.results.map(x=>x.caseId),
+    source.rows.map(x=>x.caseId));
+  assert.ok(template.results.every(x=>x.observed==='UNTESTED'));
+  assert.ok(Object.isFrozen(template)&&Object.isFrozen(template.results));
+  assert.equal(triageFictionalDetectorJson(JSON.stringify(template)).status,'ERROR');
+  const completed=structuredClone(template);
+  ['NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED'].forEach((v,i)=>{
+    completed.results[i].observed=v;
+  });
+  const triage=triageFictionalDetectorJson(JSON.stringify(completed));
+  assert.equal(triage.status,'PASS');
+  assert.deepEqual(triage.outcomes,{TP:2,FP:0,FN:0,TN:2,ERROR:0});
+  completed.results[1].observed='UNTESTED';
+  assert.equal(triageFictionalDetectorJson(JSON.stringify(completed)).status,'ERROR');
+  const cli=m38Cli(['--export-detector-results-template']);
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),template);
+  assert.ok(Buffer.byteLength(cli.stdout,'utf8')<2048);
+  assert.equal(m38Cli(['--export-detector-results-template','--unsafe']).status,2);
+  const invalid=exportFictionalDetectorResultsTemplate(['PRIVATE_CANARY']);
+  assert.equal(invalid.status,'ERROR');
+  assert.doesNotMatch(JSON.stringify(invalid),/PRIVATE_CANARY/);
 });
