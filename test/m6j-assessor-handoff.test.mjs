@@ -372,11 +372,11 @@ test('M6-J: no release commands, symlink inputs, additional args or shipped path
     assert.equal(Object.hasOwn(pkg.scripts,k),false);
 });
 
-test('M54: superseded branch CI only; main and dispatch never coalesced',()=>{
+test('M54: superseded PR/branch CI only; main, manual and tags preserved',()=>{
   const y=readFileSync(join(root,'.github/workflows/ci.yml'),'utf8');
   assert.equal(y.split('concurrency:').length,2);
-  assert.ok(y.includes("group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}"));
-  assert.ok(y.includes("cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.event_name != 'workflow_dispatch' }}"));
+  assert.ok(y.includes("group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')) && github.run_id || github.ref }}"));
+  assert.ok(y.includes("cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') }}"));
   for(const v of ['push:','pull_request:','workflow_dispatch:',
     'node-version: [20, 22]','os: [ubuntu-latest, windows-latest]',
     'persist-credentials: false','run: npm test',
