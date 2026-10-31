@@ -26,7 +26,8 @@ certification. Share only sanitized scanner version, reviewed source SHA,
 results and FP/FN notes at [Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
 Never post credentials, user files, customer text or real MCP targets.
 Beta [#59](../issues/59), audit [#43](../issues/43), external permission
-[#21](../issues/21) remain open. Fixture-only JSON PRs are welcome.
+[#21](../issues/21) remain open. A fixture-only PR is welcome.
+This source-only comparison is not a prompt-injection detector.
 
 ## Privacy indicators and manual review (M9-J/K/L)
 
