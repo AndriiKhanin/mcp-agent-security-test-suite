@@ -86,7 +86,11 @@ Status PASS/exit 0 confirms **only** the included fictional controls
 and first-party mock. A failed included check yields FAIL/1.
 Malformed/oversized/private input or wrong invocation yields ERROR/2
 and does not print the input path/content. The 4 KiB descriptor limit
-is intentional. Do not supply customer credentials or production URLs.
+is intentional. The JSON error contains fixed, first-run-specific
+`guidance` for invalid arguments or invalid local input; it distinguishes
+the **4 KiB limit** from the legacy 1 MiB fictional-fixture limit, but
+never claims the underlying private input was diagnosed or scanned.
+Do not supply customer credentials or production URLs.
 
 The first-party local HTTP socket is an actual loopback effect, not a
 network isolation guarantee. No arbitrary external MCP connection
