@@ -1,5 +1,25 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Start here: the finite product v1.0 roadmap
+
+**Current status (2026-10-31): F0 tested foundation complete, F1 next,
+product v1.0 NOT RELEASED.** The suite has offline fictional contract
+checks, owned local MCP mocks and CI, **not** an approved connection
+to an arbitrary MCP project or a general prompt-injection detector.
+
+**[See the single F0–F6 roadmap, release finish line and acceptance
+criteria](ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan)**
+and the [single v1.0 tracking issue #385](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/385).
+The latest merged M63 test comparison is [PR #384](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/384),
+[main CI 4/4](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41208529559).
+Candidate `0.0.10-rc.1` has **not** been published.
+External target authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
+independent beta [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+and audit [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) are **OPEN**.
+Work on new fictional-only test matrices is no longer the product
+delivery objective; an accessible user journey and properly authorized,
+bounded real staging validation are next.
+
 ## Fixed approval-policy demonstration (M59)
 
 To explore **approval fatigue vs. authorization**, run the
