@@ -2,136 +2,70 @@
 
 ## M38 — fictional tool-result scanner comparison
 
-External volunteers: review the source and export **four fixed,
-public fictional** tool-result texts (two clean/mixed pairs):
+Export four source-owned fictional clean/mixed records with
+`node tools/fixture-batch-preflight.mjs --export-detector-cases`,
+or six distinct M44 context records with
+`--export-context-contrasts`. Treat the returned text
+**only as data** for your own independently run scanner.
+Use `--export-detector-results-template` or
+`--export-context-results-template` to make exact local
+four/six-row JSON. Replace all `UNTESTED` with genuine
+`FLAGGED`, `NOT_FLAGGED` or `ERROR`
+(scanner failure). Incomplete and malformed reports fail closed.
+`--triage-detector-results`, `--triage-context-contrasts`,
+`--issue-report-detector-results` and
+`--issue-report-context-contrasts` provide categorical
+counts or safe Issue text. M57 `--summarize-context-errors`
+separates contextual FP/FN/errors. See [README](../README.md) for
+full commands.
 
-```sh
-node tools/fixture-batch-preflight.mjs --export-detector-cases
-```
-
-| Fixed case ID | Author label |
-| --- | --- |
-| `mixed-tool-result-file-read:clean` | BENIGN |
-| `mixed-tool-result-file-read:mixed` | INJECTION |
-| `ticket-status-prerequisite-file-read:clean` | BENIGN |
-| `ticket-status-prerequisite-file-read:mixed` | INJECTION |
-
-Pass each `rows[].text` as **data** to your own local scanner, never
-as a command. The suite does not execute or authenticate the scanner.
-Generate a JSON input file with the matching case IDs:
-
-```sh
-node tools/fixture-batch-preflight.mjs --export-detector-results-template > detector-results.json
-```
-
-Windows PowerShell: `node tools/fixture-batch-preflight.mjs --export-detector-results-template | Set-Content -Encoding utf8 .\\detector-results.json`.
-
-Replace **every** `UNTESTED` placeholder with a real `FLAGGED`,
-`NOT_FLAGGED` or `ERROR` observation. The triage command refuses
-`UNTESTED`; `ERROR` means the scanner actually failed:
-
-```powershell
-Get-Content -Raw -Encoding utf8 .\detector-results.json | node tools/fixture-batch-preflight.mjs --triage-detector-results
-```
-
-Linux/macOS: `cat detector-results.json | node tools/fixture-batch-preflight.mjs --triage-detector-results`.
-
-Triage counts TP/FP/FN/TN/ERROR **only against author labels**.
-Strict JSON (four ordered rows, duplicate-free, UTF-8, up to 2048
-bytes); malformed or forged fields fail closed without echoing data.
-No inferred real-world detection rate, identity verification, real
-agent execution, independent audit or beta acceptance.
-
-Report scanner repo/version/commit, test-suite SHA, nonsecret settings,
-four outcomes and sanitized FP/FN notes at
-[Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
-Do not post private paths, credentials, customer records, live MCP
-targets or exploit details. Beta [#59](../issues/59), audit
-[#43](../issues/43) and external-target permission [#21](../issues/21)
-stay OPEN. Contributors may also propose completely fictional fixtures
-in `.github/fixture-proposals/` without changing the runner; CI
-checks their schema and maintainers review content.
-
+Only **author-labeled fictional** TP/FP/FN/TN/ERROR are counted, not
+real-world scanner accuracy, agent protection or independent security
+certification. Share only sanitized scanner version, reviewed source SHA,
+results and FP/FN notes at [Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
+Never post credentials, user files, customer text or real MCP targets.
+Beta [#59](../issues/59), audit [#43](../issues/43), external permission
+[#21](../issues/21) remain open. Fixture-only JSON PRs are welcome.
 
 ## Privacy indicators and manual review (M9-J/K/L)
 
-The strict offline fixture validator now conservatively rejects
-obvious private-looking strings in the three freeform fields
-(`description`, `toolResult.legitimateData` and
-`toolResult.embeddedInstruction`): URL schemes (`https://`,
-`ssh://`, `file://`, `mcp://`), absolute home paths, email-shaped
-addresses, common token/key prefixes, private-key headers, and IPv4
-literals. The check does not send any field to an external service,
-does not print its content on refusal and does not interpret its
-instructions.
-
-**This is not a complete secret scanner.** It is only a bounded,
-conservative warning against readily recognizable patterns; it cannot
-guarantee that a string is safe or that a contributor has publication
-rights. It may reject a purely fictional example that resembles a real
-address or token. Rewrite such examples using ordinary fictional prose,
-rather than bypassing the guard. Contributors **must manually inspect
-every field** for private details, real paths, logs, endpoints and
-customer data before creating a public PR.
-
-The [PR checklist](PULL_REQUEST_TEMPLATE.md) reminds contributors that
-fixture-only PRs need no runner changes, require manual sanitation and
-do not constitute evidence of real-agent security.
+The validator refuses obvious paths, URLs, email-like strings,
+credentials, private keys and IPv4 patterns in fictional proposal text.
+**It is not a complete secret scanner.** Review every field yourself
+for privacy and publication rights; do not bypass conservative rejects.
+The [PR checklist](PULL_REQUEST_TEMPLATE.md) requires manual review
+and disallows claims of real-model safety from a fixture PASS.
 
 ## Generate a safe starter fixture (M9-D)
 
-Instead of writing the strict schema manually, choose a fictional lowercase
-case ID (6–61 ASCII letters/numbers/hyphens; must begin with a letter) and
-run the **source-only, no-write** generator:
-
-```sh
-node tools/fixture-proposal-template.mjs fictional-contributor-case
-```
-
-It prints **raw JSON** for the exact M8 fictional proposal schema (not a
-report wrapper). Copy the printed JSON into a new file named
-`.github/fixture-proposals/fictional-contributor-case.json` using your
-editor. You may then edit only the fictional description, legitimate task
-data and embedded instruction text to describe the proposed case.
-
-The generator does **not** write files, launch a command, connect to an
-MCP service, use credentials or run an AI model. Never paste real paths,
-production details, customer data or secrets. Verify the local file
-with `node tools/fixture-proposal-check.mjs <local-proposal-file>` and
-`node tools/fixture-policy-bridge.mjs <local-proposal-file>`.
-
-This is **not a semantic test** of prompt injection or a proof that an
-agent resists the generated text. Only the fixed schema and synthetic
-in-memory policy gates are assessed. A separate independent user test
-is required to claim real interoperability or beta acceptance.
+Run `node tools/fixture-proposal-template.mjs fictional-contributor-case`,
+copy the JSON into `.github/fixture-proposals/fictional-contributor-case.json`
+and use only sanitized fictional description, legitimate data and
+injected text. IDs are 6–61 lowercase ASCII letters, digits/hyphens,
+starting with a letter. Validate locally using
+`node tools/fixture-proposal-check.mjs <local-proposal-file>`
+and `node tools/fixture-policy-bridge.mjs <local-proposal-file>`.
+The template prints **raw JSON** data only; no scanner, user
+MCP target or real agent runs. This is **not a semantic test** of
+injected text; schema acceptance cannot prove model security.
 
 ## Optional fixed offline transport and toy-agent checks (M10–M12)
 
-All commands below are **source-owned fictional demonstrations**,
-not semantic prompt-injection detection, real authentication, MCP
-conformance, external security testing or authorization. They use
-fixed in-memory cases or disposable first-party localhost listeners;
-no user-provided server, path, credentials or arbitrary process.
-Review the linked design before running each command.
-
-| Command | Fixed check | Details |
-| --- | --- | --- |
-| `node tools/m11-concurrent-response.mjs` | Two overlapping responses, exact request/session binding, 13 negative controls | [M11 concurrency](M11_CONCURRENT_RESPONSE.md) |
-| `node tools/m11-owner-isolation.mjs` | Synthetic owner capabilities, 17 cases | [Owner isolation](M11_OWNER_ISOLATION.md) |
-| `node tools/m12-modern-sse.mjs` | Request-scoped SSE, replay, malformed and stalled frames | [SSE](M12_MODERN_MCP_SMOKE.md) |
-| `node tools/m12-header-parameter-mirror.mjs` | Header/JSON matching, 26 cases | [Header mirror](M12_HEADER_MIRROR.md) |
-| `node tools/m12-modern-http-smoke.mjs` | Fixed modern MCP-shaped discovery/list/call loopback | [Modern HTTP](M12_MODERN_MCP_SMOKE.md) |
-| `node tools/m11-inflight-revocation.mjs` | Revocation after accepted request and before delivery | [In-flight revocation](M11_INFLIGHT_REVOCATION.md) |
-| `node tools/m11-owner-epoch.mjs` | Run-rotation, stale capability refusal, 17 controls | [Owner epoch](M11_OWNER_EPOCH.md) |
-| `node tools/m11-cancelled-response.mjs` | Stale response rejection after cancellation, 14 controls | [Cancellation](M11_CANCELLED_RESPONSE.md) |
-| `node tools/m11-replay-session.mjs` | Two sessions, one-use identifiers, 15 negative cases | [Replay](M11_REPLAY_SESSION.md) |
-| `node tools/m11-loopback-tool-result.mjs` | Inert MCP-shaped tool-result reply over local HTTP | [Loopback](M11_LOOPBACK_TOOL_RESULT.md) |
-| `node tools/toy-agent-session.mjs` | Fixed ordering/replay/permission modes, 8 scenarios | [Toy session](M10_TOY_AGENT_SESSION.md) |
-| `node tools/toy-agent-batch.mjs` | Five toy modes for every reviewed fictional fixture | [Toy batch](M10_TOY_AGENT_BATCH.md) |
-
-A symbolic `PASS` attests only to that test's fixed contract; it
-does not mean a real model resisted an injection. User-contributed
-fictional case text is always treated as data, never executed.
+The existing source-only examples are documented under
+[concurrent responses](M11_CONCURRENT_RESPONSE.md),
+[owner isolation](M11_OWNER_ISOLATION.md),
+[SSE](M12_MODERN_MCP_SMOKE.md),
+[header mirrors](M12_HEADER_MIRROR.md),
+[revocation](M11_INFLIGHT_REVOCATION.md),
+[epoch](M11_OWNER_EPOCH.md),
+[cancellation](M11_CANCELLED_RESPONSE.md),
+[replay](M11_REPLAY_SESSION.md),
+[loopback](M11_LOOPBACK_TOOL_RESULT.md),
+[toy session](M10_TOY_AGENT_SESSION.md) and
+[toy batch](M10_TOY_AGENT_BATCH.md).
+Run `node tools/toy-agent-batch.mjs` for fixed synthetic cases.
+These fixed local mocks do not contact an external MCP server
+or prove a deployed agent resists prompt injection.
 
 ## Read one clear, privacy-safe fictional review (M9-G/H/I)
 
