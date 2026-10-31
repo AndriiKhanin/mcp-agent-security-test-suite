@@ -33,7 +33,7 @@ author labels only**, not a generalizable scanner accuracy rate,
 independently verified test, beta acceptance, external audit or
 security certification. Errors are excluded from matches and misses.
 See [exact JSON input, PowerShell instructions and volunteer report
-format](.github/FIXTURE_ONLY_CONTRIBUTIONS.md#m38--independent-scanner-comparison-on-fixed-fictional-tool-results)
+format](.github/FIXTURE_ONLY_CONTRIBUTIONS.md)
 and [GitHub Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
 
 
