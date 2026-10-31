@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Keep every main/manual run; coalesce only stale PR/feature-branch runs.
-  group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch') && github.run_id || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.event_name != 'workflow_dispatch' }}
+  # Preserve main, manual and tag runs; only supersede obsolete PR/branch runs.
+  group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')) && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') }}
 
 permissions:
   contents: read
