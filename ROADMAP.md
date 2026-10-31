@@ -209,28 +209,41 @@ The numbers above measure **engineering acceptance only**, not commercial tracti
 - Test-owned temp directories and local TCP sockets must be closed and cleaned, with no paths, ports or data reflected. Only strictly fixed request metadata and short bounded bodies; no real AI/LLM, independently authenticated owner, external scanner, arbitrary MCP tools, remote network contact or OS sandbox.
 - CI acceptance requires four Windows/Ubuntu Node 20/22 jobs plus separately verified post-merge `main` CI. External-target authorization [#21](../../issues/21), beta [#59](../../issues/59), and audit [#43](../../issues/43) are unchanged.
 
-## M50 — fixed child-process effect readback (PR #359 merged; CI 4/4)
+## M50 — parent-owned child effect witness (accepted)
 
-- Existing nonpackaged M32 lab, exact first-party child, IPC parent
-  authority and OS temporary-file readback. Six fixed cases: one
-  owner-scoped write, five denials; parent checks bytes after process
-  exit and cleanup. Five test-only faults cover unauthorized child write,
-  false report, malformed IPC, early exit and hang.
-- M10's no-process invariant remains intact. Same-user child is **not**
-  an OS sandbox; no real MCP, agent, external target, arbitrary path or
-  credentials. No package or M6-J custody limits changed.
-- [PR #359](../../pull/359), main commit
-  `abdcfd856e19116f3d442de062836cd21d06a3de`,
-  [PR CI #41118590626](../../actions/runs/41118590626) **4/4 PASS**,
-  **1388/1388 per job**, zero fails/skips. Separate post-merge main CI
-  not verified; beta #59, audit #43, target authority #21 and owner
-  release decision remain open.
+[PR #359](../../pull/359), [CI #41118590626](../../actions/runs/41118590626):
+**4/4 PASS, 1388 tests/job**. Fixed first-party M32 child: one owner-approved
+write, five denied contexts; parent reads real temporary-file effects
+after child exit. Five fault controls catch unauthorized writes, false
+reports, malformed IPC, early exit and timeout. No M10 process changes;
+not an OS sandbox. Main-push CI not separately verified.
 
-## M51 — read-only FD denial with same-user path-reopen counterexample (PR #361 merged; CI 4/4)
+## M51 — real OS handle rights and path-reopen bypass (accepted)
 
-- Existing nonpackaged M32 process lab: 3 source-owned child cases on actual Windows/Linux OS temp files. Parent observes read-only `r` write denied and unchanged bytes, `r+` positive write, and the same child reopening the known path in `r+` after the denial to write successfully. Private negative fault falsely claims no write; parent readback catches it.
-- OS handle restriction **does not mean process isolation**: `osSandboxed:false`; no real MCP/LLM, user paths, credentials, remote targets, extra files or package changes. M10 and M6-J 240-file/2MB custody limits unchanged.
-- [PR #361](../../pull/361) merged at `5daa5e524ad4adef9f493a406cd02761da9af49f`: [PR CI #41123160999](../../actions/runs/41123160999) **4/4 PASS, 1392/1392 per job**, zero errors/skips. M6-J remains **240 files / 2,000,000 bytes max** (final Git-tree bytes 1,998,968); no npm changes. Separate post-merge main CI not verified. Real confinement, beta #59, audit #43, target authority #21 and owner release remain open.
+[PR #361](../../pull/361), [CI #41123160999](../../actions/runs/41123160999):
+**4/4 PASS, 1392 tests/job**. Read-only FD denies writes, writable FD
+succeeds, and same-user child can reopen a known path to bypass the
+read-only FD. Parent independently catches a false IPC effect report.
+M6-J remains at **240 paths / 2,000,000 bytes**; npm frozen.
+Main-push CI not separately verified.
+
+## M52 — preopened writable FD survives later read-only denial (merged)
+
+[PR #363](../../pull/363), [PR CI #41127274914](../../actions/runs/41127274914):
+**4/4 PASS, 1393 tests/job**, no failures/skips (Windows/Ubuntu,
+Node20/22). Exact merged main commit
+`ea975e1714e599afe3327e9bfb41716e114d3ffe`.
+One first-party disposable M32 child opens an `r+` handle **before**
+a separate `r` handle; the latter rejects writes, but the prior
+writable handle still changes OS file bytes. Parent verifies real
+readback, child exit and cleanup. Invalid test API input fails closed.
+No user path, external MCP, real agent, OS isolation, or extra npm paths.
+M10 remains inert; M6-J custody preserved. Separate post-merge main
+CI has not yet been independently verified.
+
+**Shared gates remain OPEN:** external target authorization [#21](../../issues/21),
+independent beta [#59](../../issues/59), external security review
+[#43](../../issues/43), and owner release/publication decision.
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
