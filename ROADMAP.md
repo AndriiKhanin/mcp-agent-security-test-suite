@@ -26,11 +26,9 @@ M63 [PR #384](../../pull/384) remains accepted. Candidate
 `0.0.10-rc.1` is **unpublished**, release approval not given.
 First-party fixed loopback MCP and inert descriptor validation
 already exist; arbitrary user-owned servers are **not** contacted.
-Current excluded-source custody is independently checked per merged
-PR; the F1 text-view branch initially has **240 paths / 1,998,089
-bytes** out of 2,000,000 after pinned historical guide consolidation.
-This figure is a **branch candidate**, not accepted main evidence until
-CI and merge. Strict fail-on-overflow remains unchanged. Frozen candidate contains
+Exact F1 merged-main tree custody is **240 excluded paths / 1,998,089
+bytes** out of 2,000,000 (strict fail-on-overflow); historic guide is
+available at a pinned pre-consolidation commit. No limit was increased. Frozen candidate contains
 **80** reviewed npm paths.
 
 **Single product tracking issue: [#385](../../issues/385)**. The
@@ -64,14 +62,19 @@ Do not invent M64/M65 merely to continue synthetic matrices.
   **4/4 PASS** each. Source CLI, invalid/no-input modes and the
   **disposable locally installed npm candidate** were tested.
   This is only F1's first subtask, not F1 completion; full independent
-  adopter walkthrough, human-first help and complete supported-target
-  matrix are outstanding.
+  adopter walkthrough and ordinary client config import are outstanding.
 - Source/test file budget and frozen 80-path candidate membership
   unchanged; both PR and exact merged-main CI **4/4 verified**.
 
-### F1 usability extension — human-readable first-run output (review pending)
+### F1 usability extension — human-readable first-run output (engineering accepted)
 
-- Extend the existing **installed** `start` CLI with opt-in `--text`
+- [PR #389](../../pull/389) merged at exact main SHA
+  `7cbf7a11512504499482abb22789cba876d1b402`;
+  [PR CI #41220993306](../../actions/runs/41220993306)
+  **4/4 PASS** on Windows/Ubuntu Node20/22.
+  [Exact main CI #41221275559](../../actions/runs/41221275559)
+  is separately tracked; do not infer status without checking the run.
+- Extended the existing **installed** `start` CLI with opt-in `--text`
   while preserving JSON-v1 by default. Both no-descriptor and
   `start <local-descriptor.json> --text` use the same completed
   bundled fictional checks and temporary source-owned loopback mock.
@@ -84,6 +87,20 @@ Do not invent M64/M65 merely to continue synthetic matrices.
 - F1 stays **IN PROGRESS**: user config import, comprehensive
   supported/unsupported profile guidance and independent usability
   still need review. F2/#21 remains authorization-blocked.
+
+### F1 supported-input guide (documentation PR)
+
+- See the [supported/unsupported input matrix](docs/GETTING_STARTED.md#f1-supported-and-unsupported-project-inputs).
+  **Packaged** `start` validates only the explicitly versioned inert
+  universal adapter descriptor; an ordinary Claude/VS Code client config
+  is **not** implicitly a valid project descriptor. No real target, user
+  process or credential handling is supported.
+- Node 20/22 on Windows/Ubuntu are CI-supported. Descriptor protocol
+  labels `2025-11-25` and `2026-07-28` do not certify actual real-server
+  protocol negotiation or complete conformance.
+- F1 **IN PROGRESS**: actual supported client-config conversion/import,
+  independently evaluated first-run usability and end-to-end user
+  workflow remain before F1 acceptance.
 
 ### v1.0 Definition of Done (all required)
 
