@@ -38,8 +38,8 @@ The optional descriptor is read *locally*, strictly validated (up to
 bundled fictional contract controls and a separate ephemeral
 **first-party 127.0.0.1 staging mock**, then emits a stable JSON-v1
 PASS/FAIL/ERROR report by default, or a literal-only human summary
-when `--text` is supplied with `productStage:"F1"` and explicit next
-actions. PASS **does not** mean your own project was security-tested;
+when `--text` is supplied. The JSON report includes
+`productStage:"F1"` and explicit next actions. PASS **does not** mean your own project was security-tested;
 `externalTargetContacted:false`, `operatorVerified:false` and
 `projectConnectionAuthorized:false` are mandatory. No real staging
 target is supported until authorization and implementation under
@@ -47,7 +47,8 @@ target is supported until authorization and implementation under
 Invalid/unreadable descriptors and extra arguments exit 2 without
 printing source path/content.
 
-[Full walkthrough](docs/GETTING_STARTED.md#f1--guided-source-or-installed-first-run)
+[Full walkthrough](docs/GETTING_STARTED.md#f1--guided-source-or-installed-first-run),
+[supported vs unsupported input matrix](docs/GETTING_STARTED.md#f1-supported-and-unsupported-project-inputs)
 and [finite product roadmap](ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan).
 Candidate `0.0.10-rc.1` remains **unpublished**.
 
