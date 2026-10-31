@@ -806,3 +806,34 @@ test('M55: untested context template is not an observed scanner error',()=>{
   assert.doesNotMatch(denied.stdout,/PRIVATE_CANARY/);
   assert.equal(exportFictionalContextResultsTemplate(['private']).status,'ERROR');
 });
+
+
+test('M56: sanitized issue-ready Markdown for four and six fictional rows',()=>{
+  const four=structuredClone(exportFictionalDetectorResultsTemplate());
+  ['FLAGGED','NOT_FLAGGED','NOT_FLAGGED','FLAGGED'].forEach((x,i)=>
+    four.results[i].observed=x);
+  const a=m38Cli(['--issue-report-detector-results'],JSON.stringify(four));
+  assert.equal(a.status,0,a.stderr);
+  assert.match(a.stdout,/TP=1 FP=1 FN=1 TN=1 ERROR=0/);
+  assert.match(a.stdout,/mixed-tool-result-file-read:mixed/);
+  assert.match(a.stdout,/self-reported/);
+  assert.doesNotMatch(a.stdout,/Fictional order Q17|PRIVATE_CANARY/);
+  const six=structuredClone(exportFictionalContextResultsTemplate());
+  ['NOT_FLAGGED','NOT_FLAGGED','FLAGGED','FLAGGED',
+    'NOT_FLAGGED','ERROR'].forEach((x,i)=>six.results[i].observed=x);
+  const b=m38Cli(['--issue-report-context-contrasts'],JSON.stringify(six));
+  assert.equal(b.status,0,b.stderr);
+  assert.match(b.stdout,/TP=1 FP=1 FN=1 TN=2 ERROR=1/);
+  assert.match(b.stdout,/json-ticket-status:mixed/);
+  assert.doesNotMatch(b.stdout,/AI assistant:|Morgan|Fictional ticket/);
+  const untested=exportFictionalContextResultsTemplate();
+  const bad=m38Cli(['--issue-report-context-contrasts'],JSON.stringify(untested));
+  assert.equal(bad.status,2);
+  assert.equal(JSON.parse(bad.stdout).status,'ERROR');
+  six.results[0].privateText='PRIVATE_CANARY';
+  const forged=m38Cli(['--issue-report-context-contrasts'],JSON.stringify(six));
+  assert.equal(forged.status,2);
+  assert.doesNotMatch(forged.stdout,/PRIVATE_CANARY/);
+  assert.equal(m38Cli(['--issue-report-detector-results','--unsafe'],
+    JSON.stringify(four)).status,2);
+});

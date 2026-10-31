@@ -717,11 +717,32 @@ export async function runFictionalContextTriageStdin(args=[],stream=process.stdi
   }catch{return M44_ERROR;}
 }
 
+/* M56: render only source-owned categories; never echo scanner inputs. */
+function formatFictionalIssueReport(report){
+  const counts=report.counts??report.outcomes;
+  const lines=report.results.map(x=>
+    '| `'+x.caseId+'` | '+x.expectedLabel+' | '+x.classification+' |');
+  return [
+    '## Fictional MCP scanner comparison (self-reported)',
+    '', 'Source profile: `'+report.profile+'`', '',
+    '| Case ID | Author label | Classification |',
+    '| --- | --- | --- |', ...lines, '',
+    'Totals: TP='+counts.TP+' FP='+counts.FP+' FN='+counts.FN+
+      ' TN='+counts.TN+' ERROR='+counts.ERROR, '',
+    'Scanner/version: [add public details manually]',
+    'Test-suite commit: [add reviewed SHA manually]', '',
+    'Source-only comparison against author labels. No scanner was run or authenticated by this tool; no real-agent protection, population accuracy, beta acceptance or release approval is demonstrated. Manual review required.'
+  ].join('\n');
+}
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
   const template=args.length===1&&args[0]==='--export-detector-results-template';
   const contextTemplate=args.length===1&&args[0]==='--export-context-results-template';
-  const report=contextTemplate?exportFictionalContextResultsTemplate():
+  const detectorIssue=args.length===1&&args[0]==='--issue-report-detector-results';
+  const contextIssue=args.length===1&&args[0]==='--issue-report-context-contrasts';
+  const report=detectorIssue?await runFictionalDetectorTriageStdin():
+    contextIssue?await runFictionalContextTriageStdin():
+    contextTemplate?exportFictionalContextResultsTemplate():
     template?exportFictionalDetectorResultsTemplate():
     args.length===1&&args[0]==='--export-context-contrasts'?
       exportFictionalContextContrasts():
@@ -740,6 +761,8 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
     args.length===1&&args[0]==='--triage-detector-results'?
       await runFictionalDetectorTriageStdin():
       await runFictionalFixtureBatchPreflight(args);
-  process.stdout.write(JSON.stringify(report,null,2)+'\n');
+  const printed=(detectorIssue||contextIssue)&&report.status==='PASS'?
+    formatFictionalIssueReport(report):JSON.stringify(report,null,2);
+  process.stdout.write(printed+'\n');
   process.exitCode=(template||contextTemplate)?0:report.exitCode;
 }
