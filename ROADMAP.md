@@ -252,8 +252,9 @@ We will not claim a release is production-ready merely because a synthetic test 
 - The CI workflow retains `push`, `pull_request`, `workflow_dispatch`,
   four Windows/Ubuntu Node20/22 jobs, full `npm test` and fixed smoke.
   For non-main PR/feature refs, a newer run cancels **only earlier
-  obsolete runs of the same ref**; for `main` and explicit manual
-  dispatch, unique run-ID groups prevent even pending-run replacement.
+  obsolete runs of the same ref**; for `main`, explicit manual
+  dispatch and Git tags, unique run-ID groups prevent even pending-run
+  replacement.
 - Source regression checks both exact workflow expressions and retained
   CI gates. No package or security-test logic changes, no extra source
   paths, and **no relaxation** of M6-J 240-file/2MB custody.
