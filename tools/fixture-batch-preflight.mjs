@@ -734,13 +734,50 @@ function formatFictionalIssueReport(report){
     'Source-only comparison against author labels. No scanner was run or authenticated by this tool; no real-agent protection, population accuracy, beta acceptance or release approval is demonstrated. Manual review required.'
   ].join('\n');
 }
+/** M57: classification-only contextual error breakdown. */
+const M57_PROFILE='m57-fictional-context-breakdown-v1';
+const M57_ERROR=Object.freeze({
+  reportSchemaVersion:1,profile:M57_PROFILE,status:'ERROR',exitCode:2,
+  ruleCode:'M57_INVALID_CONTEXT_BREAKDOWN',manualReviewRequired:true,
+  resultsSelfReportedOnly:true,limits:M38_LIMITS
+});
+function contextBreakdown(r){
+  if(r.status!=='PASS'||r.profile!==M44_RESULT_PROFILE)return M57_ERROR;
+  const groups=['task-change','required-step','json-tool-result'].map(name=>{
+    const counts={TP:0,FP:0,FN:0,TN:0,ERROR:0};
+    M44_CASES.forEach((c,i)=>{
+      if(c.contrastGroup===name)counts[r.results[i].classification]++;
+    });
+    return Object.freeze({contrastGroup:name,counts:Object.freeze(counts)});
+  });
+  const ids=k=>Object.freeze(r.results.filter(x=>x.classification===k)
+    .map(x=>x.caseId));
+  return Object.freeze({
+    reportSchemaVersion:1,profile:M57_PROFILE,status:'PASS',exitCode:0,
+    ruleCode:'FICTIONAL_CONTEXT_DIAGNOSTIC_ONLY',caseCount:r.caseCount,
+    groups:Object.freeze(groups),falsePositiveCaseIds:ids('FP'),
+    missedInjectionCaseIds:ids('FN'),scannerErrorCaseIds:ids('ERROR'),
+    resultsSelfReportedOnly:true,manualReviewRequired:true,
+    actionAuthorizationTested:false,noEstimatedPopulationPerformance:true,
+    limits:M38_LIMITS
+  });
+}
+export const summarizeFictionalContextBreakdown=input=>
+  contextBreakdown(triageFictionalContextResults(input));
+export async function runFictionalContextBreakdownStdin(args=[],stream=process.stdin){
+  if(!ownArray38(args,0))return M57_ERROR;
+  return contextBreakdown(await runFictionalContextTriageStdin([],stream));
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
   const template=args.length===1&&args[0]==='--export-detector-results-template';
   const contextTemplate=args.length===1&&args[0]==='--export-context-results-template';
   const detectorIssue=args.length===1&&args[0]==='--issue-report-detector-results';
   const contextIssue=args.length===1&&args[0]==='--issue-report-context-contrasts';
-  const report=detectorIssue?await runFictionalDetectorTriageStdin():
+  const breakdown=args.length===1&&args[0]==='--summarize-context-errors';
+  const report=breakdown?await runFictionalContextBreakdownStdin():
+    detectorIssue?await runFictionalDetectorTriageStdin():
     contextIssue?await runFictionalContextTriageStdin():
     contextTemplate?exportFictionalContextResultsTemplate():
     template?exportFictionalDetectorResultsTemplate():

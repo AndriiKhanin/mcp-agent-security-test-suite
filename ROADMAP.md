@@ -247,6 +247,18 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
+## M57 — separate contextual false positives, misses and errors (PR CI pending)
+
+- `--summarize-context-errors` consumes the same strict
+  six-case M44 observations. Separately reports FP/FN/TP/TN/ERROR
+  for task-change, required-step and JSON tool results, listing only
+  source-owned case IDs for false positives, misses and errors.
+- Invalid, forged, oversized and incomplete `UNTESTED` input fails
+  closed. No external scanner execution, authenticated provenance,
+  user MCP, action approval, real-world accuracy or release claim.
+  M6-J full custody, frozen npm candidate and all external gates
+  unchanged. PR and exact merged main CI 4/4 required.
+
 ## M56 — privacy-safe contributor issue reports (merged; PR/main CI 4/4)
 
 - Exact `--issue-report-detector-results` and

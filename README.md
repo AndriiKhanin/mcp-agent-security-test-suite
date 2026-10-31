@@ -80,6 +80,20 @@ posting to [comparison issue #329](https://github.com/AndriiKhanin/mcp-agent-sec
 Invalid or `UNTESTED` input fails closed with a generic error.
 No local input text, paths, credentials or real scanner evidence is copied.
 
+## Context-group scanner diagnostic (M57)
+
+After filling the six M44 fictional observations, separate false
+positives on ordinary emails from missed AI-directed tool or JSON
+instructions and actual scanner errors:
+
+```sh
+cat context-results.json | node tools/fixture-batch-preflight.mjs --summarize-context-errors
+```
+
+PowerShell: `Get-Content -Raw -Encoding utf8 .\context-results.json | node tools/fixture-batch-preflight.mjs --summarize-context-errors`.
+Strict input, source-owned case IDs only. **This does not execute
+a scanner, measure real-world protection, or approve any tool action.**
+
 ## One-command local first run — no config required (M37)
 
 On Node.js 20+ in a reviewed source checkout, try both built-in adapter
