@@ -73,7 +73,7 @@ Do not invent M64/M65 merely to continue synthetic matrices.
   [PR CI #41220993306](../../actions/runs/41220993306)
   **4/4 PASS** on Windows/Ubuntu Node20/22.
   [Exact main CI #41221275559](../../actions/runs/41221275559)
-  is separately tracked; do not infer status without checking the run.
+  **4/4 PASS** independently verified on the same merged SHA.
 - Extended the existing **installed** `start` CLI with opt-in `--text`
   while preserving JSON-v1 by default. Both no-descriptor and
   `start <local-descriptor.json> --text` use the same completed
