@@ -115,15 +115,24 @@ export function inspectProjectAdapter(config) {
  * Strictly inert: does not read credentials, spawn or contact a target.
  * Unknown fields (including env, headers and auth) fail closed.
  */
-export function importOfflineClientConfig(input) {
+export function importOfflineClientConfig(input,selectedServer=null) {
   if(!plainFiniteTree(input)) FAIL();
   const top=Object.keys(input);
   if(top.length!==1 || !['mcpServers','servers'].includes(top[0])) FAIL();
   const kind=top[0],entries=input[kind];
   if(!entries || typeof entries!=='object' || Array.isArray(entries)) FAIL();
   const names=Object.keys(entries);
-  if(names.length!==1 || !/^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/u.test(names[0])) FAIL();
-  const server=entries[names[0]];
+  const safeName=/^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/u;
+  if(names.length<1 || names.length>16 ||
+     names.some(name=>!safeName.test(name))) FAIL();
+  // Never guess which of multiple entries the operator intended.
+  // Ignore unselected entries; do not execute, interpolate or export them.
+  if(selectedServer!==null &&
+     (typeof selectedServer!=='string' || !safeName.test(selectedServer) ||
+      !Object.hasOwn(entries,selectedServer))) FAIL();
+  if(selectedServer===null && names.length!==1) FAIL();
+  const name=selectedServer??names[0];
+  const server=entries[name];
   if(!server || typeof server!=='object' || Array.isArray(server)) FAIL();
   const keys=Object.keys(server),type=server.type;
   let transport;
@@ -144,7 +153,7 @@ export function importOfflineClientConfig(input) {
     transport={type:'streamable-http',endpoint:server.url};
   } else FAIL();
   const descriptor={
-    adapterSchemaVersion:1,project:{name:names[0]},transport,
+    adapterSchemaVersion:1,project:{name},transport,
     protocolVersion:'2026-07-28',policy:{...DRY}
   };
   // Reuse the exact packaged descriptor validator; never trust a client
