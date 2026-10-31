@@ -919,6 +919,8 @@ test('M63: version comparison exposes FP regression, FN improvement, unknown',()
    ['UNCHANGED','IMPROVEMENT','REGRESSION','UNCHANGED','UNKNOWN','UNCHANGED']);
  assert.ok(Object.isFrozen(result.changes)&&Object.isFrozen(result.changes[0]));
  assert.equal(result.realScannerExecuted,false);
+ const hostile=new Proxy({}, {getPrototypeOf(){throw Error('PRIVATE_CANARY');}});
+ assert.equal(compareFictionalContextVersions(hostile).status,'ERROR');
  const cli=m38Cli(['--compare-context-versions'],JSON.stringify(input));
  assert.equal(cli.status,1,cli.stderr);
  assert.deepEqual(JSON.parse(cli.stdout),result);
