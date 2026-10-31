@@ -44,6 +44,41 @@ requires separate review and explicit approval; product F2/F3 are
 [UNIVERSAL_ADAPTER.md](UNIVERSAL_ADAPTER.md), then follow the
 [product F0–F6 roadmap](../ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan).
 
+## F1 supported and unsupported project inputs
+
+| What a developer supplies | Installed `start` behavior | Real project tested? |
+| --- | --- | --- |
+| Nothing (`start --text`) | Two fictional checks and a fixed first-party temporary loopback demo | **No** |
+| A single **universal project descriptor** v1 with `stdio` or `streamable-http` transport (`start descriptor.json --text`) | Strictly reads up to 4 KiB and validates supported descriptor fields, then runs only unrelated fixed first-party checks | **No** |
+| Standard Claude-style `mcpServers` / VS Code-style `servers` client config directly | **Not accepted by packaged `start`**; source-only offline converter/report instructions in [M35](#m35--first-party-readable-offline-onboarding-source-checkout) | **No** |
+| Operator-owned staging MCP HTTPS URL, HTTP session/token, or OAuth credentials | **Not connected or authenticated**; F2 and authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21) not accepted | **No** |
+| Arbitrary stdio executable, MCP tool call, production server or private agent workspace | **Never launched or contacted by `start`** | **No** |
+
+**Platform scope:** reviewed Node.js 20 and 22 on Windows and Ubuntu.
+The accepted descriptor's `protocolVersion` field is a **schema label**
+(`2025-11-25` or `2026-07-28`), not evidence that a real server of
+that version was contacted, negotiated or certified.
+
+**Copyable first-run progression** (source checkout, no private data):
+
+```sh
+node src/cli.mjs start --text
+node src/cli.mjs adapter-template stdio
+node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text
+node src/cli.mjs start examples/adapter-profiles/stdio-project.json
+```
+
+The template command prints a **JSON report wrapper**, not a directly
+usable input descriptor; save **only** its nested `template` object
+into a local descriptor file before passing it to `start`. The final
+command outputs JSON-v1 for CI, with status codes 0 (fixed checks
+matched), 1 (fixed checks failed) and 2 (invalid/unavailable input).
+No command above tests a user-controlled server or grants authority.
+
+**Independent feedback:** [fictional-only beta #59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59).
+The full v1.0 flow from own authorized staging → observed findings →
+remediation/CI is still F2–F4 work, not a current feature.
+
 ---
 
 ## M37 — one-command first run (no config, no user server)
