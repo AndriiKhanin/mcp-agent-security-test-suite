@@ -49,6 +49,22 @@ const ERROR_GUIDES = Object.freeze({
     exampleCommand:'node src/cli.mjs demo'
   })
 });
+// F1 start accepts at most 4 KiB, unlike the legacy 1 MiB fixture commands.
+// These literals never include caller paths, server names or JSON values.
+const START_ERROR_GUIDES = Object.freeze({
+  INVALID_CLI_ARGUMENTS:Object.freeze({
+    code:'INVALID_CLI_ARGUMENTS',
+    explanation:'Unsupported first-run command arguments.',
+    nextStep:'Use start --text, start <descriptor.json> --text, or start --client-config <config.json> [--server NAME] --text.',
+    exampleCommand:'node src/cli.mjs start --text'
+  }),
+  INVALID_OR_UNREADABLE_INPUT:Object.freeze({
+    code:'INVALID_OR_UNREADABLE_INPUT',
+    explanation:'The local first-run JSON is unreadable or is not a supported 4 KiB descriptor/client config.',
+    nextStep:'Use a reviewed UTF-8 JSON file of at most 4 KiB, select one credential-free server entry, and review supported formats in docs/GETTING_STARTED.md.',
+    exampleCommand:'node src/cli.mjs start --text'
+  })
+});
 function safeGuidance(codes) {
   return codes.filter(code=>Object.hasOwn(GUIDES,code))
     .slice(0,GUIDE_LIMIT).map(code=>({...GUIDES[code]}));
@@ -305,7 +321,7 @@ export function buildCliErrorReport(command,errorCode) {
     status:'ERROR',
     errorCode,
     summary:EMPTY_SUMMARY(),
-    guidance:[{...ERROR_GUIDES[errorCode]}],
+    guidance:[{...(command==='start'?START_ERROR_GUIDES[errorCode]:ERROR_GUIDES[errorCode])}],
     ...(fixedReaderGuide(command,null,true) ? {readerGuide:fixedReaderGuide(command,null,true)} : {})
   };
 }
