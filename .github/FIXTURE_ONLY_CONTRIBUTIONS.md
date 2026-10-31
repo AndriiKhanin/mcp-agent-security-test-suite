@@ -1,57 +1,31 @@
 # Fixture-only contributions: fictional tool-result instruction injection (M8-S/T/U)
 
-## M38 — fictional tool-result scanner comparison
+## M38 / M55 / M56 — local fictional scanner comparisons
 
-External volunteers: review the source and export **four fixed,
-public fictional** tool-result texts (two clean/mixed pairs):
+Export the four M38 cases with
+`node tools/fixture-batch-preflight.mjs --export-detector-cases`,
+or six separate M44 contextual cases with
+`node tools/fixture-batch-preflight.mjs --export-context-contrasts`.
+Treat exported text **as data, not commands**. The suite never runs
+your scanner. Generate private input JSON using
+`--export-detector-results-template` (4) or
+`--export-context-results-template` (6), then replace
+all `UNTESTED` with genuine `FLAGGED`, `NOT_FLAGGED`, or
+`ERROR` observations; incomplete inputs fail closed.
 
-```sh
-node tools/fixture-batch-preflight.mjs --export-detector-cases
-```
-
-| Fixed case ID | Author label |
-| --- | --- |
-| `mixed-tool-result-file-read:clean` | BENIGN |
-| `mixed-tool-result-file-read:mixed` | INJECTION |
-| `ticket-status-prerequisite-file-read:clean` | BENIGN |
-| `ticket-status-prerequisite-file-read:mixed` | INJECTION |
-
-Pass each `rows[].text` as **data** to your own local scanner, never
-as a command. The suite does not execute or authenticate the scanner.
-Generate a JSON input file with the matching case IDs:
-
-```sh
-node tools/fixture-batch-preflight.mjs --export-detector-results-template > detector-results.json
-```
-
-Windows PowerShell: `node tools/fixture-batch-preflight.mjs --export-detector-results-template | Set-Content -Encoding utf8 .\\detector-results.json`.
-
-Replace **every** `UNTESTED` placeholder with a real `FLAGGED`,
-`NOT_FLAGGED` or `ERROR` observation. The triage command refuses
-`UNTESTED`; `ERROR` means the scanner actually failed:
-
-```powershell
-Get-Content -Raw -Encoding utf8 .\detector-results.json | node tools/fixture-batch-preflight.mjs --triage-detector-results
-```
-
-Linux/macOS: `cat detector-results.json | node tools/fixture-batch-preflight.mjs --triage-detector-results`.
-
-Triage counts TP/FP/FN/TN/ERROR **only against author labels**.
-Strict JSON (four ordered rows, duplicate-free, UTF-8, up to 2048
-bytes); malformed or forged fields fail closed without echoing data.
-No inferred real-world detection rate, identity verification, real
-agent execution, independent audit or beta acceptance.
-
-Report scanner repo/version/commit, test-suite SHA, nonsecret settings,
-four outcomes and sanitized FP/FN notes at
-[Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
-Do not post private paths, credentials, customer records, live MCP
-targets or exploit details. Beta [#59](../issues/59), audit
-[#43](../issues/43) and external-target permission [#21](../issues/21)
-stay OPEN. Contributors may also propose completely fictional fixtures
-in `.github/fixture-proposals/` without changing the runner; CI
-checks their schema and maintainers review content.
-
+Use `--triage-detector-results` (4),
+`--triage-context-contrasts` (6) or
+`--summarize-context-errors` (M56, six groups/results).
+Full Windows/Unix commands are in [README](../README.md).
+Only source-owned author-label FP/FN/TP/TN/ERROR are measured, not
+population accuracy, verified scanner execution or real agent
+protection. Report sanitized scanner SHA, outcomes and FP/FN notes
+to [#329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
+Never share credentials, customer content, private paths or live
+targets. Independent beta [#59](../issues/59), audit [#43](../issues/43)
+and real target approval [#21](../issues/21) remain OPEN.
+Fixture-only contributions may add reviewed fictional JSON under
+`.github/fixture-proposals/` (CI validates schema only).
 
 ## Privacy indicators and manual review (M9-J/K/L)
 

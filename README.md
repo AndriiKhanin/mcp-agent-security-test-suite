@@ -58,9 +58,17 @@ cat context-results.json | node tools/fixture-batch-preflight.mjs --triage-conte
 ```
 
 PowerShell: `Get-Content -Raw -Encoding utf8 .\\context-results.json | node tools/fixture-batch-preflight.mjs --triage-context-contrasts`.
-Reports count TP/FP/FN/TN/ERROR **relative to author labels only**;
-no external scanner is launched, no real AI or MCP target is tested,
-and these six public examples do not establish detection accuracy.
+Reports count TP/FP/FN/TN/ERROR **against author labels only**.
+M56 separates benign-email false positives, missed tool instructions,
+and real scanner errors by context:
+
+```sh
+cat context-results.json | node tools/fixture-batch-preflight.mjs --summarize-context-errors
+```
+
+PowerShell: `Get-Content -Raw -Encoding utf8 .\context-results.json | node tools/fixture-batch-preflight.mjs --summarize-context-errors`.
+No scanner, real MCP or agent is executed; no population accuracy
+or successful authorization is inferred.
 
 ## One-command local first run — no config required (M37)
 

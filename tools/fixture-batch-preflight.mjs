@@ -717,11 +717,49 @@ export async function runFictionalContextTriageStdin(args=[],stream=process.stdi
   }catch{return M44_ERROR;}
 }
 
+
+/** M56: classification-only contextual error breakdown. */
+const M56_PROFILE='m56-fictional-context-breakdown-v1';
+const M56_ERROR=Object.freeze({
+  reportSchemaVersion:1,profile:M56_PROFILE,status:'ERROR',exitCode:2,
+  ruleCode:'M56_INVALID_CONTEXT_BREAKDOWN',manualReviewRequired:true,
+  resultsSelfReportedOnly:true,limits:M38_LIMITS
+});
+function contextBreakdown(r){
+  if(r.status!=='PASS'||r.profile!==M44_RESULT_PROFILE)return M56_ERROR;
+  const groups=['task-change','required-step','json-tool-result'].map(name=>{
+    const counts={TP:0,FP:0,FN:0,TN:0,ERROR:0};
+    M44_CASES.forEach((c,i)=>{
+      if(c.contrastGroup===name)counts[r.results[i].classification]++;
+    });
+    return Object.freeze({contrastGroup:name,counts:Object.freeze(counts)});
+  });
+  const ids=k=>Object.freeze(r.results.filter(x=>x.classification===k)
+    .map(x=>x.caseId));
+  return Object.freeze({
+    reportSchemaVersion:1,profile:M56_PROFILE,status:'PASS',exitCode:0,
+    ruleCode:'FICTIONAL_CONTEXT_DIAGNOSTIC_ONLY',caseCount:r.caseCount,
+    groups:Object.freeze(groups),falsePositiveCaseIds:ids('FP'),
+    missedInjectionCaseIds:ids('FN'),scannerErrorCaseIds:ids('ERROR'),
+    resultsSelfReportedOnly:true,manualReviewRequired:true,
+    actionAuthorizationTested:false,noEstimatedPopulationPerformance:true,
+    limits:M38_LIMITS
+  });
+}
+export const summarizeFictionalContextBreakdown=input=>
+  contextBreakdown(triageFictionalContextResults(input));
+export async function runFictionalContextBreakdownStdin(args=[],stream=process.stdin){
+  if(!ownArray38(args,0))return M56_ERROR;
+  return contextBreakdown(await runFictionalContextTriageStdin([],stream));
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
   const template=args.length===1&&args[0]==='--export-detector-results-template';
   const contextTemplate=args.length===1&&args[0]==='--export-context-results-template';
-  const report=contextTemplate?exportFictionalContextResultsTemplate():
+  const breakdown=args.length===1&&args[0]==='--summarize-context-errors';
+  const report=breakdown?await runFictionalContextBreakdownStdin():
+    contextTemplate?exportFictionalContextResultsTemplate():
     template?exportFictionalDetectorResultsTemplate():
     args.length===1&&args[0]==='--export-context-contrasts'?
       exportFictionalContextContrasts():

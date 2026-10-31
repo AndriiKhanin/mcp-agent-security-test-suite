@@ -247,7 +247,16 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M55 — six-case context-results template (PR CI pending)
+## M56 — contextual FP/FN and scanner error breakdown (under review)
+
+- `--summarize-context-errors` reuses strict M44 six-row
+  observations and separates TP/FP/FN/TN/ERROR for task-change,
+  prerequisite and JSON-tool-result contrasts. Only source-owned
+  case IDs are reported. Missing or forged observations fail closed.
+  No scanner execution, action authorization, external MCP, real
+  accuracy claim or package changes; M6-J custody remains strict.
+
+## M55 — six-case context-results template (merged; main CI 4/4)
 
 - Reuse M44's six separate first-party fictional contrasts: benign
   human email, AI-addressed tool-result injection and clean/mixed JSON.
@@ -259,7 +268,10 @@ We will not claim a release is production-ready merely because a synthetic test 
   independent reproduction or efficacy estimate. M38 four-row baseline
   unchanged. Strict source-only M6-J 240 files/2MB and unpublished npm
   inventory preserved by consolidating duplicate first-party guide text.
-  Target: Windows/Ubuntu Node20/22 4/4 PR CI and exact main-push CI.
+  [PR #369](../../pull/369) merged
+  `e169535b87895b10592207997c33f6c9190057a8`;
+  [main CI #41174915273](../../actions/runs/41174915273)
+  **4/4 PASS, 1396 tests/job**, zero failures/skips.
 
 ## M54 — obsolete CI run coalescing (merged; PR CI 4/4)
 
@@ -276,8 +288,8 @@ We will not claim a release is production-ready merely because a synthetic test 
   `e32feef224f7590ae5d3ce98aca6986d553553f9`;
   [PR CI #41174171532](../../actions/runs/41174171532)
   **4/4 PASS, 1395 tests/job**, zero errors/skips.
-  Separate main-push CI [#41174436612](../../actions/runs/41174436612)
-  was launched; final conclusion must be verified separately.
+  Separate main CI [#41174436612](../../actions/runs/41174436612)
+  **4/4 PASS on exact SHA**.
   [Issue #366](../../issues/366).
 
 ## M53 — one-command offline detector-result template (merged; PR CI 4/4)

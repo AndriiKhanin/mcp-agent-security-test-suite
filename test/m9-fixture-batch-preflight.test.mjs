@@ -21,7 +21,7 @@ import {
   runFictionalDetectorPrioritiesStdin,
   exportFictionalContextContrasts,exportFictionalContextResultsTemplate,
   triageFictionalContextResults,
-  triageFictionalContextJson,runFictionalContextTriageStdin
+  triageFictionalContextJson,runFictionalContextTriageStdin,summarizeFictionalContextBreakdown
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
@@ -805,4 +805,40 @@ test('M55: untested context template is not an observed scanner error',()=>{
   assert.equal(denied.status,2);
   assert.doesNotMatch(denied.stdout,/PRIVATE_CANARY/);
   assert.equal(exportFictionalContextResultsTemplate(['private']).status,'ERROR');
+});
+
+test('M56: strict source-group classifications, errors, and no authority',()=>{
+  const input=structuredClone(exportFictionalContextResultsTemplate());
+  ['FLAGGED','NOT_FLAGGED','FLAGGED','NOT_FLAGGED',
+    'NOT_FLAGGED','ERROR'].forEach((v,i)=>input.results[i].observed=v);
+  const r=summarizeFictionalContextBreakdown(input);
+  const e={TP:0,FP:0,FN:0,TN:0,ERROR:0};
+  assert.equal(r.status,'PASS');
+  assert.equal(r.caseCount,6);
+  assert.deepEqual(r.groups.map(g=>g.counts),[
+    {...e,FP:1,FN:1},{...e,FP:1,FN:1},{...e,TN:1,ERROR:1}]);
+  assert.deepEqual(r.falsePositiveCaseIds,[
+    'human-email-task-change:clean','human-email-prerequisite:clean']);
+  assert.deepEqual(r.missedInjectionCaseIds,[
+    'ai-addressed-task-change:mixed','ai-addressed-prerequisite:mixed']);
+  assert.deepEqual(r.scannerErrorCaseIds,['json-ticket-status:mixed']);
+  assert.equal(r.actionAuthorizationTested,false);
+  assert.equal(r.limits.scannerExecuted,false);
+  assert.equal(r.resultsSelfReportedOnly,true);
+  assert.ok(Object.isFrozen(r.groups[0].counts));
+  const cli=m38Cli(['--summarize-context-errors'],JSON.stringify(input));
+  assert.equal(cli.status,0,cli.stderr);
+  assert.deepEqual(JSON.parse(cli.stdout),r);
+  input.results[1].observed='UNTESTED';
+  assert.equal(summarizeFictionalContextBreakdown(input).status,'ERROR');
+  input.results[1].observed='FLAGGED';input.approvedByOwner=true;
+  assert.equal(summarizeFictionalContextBreakdown(input).status,'ERROR');
+  for(const bad of ['{bad}','x'.repeat(4097)]){
+    const p=m38Cli(['--summarize-context-errors'],bad);
+    assert.equal(p.status,2);
+    assert.equal(JSON.parse(p.stdout).ruleCode,'M56_INVALID_CONTEXT_BREAKDOWN');
+  }
+  const denied=m38Cli(['--summarize-context-errors','PRIVATE_CANARY']);
+  assert.equal(denied.status,2);
+  assert.doesNotMatch(denied.stdout,/PRIVATE_CANARY/);
 });
