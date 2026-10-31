@@ -1,5 +1,23 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Fixed approval-policy demonstration (M59)
+
+To explore **approval fatigue vs. authorization**, run the
+first-party source-only toy matrix:
+
+```sh
+node tools/toy-agent-exchange.mjs --approval-policy-matrix
+```
+
+108 fixed hypothetical cases compare baseline/careful handling of
+owner-granted toy reads, side-effecting tool actions and untrusted
+tool/email text. Missing grants always **DENY**, reads never prompt,
+and only a qualified owner tool action in careful mode after external
+content becomes `REQUIRE_APPROVAL` (not granted). The output executes
+**no real approvals, model, scanner, MCP or external action**.
+[Detailed controls](.github/M10_TOY_AGENT_EXCHANGE.md#m59--bounded-approval-decisions-reviving-old-proposal-354).
+Independent beta, security review and target authorization remain open.
+
 ## Compare an external rule-based detector on fictional tool results (M38)
 
 This **source-only**, opt-in workflow is suitable for independent
