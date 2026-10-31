@@ -111,6 +111,49 @@ export function inspectProjectAdapter(config) {
 
 
 /**
+ * F1 installed-CLI bridge for exactly ONE safe client config entry.
+ * Strictly inert: does not read credentials, spawn or contact a target.
+ * Unknown fields (including env, headers and auth) fail closed.
+ */
+export function importOfflineClientConfig(input) {
+  if(!plainFiniteTree(input)) FAIL();
+  const top=Object.keys(input);
+  if(top.length!==1 || !['mcpServers','servers'].includes(top[0])) FAIL();
+  const kind=top[0],entries=input[kind];
+  if(!entries || typeof entries!=='object' || Array.isArray(entries)) FAIL();
+  const names=Object.keys(entries);
+  if(names.length!==1 || !/^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/u.test(names[0])) FAIL();
+  const server=entries[names[0]];
+  if(!server || typeof server!=='object' || Array.isArray(server)) FAIL();
+  const keys=Object.keys(server),type=server.type;
+  let transport;
+  if(type===undefined || type==='stdio'){
+    if(kind==='servers' && type!=='stdio') FAIL();
+    if(!keys.every(k=>['type','command','args'].includes(k)) ||
+       !keys.includes('command') || typeof server.command!=='string') FAIL();
+    const args=server.args===undefined?[]:server.args;
+    if(!Array.isArray(args) || args.length>12 ||
+       args.some(a=>typeof a!=='string' || !/^[A-Za-z0-9_@./-]{1,128}$/u.test(a) ||
+         a.startsWith('/') || a.startsWith('~') || a.includes('..') ||
+         a.includes('//') || /^[A-Za-z]:/u.test(a) ||
+         /(?:token|secret|passwd|password|credential|apikey|api_key|bearer)/iu.test(a))) FAIL();
+    transport={type:'stdio',command:server.command,args:[...args]};
+  } else if(type==='http'||type==='streamable-http'){
+    if(keys.length!==2 || !keys.includes('type') ||
+       !keys.includes('url') || typeof server.url!=='string') FAIL();
+    transport={type:'streamable-http',endpoint:server.url};
+  } else FAIL();
+  const descriptor={
+    adapterSchemaVersion:1,project:{name:names[0]},transport,
+    protocolVersion:'2026-07-28',policy:{...DRY}
+  };
+  // Reuse the exact packaged descriptor validator; never trust a client
+  // config's alleged permission or protocol negotiation claim.
+  previewProjectOnboarding(descriptor);
+  return descriptor;
+}
+
+/**
  * M4-B7-B: project-neutral readiness for a validated descriptor only.
  * This is PURE; it does not read files, inspect env, run processes, connect
  * or accept external proof of staging/operator authorization.
