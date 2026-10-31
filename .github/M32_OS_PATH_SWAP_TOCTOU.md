@@ -33,35 +33,29 @@ IPC ordering, readbacks, cleanup and zero unsafe transitions.
 [main CI #41027413776](../actions/runs/41027413776) **4/4 on exact SHA**,
 1337/1337 tests on Ubuntu20. Engineering only.
 
-## M50 — unauthorized child effects versus IPC claims
+## M50 — child effects versus IPC claims
 
 `node tools/m32-path-swap-lab.mjs --child-process-effect-witness`:
-six fixed contexts, one parent-granted `WRITE_TASK_STATUS`, five
-denials. Parent independently checks actual file bytes after child
-exit and verifies cleanup. Five private fault controls expose a child
-writing despite denial, false effect claims, malformed IPC, early exit
-and timeout. A same-user child **can disobey** IPC policy: this witness
-detects effects, it does not confine the child. No private fault
-selection through public CLI. [PR #359](../pull/359), CI **4/4**,
-1388 tests/job.
+six fixed contexts (one owner grant, five denials) and parent OS
+readback after exit/cleanup. Five private faults catch writes despite
+denial, false claims, malformed IPC, early exit and timeout. IPC does
+**not** confine a same-user child; no fault selection through CLI.
+[PR #359](../pull/359), CI 4/4 (1388 tests/job).
 
-## M51 — descriptor rights are not path confinement
+## M51 — file handles do not confine paths
 
 `node tools/m32-path-swap-lab.mjs --os-filehandle-rights-witness`:
-real `r` FD write denied, `r+` positive write, and a same-user child
-can reopen the known file path as `r+` after denial and write.
-A private lying-child test is contradicted by parent OS readback.
-Three fixed children, exit/cleanup checks and no user paths.
-[PR #361](../pull/361), CI **4/4**, 1392 tests/job.
+real `r` write denial, `r+` positive write and same-user path reopen
+bypass, with parent-read false-claim control and cleanup.
+[PR #361](../pull/361), CI 4/4 (1392 tests/job).
 
-## M52 — retained writable descriptor survives denial
+## M52 — preopened writable handle bypass
 
-Direct test-only `runFixedPreopenedHandleSelftest()`: child opens
-`r+` first, a separate read-only `r` handle later rejects writes,
-yet the previously held writable handle still changes the file.
-Parent verifies actual bytes, child exit, and cleanup. Invalid input
-fails closed. **Not OS sandboxing or revocation**.
-[PR #363](../pull/363), CI **4/4**, 1393 tests/job.
+Direct test-only `runFixedPreopenedHandleSelftest()` demonstrates a
+held `r+` handle writing despite later `r` handle denial.
+Parent verifies bytes, exit and cleanup; invalid input fails closed.
+**Not an OS sandbox or revocation**.
+[PR #363](../pull/363), CI 4/4 (1393 tests/job).
 
 ## Shared custody and open gates
 
