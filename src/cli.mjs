@@ -97,6 +97,38 @@ function emitFictionalTerminalView(report){
   ].join('\n')+'\n');
 }
 
+/**
+ * F1: human-facing view contains only reviewed literals and fixed enums.
+ * Never interpolate descriptor paths, project names, endpoints or payloads.
+ * The JSON-v1 report remains the default contract for CI callers.
+ */
+function emitStartText(report) {
+  if (report.command!=='start' || report.productStage!=='F1' ||
+      !['PASS','FAIL'].includes(report.status) ||
+      !['PASS','FAIL'].includes(report.demoStatus) ||
+      !['PASS','FAIL'].includes(report.stagingStatus) ||
+      !['NOT_PROVIDED','DESCRIPTOR_VALIDATED'].includes(report.descriptorEvidence) ||
+      report.externalTargetContacted!==false ||
+      report.projectConnectionAuthorized!==false ||
+      report.executionEnabled!==false || report.operatorVerified!==false)
+    throw new TypeError('INVALID_F1_TEXT_REPORT');
+  process.stdout.write([
+    'MCP Agent Security — guided offline first run (F1)',
+    'Result: '+report.status+' (first-party evidence only)',
+    'Bundled fictional controls: '+report.demoStatus,
+    'Disposable local MCP mock: '+report.stagingStatus,
+    'Local descriptor: '+(report.descriptorEvidence==='DESCRIPTOR_VALIDATED'?'VALIDATED OFFLINE':'NOT PROVIDED'),
+    'User MCP server checked: NO',
+    'User MCP server contacted: NO',
+    'User project command executed: NO',
+    'Operator ownership verified: NO',
+    'This is NOT a security assessment of your MCP server.',
+    'Next: use start <local-descriptor.json> --text for inert descriptor validation.',
+    'Real staging checks require separate owner authorization under Issue #21.',
+    'For CI, omit --text to receive the stable JSON-v1 report.'
+  ].join('\n')+'\n');
+}
+
 async function runOfflineDemo() {
   // No caller-controlled paths: these two fictional fixtures are shipped in
   // the reviewed npm package and opened via the same bounded input helper.
@@ -118,10 +150,12 @@ async function main() {
     '--help':'help', '-h':'help', '--version':'version', '-V':'version'
   });
   const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
+  const startText=command==='start' && args.at(-1)==='--text';
+  const startArgs=startText?args.slice(0,-1):args;
   const noFile = command === 'start' || command === 'demo' || command === 'help' || command === 'version' || command === 'adapter-guide' || command === 'adapter-selftest' || command === 'staging-selftest' || command === 'staging-process-selftest' || command === 'adapter-staging-selftest' || command === 'adapter-onboarding-demo';
   // Only two reviewed selectors are legal. Never treat template selection as
   // a file path, process command, URL, flag or caller-provided descriptor.
-  const validArgs=command==='start' ? (args.length===1 || (args.length===2 && !args[1].startsWith('-')))
+  const validArgs=command==='start' ? (startArgs.length===1 || (startArgs.length===2 && !startArgs[1].startsWith('-')))
     : (command==='adapter-template' || command==='adapter-kit')
     ? args.length===2 && ['stdio','streamable-http'].includes(args[1])
     : noFile ? args.length===1
@@ -131,7 +165,7 @@ async function main() {
       emitFictionalTerminalView(buildCliErrorReport('adapter-trace-expect','INVALID_CLI_ARGUMENTS'));
       return 2;
     }
-    process.stderr.write('USAGE: node src/cli.mjs start [local-descriptor.json] OR help|version|demo|adapter-guide|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    process.stderr.write('USAGE: node src/cli.mjs start [local-descriptor.json] [--text] OR help|version|demo|adapter-guide|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
@@ -193,8 +227,8 @@ async function main() {
       // F1: one installed-package entry point; caller's descriptor is inert.
       // The staging demo is always the *fixed first-party loopback*, never
       // derived from the supplied config or its embedded command/endpoint.
-      const descriptor=args.length===2
-        ? previewProjectOnboarding(parseStrictJson(await readBoundedFile(args[1],4096)))
+      const descriptor=startArgs.length===2
+        ? previewProjectOnboarding(parseStrictJson(await readBoundedFile(startArgs[1],4096)))
         : null;
       const demo=await runOfflineDemo();
       const staged=await runFixedOnboardingDemo();
@@ -222,7 +256,8 @@ async function main() {
         ],
         failureCount:findings.length,findingsTruncated:false,findings
       });
-      emit(report);
+      if(startText) emitStartText(report);
+      else emit(report);
       return report.exitCode;
     }
     if (command === 'demo') {
