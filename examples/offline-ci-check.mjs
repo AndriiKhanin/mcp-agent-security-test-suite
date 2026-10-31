@@ -115,7 +115,68 @@ function requireSymbolic(res,exitCode,observedSafety,match,expectedSafety,
      JSON.stringify(v).includes('fictional-ci-project'))
     throw Error('SYMBOLIC_CI_CONTRACT_MISMATCH');
 }
-try {
+/**
+ * Local-only developer runner. Explicit opt-in, reviewed command allowlist,
+ * no registry/install, no shell. The no-argument CI smoke is unchanged.
+ * Logs stay in a private OS temp folder; NEVER upload them automatically.
+ */
+function runLocalSuite(mode){
+  const quick=mode==='--local-quick';
+  if(!/^v(?:20|22)\./.test(process.version)) throw Error('UNSUPPORTED_LOCAL_NODE');
+  const env={...process.env,npm_config_offline:'true',
+    npm_config_ignore_scripts:'true',npm_config_audit:'false',
+    npm_config_fund:'false',npm_config_update_notifier:'false'};
+  const git=(args)=>spawnSync('git',args,{
+    cwd:root,env,encoding:'utf8',shell:false,windowsHide:true,
+    timeout:10000,maxBuffer:65536});
+  const head=git(['rev-parse','HEAD']);
+  const status=git(['status','--porcelain']);
+  if(head.status!==0||status.status!==0||
+     !/^[0-9a-f]{40}$/.test(head.stdout.trim()))
+    throw Error('LOCAL_GIT_CHECK_FAILED');
+  const dir=mkdtempSync(join(tmpdir(),'mcp-local-ci-'));
+  const stages=[
+    {name:'regression',args:quick
+      ? ['--test','test/cli.test.mjs','test/cli-discovery.test.mjs','test/demo.test.mjs']
+      : ['--test']},
+    {name:'fictional-smoke',args:[fileURLToPath(import.meta.url)]}
+  ];
+  const receipts=[];
+  for(const stage of stages){
+    const run=spawnSync(process.execPath,stage.args,{
+      cwd:root,env,encoding:'utf8',shell:false,windowsHide:true,
+      timeout:900000,maxBuffer:8*1024*1024});
+    const log=join(dir,stage.name+'.log');
+    writeFileSync(log,(run.stdout||'')+'\n'+(run.stderr||''),{
+      encoding:'utf8',mode:0o600});
+    const passed=!run.error&&!run.signal&&run.status===0;
+    receipts.push({stage:stage.name,status:passed?'PASS':'FAIL',
+      exitCode:Number.isInteger(run.status)?run.status:null,log});
+    if(!passed) break;
+  }
+  const ok=receipts.length===stages.length&&
+    receipts.every(x=>x.status==='PASS');
+  const receipt={schemaVersion:1,mode:quick?'QUICK':'FULL',
+    status:ok?'PASS':'FAIL',source:'LOCAL_CHECKOUT_ONLY',
+    gitHead:head.stdout.trim(),workingTreeClean:status.stdout.trim()==='',
+    platform:process.platform,node:process.version,
+    externalTargetAssessed:false,independentCI:false,stages:receipts};
+  const receiptPath=join(dir,'receipt.json');
+  writeFileSync(receiptPath,JSON.stringify(receipt,null,2)+'\n',{
+    encoding:'utf8',mode:0o600});
+  process.stdout.write('LOCAL_CI_'+receipt.status+' '+receipt.mode+
+    ' gitHead='+receipt.gitHead+' workingTreeClean='+
+    receipt.workingTreeClean+' node='+receipt.node+'\n');
+  process.stdout.write('LOCAL_CI_RECEIPT '+receiptPath+'\n');
+  if(!ok) process.exitCode=1;
+}
+
+if(process.argv.length===3 &&
+  ['--local-quick','--local-full'].includes(process.argv[2])){
+  try{runLocalSuite(process.argv[2]);}
+  catch{process.stderr.write('LOCAL_CI_ERROR: unable to run reviewed local checks\n');
+    process.exitCode=2;}
+} else try {
   if(process.argv.length!==2) throw Error('NO_CUSTOM_ARGUMENTS');
   const safe=invoke('scenario','fixtures/scenario-denial.json');
   if(safe.exitCode!==0 || safe.result.status!=='PASS' ||
