@@ -860,7 +860,7 @@ const M60_PLANS=Object.freeze([
  ['rejected',['REJECT','OWNER_OK'],['DENY','DENY'],0,'REJECTED'],
  ['spoof-then-owner',['TOOL_CLAIM','OWNER_OK'],['DENY','ALLOW'],1,'APPROVED'],
  ['owner-then-spoof',['OWNER_OK','EMAIL_CLAIM'],['ALLOW','DENY'],1,'APPROVED']
-].map(Object.freeze));
+].map(p=>Object.freeze([p[0],Object.freeze(p[1]),Object.freeze(p[2]),p[3],p[4]])));
 function m60Session(){
  let phase='PENDING',effects=0,attempts=0;
  const deny=()=>{attempts++;return 'DENY';};
@@ -904,7 +904,7 @@ export function runFixedToyApprovalReplaySelftest(args=[]){
      const matched=JSON.stringify(observed)===JSON.stringify(expected)&&
        w.fictionalEffects===effects&&w.phase===phase&&
        w.attempts===steps.length;
-     return Object.freeze({caseId,expected,observed,matched,...w});
+     return Object.freeze({caseId,expected,observed:Object.freeze(observed),matched,...w});
    });
    const matched=cases.filter(x=>x.matched).length;
    const totalEffects=cases.reduce((n,x)=>n+x.fictionalEffects,0);
