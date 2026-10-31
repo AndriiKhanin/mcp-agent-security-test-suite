@@ -661,6 +661,14 @@ export function exportFictionalContextContrasts(args=[]){
     sourceProfile:M44_PROFILE,rows:M44_CASES,limits:M38_LIMITS
   });
 }
+/** An unrun six-case context scan is never classified as a scanner ERROR. */
+export function exportFictionalContextResultsTemplate(args=[]){
+  if(!ownArray38(args,0))return M44_ERROR;
+  return Object.freeze({reportSchemaVersion:1,sourceProfile:M44_PROFILE,
+    results:Object.freeze(M44_CASES.map(({caseId})=>
+      Object.freeze({caseId,observed:'UNTESTED'})))
+  });
+}
 export function triageFictionalContextResults(input){
   if(!ownRecord38(input,['reportSchemaVersion','sourceProfile','results'])||
     input.reportSchemaVersion!==1||input.sourceProfile!==M44_PROFILE||
@@ -712,7 +720,9 @@ export async function runFictionalContextTriageStdin(args=[],stream=process.stdi
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const args=process.argv.slice(2);
   const template=args.length===1&&args[0]==='--export-detector-results-template';
-  const report=template?exportFictionalDetectorResultsTemplate():
+  const contextTemplate=args.length===1&&args[0]==='--export-context-results-template';
+  const report=contextTemplate?exportFictionalContextResultsTemplate():
+    template?exportFictionalDetectorResultsTemplate():
     args.length===1&&args[0]==='--export-context-contrasts'?
       exportFictionalContextContrasts():
     args.length===1&&args[0]==='--triage-context-contrasts'?
@@ -731,5 +741,5 @@ if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
       await runFictionalDetectorTriageStdin():
       await runFictionalFixtureBatchPreflight(args);
   process.stdout.write(JSON.stringify(report,null,2)+'\n');
-  process.exitCode=template?0:report.exitCode;
+  process.exitCode=(template||contextTemplate)?0:report.exitCode;
 }

@@ -19,7 +19,8 @@ import {
   runFictionalDetectorDisagreementsStdin,
   prioritizeFictionalDetectorIssues,prioritizeFictionalDetectorIssuesJson,
   runFictionalDetectorPrioritiesStdin,
-  exportFictionalContextContrasts,triageFictionalContextResults,
+  exportFictionalContextContrasts,exportFictionalContextResultsTemplate,
+  triageFictionalContextResults,
   triageFictionalContextJson,runFictionalContextTriageStdin
 } from '../tools/fixture-batch-preflight.mjs';
 import {runFixturePolicyBridge} from '../tools/fixture-policy-bridge.mjs';
@@ -777,4 +778,31 @@ test('M53: generated template roundtrips without fabricated scanner results',()=
   const invalid=exportFictionalDetectorResultsTemplate(['PRIVATE_CANARY']);
   assert.equal(invalid.status,'ERROR');
   assert.doesNotMatch(JSON.stringify(invalid),/PRIVATE_CANARY/);
+});
+
+
+test('M55: untested context template is not an observed scanner error',()=>{
+  const template=exportFictionalContextResultsTemplate();
+  const original=exportFictionalContextContrasts();
+  assert.equal(template.sourceProfile,original.profile);
+  assert.deepEqual(template.results.map(x=>x.caseId),
+    original.rows.map(x=>x.caseId));
+  assert.ok(template.results.every(x=>x.observed==='UNTESTED'));
+  assert.ok(Object.isFrozen(template)&&Object.isFrozen(template.results));
+  assert.equal(triageFictionalContextJson(JSON.stringify(template)).status,'ERROR');
+  const completed=structuredClone(template);
+  ['NOT_FLAGGED','FLAGGED','NOT_FLAGGED','FLAGGED',
+    'NOT_FLAGGED','FLAGGED'].forEach((v,i)=>completed.results[i].observed=v);
+  const result=triageFictionalContextResults(completed);
+  assert.equal(result.status,'PASS');
+  assert.deepEqual(result.counts,{TP:3,FP:0,FN:0,TN:3,ERROR:0});
+  completed.results[1].observed='UNTESTED';
+  assert.equal(triageFictionalContextResults(completed).status,'ERROR');
+  const cmd=m38Cli(['--export-context-results-template']);
+  assert.equal(cmd.status,0,cmd.stderr);
+  assert.deepEqual(JSON.parse(cmd.stdout),template);
+  const denied=m38Cli(['--export-context-results-template','--path=PRIVATE_CANARY']);
+  assert.equal(denied.status,2);
+  assert.doesNotMatch(denied.stdout,/PRIVATE_CANARY/);
+  assert.equal(exportFictionalContextResultsTemplate(['private']).status,'ERROR');
 });

@@ -105,181 +105,33 @@ agent resists the generated text. Only the fixed schema and synthetic
 in-memory policy gates are assessed. A separate independent user test
 is required to claim real interoperability or beta acceptance.
 
-## Optional overlapping first-party HTTP reply test (M11-G/H/I)
+## Optional fixed offline transport and toy-agent checks (M10–M12)
 
-```sh
-node tools/m11-concurrent-response.mjs
-```
+All commands below are **source-owned fictional demonstrations**,
+not semantic prompt-injection detection, real authentication, MCP
+conformance, external security testing or authorization. They use
+fixed in-memory cases or disposable first-party localhost listeners;
+no user-provided server, path, credentials or arbitrary process.
+Review the linked design before running each command.
 
-This source-only command overlaps two source-owned fictional HTTP
-requests at a disposable `127.0.0.1` listener, deliberately allows
-response B to be issued before A, then checks exact request ID,
-session markers and body binding. It has 13 negative controls and
-accepts no user endpoint, credential, filename or command. It does
-**not** evaluate the semantic effect of prompt injection on a real
-LLM. See the [concurrency guide](M11_CONCURRENT_RESPONSE.md).
+| Command | Fixed check | Details |
+| --- | --- | --- |
+| `node tools/m11-concurrent-response.mjs` | Two overlapping responses, exact request/session binding, 13 negative controls | [M11 concurrency](M11_CONCURRENT_RESPONSE.md) |
+| `node tools/m11-owner-isolation.mjs` | Synthetic owner capabilities, 17 cases | [Owner isolation](M11_OWNER_ISOLATION.md) |
+| `node tools/m12-modern-sse.mjs` | Request-scoped SSE, replay, malformed and stalled frames | [SSE](M12_MODERN_MCP_SMOKE.md) |
+| `node tools/m12-header-parameter-mirror.mjs` | Header/JSON matching, 26 cases | [Header mirror](M12_HEADER_MIRROR.md) |
+| `node tools/m12-modern-http-smoke.mjs` | Fixed modern MCP-shaped discovery/list/call loopback | [Modern HTTP](M12_MODERN_MCP_SMOKE.md) |
+| `node tools/m11-inflight-revocation.mjs` | Revocation after accepted request and before delivery | [In-flight revocation](M11_INFLIGHT_REVOCATION.md) |
+| `node tools/m11-owner-epoch.mjs` | Run-rotation, stale capability refusal, 17 controls | [Owner epoch](M11_OWNER_EPOCH.md) |
+| `node tools/m11-cancelled-response.mjs` | Stale response rejection after cancellation, 14 controls | [Cancellation](M11_CANCELLED_RESPONSE.md) |
+| `node tools/m11-replay-session.mjs` | Two sessions, one-use identifiers, 15 negative cases | [Replay](M11_REPLAY_SESSION.md) |
+| `node tools/m11-loopback-tool-result.mjs` | Inert MCP-shaped tool-result reply over local HTTP | [Loopback](M11_LOOPBACK_TOOL_RESULT.md) |
+| `node tools/toy-agent-session.mjs` | Fixed ordering/replay/permission modes, 8 scenarios | [Toy session](M10_TOY_AGENT_SESSION.md) |
+| `node tools/toy-agent-batch.mjs` | Five toy modes for every reviewed fictional fixture | [Toy batch](M10_TOY_AGENT_BATCH.md) |
 
-## Optional fictional two-owner isolation (M11-M/N/O)
-
-Run `node tools/m11-owner-isolation.mjs` to check 17 fixed
-source-owned owner-isolation cases over disposable IPv4 loopback HTTP.
-The test uses per-run **synthetic** capability markers, not real account
-credentials. It rejects wrong-owner responses and unexpected authority
-before passing data to a deterministic toy gateway. This is **not real
-authentication**, real LLM safety evaluation, external MCP testing or
-permission to access private files. See [design](M11_OWNER_ISOLATION.md).
-
-## Optional modern request-scoped SSE check (M12-G/H/I)
-
-```sh
-node tools/m12-modern-sse.mjs
-```
-
-This zero-argument, source-only demo receives one fixed fictional
-`tools/call` reply as an actual `127.0.0.1` SSE stream. It accepts
-properly scoped progress + final response data, but rejects
-unsolicited requests, replayed or forged final results, malformed
-frames, UTF-8 errors, oversized responses and stalled streams.
-The embedded instruction is never interpreted. No contributor can
-select an external endpoint, process, credential or actual agent.
-See the [modern SSE limits](M12_MODERN_MCP_SMOKE.md#m12-ghi--request-scoped-sse-response-checks).
-
-## Optional modern x-mcp-header mirror verification (M12-D/E/F)
-
-```sh
-node tools/m12-header-parameter-mirror.mjs
-```
-
-The source-only test checks four fixed fictional `Mcp-Param-*`
-header mirrors, strict JSON/header consistency and expected
-`HeaderMismatch` denials on a one-off `127.0.0.1` mock.
-It accepts no URL, executable, credential or remote MCP target.
-Its 26 cases are deterministic; no injected tool-result text is
-executed or interpreted. See [scope and limitations](M12_HEADER_MIRROR.md).
-This is **not** full conformance or real-agent attack assessment.
-
-## Optional first-party modern MCP HTTP subset check (M12-A/B/C)
-
-```sh
-node tools/m12-modern-http-smoke.mjs
-```
-
-From a reviewed source checkout only. The command exercises fixed,
-source-owned `2026-07-28` `server/discover`, `tools/list` and
-`tools/call` requests against one disposable local listener. It
-uses proper modern request metadata and compares on-wire responses
-strictly before data reaches the inert toy gateway.
-
-This is **not complete MCP conformance**, a real agent or an actual
-prompt-injection detector. It does not use your project, credentials,
-network endpoints or executable commands. See the
-[M12 design](M12_MODERN_MCP_SMOKE.md).
-
-## Optional post-admission fictional revocation check (M11-S/T/U)
-
-```sh
-node tools/m11-inflight-revocation.mjs
-```
-
-The command runs two fixed localhost requests with fictional owner
-capabilities. A source-owned barrier allows an owner capability to
-be revoked **after request acceptance but before response delivery**.
-The parent then blocks each revoked response from reaching the toy
-gateway. This is **not real authentication**, an LLM or permission to
-test any contributor-owned MCP server. No credentials, network targets
-or executable scripts can be supplied. See
-[M11 in-flight design](M11_INFLIGHT_REVOCATION.md).
-
-## Optional synthetic owner run-rotation check (M11-P/Q/R)
-
-```sh
-node tools/m11-owner-epoch.mjs
-```
-
-Two sequential, fully disposable first-party localhost servers use
-different source-generated **fictional** capabilities. The old
-capability must be rejected by the new run. Seventeen additional
-negative controls verify request/response binding, replay rejection,
-bounded timeout and cleanup. These are not real credentials or
-production authorization, and this command never connects to a user
-MCP server or interprets a contributor's embedded instructions.
-See [M11 owner-epoch guide](M11_OWNER_EPOCH.md).
-
-## Optional owned HTTP cancellation test (M11-J/K/L)
-
-```sh
-node tools/m11-cancelled-response.mjs
-```
-
-This source-only test checks a **first-party** owned cancellation while
-another fictional `127.0.0.1` request remains in flight. A closed
-response must never deliver a stale tool result into the surviving
-M10 toy session. The CLI accepts no URLs, paths, arbitrary commands,
-models, credentials or customer endpoints. The 14 fixed controls are
-synthetic and **do not evaluate a real AI agent** or attack wording.
-See the [M11 cancellation design](M11_CANCELLED_RESPONSE.md).
-
-## Optional owned two-session replay test (M11-D/E/F)
-
-```sh
-node tools/m11-replay-session.mjs
-```
-
-This test uses two fixed, public **fictional** fixtures and a disposable
-first-party IPv4 loopback listener to require source-owned session IDs,
-one-use request identifiers and exact response correlation. It checks
-15 deliberate negative cases, but **does not** interpret the attack
-wording, run a real agent, contact a user MCP target or grant external
-testing permission. No contributor can supply a URL, command or
-credential to this test. See [M11 replay guide](M11_REPLAY_SESSION.md).
-
-## Optional first-party local HTTP check (M11-A/B/C)
-
-Run `node tools/m11-loopback-tool-result.mjs` for a finite review of a
-**fixed** fictional tool-result transported over localhost HTTP to the
-first-party toy gateway. It uses two disposable owned servers: the
-existing discovery-only test and a **separate** MCP-shaped response
-mock. This is not an LLM attack evaluation and does not grant
-permission to contact any user MCP server. No contributor input can
-choose a network target, port, executable or command; CI separately
-discovers contributor fixtures through the bounded M8 loader. See
-[M11 guide](M11_LOOPBACK_TOOL_RESULT.md).
-
-## Optional stateful toy-agent task/result check (M10-G/H/I)
-
-The source-only stateful example checks ordering and replay protection
-across one fixed fictional tool-result exchange:
-
-```sh
-node tools/toy-agent-session.mjs
-```
-
-Eight fixed source-authored modes check safe task progression, early,
-replayed and late results, and denied read/tool/authority requests.
-The test suite automatically repeats these controls for every
-approved fictional contributor fixture. The tool result's instruction
-text is never parsed or executed and no real file, MCP service, model
-or third-party agent is accessed. See the
-[stateful toy-session guide](M10_TOY_AGENT_SESSION.md).
-
-## Optional in-memory toy-agent replay of every fictional case (M10-D/E/F)
-
-To check every fictional fixture against the independent in-memory
-toy-agent gateway method-call observer:
-
-```sh
-node tools/toy-agent-batch.mjs
-```
-
-Each file receives five fixed first-party toy modes (one safe,
-four deliberately failing). The zero-argument batch expects exact
-`PASS`/`FAIL` outcomes and zero protected effects, and emits only
-ordinal counts and fixed rule codes. Contributors need **no runner edits**
-to add a fictional fixture-only PR.
-
-This is **not a real agent**, actual MCP integration, or semantic assessment
-of your injected instruction. See the
-[toy-agent batch design](M10_TOY_AGENT_BATCH.md).
+A symbolic `PASS` attests only to that test's fixed contract; it
+does not mean a real model resisted an injection. User-contributed
+fictional case text is always treated as data, never executed.
 
 ## Read one clear, privacy-safe fictional review (M9-G/H/I)
 
