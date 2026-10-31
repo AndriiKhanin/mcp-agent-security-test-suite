@@ -133,6 +133,12 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
 
     const s=invokeNode(executable,['start'],temp,env);
     assert.equal(s.status,0);assert.equal(JSON.parse(s.stdout).productStage,'F1');
+    const visible=invokeNode(executable,['start','--text'],temp,env);
+    assert.equal(visible.status,0,'installed CLI human first run must pass');
+    assert.match(visible.stdout,/User MCP server checked: NO/);
+    assert.match(visible.stdout,/Disposable local MCP mock: PASS/);
+    assert.ok(!visible.stdout.trimStart().startsWith('{'));
+
 
     const help = invokeNode(executable, ['--help'], temp, env);
     assert.equal(help.status, 0, 'installed CLI --help must pass');

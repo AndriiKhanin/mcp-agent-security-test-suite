@@ -26,17 +26,19 @@ user-owned staging validation is still blocked by Issue #21.
 From a reviewed source checkout (Node.js 20/22):
 
 ```sh
-node src/cli.mjs start
-node src/cli.mjs start examples/adapter-profiles/stdio-project.json
+node src/cli.mjs start --text
+node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text
+node src/cli.mjs start  # JSON-v1 output for CI
 ```
 
 From the separately reviewed **locally installed** candidate the same
-entry point is `mcp-agent-security start [local-descriptor.json]`.
+entry point is `mcp-agent-security start [local-descriptor.json] [--text]`.
 The optional descriptor is read *locally*, strictly validated (up to
 4 KiB), and **never executed or connected**. The command runs two
 bundled fictional contract controls and a separate ephemeral
-**first-party 127.0.0.1 staging mock**, then emits one JSON-v1
-PASS/FAIL/ERROR report with `productStage:"F1"` and explicit next
+**first-party 127.0.0.1 staging mock**, then emits a stable JSON-v1
+PASS/FAIL/ERROR report by default, or a literal-only human summary
+when `--text` is supplied with `productStage:"F1"` and explicit next
 actions. PASS **does not** mean your own project was security-tested;
 `externalTargetContacted:false`, `operatorVerified:false` and
 `projectConnectionAuthorized:false` are mandatory. No real staging

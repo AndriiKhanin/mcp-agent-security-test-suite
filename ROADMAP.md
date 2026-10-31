@@ -26,8 +26,11 @@ M63 [PR #384](../../pull/384) remains accepted. Candidate
 `0.0.10-rc.1` is **unpublished**, release approval not given.
 First-party fixed loopback MCP and inert descriptor validation
 already exist; arbitrary user-owned servers are **not** contacted.
-Current excluded-source custody: **240 paths / 1,998,916 bytes** out
-of 2,000,000, strict fail-on-overflow. Frozen candidate contains
+Current excluded-source custody is independently checked per merged
+PR; the F1 text-view branch initially has **240 paths / 1,998,089
+bytes** out of 2,000,000 after pinned historical guide consolidation.
+This figure is a **branch candidate**, not accepted main evidence until
+CI and merge. Strict fail-on-overflow remains unchanged. Frozen candidate contains
 **80** reviewed npm paths.
 
 **Single product tracking issue: [#385](../../issues/385)**. The
@@ -65,6 +68,22 @@ Do not invent M64/M65 merely to continue synthetic matrices.
   matrix are outstanding.
 - Source/test file budget and frozen 80-path candidate membership
   unchanged; both PR and exact merged-main CI **4/4 verified**.
+
+### F1 usability extension — human-readable first-run output (review pending)
+
+- Extend the existing **installed** `start` CLI with opt-in `--text`
+  while preserving JSON-v1 by default. Both no-descriptor and
+  `start <local-descriptor.json> --text` use the same completed
+  bundled fictional checks and temporary source-owned loopback mock.
+- Display only source-owned status enums and fixed next steps. No
+  descriptor path, endpoint, command, grant, private content or
+  user tool result is interpolated; unknown flags fail closed.
+- Add source CLI tests, disposable installed-package smoke, readable
+  quickstart and CLI help. The complete earlier M28/M29 recovery guide
+  stays pinned at pre-change commit `04f9bea1170549cf64dda715693151a1f988e074`.
+- F1 stays **IN PROGRESS**: user config import, comprehensive
+  supported/unsupported profile guidance and independent usability
+  still need review. F2/#21 remains authorization-blocked.
 
 ### v1.0 Definition of Done (all required)
 

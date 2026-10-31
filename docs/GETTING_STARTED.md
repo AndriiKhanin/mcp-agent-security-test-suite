@@ -4,13 +4,19 @@
 In a reviewed source checkout with Node.js 20 or 22:
 
 ```sh
-node src/cli.mjs start
-node src/cli.mjs start examples/adapter-profiles/stdio-project.json
+node src/cli.mjs start --text
+node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text
+node src/cli.mjs start  # JSON-v1 for CI
 ```
 
 In a disposable local installation of the unpublished candidate,
 use `mcp-agent-security start` or
-`mcp-agent-security start <local-descriptor.json>`. This one command
+`mcp-agent-security start <local-descriptor.json> --text`.
+Omit `--text` for machine-readable JSON (the default CI contract).
+The text view prints only fixed local check statuses, the inert
+descriptor validation result and an explicit **user MCP server NOT
+checked** warning; it cannot print private paths, endpoint names,
+project commands or raw descriptor content. This one command
 runs the **two fixed bundled fictional controls**, performs a bounded
 **first-party ephemeral 127.0.0.1 staging mock** check, and optionally
 validates the supplied descriptor's *inert* shape. It does **not**

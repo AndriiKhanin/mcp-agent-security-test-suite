@@ -39,3 +39,31 @@ test('F1 start validates inert descriptor and rejects private path',()=>{
  assert.ok(!bad.stderr.includes('private-F1-SENTINEL'));
  assert.equal(cli('start','--unsafe').status,2);
 });
+
+// F1 text is an explicit local-only view; no caller fields are interpolated.
+test('F1 text and JSON show the same fixed offline results',()=>{
+ const json=JSON.parse(cli('start').stdout),r=cli('start','--text');
+ assert.equal(r.status,json.exitCode);assert.equal(r.stderr,'');
+ assert.match(r.stdout,/guided offline first run \(F1\)/);
+ assert.match(r.stdout,/Bundled fictional controls: PASS/);
+ assert.match(r.stdout,/Disposable local MCP mock: PASS/);
+ assert.match(r.stdout,/User MCP server checked: NO/);
+ assert.match(r.stdout,/NOT a security assessment/);
+ assert.ok(!r.stdout.trimStart().startsWith('{'));
+ const withFile=cli('start','examples/adapter-profiles/stdio-project.json','--text');
+ assert.equal(withFile.status,0);assert.match(withFile.stdout,/Local descriptor: VALIDATED OFFLINE/);
+ assert.ok(!withFile.stdout.includes('stdio-project.json'));
+});
+test('F1 text does not echo hostile arguments or accidental authority',()=>{
+ for(const value of ['--execute','--text','https://private.example.org/mcp']){
+  const r=cli('start',value,'--text');
+  assert.equal(r.status,2);
+  assert.equal(JSON.parse(r.stdout).status,'ERROR');
+  assert.ok(!(r.stdout+r.stderr).includes(value==='--text'?'PRIVATE-SENTINEL':value));
+ }
+ const bad=cli('start','PRIVATE-DESCRIPTOR-MISSING.json','--text');
+ assert.equal(bad.status,2);
+ assert.ok(!(bad.stdout+bad.stderr).includes('PRIVATE-DESCRIPTOR-MISSING'));
+ assert.equal(cli('start','--text','examples/adapter-profiles/stdio-project.json').status,2);
+ assert.equal(cli('start','examples/adapter-profiles/stdio-project.json','--text','extra').status,2);
+});
