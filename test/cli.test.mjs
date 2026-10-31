@@ -20,3 +20,22 @@ test('mock result does not echo synthetic grant nonce',()=>{
  const r=cli('mock','fixtures/scenario-denial.json');
  assert.equal(r.status,0); assert.equal(r.stdout.includes('fictional-nonce'),false);
 });
+
+test('F1 start is synthetic, never an external check',()=>{
+ const r=cli('start'),j=JSON.parse(r.stdout);
+ assert.equal(r.status,0); assert.equal(j.command,'start');
+ assert.equal(j.productStage,'F1'); assert.equal(j.status,'PASS');
+ assert.equal(j.descriptorEvidence,'NOT_PROVIDED');
+ assert.equal(j.externalTargetContacted,false);
+ assert.equal(j.projectConnectionAuthorized,false);
+});
+test('F1 start validates inert descriptor and rejects private path',()=>{
+ const ok=cli('start','examples/adapter-profiles/stdio-project.json');
+ assert.equal(ok.status,0);
+ assert.equal(JSON.parse(ok.stdout).descriptorEvidence,'DESCRIPTOR_VALIDATED');
+ const bad=cli('start','private-F1-SENTINEL.json');
+ assert.equal(bad.status,2);
+ assert.ok(!bad.stdout.includes('private-F1-SENTINEL'));
+ assert.ok(!bad.stderr.includes('private-F1-SENTINEL'));
+ assert.equal(cli('start','--unsafe').status,2);
+});

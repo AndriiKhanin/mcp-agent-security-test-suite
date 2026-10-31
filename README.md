@@ -20,6 +20,34 @@ Work on new fictional-only test matrices is no longer the product
 delivery objective; an accessible user journey and properly authorized,
 bounded real staging validation are next.
 
+## F1 guided first run — single CLI entry
+
+From a reviewed source checkout (Node.js 20/22):
+
+```sh
+node src/cli.mjs start
+node src/cli.mjs start examples/adapter-profiles/stdio-project.json
+```
+
+From the separately reviewed **locally installed** candidate the same
+entry point is `mcp-agent-security start [local-descriptor.json]`.
+The optional descriptor is read *locally*, strictly validated (up to
+4 KiB), and **never executed or connected**. The command runs two
+bundled fictional contract controls and a separate ephemeral
+**first-party 127.0.0.1 staging mock**, then emits one JSON-v1
+PASS/FAIL/ERROR report with `productStage:"F1"` and explicit next
+actions. PASS **does not** mean your own project was security-tested;
+`externalTargetContacted:false`, `operatorVerified:false` and
+`projectConnectionAuthorized:false` are mandatory. No real staging
+target is supported until authorization and implementation under
+[Issue #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21).
+Invalid/unreadable descriptors and extra arguments exit 2 without
+printing source path/content.
+
+[Full walkthrough](docs/GETTING_STARTED.md#f1--guided-source-or-installed-first-run)
+and [finite product roadmap](ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan).
+Candidate `0.0.10-rc.1` remains **unpublished**.
+
 ## Fixed approval-policy demonstration (M59)
 
 To explore **approval fatigue vs. authorization**, run the

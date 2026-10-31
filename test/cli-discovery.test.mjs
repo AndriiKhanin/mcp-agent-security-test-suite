@@ -26,7 +26,7 @@ test('M5-04: canonical and aliased help enumerate only reviewed fictional modes'
   assert.equal(data.command,'help');
   assert.equal(data.status,'PASS');
   assert.deepEqual(data.commands,CLI_COMMANDS);
-  assert.equal(data.commands.length,30);
+  assert.equal(data.commands.length,31);
   assert.ok(data.commands.includes('adapter-staging-selftest'));
   assert.ok(data.commands.includes('adapter-onboard'));
   assert.ok(data.commands.includes('adapter-quickstart'));

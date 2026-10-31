@@ -131,6 +131,9 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.deepEqual(demoReport.expectations.map(v => v.matched), [true, true]);
     assert.equal(demoReport.summary.failureCount, 0);
 
+    const s=invokeNode(executable,['start'],temp,env);
+    assert.equal(s.status,0);assert.equal(JSON.parse(s.stdout).productStage,'F1');
+
     const help = invokeNode(executable, ['--help'], temp, env);
     assert.equal(help.status, 0, 'installed CLI --help must pass');
     const helpReport=JSON.parse(help.stdout);

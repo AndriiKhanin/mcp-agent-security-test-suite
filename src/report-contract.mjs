@@ -4,7 +4,7 @@
  */
 export const REPORT_SCHEMA_VERSION = 1;
 export const CLI_COMMANDS = Object.freeze([
-  'scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check','adapter-selftest','adapter-policy-check','staging-selftest','staging-process-selftest','adapter-staging-selftest','adapter-onboard','adapter-onboarding-demo','adapter-template','adapter-fixture-audit','adapter-synthetic-trace','adapter-trace-expect','adapter-quickstart','adapter-kit','adapter-kit-verify','adapter-report-view','adapter-guide'
+  'start','scenario','trace','mock','witness','process','stdio','loopback','jsonrpc','era','negotiate','demo','help','version','adapter-check','adapter-selftest','adapter-policy-check','staging-selftest','staging-process-selftest','adapter-staging-selftest','adapter-onboard','adapter-onboarding-demo','adapter-template','adapter-fixture-audit','adapter-synthetic-trace','adapter-trace-expect','adapter-quickstart','adapter-kit','adapter-kit-verify','adapter-report-view','adapter-guide'
 ]);
 const COMMANDS = new Set(CLI_COMMANDS);
 const ERRORS = new Set(['INVALID_CLI_ARGUMENTS','INVALID_OR_UNREADABLE_INPUT']);
@@ -388,6 +388,8 @@ export function buildCliHelpResult() {
     profile:'local-offline-cli-help-v1',
     commands:[...CLI_COMMANDS],
     syntax:[
+      'node src/cli.mjs start',
+      'node src/cli.mjs start examples/adapter-profiles/stdio-project.json',
       'node src/cli.mjs help',
       'node src/cli.mjs version',
       'node src/cli.mjs demo',

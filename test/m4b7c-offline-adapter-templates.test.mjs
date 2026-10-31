@@ -199,7 +199,7 @@ test('M4-B7-C: CLI help discovers template syntax without remote URLs',()=>{
   const p=cli('help');
   assert.equal(p.status,0);
   const v=JSON.parse(p.stdout);
-  assert.equal(v.commands.length,30);
+  assert.equal(v.commands.length,31);
   assert.ok(v.commands.includes('adapter-template'));
   assert.ok(v.syntax.includes('node src/cli.mjs adapter-template stdio'));
   assert.ok(v.syntax.includes('node src/cli.mjs adapter-template streamable-http'));

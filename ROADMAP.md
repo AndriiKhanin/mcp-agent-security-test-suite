@@ -44,6 +44,23 @@ Do not invent M64/M65 merely to continue synthetic matrices.
 | **F5 — Independent adopter beta** | **OPEN now for fictional-only path [#59](../../issues/59); final product validation after F4** | Target **3 genuinely independent developers**, Windows and Ubuntu represented; at least one genuine opt-in report satisfies #59; capture setup usability, reproducible findings and false alarm/missed-boundary feedback. Triage and fix blockers; rerun fresh 4/4 CI. Self-reported external scanner observations [#329](../../issues/329) do **not** count as product beta. |
 | **F6 — Independent audit + release** | **BLOCKED by F2–F5 and [#43](../../issues/43)** | Independent assessor reviews final shipped source + bytes, boundaries and provenance; no unresolved critical/high issues, reproducible final package, exact 4/4 main CI, explicit owner authorization for selected version/channel, GitHub Release and/or npm as specifically approved, then independent clean install and end-to-end first-run verification. **This is the finish line.** |
 
+### F1 progress — first guided CLI entry (engineering PR)
+
+- Added `start [local-descriptor.json]` to the existing **packaged CLI**
+  instead of a new source-only script. A single JSON-v1 view combines
+  two bundled fictional controls, fixed first-party ephemeral loopback
+  staging and **optional inert** descriptor validation.
+- It never runs a user stdio command, contacts the descriptor's
+  HTTP endpoint, fetches credentials, or promotes self-asserted
+  permission. Incorrect/oversized/unreadable input fails closed.
+- CI checks source CLI, invalid/no-input modes and the **disposable
+  locally installed npm candidate**. This is only F1's first subtask,
+  not F1 completion; a full independent adopter walkthrough, polished
+  message and staging-to-report integration are still outstanding.
+- Source/test file budget and frozen 80-path candidate membership
+  unchanged; PR CI + exact merged-main 4/4 must be verified before
+  calling this subtask accepted.
+
 ### v1.0 Definition of Done (all required)
 
 - Independently installed on supported Windows/Ubuntu Node 20/22;
