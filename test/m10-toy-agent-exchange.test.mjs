@@ -10,7 +10,8 @@ import {
   runFixedContextProvenanceSelftest,
   runFixedTemporaryFileEffectSelftest,
   runFixedTemporaryFileEffectFaultSelftest,
-  runFixedScopedAuthoritySelftest,runFixedToyApprovalPolicySelftest
+  runFixedScopedAuthoritySelftest,runFixedToyApprovalPolicySelftest,
+  runFixedToyApprovalReplaySelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
 
@@ -713,4 +714,34 @@ test('M59: public CLI rejects fabricated approval, arguments and secrets',()=>{
     assert.deepEqual([runFixedToyApprovalPolicySelftest(bad).status,
       runFixedToyApprovalPolicySelftest(bad).exitCode],['ERROR',2]);
   }
+});
+
+test('M60: one-shot toy owner resolution, spoof and replay',()=>{
+ const r=runFixedToyApprovalReplaySelftest();
+ assert.equal(r.status,'PASS');
+ assert.deepEqual([r.checked,r.matched,r.totalEffects],[10,10,4]);
+ assert.equal(r.sourceOwnedOwnerInterface,true);
+ assert.equal(r.realApprovalGranted,false);
+ assert.ok(Object.isFrozen(r)&&Object.isFrozen(r.cases));
+ for(const row of r.cases){
+   assert.equal(row.matched,true,row.caseId);
+   assert.deepEqual(row.observed,row.expected);
+   assert.equal(row.attempts,row.observed.length);
+   if(['tool-spoof','email-spoof','scope-mismatch',
+     'expired','revoked','rejected'].includes(row.caseId))
+     assert.equal(row.fictionalEffects,0,row.caseId);
+ }
+ const run=(...a)=>spawnSync(process.execPath,
+   ['tools/toy-agent-exchange.mjs',...a],{encoding:'utf8'});
+ const ok=run('--approval-replay-matrix');
+ assert.equal(ok.status,0,ok.stderr);
+ assert.deepEqual(JSON.parse(ok.stdout),r);
+ for(const arg of ['--approve','PRIVATE_CANARY']){
+   const bad=run('--approval-replay-matrix',arg);
+   assert.equal(bad.status,2);
+   assert.equal(JSON.parse(bad.stdout).status,'ERROR');
+   assert.doesNotMatch(bad.stdout,/PRIVATE_CANARY/);
+ }
+ for(const a of [null,{},['OWNER_OK'],Array(1)])
+   assert.equal(runFixedToyApprovalReplaySelftest(a).status,'ERROR');
 });
