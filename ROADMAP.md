@@ -2,7 +2,7 @@
 
 > **Mission:** Build a practical, free and open-source MCP/AI-agent security testing product that helps developers find contract, authorization and unsafe tool-execution mistakes **before deployment**. All future connections to external systems must be explicitly authorized, bounded and isolated. Passing tests is not a security certification.
 >
-> **Last reviewed:** 2026-10-30 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
+> **Last reviewed:** 2026-10-31 · **Current candidate:** `v0.0.10-rc.1` (not published) · **M4-A accepted:** [Issue #23](../../issues/23), [PR #24](../../pull/24), [CI](../../actions/runs/39925449081) 4/4 PASS; **M4-B remains unauthorized**
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
@@ -247,19 +247,24 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M56 — shareable fictional-scanner report (source-only, CI pending)
+## M56 — privacy-safe contributor issue reports (merged; PR/main CI 4/4)
 
-- New exact `--issue-report-detector-results` and
-  `--issue-report-context-contrasts` take already supported strict
-  M38 four-case / M44 six-case stdin JSON. They create issue-ready
-  Markdown from validated source-owned IDs, labels and TP/FP/FN/TN/ERROR,
-  with no user text, scanner identity or credentials echoed.
-- Unfilled `UNTESTED`, unknown fields, duplicate keys, extra CLI args
-  and forged provenance fail closed. No actual scanner/agent/MCP target
-  executed, accuracy estimated or external acceptance asserted.
-- Existing `.github/test/tools` paths only; M6-J 240-file/2MB and
-  frozen unpublished npm package retained. Requires PR and separate
-  post-merge main CI 4/4. Beta #59, audit #43 and target #21 OPEN.
+- Exact `--issue-report-detector-results` and
+  `--issue-report-context-contrasts` accept existing bounded M38 four-case
+  or M44 six-case stdin observations. Strict source-owned case IDs,
+  author labels and TP/FP/FN/TN/ERROR become copyable Markdown; no
+  submitted text, scanner identity, credential or private path echoed.
+- Incomplete `UNTESTED`, forged fields, duplicate keys, extra arguments,
+  malformed JSON/UTF-8 fail closed. Does not execute a scanner or agent
+  or infer real-world protection, audit or beta acceptance.
+- [PR #370](../../pull/370) merged at
+  `bcbaa81d11b65c69f400ad90f3d95ad2ab8bee03`;
+  [PR CI #41180225710](../../actions/runs/41180225710)
+  **4/4 PASS, 1397 tests/job**, zero failed/skipped; separate exact
+  [main CI #41180483388](../../actions/runs/41180483388)
+  **4/4 PASS**. M6-J source custody **240 files / 1,999,441 bytes**
+  remains within the unchanged strict 2,000,000-byte cap; frozen npm
+  candidate unchanged. Beta #59, audit #43, external authority #21 OPEN.
 
 ## M55 — six-case context-results template (merged; PR/main CI 4/4)
 
