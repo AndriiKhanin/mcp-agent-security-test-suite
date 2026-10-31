@@ -144,3 +144,28 @@ test('F1: explicit one-server choice from multi-entry client settings is inert',
   assert.equal(cli('start','--client-config',file,'--server','chosen').status,2);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test('F1 start gives fixed, privacy-safe 4 KiB error guidance',()=>{
+ const dir=mkdtempSync(join(tmpdir(),'f1-bad-')),file=join(dir,'private.json');
+ try{
+  writeFileSync(file,JSON.stringify({mcpServers:{private:{command:'node',
+   env:{TOKEN:'PRIVATE_F1_CANARY'}}}}));
+  for(const r of [
+   cli('start','--client-config',file),
+   cli('start','--client-config',file,'--server','private'),
+   cli('start','--client-config','PRIVATE_F1_MISSING.json'),
+   cli('start','--client-config',file,'--server','../private')
+  ]){
+   assert.equal(r.status,2);
+   const j=JSON.parse(r.stdout);
+   assert.equal(j.command,'start');
+   assert.equal(j.guidance.length,1);
+   assert.equal(j.guidance[0].code,j.errorCode);
+   assert.match(j.guidance[0].nextStep,/start --text|4 KiB/);
+   assert.ok(!JSON.stringify(j).includes('PRIVATE_F1_'));
+   assert.ok(!JSON.stringify(j).includes('private.json'));
+  }
+  writeFileSync(file,' '.repeat(4097));
+  assert.equal(cli('start','--client-config',file).status,2);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
