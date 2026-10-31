@@ -1,13 +1,12 @@
-name: CI
+name: CI (manual release verification)
 
 # Cost-control: no automatic push/PR runs; operator-triggered release verification only.
 on:
   workflow_dispatch:
 
 concurrency:
-  # Preserve main, manual and tag runs; only supersede obsolete PR/branch runs.
-  group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')) && github.run_id || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') }}
+  group: manual-ci-${{ github.run_id }}
+  cancel-in-progress: false
 
 permissions:
   contents: read

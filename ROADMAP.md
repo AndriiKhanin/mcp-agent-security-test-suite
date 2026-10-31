@@ -102,6 +102,31 @@ Do not invent M64/M65 merely to continue synthetic matrices.
   independently evaluated first-run usability and end-to-end user
   workflow remain before F1 acceptance.
 
+### Cost-controlled local verification policy (2026-10-31)
+
+- Development and intermediate PRs: run existing bundled
+  `node examples/offline-ci-check.mjs --local-quick` or
+  `--local-full` on a **reviewed laptop checkout**. These commands
+  retain the original fictional offline smoke, run the targeted/all
+  `node --test` suite and write local logs/receipts with the exact
+  git revision and `independentCI:false`. Windows/Ubuntu Node20/22
+  must not be claimed unless separately observed.
+- GitHub [workflow](.github/workflows/ci.yml) now uses **only**
+  manually requested `workflow_dispatch`. Removed automatic
+  `push` and `pull_request` triggers. Four-job independent cloud
+  CI is reserved for important stage exits, security-sensitive
+  gates and approved release candidates, **not each commit**.
+- [Local Windows/WSL instructions](docs/GETTING_STARTED.md#local-first-development-tests-github-actions-budget-control).
+  Never attach an always-on public PR self-hosted runner to a personal
+  laptop; source tests execute code.
+- **Release acceptance unchanged:** explicitly verify 4/4 on the
+  *exact intended release commit* when the owner authorizes that
+  manual cloud run. A development PR with no GitHub CI is **not**
+  automatically a failed release, but cannot be reported as
+  independently accepted 4/4. F1 remains **IN PROGRESS**; F2/#21
+  remains BLOCKED. The source-custody gate (240 paths / 2 MB) and
+  frozen npm 80-path package membership remain unchanged.
+
 ### v1.0 Definition of Done (all required)
 
 - Independently installed on supported Windows/Ubuntu Node 20/22;
@@ -132,8 +157,9 @@ separately scoped post-v1 decisions.
 F5 fictional-only volunteer outreach may run in parallel now. F2
 **cannot start live target implementation or contact until separate
 explicit #21 permission**. Every completed phase needs an actual
-user-visible feature, exact merged SHA and **4/4 Windows/Ubuntu
-Node20/22 CI after merge**. Keep existing M6-J 240-file/2 MB custody
+user-visible feature, exact merged SHA and an **explicitly initiated,
+verified 4/4 Windows/Ubuntu Node20/22 CI release/phase gate**.
+Intermediate PRs use local evidence; never invent cloud pass claims. Keep existing M6-J 240-file/2 MB custody
 and frozen 80-path package inventory: any necessary migration must be
 separately reviewed, never hidden in a limit increase. F5/#59, F6/#43
 and owner publication approval cannot be passed by internal test counts.

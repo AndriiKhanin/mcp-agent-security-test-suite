@@ -1,3 +1,57 @@
+# Local-first development tests (GitHub Actions budget control)
+
+**Since 2026-10-31, cloud CI is manual-only.** Ordinary `push` and
+`pull_request` events no longer start GitHub Actions. The original
+four-job Windows/Ubuntu × Node20/22 workflow remains available **only**
+through an intentionally requested `workflow_dispatch` for a stage
+acceptance/release or independent verification. This avoids duplicate
+push/PR jobs for normal iterations.
+
+From a **reviewed source checkout** on your Windows laptop, with
+Git and Node.js **20 or 22** already on PATH:
+
+```powershell
+git clone https://github.com/AndriiKhanin/mcp-agent-security-test-suite.git
+cd .\mcp-agent-security-test-suite
+node examples/offline-ci-check.mjs --local-quick
+node examples/offline-ci-check.mjs --local-full
+```
+
+If already cloned, run `git pull --ff-only` in that checkout instead
+of cloning a second time. The quick command runs three fixed CLI test
+files and the original fictional offline smoke. The full command runs
+`node --test` (the same suite as `npm test`) plus the original
+offline smoke. Neither command uses a shell, remote test runner,
+npm install, registry or user MCP target. It uses the active local Node
+version; it **does not install/switch runtimes automatically**.
+
+Each run writes a bounded `receipt.json` plus separate stage log files
+under a private temporary `mcp-local-ci-...` folder. The final console
+line `LOCAL_CI_RECEIPT <path>` identifies the local receipt. It records
+`gitHead`, local Node version, OS, clean/dirty status, PASS/FAIL and
+`independentCI:false`. If a stage fails, exit code is 1; invalid
+environment or unavailable Git/Node exits 2. Logs stay on the laptop,
+never uploaded to GitHub. Verify `gitHead` before reporting a result;
+a PASS on uncommitted changes is not evidence for a merged commit.
+
+For a full four-configuration **local** matrix, repeat `--local-full`
+after selecting Node 20 and Node 22 on Windows, and repeat in
+a preconfigured Ubuntu WSL2 environment with Node 20 and 22.
+Windows-only results do not claim Ubuntu coverage. The same portable
+Node command works on Windows and Linux; no WSL installation or system
+settings changes are made by the runner.
+
+Do **not** configure the personal laptop as an always-on GitHub Actions
+self-hosted runner for public PRs, and do **not** run unknown contributor
+branches locally: untrusted tests can execute code. Review code first.
+The final F0–F6 milestone acceptance still requires an **explicit,
+manually authorized, independent four-job CI run on the exact commit**;
+development PRs and intermediate documentation changes do not.
+F2 external target access [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)
+remains separately blocked. Nothing here is an MCP server scan.
+
+---
+
 # F1 — guided source or installed first run
 
 **Current delivery stage: F1 (one user journey); NOT real MCP scanning.**
