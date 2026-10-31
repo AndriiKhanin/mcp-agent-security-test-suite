@@ -15,13 +15,14 @@ evidence-backed human + CI report, fix a problem and rerun. The product
 must never interpret untrusted tool output as permission. "PASS" is
 limited to the tested checks — **not** a guarantee against all attacks.
 
-**Current state at 2026-10-31:** **F0 complete; F1 is next**. We have a
+**Current state at 2026-10-31:** **F0 DONE; F1 IN PROGRESS**. We have a
 mature *first-party offline/synthetic harness*, not a working general
 real-project security scanner. Main commit
-`fb6b0ebea55fa3976984db7166dd9032ec068cb5`,
-[verified main CI #41208529559](../../actions/runs/41208529559):
-**4/4 PASS**, Windows/Ubuntu Node 20/22 (inspected Ubuntu20
-1405/1405). M63 [PR #384](../../pull/384) merged. Candidate
+`96533e16d20e987a8702eb0aab50629850b7fcff`,
+[verified main CI #41214207624](../../actions/runs/41214207624):
+**4/4 PASS**, Windows/Ubuntu Node 20/22. F1's first packaged
+guided CLI entry [PR #387](../../pull/387) is accepted; historical
+M63 [PR #384](../../pull/384) remains accepted. Candidate
 `0.0.10-rc.1` is **unpublished**, release approval not given.
 First-party fixed loopback MCP and inert descriptor validation
 already exist; arbitrary user-owned servers are **not** contacted.
@@ -37,14 +38,14 @@ Do not invent M64/M65 merely to continue synthetic matrices.
 | Phase | State | Actual deliverable and measurable exit gate |
 | --- | --- | --- |
 | **F0 — Tested foundation** | **DONE** | MIT open source, deterministic fictional MCP/security contracts, source-owned loopback mock, two-OS/two-Node CI, local install/custody doctor. Engineering only. |
-| **F1 — One user journey** | **NEXT** | One documented CLI path for demo → config import/validation → safe staged check → results/CI; no need to navigate dozens of internal source-only scripts. Supported vs unsupported targets/versions stated plainly. Clean checkout and disposable package usability smoke; clear errors and help. |
+| **F1 — One user journey** | **IN PROGRESS — first CLI entry accepted [#387](../../pull/387); onboarding usability remains** | One documented CLI path for demo → config import/validation → safe staged check → results/CI; no need to navigate dozens of internal source-only scripts. Supported vs unsupported targets/versions stated plainly. Clean checkout and disposable package usability smoke; clear errors and help. |
 | **F2 — Authorized staging adapter** | **BLOCKED by explicit [#21](../../issues/21) owner approval** | After a separately reviewed target/consent authorization: one operator-controlled modern MCP **HTTPS staging** discovery-only profile, exact target + per-method allowlist, TLS/DNS/SSRF/proxy/redirect/time/size constraints, no credentials by default, no writes or arbitrary child commands. Test both permitted and denied transport paths. |
 | **F3 — Useful observed checks** | **NOT STARTED; depends on F2** | In approved staging, compare declared versus observed protocol/version/capabilities/metadata and permitted read-only behavior. Separately exercise denial, replay, forged authority and attack fixtures in a *disposable first-party lab*. Each finding states whether evidence is real authorized staging, OS-witnessed lab, or synthetic model. Never attribute source-owned toy successes to external agent security. |
 | **F4 — Actionable reports + CI** | **NOT STARTED; depends on F3** | One supported command delivers bounded text/JSON with fixed finding IDs, evidence source, severity/limitations, reproducer, remediation, result 0=matched, 1=violations, 2=invalid/blocked, and repeatable CI output. Cross-platform user installation test; intentional package changes reviewed, no silent modification of frozen 80-path inventory. |
 | **F5 — Independent adopter beta** | **OPEN now for fictional-only path [#59](../../issues/59); final product validation after F4** | Target **3 genuinely independent developers**, Windows and Ubuntu represented; at least one genuine opt-in report satisfies #59; capture setup usability, reproducible findings and false alarm/missed-boundary feedback. Triage and fix blockers; rerun fresh 4/4 CI. Self-reported external scanner observations [#329](../../issues/329) do **not** count as product beta. |
 | **F6 — Independent audit + release** | **BLOCKED by F2–F5 and [#43](../../issues/43)** | Independent assessor reviews final shipped source + bytes, boundaries and provenance; no unresolved critical/high issues, reproducible final package, exact 4/4 main CI, explicit owner authorization for selected version/channel, GitHub Release and/or npm as specifically approved, then independent clean install and end-to-end first-run verification. **This is the finish line.** |
 
-### F1 progress — first guided CLI entry (engineering PR)
+### F1 progress — first guided CLI entry (engineering accepted)
 
 - Added `start [local-descriptor.json]` to the existing **packaged CLI**
   instead of a new source-only script. A single JSON-v1 view combines
@@ -53,13 +54,17 @@ Do not invent M64/M65 merely to continue synthetic matrices.
 - It never runs a user stdio command, contacts the descriptor's
   HTTP endpoint, fetches credentials, or promotes self-asserted
   permission. Incorrect/oversized/unreadable input fails closed.
-- CI checks source CLI, invalid/no-input modes and the **disposable
-  locally installed npm candidate**. This is only F1's first subtask,
-  not F1 completion; a full independent adopter walkthrough, polished
-  message and staging-to-report integration are still outstanding.
+- [PR #387](../../pull/387) merged at
+  `96533e16d20e987a8702eb0aab50629850b7fcff`,
+  [PR CI #41213781270](../../actions/runs/41213781270) and
+  [main CI #41214207624](../../actions/runs/41214207624)
+  **4/4 PASS** each. Source CLI, invalid/no-input modes and the
+  **disposable locally installed npm candidate** were tested.
+  This is only F1's first subtask, not F1 completion; full independent
+  adopter walkthrough, human-first help and complete supported-target
+  matrix are outstanding.
 - Source/test file budget and frozen 80-path candidate membership
-  unchanged; PR CI + exact merged-main 4/4 must be verified before
-  calling this subtask accepted.
+  unchanged; both PR and exact merged-main CI **4/4 verified**.
 
 ### v1.0 Definition of Done (all required)
 
@@ -87,7 +92,7 @@ any guarantee that an LLM resists arbitrary prompt injections, and
 all-version all-provider universal interoperability. These require
 separately scoped post-v1 decisions.
 
-**Execution discipline:** F1 is the sole active engineering priority;
+**Execution discipline:** F1 IN PROGRESS is the sole active engineering priority;
 F5 fictional-only volunteer outreach may run in parallel now. F2
 **cannot start live target implementation or contact until separate
 explicit #21 permission**. Every completed phase needs an actual
