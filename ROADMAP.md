@@ -247,7 +247,7 @@ independent beta [#59](../../issues/59), external security review
 
 We will not claim a release is production-ready merely because a synthetic test suite passes.
 
-## M58 — issue-ready contextual error summary (PR CI pending)
+## M58 — issue-ready contextual error summary (merged; PR/main CI 4/4)
 
 - New source-only `--issue-report-context-errors` formats the strict
   existing six-row M44/M57 observations as a copyable GitHub Issue.
@@ -258,10 +258,16 @@ We will not claim a release is production-ready merely because a synthetic test 
   Existing M38/M44/M56 CLI modes unchanged. M6-J full source custody,
   strict 240 files/2MB and frozen 80-file npm candidate preserved.
   See [Issue #374](../../issues/374), [contributor guide](.github/FIXTURE_ONLY_CONTRIBUTIONS.md).
-  PR 4/4 and independent exact main CI 4/4 required; external
-  beta #59, audit #43 and real-target authority #21 remain OPEN.
+  [PR #375](../../pull/375) merged at
+  `725c598cdb65eff9e74c627a65cf0d04481fb2c6`;
+  [PR CI #41181632679](../../actions/runs/41181632679)
+  **4/4 PASS, 1399 tests/job**, zero failures/skips;
+  [main CI #41181929756](../../actions/runs/41181929756)
+  **4/4 PASS** on the exact merged SHA.
+  Strict M6-J excluded source: **240 files / 1,999,566 bytes**.
+  External beta #59, audit #43 and real-target authority #21 remain OPEN.
 
-## M57 — separate contextual false positives, misses and errors (merged; PR CI 4/4)
+## M57 — separate contextual false positives, misses and errors (merged; PR/main CI 4/4)
 
 - `--summarize-context-errors` consumes the same strict
   six-case M44 observations. Separately reports FP/FN/TP/TN/ERROR
@@ -275,7 +281,8 @@ We will not claim a release is production-ready merely because a synthetic test 
   `662dd02ebb5cea61caedb800dbc0fd6f02244ab8`;
   [PR CI #41181092205](../../actions/runs/41181092205)
   **4/4 PASS, 1398 tests/job**, zero failures/skips.
-  Separate exact main CI #41181368339 was still running when recorded.
+  Separate [main CI #41181368339](../../actions/runs/41181368339)
+  **4/4 PASS** on that exact merged SHA.
 
 ## M56 — privacy-safe contributor issue reports (merged; PR/main CI 4/4)
 
