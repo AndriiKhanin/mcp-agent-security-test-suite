@@ -3,6 +3,22 @@
 > **Product finish line:** [F0–F6 roadmap](../ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan) and [single tracking #385](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/385). As of 2026-10-31, **F0 DONE, F1 IN PROGRESS** ([PR #387](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/387), [main 4/4 CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41214207624)), live external MCP authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21), independent beta [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59), independent review [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) and owner publication permission **remain open**. Internal 4/4 CI is not release approval. Candidate `0.0.10-rc.1` unpublished.
 
 
+## CI cost policy — local by default, manual cloud gate
+
+The reviewable [workflow](../.github/workflows/ci.yml) now has
+**manual `workflow_dispatch` only**. Developer PRs and pushes do
+not automatically spend GitHub Actions minutes. Use the
+[portable local quick/full runner](GETTING_STARTED.md#local-first-development-tests-github-actions-budget-control)
+from a reviewed clone and preserve its local receipt with
+`independentCI:false`. Its PASS is a self-reported local check,
+not an independent attestation.
+
+Release/security sign-off still requires the owner explicitly to
+initiate and review the four-job Windows/Ubuntu Node20/22 cloud
+matrix against the exact release SHA. If it was not run,
+record **NOT VERIFIED**, never 4/4 PASS. Independent beta #59,
+audit #43, and real-target permission #21 remain separate.
+
 ## M36 — one-command offline candidate doctor (engineering accepted)
 
 From a reviewed **source checkout**, run:
