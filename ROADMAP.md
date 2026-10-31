@@ -245,6 +245,19 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
+## M62 — exact request-bound toy approval lifecycle (engineering PR)
+
+- Extend the existing M59/M60 synthetic owner-context policy with two
+  immutable request objects and one exact generation. Check owner-only
+  one-shot authorization, cross-request mismatch, stale generation,
+  revoke/rotate, spoof denial and scanner-hypothesis independence:
+  14 fixed plans × three labels = 42 expected results.
+- No user-supplied requests, grants, paths or endpoints. Only first-party
+  in-memory effects; no real authenticated owner, scanner, agent or MCP.
+  Preserve unchanged 240-file/2MB excluded-source custody and frozen
+  80-path npm candidate; acceptance requires 4/4 PR and main CI.
+  External authorization #21, audit #43 and beta #59 remain OPEN.
+
 ## M61 — excluded-source M12 guide consolidation (engineering PR)
 
 - Preserve the full historical M12 modern protocol guide at immutable

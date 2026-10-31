@@ -923,9 +923,105 @@ export function runFixedToyApprovalReplaySelftest(args=[]){
  }catch{return error;}
 }
 
+
+/** M62: exact request/epoch binding with source-owned inert approval. */
+const M62_SCOPE='SOURCE_OWNED_TOY_APPROVAL_REQUEST_BINDING';
+const M62_REQUESTS=Object.freeze({
+  A:Object.freeze({id:'FICTIONAL-A',method:'TASK_STATUS_WRITE'}),
+  B:Object.freeze({id:'FICTIONAL-B',method:'TASK_STATUS_WRITE'})
+});
+const M62_CASES=Object.freeze([
+ ['a-valid','A',['A'],['ALLOW'],'CONSUMED',1],
+ ['a-replay','A',['A','A'],['ALLOW','DENY'],'CONSUMED',1],
+ ['a-cross','A',['B'],['DENY'],'PENDING',0],
+ ['a-stale','A',['OLD_A'],['DENY'],'PENDING',0],
+ ['a-spoof','A',['CLAIM'],['DENY'],'PENDING',0],
+ ['a-spoof-then-valid','A',['CLAIM','A'],['DENY','ALLOW'],'CONSUMED',1],
+ ['a-cross-then-valid','A',['B','A'],['DENY','ALLOW'],'CONSUMED',1],
+ ['a-revoked','A',['REVOKE','A'],['DENY','DENY'],'REVOKED',0],
+ ['a-rotated','A',['ROTATE','A'],['DENY','DENY'],'STALE',0],
+ ['a-consumed-then-claim','A',['A','CLAIM'],['ALLOW','DENY'],'CONSUMED',1],
+ ['b-valid','B',['B'],['ALLOW'],'CONSUMED',1],
+ ['b-cross','B',['A'],['DENY'],'PENDING',0],
+ ['b-cross-then-valid','B',['A','B'],['DENY','ALLOW'],'CONSUMED',1],
+ ['b-stale','B',['OLD_B'],['DENY'],'PENDING',0]
+].map(r=>Object.freeze([r[0],r[1],Object.freeze(r[2]),Object.freeze(r[3]),r[4],r[5]])));
+function m62BindingSession(bound){
+  let state='PENDING',effects=0,attempts=0;
+  const deny=()=>{attempts++;return 'DENY';};
+  const end=next=>{attempts++;if(state==='PENDING')state=next;return 'DENY';};
+  return Object.freeze({
+    owner:Object.freeze({
+      approve(request,epoch){
+        attempts++;
+        if(state!=='PENDING'||request!==bound||epoch!==3)return 'DENY';
+        state='CONSUMED';effects++;return 'ALLOW';
+      }
+    }),
+    external:Object.freeze({claim:deny}),
+    controller:Object.freeze({revoke:()=>end('REVOKED'),rotate:()=>end('STALE')}),
+    witness:()=>Object.freeze({state,attempts,fictionalEffects:effects})
+  });
+}
+export function runFixedToyApprovalBindingSelftest(args=[]){
+  const denied=Object.freeze({reportSchemaVersion:1,status:'ERROR',exitCode:2,
+    ruleCode:'TOY_APPROVAL_BINDING_UNAVAILABLE',scope:M62_SCOPE,
+    realApprovalGranted:false,externalMcpContacted:false});
+  if(!noArgs(args))return denied;
+  try{
+    if(m59Gate('OWNER_DIRECT','USE_TOOL','CAREFUL',true)
+      .request('PROTECTED_TOOL')!=='REQUIRE_APPROVAL')return denied;
+    const rows=[];
+    for(const hypothesis of M59_LABELS){
+      for(const [caseId,binding,steps,expected,state,effects] of M62_CASES){
+        const session=m62BindingSession(M62_REQUESTS[binding]);
+        const observed=steps.map(step=>{
+          if(step==='CLAIM')return session.external.claim();
+          if(step==='REVOKE')return session.controller.revoke();
+          if(step==='ROTATE')return session.controller.rotate();
+          const old=step.startsWith('OLD_');
+          const key=old?step.slice(4):step;
+          if(!Object.hasOwn(M62_REQUESTS,key))throw Error('BAD_FIXED_STEP');
+          return session.owner.approve(M62_REQUESTS[key],old?2:3);
+        });
+        const w=session.witness();
+        const matched=JSON.stringify(observed)===JSON.stringify(expected)&&
+          w.state===state&&w.fictionalEffects===effects&&
+          w.attempts===steps.length;
+        rows.push(Object.freeze({caseId,hypotheticalScanner:hypothesis,
+          expected,observed:Object.freeze(observed),...w,matched}));
+      }
+    }
+    const stride=M62_CASES.length;
+    const invariant=rows.every((r,i)=>{
+      const first=rows[i%stride];
+      return r.caseId===first.caseId&&r.state===first.state&&
+        r.fictionalEffects===first.fictionalEffects&&
+        JSON.stringify(r.observed)===JSON.stringify(first.observed);
+    });
+    const matched=rows.filter(r=>r.matched).length;
+    const effects=rows.reduce((n,r)=>n+r.fictionalEffects,0);
+    const pass=rows.length===42&&matched===42&&invariant&&effects===21;
+    return Object.freeze({
+      reportSchemaVersion:1,status:pass?'PASS':'FAIL',exitCode:pass?0:1,
+      ruleCode:pass?'TOY_APPROVAL_BINDING_MATCH':
+        'TOY_APPROVAL_BINDING_MISMATCH',scope:M62_SCOPE,
+      checked:rows.length,matched,fictionalEffects:effects,
+      detectorLabelIndependent:invariant,cases:Object.freeze(rows),
+      realOwnerAuthenticated:false,realApprovalGranted:false,
+      realAgentBehaviorObserved:false,realScannerExecuted:false,
+      realFilesystemReadObserved:false,realMcpToolCallObserved:false,
+      externalMcpContacted:false,independentBetaVerified:false,
+      securityCertified:false,releaseAuthorized:false
+    });
+  }catch{return denied;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  const result=argv.length===1&&argv[0]==='--approval-replay-matrix'?
+  const result=argv.length===1&&argv[0]==='--approval-request-binding-matrix'?
+    runFixedToyApprovalBindingSelftest():
+    argv.length===1&&argv[0]==='--approval-replay-matrix'?
     runFixedToyApprovalReplaySelftest():
     argv.length===1&&argv[0]==='--approval-policy-matrix'?
     runFixedToyApprovalPolicySelftest():
