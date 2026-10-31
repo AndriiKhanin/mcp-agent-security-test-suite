@@ -389,6 +389,8 @@ export function buildCliHelpResult() {
     commands:[...CLI_COMMANDS],
     syntax:[
       'node src/cli.mjs start',
+      'node src/cli.mjs start --text',
+      'node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text',
       'node src/cli.mjs start examples/adapter-profiles/stdio-project.json',
       'node src/cli.mjs help',
       'node src/cli.mjs version',
