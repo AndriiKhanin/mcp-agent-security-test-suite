@@ -104,8 +104,9 @@ requires separate review and explicit approval; product F2/F3 are
 | --- | --- | --- |
 | Nothing (`start --text`) | Two fictional checks and a fixed first-party temporary loopback demo | **No** |
 | A single **universal project descriptor** v1 with `stdio` or `streamable-http` transport (`start descriptor.json --text`) | Strictly reads up to 4 KiB and validates supported descriptor fields, then runs only unrelated fixed first-party checks | **No** |
-| One reviewed Claude-style `mcpServers` or VS Code-style `servers` client entry | `start --client-config local-client.json [--text]`: validates one strict, no-credential stdio/HTTPS profile and runs only the *same unrelated fixed mocks* | **No** |
-| Client config with several servers, `env`, `headers`, credentials, non-HTTPS URL or extra keys | Rejected; must first be reduced to a safe one-server review copy **without secrets** | **No** |
+| One reviewed Claude-style `mcpServers` or VS Code-style `servers` client entry | `start --client-config local-client.json [--text]`: validates its single no-credential stdio/HTTPS entry; then only fixed mocks | **No** |
+| Client config containing **2–16** servers, one supported clean entry | `start --client-config local-client.json --server NAME [--text]`: explicitly selects and validates only that one entry; never starts it or the others | **No** |
+| Selected entry with `env`, `headers`, credentials, unsafe arguments, non-HTTPS URL or extra keys | Rejected; remove secrets from the *selected entry* in a locally reviewed copy. Other entries are never executed or reported | **No** |
 | Operator-owned staging MCP HTTPS URL, HTTP session/token, or OAuth credentials | **Not connected or authenticated**; F2 and authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21) not accepted | **No** |
 | Arbitrary stdio executable, MCP tool call, production server or private agent workspace | **Never launched or contacted by `start`** | **No** |
 
@@ -117,11 +118,14 @@ that version was contacted, negotiated or certified.
 ### F1 direct single-server client-config import (unpublished candidate)
 
 In addition to the universal descriptor, the packaged CLI now accepts
-**one local client config** with either `mcpServers` (one stdio entry)
-or `servers` (one explicit stdio or HTTPS entry). The schema is
-closed: `env`, `headers`, tokens, OAuth, multiple server entries,
-unknown fields, unsafe command arguments and unsupported URLs are
-rejected. No client command is launched, endpoint contacted, DNS
+**one local client config** with either `mcpServers` (stdio/HTTPS entry)
+or `servers` (explicit stdio or HTTPS entry). A single server is selected
+implicitly; for **2–16 entries**, a literal `--server NAME` is mandatory
+so the program never guesses which target is meant. Only the selected
+entry is interpreted. The selected entry has a closed schema: `env`,
+`headers`, tokens, OAuth, unknown fields, unsafe arguments and
+unsupported URLs are rejected. Unselected entries are ignored, not
+executed, exported or assessed. No client command is launched, endpoint contacted, DNS
 resolved, authentication performed or real security check claimed.
 
 For example, create a private `single-client-config.json` with
@@ -136,11 +140,15 @@ Then from the reviewed checkout run:
 ```sh
 node src/cli.mjs start --client-config single-client-config.json --text
 node src/cli.mjs start --client-config single-client-config.json
+# For a file with multiple entries, require an explicit server name:
+node src/cli.mjs start --client-config client-config.json --server fictional --text
 ```
 
-The second form retains machine-readable JSON-v1 for CI; successful
+The JSON form retains machine-readable JSON-v1 for CI; successful
 validation reports `descriptorEvidence:"CLIENT_CONFIG_VALIDATED_OFFLINE"`
-and `externalTargetContacted:false`. The optional `--text` view
+and `externalTargetContacted:false`. Explicit selection adds the fixed
+`selectionEvidence:"EXPLICIT_SERVER_SELECTED"` enum without echoing the
+selected server name. Missing or ambiguous selections exit 2. The optional `--text` view
 contains fixed labels only. Invalid input exits 2 and does not echo
 paths, server names or credential strings. The input is limited to
 4 KiB and direct symlinks are rejected by the existing bounded reader.
