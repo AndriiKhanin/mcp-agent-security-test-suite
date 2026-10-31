@@ -90,7 +90,7 @@ function reader(report,code){
 }
 test('M6-G: CLI discovery, aliases, candidate metadata and JSON-v1 stay stable',()=>{
   const help=jsonResult(cli('help'),'help',0,'PASS');
-  assert.equal(help.commands.length,30);
+  assert.equal(help.commands.length,31);
   for(const name of ['adapter-kit','adapter-kit-verify',
     'adapter-quickstart','adapter-trace-expect','adapter-report-view'])
     assert.ok(help.commands.includes(name),name);
