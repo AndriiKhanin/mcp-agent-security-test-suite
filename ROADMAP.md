@@ -6,13 +6,89 @@
 
 This roadmap is the **source of truth for priorities and acceptance criteria**. GitHub Issues track the individual tasks; merged PRs and GitHub Actions runs are the evidence. Version names and milestone scope can change when requirements are better understood. Do not read future milestones as implemented features.
 
+## PRODUCT v1.0 — finite finish line (authoritative delivery plan)
+
+**One release goal:** a developer can install the tool, validate/import a
+supported project descriptor, explicitly authorize *one operator-owned
+staging target*, run narrowly scoped safe real MCP checks, receive an
+evidence-backed human + CI report, fix a problem and rerun. The product
+must never interpret untrusted tool output as permission. "PASS" is
+limited to the tested checks — **not** a guarantee against all attacks.
+
+**Current state at 2026-10-31:** **F0 complete; F1 is next**. We have a
+mature *first-party offline/synthetic harness*, not a working general
+real-project security scanner. Main commit
+`fb6b0ebea55fa3976984db7166dd9032ec068cb5`,
+[verified main CI #41208529559](../../actions/runs/41208529559):
+**4/4 PASS**, Windows/Ubuntu Node 20/22 (inspected Ubuntu20
+1405/1405). M63 [PR #384](../../pull/384) merged. Candidate
+`0.0.10-rc.1` is **unpublished**, release approval not given.
+First-party fixed loopback MCP and inert descriptor validation
+already exist; arbitrary user-owned servers are **not** contacted.
+Current excluded-source custody: **240 paths / 1,998,916 bytes** out
+of 2,000,000, strict fail-on-overflow. Frozen candidate contains
+**80** reviewed npm paths.
+
+**Single product tracking issue: [#385](../../issues/385)**. The
+table below supersedes chronological M0–M63 entries as the active
+development queue; history below remains immutable engineering evidence.
+Do not invent M64/M65 merely to continue synthetic matrices.
+
+| Phase | State | Actual deliverable and measurable exit gate |
+| --- | --- | --- |
+| **F0 — Tested foundation** | **DONE** | MIT open source, deterministic fictional MCP/security contracts, source-owned loopback mock, two-OS/two-Node CI, local install/custody doctor. Engineering only. |
+| **F1 — One user journey** | **NEXT** | One documented CLI path for demo → config import/validation → safe staged check → results/CI; no need to navigate dozens of internal source-only scripts. Supported vs unsupported targets/versions stated plainly. Clean checkout and disposable package usability smoke; clear errors and help. |
+| **F2 — Authorized staging adapter** | **BLOCKED by explicit [#21](../../issues/21) owner approval** | After a separately reviewed target/consent authorization: one operator-controlled modern MCP **HTTPS staging** discovery-only profile, exact target + per-method allowlist, TLS/DNS/SSRF/proxy/redirect/time/size constraints, no credentials by default, no writes or arbitrary child commands. Test both permitted and denied transport paths. |
+| **F3 — Useful observed checks** | **NOT STARTED; depends on F2** | In approved staging, compare declared versus observed protocol/version/capabilities/metadata and permitted read-only behavior. Separately exercise denial, replay, forged authority and attack fixtures in a *disposable first-party lab*. Each finding states whether evidence is real authorized staging, OS-witnessed lab, or synthetic model. Never attribute source-owned toy successes to external agent security. |
+| **F4 — Actionable reports + CI** | **NOT STARTED; depends on F3** | One supported command delivers bounded text/JSON with fixed finding IDs, evidence source, severity/limitations, reproducer, remediation, result 0=matched, 1=violations, 2=invalid/blocked, and repeatable CI output. Cross-platform user installation test; intentional package changes reviewed, no silent modification of frozen 80-path inventory. |
+| **F5 — Independent adopter beta** | **OPEN now for fictional-only path [#59](../../issues/59); final product validation after F4** | Target **3 genuinely independent developers**, Windows and Ubuntu represented; at least one genuine opt-in report satisfies #59; capture setup usability, reproducible findings and false alarm/missed-boundary feedback. Triage and fix blockers; rerun fresh 4/4 CI. Self-reported external scanner observations [#329](../../issues/329) do **not** count as product beta. |
+| **F6 — Independent audit + release** | **BLOCKED by F2–F5 and [#43](../../issues/43)** | Independent assessor reviews final shipped source + bytes, boundaries and provenance; no unresolved critical/high issues, reproducible final package, exact 4/4 main CI, explicit owner authorization for selected version/channel, GitHub Release and/or npm as specifically approved, then independent clean install and end-to-end first-run verification. **This is the finish line.** |
+
+### v1.0 Definition of Done (all required)
+
+- Independently installed on supported Windows/Ubuntu Node 20/22;
+  easy local demo and approved project configuration import.
+- One *authorized* operator-owned staging MCP endpoint can be checked
+  under a visible consent + narrow read-only plan, with forbidden contact
+  and tool side effects denied. No production/customer scanning.
+- Actual observed staging findings are explicitly separated from the
+  fictional agent and first-party OS/loopback proofs. Actionable,
+  bounded human/JSON evidence integrates in a developer CI pipeline.
+- At least one genuinely independent beta acceptance under #59, with
+  the product adoption target of three independent participants,
+  reviewed fixes and independently checked regression CI.
+- Independent final-source/security/provenance review #43 and explicit
+  owner decision approve the exact artifact and distribution.
+  Public stable version is **actually installed and used** from the
+  approved distribution; documented features work without private data
+  or unsafe defaults.
+
+**Outside the v1.0 promise:** hosted SaaS, arbitrary stdio execution,
+credential storage, production target scans, unrestricted tool calls,
+automatic vulnerability exploitation, complete MCP certification,
+any guarantee that an LLM resists arbitrary prompt injections, and
+all-version all-provider universal interoperability. These require
+separately scoped post-v1 decisions.
+
+**Execution discipline:** F1 is the sole active engineering priority;
+F5 fictional-only volunteer outreach may run in parallel now. F2
+**cannot start live target implementation or contact until separate
+explicit #21 permission**. Every completed phase needs an actual
+user-visible feature, exact merged SHA and **4/4 Windows/Ubuntu
+Node20/22 CI after merge**. Keep existing M6-J 240-file/2 MB custody
+and frozen 80-path package inventory: any necessary migration must be
+separately reviewed, never hidden in a limit increase. F5/#59, F6/#43
+and owner publication approval cannot be passed by internal test counts.
+
+---
+
 ## Where we stand
 
 | Indicator | Verified state | Evidence |
 | --- | --- | --- |
 | Public independently maintained source | **Done**; MIT license | [LICENSE](LICENSE) |
 | First baseline | **v0.0.9**; 243 synthetic tests | [Original CI](../../actions/runs/39852303226) — 4/4 jobs passed |
-| Latest candidate in `main` | **v0.0.10-rc.1**, unpublished; M10-A/F toy-agent engineering merged, first external fixture accepted via PR #212, independent-beta acceptance still **PENDING** | [PR #212](../../pull/212), [main CI #1053](../../actions/runs/40687127717): **4/4 PASS** |
+| Latest candidate in `main` | **v0.0.10-rc.1**, unpublished; M63 toy/scanner version-comparison engineering accepted, **real-project checking NOT implemented** | [PR #384](../../pull/384), [main CI #41208529559](../../actions/runs/41208529559): **4/4 PASS** |
 | Supported automated test matrix | **Windows + Ubuntu, Node.js 20 + 22** | [CI workflow](.github/workflows/ci.yml) |
 | Security boundary model | **DONE**; offline synthetic threat model and future adapter checklist | [Threat model](docs/THREAT_MODEL.md), [PR #9](../../pull/9) |
 | Original M1–M3 issue plan | **6/6 original issues complete**; newer M5 external beta gate **OPEN** | [Original issues #2–#7](../../issues?q=is%3Aissue); [open gate #59](../../issues/59) |
@@ -245,7 +321,7 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
-## M63 — paired fictional scanner-version regression gate (engineering PR)
+## M63 — paired fictional scanner-version regression gate (engineering accepted; PR #384, main CI 4/4)
 
 - Reuse the **same six fixed M44 public author-labeled cases** twice,
   as baseline and candidate observations for *one* scanner. New
