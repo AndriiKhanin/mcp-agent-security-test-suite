@@ -50,6 +50,7 @@ MCP contact is performed by this suite.
 
 Create a source-only case with
 `node tools/fixture-proposal-template.mjs fictional-contributor-case`.
+Copy the emitted **raw JSON** into the reviewed source-only template;
 Use the reviewed template and
 [example](fixture-proposals/mixed-tool-result-file-read.json).
 Place the sanitized JSON in
@@ -75,19 +76,21 @@ node tools/fixture-contributor-summary.mjs
 ```
 
 The checker denies symlinks, unsupported fields, malformed JSON and
-obvious privacy indicators, but **is not a full secrets scanner**.
+obvious privacy indicators, but **is not a complete secret scanner**.
 Review every public string manually. Never submit real names, file
 paths, credentials, email addresses, logs, user targets, private
-source or exploit scripts. A PR should add only a fictional fixture
+source or exploit scripts. A **fixture-only PR** should add only a fictional fixture
 and concise explanation. Maintainers manually review it and require
 Windows/Ubuntu × Node.js 20/22 CI **4/4 PASS** before merge.
 
 ## Exact limits and supporting references
 
 Source acceptance is only offline validation and in-memory symbolic
-policy testing. It is **not a real model, scanner, MCP server, OS
-sandbox or proof of attack prevention**. Tool-result text and JSON
-values cannot confer task authority. The fixed first-party mock and
+policy testing. It is **not a semantic test**, **not a prompt-injection detector**,
+and **not a real model security assessment**. It does not verify a real
+model, scanner, MCP server, OS sandbox or attack prevention. Tool-result text and JSON
+values cannot confer task authority. Use `node tools/toy-agent-batch.mjs` for additional local fixed toy
+checks; no external user tool is executed. The first-party mock and
 toy-agent walkthroughs are indexed in
 [M10](M10_TOY_AGENT_SESSION.md),
 [M11](M11_LOOPBACK_TOOL_RESULT.md),
