@@ -245,6 +245,16 @@ CI has not yet been independently verified.
 independent beta [#59](../../issues/59), external security review
 [#43](../../issues/43), and owner release/publication decision.
 
+## M60 — single-use toy approval replay (source/test)
+
+- Ten first-party toy plans cover owner approval, replay, tool/email
+  spoofing, wrong scope, expiry, revocation, rejection and mixed order
+  after M59's eligible pending decision. No real approval is granted.
+- The original toy guide is consolidated into an existing packaged
+  documentation path with its original link preserved. Keep M6-J's
+  unchanged 240-file / 2,000,000-byte custody ceiling and frozen 80
+  npm package paths. External gates #21/#43/#59 remain OPEN.
+
 ## M59 — source-owned scoped approval decisions (merged; PR/main CI 4/4)
 
 - Reconcile unfinished [proposal #354](../../issues/354) from
