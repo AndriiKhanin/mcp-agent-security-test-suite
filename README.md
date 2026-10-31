@@ -33,7 +33,7 @@ author labels only**, not a generalizable scanner accuracy rate,
 independently verified test, beta acceptance, external audit or
 security certification. Errors are excluded from matches and misses.
 See [exact JSON input, PowerShell instructions and volunteer report
-format](.github/FIXTURE_ONLY_CONTRIBUTIONS.md#m38--independent-scanner-comparison-on-fixed-fictional-tool-results)
+format](.github/FIXTURE_ONLY_CONTRIBUTIONS.md#m38--fictional-tool-result-scanner-comparison)
 and [GitHub Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
 
 
@@ -93,6 +93,25 @@ cat context-results.json | node tools/fixture-batch-preflight.mjs --summarize-co
 PowerShell: `Get-Content -Raw -Encoding utf8 .\context-results.json | node tools/fixture-batch-preflight.mjs --summarize-context-errors`.
 Strict input, source-owned case IDs only. **This does not execute
 a scanner, measure real-world protection, or approve any tool action.**
+
+## Copyable contextual error Issue report (M58)
+
+After filling all six `context-results.json` observations with your
+own local scanner results, produce a source-only Markdown Issue draft:
+
+```sh
+node tools/fixture-batch-preflight.mjs --issue-report-context-errors < context-results.json
+```
+
+PowerShell: `Get-Content -Raw -Encoding utf8 .\context-results.json | node tools/fixture-batch-preflight.mjs --issue-report-context-errors`.
+
+It includes per-group TP/FP/FN/TN/ERROR counts and only fixed public
+case IDs for false positives, missed injections and scanner errors.
+Add public scanner/version and source SHA manually before posting at
+[comparison #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
+An incomplete `UNTESTED` row or unauthorized field fails closed.
+No scanner is invoked and no real-agent security is certified.
+
 
 ## One-command local first run — no config required (M37)
 
