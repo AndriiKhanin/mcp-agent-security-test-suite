@@ -21,6 +21,25 @@ The first F1 guided entry point is accepted via [PR #387](https://github.com/And
 Completing F1 usability is the current engineering priority; actual
 user-owned staging validation is still blocked by Issue #21.
 
+## Local tests — cloud CI runs only on request
+
+To avoid automatic GitHub Actions consumption, normal development now
+runs on the developer's laptop from a reviewed checkout (Node 20/22):
+
+```sh
+node examples/offline-ci-check.mjs --local-quick
+node examples/offline-ci-check.mjs --local-full
+```
+
+`--local-full` runs the complete `node --test` regression suite and
+the existing fictional smoke; `--local-quick` runs selected CLI tests
+and the same smoke. Both work on Windows and Ubuntu WSL2, leave local
+logs and a JSON receipt in the OS temp directory, and **never**
+authorize a real target. The [full local instructions](docs/GETTING_STARTED.md#local-first-development-tests-github-actions-budget-control)
+include Node-version, git SHA, independent release-gate and safety
+requirements. GitHub [CI](.github/workflows/ci.yml) is
+**manual `workflow_dispatch` only**; it does not auto-run on push or PR.
+
 ## F1 guided first run — single CLI entry
 
 From a reviewed source checkout (Node.js 20/22):
