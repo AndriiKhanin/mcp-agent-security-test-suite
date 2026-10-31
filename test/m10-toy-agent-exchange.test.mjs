@@ -10,7 +10,7 @@ import {
   runFixedContextProvenanceSelftest,
   runFixedTemporaryFileEffectSelftest,
   runFixedTemporaryFileEffectFaultSelftest,
-  runFixedScopedAuthoritySelftest
+  runFixedScopedAuthoritySelftest,runFixedToyApprovalPolicySelftest
 } from '../tools/toy-agent-exchange.mjs';
 import {loadValidatedFixtureProposalFile} from '../tools/fixture-proposal-check.mjs';
 
@@ -662,5 +662,55 @@ test('M48: API denies nonempty or exotic arguments before creating temp files',a
       assert.equal(result.externalMcpContacted,false);
       assert.ok(!JSON.stringify(result).includes('PRIVATE_CANARY'));
     }
+  }
+});
+
+test('M59: 108 fixed scoped decisions with zero unauthorized approval/effects',()=>{
+  const r=runFixedToyApprovalPolicySelftest();
+  assert.equal(r.status,'PASS');
+  assert.deepEqual([r.checked,r.matched,r.allowed,r.denied,r.pending,
+    r.unnecessarilyPromptedReads,r.unauthorizedRequestsPrompted,
+    r.fictionalAllowedToolEffects],[108,108,45,60,3,0,0,9]);
+  assert.equal(r.independentOfDetectorLabel,true);
+  assert.ok(Object.isFrozen(r)&&Object.isFrozen(r.cases));
+  for(const row of r.cases){
+    assert.ok(Object.isFrozen(row));
+    assert.equal(row.observed,row.expected);
+    assert.equal(row.calls,1);
+    assert.equal(row.approvalGranted,false);
+    assert.equal(row.fictionalUnauthorizedEffects,0);
+    if(row.observed==='DENY')
+      assert.equal(row.fictionalToolEffects+row.fictionalReadEffects,0);
+    if(row.observed==='REQUIRE_APPROVAL'){
+      assert.equal(row.caseId,'owner-tool');
+      assert.equal(row.policyMode,'CAREFUL');
+      assert.equal(row.externalContentSeen,true);
+      assert.equal(row.fictionalToolEffects,0);
+    }
+    if(row.action!=='PROTECTED_TOOL')
+      assert.notEqual(row.observed,'REQUIRE_APPROVAL');
+  }
+  for(const key of ['realApprovalRequested','realApprovalGranted',
+    'realAgentBehaviorObserved','realScannerExecuted',
+    'realFilesystemReadObserved','realMcpToolCallObserved',
+    'externalMcpContacted','independentBetaVerified',
+    'securityCertified','releaseAuthorized'])assert.equal(r[key],false);
+  for(let i=0;i<36;i++)for(const offset of [36,72])
+    assert.equal(r.cases[i].observed,r.cases[i+offset].observed);
+});
+test('M59: public CLI rejects fabricated approval, arguments and secrets',()=>{
+  const run=(...a)=>spawnSync(process.execPath,
+    ['tools/toy-agent-exchange.mjs',...a],{encoding:'utf8'});
+  const good=run('--approval-policy-matrix');
+  assert.equal(good.status,0,good.stderr);
+  assert.deepEqual(JSON.parse(good.stdout),runFixedToyApprovalPolicySelftest());
+  for(const arg of ['--approve','--mode=CAREFUL','PRIVATE_CANARY']){
+    const bad=run('--approval-policy-matrix',arg);
+    assert.equal(bad.status,2,bad.stderr);
+    assert.doesNotMatch(bad.stdout,/PRIVATE_CANARY/);
+  }
+  for(const bad of [null,{},['--approve'],Array(1)]){
+    assert.deepEqual([runFixedToyApprovalPolicySelftest(bad).status,
+      runFixedToyApprovalPolicySelftest(bad).exitCode],['ERROR',2]);
   }
 });

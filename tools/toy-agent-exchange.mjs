@@ -742,9 +742,115 @@ export async function runFixedTemporaryFileEffectFaultSelftest(args=[]){
   catch{return tempRejected;}
 }
 
+/** M59 revives #354's offline approval experiment without executing actions. */
+const M59_SCOPE='FIXED_SOURCE_OWNED_APPROVAL_DECISION_ONLY';
+const M59_ERROR=Object.freeze({
+  reportSchemaVersion:1,status:'ERROR',exitCode:2,
+  ruleCode:'TOY_APPROVAL_POLICY_UNAVAILABLE',scope:M59_SCOPE,
+  realApprovalRequested:false,realAgentBehaviorObserved:false,
+  externalMcpContacted:false
+});
+const M59_LABELS=Object.freeze(['FLAGGED','NOT_FLAGGED','ERROR']);
+const M59_PLANS=Object.freeze([
+  ['owner-data','OWNER_DIRECT','NONE','TASK_DATA'],
+  ['tool-data','TOOL_RESULT','NONE','TASK_DATA'],
+  ['owner-read','OWNER_DIRECT','READ_ARCHIVE','PROTECTED_READ'],
+  ['owner-tool','OWNER_DIRECT','USE_TOOL','PROTECTED_TOOL'],
+  ['no-grant-tool','OWNER_DIRECT','NONE','PROTECTED_TOOL'],
+  ['wrong-grant-tool','OWNER_DIRECT','READ_ARCHIVE','PROTECTED_TOOL'],
+  ['forged-tool','TOOL_RESULT','NONE','PROTECTED_TOOL'],
+  ['forged-email','HUMAN_EMAIL','NONE','PROTECTED_TOOL'],
+  ['forged-json-read','JSON_TOOL_RESULT','NONE','PROTECTED_READ']
+].map(p=>Object.freeze(p)));
+function m59Gate(origin,grant,mode,seen){
+  let calls=0,read=0,tool=0;
+  return Object.freeze({
+    request(action){
+      calls++;
+      const eligible=action==='TASK_DATA'||
+        (origin==='OWNER_DIRECT'&&
+          ((action==='PROTECTED_READ'&&grant==='READ_ARCHIVE')||
+           (action==='PROTECTED_TOOL'&&grant==='USE_TOOL')));
+      if(!eligible)return 'DENY';
+      if(mode==='CAREFUL'&&seen&&action==='PROTECTED_TOOL')
+        return 'REQUIRE_APPROVAL';
+      if(action==='PROTECTED_READ')read++;
+      if(action==='PROTECTED_TOOL')tool++;
+      return 'ALLOW';
+    },
+    receipt:()=>Object.freeze({calls,fictionalReadEffects:read,
+      fictionalToolEffects:tool,fictionalUnauthorizedEffects:0})
+  });
+}
+export function runFixedToyApprovalPolicySelftest(args=[]){
+  if(!noArgs(args))return M59_ERROR;
+  try{
+    const rows=[];
+    for(const label of M59_LABELS)for(const mode of ['BASELINE','CAREFUL'])
+      for(const seen of [false,true])
+        for(const [caseId,origin,grant,action] of M59_PLANS){
+          // The hypothetical detector label never reaches the gate.
+          const gate=m59Gate(origin,grant,mode,seen);
+          const observed=gate.request(action),w=gate.receipt();
+          const authorized=['owner-data','tool-data','owner-read',
+            'owner-tool'].includes(caseId);
+          const expected=!authorized?'DENY':
+            caseId==='owner-tool'&&mode==='CAREFUL'&&seen?
+              'REQUIRE_APPROVAL':'ALLOW';
+          rows.push(Object.freeze({
+            caseId,origin,grant,action,policyMode:mode,
+            externalContentSeen:seen,hypotheticalDetector:label,
+            expected,observed,matched:expected===observed,...w,
+            approvalGranted:false
+          }));
+        }
+    const stride=M59_PLANS.length*4;
+    const scannerIndependent=rows.every((r,i)=>{
+      const baseline=rows[i%stride];
+      return r.caseId===baseline.caseId&&
+        r.policyMode===baseline.policyMode&&
+        r.externalContentSeen===baseline.externalContentSeen&&
+        r.observed===baseline.observed;
+    });
+    const count=k=>rows.filter(r=>r.observed===k).length;
+    const readPrompts=rows.filter(r=>r.observed==='REQUIRE_APPROVAL'&&
+      r.action!=='PROTECTED_TOOL').length;
+    const deniedPrompts=rows.filter(r=>r.observed==='REQUIRE_APPROVAL'&&
+      (r.caseId!=='owner-tool'||r.policyMode!=='CAREFUL'||
+       !r.externalContentSeen)).length;
+    const matched=rows.filter(r=>r.matched).length;
+    const allowed=count('ALLOW'),denied=count('DENY'),pending=count('REQUIRE_APPROVAL');
+    const effects=rows.reduce((n,r)=>n+r.fictionalToolEffects,0);
+    const valid=rows.length===108&&matched===108&&scannerIndependent&&
+      allowed===45&&denied===60&&pending===3&&effects===9&&
+      readPrompts===0&&deniedPrompts===0&&
+      rows.every(r=>r.calls===1&&!r.approvalGranted&&
+        r.fictionalUnauthorizedEffects===0&&
+        (r.observed!=='REQUIRE_APPROVAL'||r.fictionalToolEffects===0));
+    return Object.freeze({
+      reportSchemaVersion:1,status:valid?'PASS':'FAIL',exitCode:valid?0:1,
+      ruleCode:valid?'FIXED_TOY_APPROVAL_DECISIONS_MATCH':
+        'FIXED_TOY_APPROVAL_DECISIONS_MISMATCH',scope:M59_SCOPE,
+      checked:rows.length,matched,allowed,denied,pending,
+      unnecessarilyPromptedReads:readPrompts,
+      unauthorizedRequestsPrompted:deniedPrompts,
+      fictionalAllowedToolEffects:effects,
+      independentOfDetectorLabel:scannerIndependent,
+      cases:Object.freeze(rows),realApprovalRequested:false,
+      realApprovalGranted:false,realAgentBehaviorObserved:false,
+      realScannerExecuted:false,realFilesystemReadObserved:false,
+      realMcpToolCallObserved:false,externalMcpContacted:false,
+      independentBetaVerified:false,securityCertified:false,
+      releaseAuthorized:false
+    });
+  }catch{return M59_ERROR;}
+}
+
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const argv=process.argv.slice(2);
-  const result=argv.length===1&&argv[0]==='--temp-file-effect-witness'?
+  const result=argv.length===1&&argv[0]==='--approval-policy-matrix'?
+    runFixedToyApprovalPolicySelftest():
+    argv.length===1&&argv[0]==='--temp-file-effect-witness'?
     await runFixedTemporaryFileEffectSelftest():
     argv.length===1&&argv[0]==='--scoped-authority-matrix'?
     runFixedScopedAuthoritySelftest():
