@@ -372,13 +372,16 @@ test('M6-J: no release commands, symlink inputs, additional args or shipped path
     assert.equal(Object.hasOwn(pkg.scripts,k),false);
 });
 
-test('M54: superseded PR/branch CI only; main, manual and tags preserved',()=>{
+test('M54/F1: cloud CI manual-only; four-platform release gate retained',()=>{
   const y=readFileSync(join(root,'.github/workflows/ci.yml'),'utf8');
+  assert.match(y,/^on:\r?\n  workflow_dispatch:\s*$/m);
+  assert.doesNotMatch(y,/^  (?:push|pull_request|schedule):/m);
   assert.equal(y.split('concurrency:').length,2);
-  assert.ok(y.includes("group: ${{ github.workflow }}-${{ (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')) && github.run_id || github.ref }}"));
-  assert.ok(y.includes("cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') }}"));
-  for(const v of ['push:','pull_request:','workflow_dispatch:',
-    'node-version: [20, 22]','os: [ubuntu-latest, windows-latest]',
+  assert.ok(y.includes('group: manual-ci-${{ github.run_id }}'));
+  assert.ok(y.includes('cancel-in-progress: false'));
+  for(const v of ['node-version: [20, 22]',
+    'os: [ubuntu-latest, windows-latest]',
     'persist-credentials: false','run: npm test',
-    'run: node examples/offline-ci-check.mjs'])assert.ok(y.includes(v),v);
+    'run: node examples/offline-ci-check.mjs'])
+    assert.ok(y.includes(v),v);
 });
