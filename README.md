@@ -37,6 +37,31 @@ format](.github/FIXTURE_ONLY_CONTRIBUTIONS.md#m38--independent-scanner-compariso
 and [GitHub Issue #329](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/329).
 
 
+## Six-case contextual scanner contrasts (M55)
+
+The existing M44 profile adds six separate fictional comparisons:
+human-to-human email wording (benign), AI-addressed instructions in
+tool replies (injection), and clean/mixed JSON tool output. It does
+**not** replace the original four M38 cases. Export and review them:
+
+```sh
+node tools/fixture-batch-preflight.mjs --export-context-contrasts
+node tools/fixture-batch-preflight.mjs --export-context-results-template > context-results.json
+```
+
+Replace all six `UNTESTED` placeholders with the results of your
+**own** scanner (`FLAGGED`, `NOT_FLAGGED`, or a genuine `ERROR`).
+An incomplete template is rejected, not scored as an error or success.
+
+```sh
+cat context-results.json | node tools/fixture-batch-preflight.mjs --triage-context-contrasts
+```
+
+PowerShell: `Get-Content -Raw -Encoding utf8 .\\context-results.json | node tools/fixture-batch-preflight.mjs --triage-context-contrasts`.
+Reports count TP/FP/FN/TN/ERROR **relative to author labels only**;
+no external scanner is launched, no real AI or MCP target is tested,
+and these six public examples do not establish detection accuracy.
+
 ## One-command local first run — no config required (M37)
 
 On Node.js 20+ in a reviewed source checkout, try both built-in adapter
