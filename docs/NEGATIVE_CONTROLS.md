@@ -169,3 +169,23 @@ authority, wrong scope, expiry, revocation and rejection deny. A forged
 external claim cannot prevent a later source-owned toy owner action.
 There is no real owner confirmation, credential, filesystem write,
 scanner or MCP call. Expectations are synthetic, not external evidence.
+
+## M62 — source-bound toy approval request identity and epoch
+
+\`node tools/toy-agent-exchange.mjs --approval-request-binding-matrix\`
+
+42 fixed first-party checks = 14 source-authored plans × three hypothetical
+detector labels (\`FLAGGED\`, \`NOT_FLAGGED\`, \`ERROR\`). The parent
+constructs two distinct immutable fictional request objects and an exact
+generation value. A matching **trusted toy owner** confirmation consumes
+only its own pending request once. A cloned/different request, old
+generation, repeated confirmation, external spoof, revocation or generation
+rotation cannot authorize an effect. A denied spoof does not consume a
+later legitimate confirmation. Hypothetical detection labels never
+influence the gate. Exactly 21 approved **fictional in-memory** effects
+across 42 source-authored rows; no genuine approval is requested.
+
+This demonstrates a **bounded first-party toy**, not cryptographic
+authentication, actual agent behavior, a durable grant ledger, security
+certification, production authority or permission to test real MCP targets.
+The unchanged unpublished package remains exactly 80 paths.
