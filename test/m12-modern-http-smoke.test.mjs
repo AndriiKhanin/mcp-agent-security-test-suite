@@ -294,6 +294,12 @@ test('M12-C: official-version documentation, no target selection, npm locked',()
   for(const text of [docs,readme])
     assert.match(text,/node tools\/m12-modern-http-smoke\.mjs/);
   assert.match(docs,/not (?:complete|full) MCP conformance/i);
+  // M61: preserved pinned source text and all fixed M12 matrices.
+  assert.match(docs,/blob\/7fd578f3fcdd914206c32bf26ed53003583b291b\/\.github\/M12_MODERN_MCP_SMOKE\.md/);
+  for(const term of ['18 fixed controls','40 (4 accepted / 36 denied)',
+    '50 fixed SSE outcomes','60 fixed cases','not a real AI agent',
+    '80-path unpublished npm candidate'])
+    assert.ok(docs.includes(term),term);
   assert.match(roadmap,/M12-A\/B\/C/);
   assert.deepEqual(pkg.files,[
     'src','fixtures','docs','examples','README.md',
