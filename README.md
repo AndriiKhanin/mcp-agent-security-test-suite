@@ -2,7 +2,7 @@
 
 ## Start here: the finite product v1.0 roadmap
 
-**Current status (2026-10-31): F0 tested foundation complete, F1 next,
+**Current status (2026-10-31): F0 DONE, F1 IN PROGRESS,
 product v1.0 NOT RELEASED.** The suite has offline fictional contract
 checks, owned local MCP mocks and CI, **not** an approved connection
 to an arbitrary MCP project or a general prompt-injection detector.
@@ -16,9 +16,10 @@ Candidate `0.0.10-rc.1` has **not** been published.
 External target authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
 independent beta [#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
 and audit [#43](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/43) are **OPEN**.
-Work on new fictional-only test matrices is no longer the product
-delivery objective; an accessible user journey and properly authorized,
-bounded real staging validation are next.
+The first F1 guided entry point is accepted via [PR #387](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/387)
+([main 4/4 CI](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41214207624)).
+Completing F1 usability is the current engineering priority; actual
+user-owned staging validation is still blocked by Issue #21.
 
 ## F1 guided first run — single CLI entry
 
