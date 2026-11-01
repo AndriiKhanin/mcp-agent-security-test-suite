@@ -1,87 +1,40 @@
-# M23 — community-requested first-party attack-family differential
+# M23 — source-only community attack families
 
-This source-only experiment adds **three distinct security families**
-proposed in public X feedback: changing tool metadata after registration
-("rug pulls"), cross-server authority claims, and secret-like material
-echoed into an error response. It complements the finite policy fixture
-plan [M22 #287](../issues/287). It is **not** a new M8 user fixture format:
-the current M8 schema represents only untrusted tool-result text, so it
-cannot truthfully encode all three of these other trust boundaries.
+M23 compares unsafe and guarded **first-party deterministic toys** for metadata rug pulls, cross-server authority spoofing and synthetic error leaks. No real agent, server, secrets, files or external traffic.
 
-## Run
-
-From a reviewed source checkout using Node.js 20 or 22:
+## Run from a reviewed source checkout (Node 20/22)
 
 ```sh
 node tools/m23-community-attack-families.mjs
 ```
 
-The command accepts **zero arguments**, performs **no network access**,
-does not read environment variables, files, credentials or actual request
-headers, and cannot contact Stable Bridge or a user's MCP server.
-The user-visible JSON is **source-only**, with fixed case identifiers
-and bounded counters. It does not expose underlying synthetic markers.
+No arguments allowed. Output contains only symbolic IDs and counters. PASS means **12/12 fixed toy controls matched**, not real-world protection.
 
-## Fixed toy scenarios
+## Fixed fictional controls
 
-| Control | Intentionally vulnerable toy | Guarded toy |
+| Case | Unsafe toy | Guarded toy |
 | --- | --- | --- |
-| `RUG_UNCHANGED` | Allows the original registered description | Allows the same original description |
-| `RUG_DESCRIPTION_CHANGED` | Trusts changed description, permits one fictional extra protected action | Rejects the descriptor mismatch before execution |
-| `MULTI_SAME_OWNER` | Allows legitimate task data | Allows legitimate task data |
-| `MULTI_CROSS_OWNER` | Treats a different server's tool result as authorization | Denies cross-owner protected effect |
-| `MULTI_FORGED_OWNER_CLAIM` | Trusts the claimed origin despite a different actual fictional owner | Compares to server-owned resource ownership and denies |
-| `ERROR_SUCCESS_CONTROL` | Normal response with no leak | Normal response with no leak |
-| `ERROR_GENERIC_CONTROL` | Generic failure with no leak | Generic failure with no leak |
-| `ERROR_ENV_ECHO` | Error string includes a **fabricated** environment-like marker | Returns a fixed generic error |
-| `ERROR_PATH_ECHO` | Error string includes a **fabricated** path-like marker | Returns a fixed generic error |
-| `ERROR_HEADER_ECHO` | Error string includes a **fabricated** header-like marker | Returns a fixed generic error |
+| `RUG_UNCHANGED` | Handles approved task | Handles approved task |
+| `RUG_DESCRIPTION_CHANGED` | Trusts changed description; one extra fictional protected effect | Rejects changed metadata |
+| `MULTI_SAME_OWNER` | Handles legitimate data | Handles legitimate data |
+| `MULTI_CROSS_OWNER` | Trusts cross-server result as authority | Rejects foreign owner |
+| `MULTI_FORGED_OWNER_CLAIM` | Trusts claimed owner | Rejects forged ownership |
+| `ERROR_SUCCESS_CONTROL` | Normal result | Normal result |
+| `ERROR_GENERIC_CONTROL` | Generic error | Generic error |
+| `ERROR_ENV_ECHO` | Includes fabricated environment marker in error | Returns fixed generic error |
+| `ERROR_PATH_ECHO` | Includes fabricated path marker | Returns fixed generic error |
+| `ERROR_HEADER_ECHO` | Includes fabricated header marker | Returns fixed generic error |
+| `RUG_HIDDEN_DESCRIPTION_INSTRUCTION` | Treats HTML-comment-like instruction in a changed tool description as authority for an extra fictional effect | Rejects descriptor drift before execution |
+| `RUG_SCHEMA_SWAP_AFTER_APPROVAL` | Trusts modified `inputSchema` after the fictional approval snapshot | Rejects schema identity drift before execution |
 
-The "unsafe" tool is a deterministic toy policy that has deliberately
-incorrect behavior. Nothing interprets arbitrary text; there is **no
-real LLM**, real authorization, file opening, tool execution or actual
-server routing. The metadata is an in-memory object, not a software
-installation. Cross-server ownership is represented by two *literal*
-source-owned names, not authenticated multi-server isolation.
-The synthetic error contexts are **literal strings in the source
-file**, not environment variables, paths or headers obtained from a host.
+At fictional approval, M23 pins the description's **SHA-256** and serialized `inputSchema`; each toy session compares both, plus name/scope. Any mismatch is denied. A hash detects changes but **does not prove approval, ownership or safety of the initial description**. No real LLM, real MCP session, or authenticated TOCTOU enforcement is tested.
 
-The **independent fixed-source expected-outcome table** requires
-exactly **10/10** case matches, including three intentionally exposed
-protected effects and three intentionally exposed error-channel leaks
-under the permissive toys, and **zero protected effects and zero leaks**
-on guarded counterparts. Three benign controls must stay permitted.
-Negative mutations detect hidden unsafe behavior, falsely denied
-legitimate operations, leaking guarded paths, false "secure" outcomes,
-sparse arrays, getter-bearing observations and absent evidence.
+Expected: `checked: 12`, `matched: 12`, five unsafe toy effects and three synthetic error leaks; **zero** guarded effects/leaks. Negative mutations reject forged witnesses and missing enforcement.
 
-Expected terminal result: `status: "PASS"`, `checked: 10`,
-`matched: 10`. A green result means **the intentionally vulnerable
-toy outcomes were identified and the fixed guarded outcomes matched**,
-not that the permissive toy is safe.
+## Privacy, scope and provenance
 
-## Contribution pathway and limitations
+All markers are fixed synthetic strings. Do not submit private descriptions, credentials, logs, paths or headers. Source-only tooling remains outside the frozen 80-file npm candidate. M6-J hashes the excluded tree under unchanged limits. No release, audit or beta acceptance is implied.
 
-These three attack families could motivate *future separate contributor
-schemas*. Contributors can discuss a scenario without sending real
-credentials or proprietary logs. Do **not** submit actual error messages
-from your workplace, real header dumps, private paths, private tool
-descriptions, internal network topology, or environment snapshots.
-A sanitized fictional submission still needs explicit review. There is
-no security certification, natural-language prompt-injection test,
-independent user beta or live MCP interoperability evidence here.
+**Historical baseline:** [PR #289](../pull/289) original **10/10**, 4/4 [PR CI](../actions/runs/40930112479) and [main CI](../actions/runs/40930780325). Neither covers these new cases; the 12-case revision needs its own exact-SHA full test.
 
-The source-only helper and tests are excluded from the unpublished
-fixed **80-path** npm candidate. M6-J still hashes every excluded source
-file with strict upper bounds; neither the shipping package nor
-release gates are modified. External target approval
-[#21](../issues/21), independent security audit [#43](../issues/43)
-and independent beta [#59](../issues/59) remain OPEN.
-Engineering acceptance (2026-10-29): [PR #289](../pull/289) passed
-[PR CI #40930112479](../actions/runs/40930112479) **4/4**
-on Windows/Ubuntu Node20/22, then merged as exact main SHA
-`713092bb51ef182c26d1c60dfd56b37dc6b1630f`.
-Independent [main CI #40930780325](../actions/runs/40930780325)
-also passed **4/4 on that exact SHA**. This is first-party
-engineering acceptance only — not independent beta, verified real-world
-attack detection, real credential-leak evaluation or a release.
+Real-target consent [#21](../issues/21), independent audit [#43](../issues/43), and independent beta [#59](../issues/59) remain open. See the [M22 contributor protocol](../issues/287) for separate bounded scenario inputs; M23 does not reinterpret M8 tool-result fixtures as real approval.

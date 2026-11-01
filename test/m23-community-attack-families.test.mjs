@@ -12,12 +12,13 @@ const names=[
   'RUG_UNCHANGED','RUG_DESCRIPTION_CHANGED',
   'MULTI_SAME_OWNER','MULTI_CROSS_OWNER','MULTI_FORGED_OWNER_CLAIM',
   'ERROR_SUCCESS_CONTROL','ERROR_GENERIC_CONTROL',
-  'ERROR_ENV_ECHO','ERROR_PATH_ECHO','ERROR_HEADER_ECHO'
+  'ERROR_ENV_ECHO','ERROR_PATH_ECHO','ERROR_HEADER_ECHO',
+  'RUG_HIDDEN_DESCRIPTION_INSTRUCTION','RUG_SCHEMA_SWAP_AFTER_APPROVAL'
 ];
 const types=[
   'RUG_PULL','RUG_PULL','MULTI_SERVER','MULTI_SERVER','MULTI_SERVER',
   'ERROR_CHANNEL','ERROR_CHANNEL','ERROR_CHANNEL','ERROR_CHANNEL',
-  'ERROR_CHANNEL'
+  'ERROR_CHANNEL','RUG_PULL','RUG_PULL'
 ];
 const witness=(v)=>({
   requests:1,allowed:v[0],denied:v[1],legitimateTasksHandled:v[2],
@@ -35,7 +36,9 @@ const expected=[
   [[1,0,0,0,0],[1,0,0,0,0]],
   [[1,0,0,0,1],[1,0,0,0,0]],
   [[1,0,0,0,1],[1,0,0,0,0]],
-  [[1,0,0,0,1],[1,0,0,0,0]]
+  [[1,0,0,0,1],[1,0,0,0,0]],
+  [[1,0,1,1,0],[0,1,0,0,0]],
+  [[1,0,1,1,0],[0,1,0,0,0]]
 ];
 const good=()=>names.map((id,i)=>({
   id,family:types[i],unsafe:witness(expected[i][0]),
@@ -46,12 +49,12 @@ const cli=(...args)=>spawnSync(process.execPath,
     cwd:fileURLToPath(new URL('../',import.meta.url)),
     shell:false,encoding:'utf8',timeout:15000,maxBuffer:65536
   });
-test('M23-A: ten source-authored controls compare all three suggested families',()=>{
+test('M23-A: twelve source-authored controls compare all three suggested families',()=>{
   const r=summarizeCommunityAttackFamilies(good());
   assert.equal(r.status,'PASS');
-  assert.equal(r.checked,10);
-  assert.equal(r.matched,10);
-  assert.equal(r.expectedUnsafeEffects,3);
+  assert.equal(r.checked,12);
+  assert.equal(r.matched,12);
+  assert.equal(r.expectedUnsafeEffects,5);
   assert.equal(r.expectedUnsafeErrorLeakCases,3);
   assert.equal(r.guardedUnauthorizedEffectsExpected,0);
   assert.equal(r.guardedErrorLeaksExpected,0);
@@ -66,7 +69,9 @@ test('M23-A: ten source-authored controls compare all three suggested families',
     'LEGITIMATE_OR_GENERIC_CONTROL_PRESERVED',
     'SYNTHETIC_ERROR_CHANNEL_LEAK_EXPOSED',
     'SYNTHETIC_ERROR_CHANNEL_LEAK_EXPOSED',
-    'SYNTHETIC_ERROR_CHANNEL_LEAK_EXPOSED'
+    'SYNTHETIC_ERROR_CHANNEL_LEAK_EXPOSED',
+    'SYNTHETIC_UNAUTHORIZED_EFFECT_EXPOSED',
+    'SYNTHETIC_UNAUTHORIZED_EFFECT_EXPOSED'
   ]);
   assert.equal(r.realAgentBehaviorObserved,false);
   assert.equal(r.realEnvironmentReadPerformed,false);
@@ -100,7 +105,10 @@ test('M23-B: missing unsafe effects, leaked protected effects and fabricated con
     [7,'unsafe','actualEnvironmentReads',1],
     [8,'unsafe','actualFilesystemReads',1],
     [0,'guarded','externalRequests',1],
-    [0,'guarded','requests',2]
+    [0,'guarded','requests',2],
+    [10,'guarded','allowed',1],
+    [11,'unsafe','protectedEffects',0],
+    [11,'guarded','protectedEffects',1]
   ];
   for(const [i,mode,key,value] of changes){
     const rows=good();
@@ -108,7 +116,7 @@ test('M23-B: missing unsafe effects, leaked protected effects and fabricated con
     const result=summarizeCommunityAttackFamilies(rows);
     assert.equal(result.status,'FAIL',i+':'+mode+'.'+key);
     assert.equal(result.exitCode,1,i+':'+mode+'.'+key);
-    assert.equal(result.matched,9,i+':'+mode+'.'+key);
+    assert.equal(result.matched,11,i+':'+mode+'.'+key);
     assert.deepEqual(result.cases[i].mismatchedWitnessFields,[mode+'.'+key]);
   }
 });
@@ -135,7 +143,7 @@ test('M23-B: sparse, swapped, accessors and extraneous private data cannot forge
   });
   const result=summarizeCommunityAttackFamilies(fake);
   assert.equal(result.status,'FAIL');
-  assert.equal(result.matched,9);
+  assert.equal(result.matched,11);
   assert.equal(executed,0);
   assert.ok(!JSON.stringify(result).includes('PRIVATE_CANARY'));
   const irrelevant=good();
@@ -148,8 +156,8 @@ test('M23-B: sparse, swapped, accessors and extraneous private data cannot forge
 test('M23-A: actual first-party differential code witnesses exposed and guarded outcomes',()=>{
   const r=runCommunityAttackFamilies();
   assert.equal(r.status,'PASS',JSON.stringify(r));
-  assert.equal(r.checked,10);
-  assert.equal(r.matched,10);
+  assert.equal(r.checked,12);
+  assert.equal(r.matched,12);
   assert.equal(r.sourceAuthoredToyOnly,true);
   assert.deepEqual(r,runCommunityAttackFamilies(),'stateless repeat');
 });
@@ -161,7 +169,7 @@ test('M23-C: no-argument CLI, fixed report, no canary or caller data echo',()=>{
   assert.equal(ok.stderr,'');
   const result=JSON.parse(ok.stdout);
   assert.equal(result.status,'PASS');
-  assert.equal(result.matched,10);
+  assert.equal(result.matched,12);
   for(const text of [
     'SYNTHETIC_ENV_CANARY_NEVER_REAL',
     'SYNTHETIC_PATH_CANARY_NEVER_REAL',
