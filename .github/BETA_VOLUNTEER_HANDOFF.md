@@ -42,16 +42,10 @@ Its five checks can detect expected fictional failures. PASS is not an MCP secur
 
 ## Optional deeper first-party tour (M14 source revisions only)
 
-The pinned M13 baseline above deliberately contains the original **five**
-fictional beta checks, not the later optional M14 tool. If you independently
-review a newer **M14-or-later** public revision, you may additionally run
-`node tools/beta-capability-tour.mjs`. It exercises two inert adapter
-profiles, a fixed fictional tool-result policy, one accepted and one
-rejected modern SSE reply over **ephemeral 127.0.0.1 only**. The optional
-result should be **4/4 MATCH** with one expected synthetic denial, and
-prints no fixture instructions or private payloads. It neither substitutes
-for the five-case beta protocol nor constitutes independent security evidence.
-Do not silently swap the pinned baseline or supply real URLs/credentials.
+The historical pin contains only the five-case beta protocol. On a separately
+reviewed M14-or-later source revision, `node tools/beta-capability-tour.mjs`
+demonstrates four fictional cases (including local 127.0.0.1 SSE), not
+independent security evidence. Do not swap pins or use real credentials.
 
 ## Optional synthetic fixture contribution (separate from beta evidence)
 
