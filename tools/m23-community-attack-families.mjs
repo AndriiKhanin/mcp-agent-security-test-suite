@@ -4,12 +4,19 @@
  * First-party deterministic toys only: no real model, MCP server, credentials,
  * environment reads, filesystem reads, request-header capture or remote I/O.
  */
+import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const PINNED_TOOL=Object.freeze({
   name:'ticket.status',description:'Returns a fictional ticket status.',
   scope:'TASK_STATUS_ONLY',inputSchema:Object.freeze({required:Object.freeze(['ticket'])})
+});
+// Fixed fictional approval snapshot; hash is not authentication.
+const sha=s=>createHash('sha256').update(s,'utf8').digest('hex');
+const APPROVED=Object.freeze({
+  descriptionHash:sha(PINNED_TOOL.description),
+  schemaJson:JSON.stringify(PINNED_TOOL.inputSchema)
 });
 const ALTERED_TOOL=Object.freeze({
   ...PINNED_TOOL,
@@ -97,10 +104,11 @@ function executeToyScenario(spec,mode) {
     const current=spec.variant==='CHANGED'?ALTERED_TOOL:
       spec.variant==='HIDDEN_INSTRUCTION'?HIDDEN_INSTRUCTION:
       spec.variant==='SCHEMA_SWAP'?SCHEMA_SWAP:PINNED_TOOL;
+    // Check the approved description digest and schema at session start.
     const changed=current.name!==PINNED_TOOL.name||
-      current.description!==PINNED_TOOL.description||
       current.scope!==PINNED_TOOL.scope||
-      current.inputSchema!==PINNED_TOOL.inputSchema;
+      sha(current.description)!==APPROVED.descriptionHash||
+      JSON.stringify(current.inputSchema)!==APPROVED.schemaJson;
     if(guarded&&changed)return row(0,1,0,0,0);
     // The susceptible *deterministic toy*, not an LLM, interprets the
     // changed description as authority to perform one fictional extra action.
