@@ -9,6 +9,16 @@ security contracts**. It cannot audit your own MCP service or authenticate
 your project. You need Git, Node.js 20 or 22, and a disposable checkout.
 Do not supply secrets, logs, production URLs or customer code.
 
+## Choose one test path before you start
+
+**New F1 guided first-run usability test (recommended for onboarding feedback):**
+follow the [step-by-step F1 guide](../docs/BETA_TESTING.md#f1-independent-first-run-beta--reviewed-source-candidate). It pins source revision `c85b03d01ccfbbd1acb1c21850638712824ed412` and tests the human-readable `start --text` command, an inert bundled descriptor, a JSON-v1 report, and the five fixed fictional cases. This is **not** a 4/4-CI attestation for the F1 pin. Verify the full source SHA yourself and submit only redacted observations. Do not switch to floating `main` or a real MCP configuration.
+
+**Historical five-case baseline (kept for reproducibility):**
+the fixed `2ad680ed2e4c322374fdabf3c2007e396f893a59` command sequence below exercises the earlier offline beta protocol, with its own historical four-platform CI reference. It **does not** include the later F1 `start` workflow. Its PASS cannot be used as evidence that you tested the new onboarding.
+
+When reporting a result, name **which path** you followed and its exact SHA. If unsure, use the F1 guide above for current onboarding feedback. Either exercise is voluntary, source-only, fictional, and completely separate from connecting to external MCP services.
+
 ## Reproducible offline-first check
 
 Review the source and its [security boundaries](../SECURITY.md) before
