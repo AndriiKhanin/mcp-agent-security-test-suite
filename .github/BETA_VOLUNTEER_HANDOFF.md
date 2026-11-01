@@ -31,7 +31,7 @@ node --version
 node tools/beta-review.mjs
 ```
 
-The final command runs five local fictional checks. It does not scan user MCP servers.
+The final command runs five fictional checks from the source checkout; it does not contact a user MCP server.
 
 The printed SHA from `git rev-parse HEAD` and the tool's displayed SHA
 must both equal the complete pinned revision above. The local Git SHA is
