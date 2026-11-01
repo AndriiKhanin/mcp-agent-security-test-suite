@@ -9,13 +9,7 @@ security contracts**. It cannot audit your own MCP service or authenticate
 your project. You need Git, Node.js 20 or 22, and a disposable checkout.
 Do not supply secrets, logs, production URLs or customer code.
 
-## Choose your beta path
-
-For the newer guided F1 `start` first-run usability check, follow the [F1 instructions](../docs/BETA_TESTING.md#f1-independent-first-run-beta--reviewed-source-candidate) at pinned commit `c85b03d01ccfbbd1acb1c21850638712824ed412`. This pin has **no claimed 4/4 CI**.
-
-For historical five-case checks only, use the separate pinned `2ad680ed2e4c322374fdabf3c2007e396f893a59` procedure below. Its historical 4/4 CI does not certify the F1 workflow.
-
-Report the exact SHA and which path you ran. Never use floating `main`, real MCP targets or secrets.
+For the newer F1 guided `start` usability test, use the [F1 guide](../docs/BETA_TESTING.md#f1-independent-first-run-beta--reviewed-source-candidate) pinned to `c85b03d01ccfbbd1acb1c21850638712824ed412`. The historical five-case procedure below pins `2ad680ed2e4c322374fdabf3c2007e396f893a59` and does **not** verify F1 `start`. Report which one you ran. Neither permits real target access.
 
 ## Reproducible offline-first check
 
@@ -37,11 +31,7 @@ node --version
 node tools/beta-review.mjs
 ```
 
-The clone uses the network to fetch *public source*. The last command
-uses **only local Git metadata** and five bundled fictional acceptance
-checks; it does not contact a user MCP server. The beta helper outputs a
-self-reported Markdown card and rejects dirty/unverifiable checkouts.
-The helper is present in a **source checkout**, not the npm package.
+The final command runs five local fictional checks. It does not scan user MCP servers.
 
 The printed SHA from `git rev-parse HEAD` and the tool's displayed SHA
 must both equal the complete pinned revision above. The local Git SHA is
