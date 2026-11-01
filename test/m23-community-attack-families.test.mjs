@@ -116,7 +116,7 @@ test('M23-B: missing unsafe effects, leaked protected effects and fabricated con
     const result=summarizeCommunityAttackFamilies(rows);
     assert.equal(result.status,'FAIL',i+':'+mode+'.'+key);
     assert.equal(result.exitCode,1,i+':'+mode+'.'+key);
-    assert.equal(result.matched,9,i+':'+mode+'.'+key);
+    assert.equal(result.matched,11,i+':'+mode+'.'+key);
     assert.deepEqual(result.cases[i].mismatchedWitnessFields,[mode+'.'+key]);
   }
 });
