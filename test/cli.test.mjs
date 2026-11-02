@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {dirname,resolve,join} from 'node:path';
-import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,writeFileSync,rmSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 const cwd=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 function cli(...args){return spawnSync(process.execPath,['src/cli.mjs',...args],{cwd,encoding:'utf8'});}
@@ -168,4 +168,12 @@ test('F1 start gives fixed, privacy-safe 4 KiB error guidance',()=>{
   writeFileSync(file,' '.repeat(4097));
   assert.equal(cli('start','--client-config',file).status,2);
  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+// The local candidate receipt must never label uncommitted source a PASS.
+test('F1: dirty checkout fails local CI before running regression',()=>{
+ const source=readFileSync(join(cwd,'examples/offline-ci-check.mjs'),'utf8');
+ assert.match(source,/if\(!clean\)\{/);
+ assert.match(source,/receipts\.push\(\{stage:'checkout',status:'FAIL'/);
+ assert.match(source,/const ok=clean&&receipts\.length/);
 });

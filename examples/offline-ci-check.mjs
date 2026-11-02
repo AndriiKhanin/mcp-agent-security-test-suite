@@ -134,6 +134,7 @@ function runLocalSuite(mode){
   if(head.status!==0||status.status!==0||
      !/^[0-9a-f]{40}$/.test(head.stdout.trim()))
     throw Error('LOCAL_GIT_CHECK_FAILED');
+  const clean=status.stdout.trim()==='';
   const dir=mkdtempSync(join(tmpdir(),'mcp-local-ci-'));
   const stages=[
     {name:'regression',args:quick
@@ -142,7 +143,11 @@ function runLocalSuite(mode){
     {name:'fictional-smoke',args:[fileURLToPath(import.meta.url)]}
   ];
   const receipts=[];
-  for(const stage of stages){
+  if(!clean){
+    const log=join(dir,'checkout.log');
+    writeFileSync(log,'DIRTY_CHECKOUT: regression not run\n',{encoding:'utf8',mode:0o600});
+    receipts.push({stage:'checkout',status:'FAIL',exitCode:1,log});
+  } else for(const stage of stages){
     const run=spawnSync(process.execPath,stage.args,{
       cwd:root,env,encoding:'utf8',shell:false,windowsHide:true,
       timeout:900000,maxBuffer:8*1024*1024});
@@ -154,11 +159,11 @@ function runLocalSuite(mode){
       exitCode:Number.isInteger(run.status)?run.status:null,log});
     if(!passed) break;
   }
-  const ok=receipts.length===stages.length&&
+  const ok=clean&&receipts.length===stages.length&&
     receipts.every(x=>x.status==='PASS');
   const receipt={schemaVersion:1,mode:quick?'QUICK':'FULL',
     status:ok?'PASS':'FAIL',source:'LOCAL_CHECKOUT_ONLY',
-    gitHead:head.stdout.trim(),workingTreeClean:status.stdout.trim()==='',
+    gitHead:head.stdout.trim(),workingTreeClean:clean,
     platform:process.platform,node:process.version,
     externalTargetAssessed:false,independentCI:false,stages:receipts};
   const receiptPath=join(dir,'receipt.json');
