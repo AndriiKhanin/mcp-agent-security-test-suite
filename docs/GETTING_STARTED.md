@@ -32,7 +32,7 @@ line `LOCAL_CI_RECEIPT <path>` identifies the local receipt. It records
 `independentCI:false`. If a stage fails, exit code is 1; invalid
 environment or unavailable Git/Node exits 2. Logs stay on the laptop,
 never uploaded to GitHub. Verify `gitHead` before reporting a result;
-a PASS on uncommitted changes is not evidence for a merged commit.
+a dirty checkout now produces `LOCAL_CI_FAIL`, exit 1, and a symbolic `checkout` failure receipt **before running any regression tests**. Neither changed filenames nor contents are printed. Only a clean exact-commit PASS is usable for PR acceptance.
 
 For a full four-configuration **local** matrix, repeat `--local-full`
 after selecting Node 20 and Node 22 on Windows, and repeat in
