@@ -58,6 +58,18 @@ Review and manually redact all text before posting to [independent beta gate #59
 3. Five-case `beta-review.mjs` verdict and matched count **0–5**; only public symbolic failure codes if needed.
 4. What was confusing or inaccessible, plus a minimal fictional-only reproduction.
 
+In the GitHub beta form, select **F1 guided start plus five-case beta**.
+For **F1 first-run outcomes**, use only the three observed exit codes
+(no-input text / inert-descriptor text / JSON start), then the JSON
+`externalTargetContacted`, `operatorVerified`, and
+`projectConnectionAuthorized` booleans; for example,
+`0/0/0; false/false/false` **only if that is what you observed**.
+Do not infer flags or convert a missing observation to PASS.
+This field is required so omissions are explicit: enter `NOT_RUN`
+for a historical five-case-only test that did not attempt F1.
+Do not enter `NOT_RUN` if you attempted F1 but it failed:
+report the observed exit codes or the failed step in usability feedback.
+
 Do **not** paste raw reports, console histories, usernames, machine paths, local environment variables, proprietary server configs, access tokens, private endpoints or exploit details. Never upload your own real MCP client configuration, even if the command can validate a restricted inert shape. For confidential vulnerabilities follow [SECURITY.md](../SECURITY.md), not public issues.
 
 ## Reviewer interpretation

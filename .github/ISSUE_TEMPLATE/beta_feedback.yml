@@ -70,6 +70,7 @@ body:
       label: "Independent offline evaluation path"
       description: "Report only which reviewed local exercise you actually ran."
       options:
+        - "F1 guided start plus five-case beta"
         - "Source runner and portable smoke"
         - "Source runner, smoke and local tarball verification"
         - "Source runner only (other exercises not attempted)"
@@ -96,6 +97,14 @@ body:
         - "Expected 0/1/2 contract matched for exercises I ran"
         - "Observed symbolic exit-code mismatch"
         - "Did not run enough exercises to check 0/1/2"
+    validations:
+      required: true
+  - type: input
+    id: f1_start_exits
+    attributes:
+      label: "F1 first-run outcomes (or NOT_RUN)"
+      description: "Use NOT_RUN if not attempted. Else provide text/inert/JSON exit codes and JSON externalTargetContacted/operatorVerified/projectConnectionAuthorized flags. No logs."
+      placeholder: "NOT_RUN or 0/0/0; false/false/false"
     validations:
       required: true
   - type: dropdown
