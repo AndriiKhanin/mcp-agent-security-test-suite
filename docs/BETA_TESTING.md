@@ -65,7 +65,10 @@ For **F1 first-run outcomes**, use only the three observed exit codes
 `projectConnectionAuthorized` booleans; for example,
 `0/0/0; false/false/false` **only if that is what you observed**.
 Do not infer flags or convert a missing observation to PASS.
-This field is optional for historical five-case-only testers.
+This field is required so omissions are explicit: enter `NOT_RUN`
+for a historical five-case-only test that did not attempt F1.
+Do not enter `NOT_RUN` if you attempted F1 but it failed:
+report the observed exit codes or the failed step in usability feedback.
 
 Do **not** paste raw reports, console histories, usernames, machine paths, local environment variables, proprietary server configs, access tokens, private endpoints or exploit details. Never upload your own real MCP client configuration, even if the command can validate a restricted inert shape. For confidential vulnerabilities follow [SECURITY.md](../SECURITY.md), not public issues.
 
