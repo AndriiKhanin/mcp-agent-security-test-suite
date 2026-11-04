@@ -21,6 +21,10 @@ The first F1 guided entry point is accepted via [PR #387](https://github.com/And
 Completing F1 usability is the current engineering priority; actual
 user-owned staging validation is still blocked by Issue #21.
 
+## F2 development authorization (2026-11-04)
+
+Owner-approved source/test development of one **disabled-by-default**, narrowly scoped MCP `2026-07-28` HTTPS `server/discover` adapter against an **isolated, first-party non-production staging target class** is tracked in [#403](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/403), with the explicit [owner decision in #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21#issuecomment-6639531672). The current `start`/`adapter-check` commands still **do not** connect to user MCP servers. No actual remote DNS/HTTPS target request has yet been authorized: exact target ownership, operator consent, isolation and a separate first-contact decision remain required. F1 remains IN PROGRESS, F2 is not implemented or accepted, and the candidate is not released.
+
 ## Local tests — cloud CI runs only on request
 
 To avoid automatic GitHub Actions consumption, normal development now
