@@ -2,7 +2,7 @@
 
 **Status:** M4-A + M4-B0 offline descriptor validation ACCEPTED ([#61](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/61)); real M4-B external target contact **NOT APPROVED**  
 **Issue:** [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21)  
-**As of:** 2026-10-23  
+**Original design:** 2026-10-23; **new bounded owner decision:** 2026-11-04  
 **Product:** the independent MIT [MCP Agent Security Test Suite](../README.md)
 
 > The maintainer has separately approved **only M4-A**, a fixed first-party temporary `127.0.0.1` loopback HTTP test double, tracked in [Issue #23](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/23). It opens a local socket; no external target, arbitrary URL, credentials, OAuth, paid service, tool execution or real MCP endpoint is approved. M4-B and later phases require a **new explicit authorization**.
@@ -10,6 +10,8 @@
 **Implementation boundary:** The public [universal project descriptor](UNIVERSAL_ADAPTER.md) now accepts stdio or Streamable-HTTP profiles but its `adapter-check` CLI never connects or launches a user process. [M4-B1 #63](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/63) tracks fixed first-party local mock driver development. This is no approval for arbitrary stdio commands, network scanning or credentials.
 
 **M4-B5 design continuation (NO LIVE TARGET IMPLEMENTATION):** the [future-target decision packet](M4_B5_TARGET_APPROVAL.md) expands the real operator/target-ownership, per-run grant and DNS/TLS/SSRF gates after M4-B4 fixed-mock acceptance. It is an offline architecture and regression effort only. The separate approval checklist in this RFC is still open.
+
+> **Superseding F2 owner decision (2026-11-04):** Following the historical M4-A-only authorization below, the owner has **now approved source/test development of a disabled-by-default bounded HTTPS client and our own isolated non-production staging target class**: [#21 decision](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21#issuecomment-6639531672), [F2 implementation #403](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/403). The initial pinned method is **MCP 2026-07-28 `server/discover` only** ([normative request](https://modelcontextprotocol.io/specification/2026-07-28/server/discover)), without legacy fallback. **No actual remote DNS/HTTPS target contact is yet authorized**, even to first-party staging: it requires separately verified ownership/operator consent, exact endpoint/method grant, DNS/TLS/SSRF isolation evidence and explicit first-contact approval. No credentials, production, third-party MCP or release. The earlier paragraphs record historical constraints at their original date, not the current source implementation permission.
 
 ## 1. Why this milestone exists
 
