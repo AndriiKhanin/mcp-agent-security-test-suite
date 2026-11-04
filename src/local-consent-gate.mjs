@@ -140,3 +140,32 @@ export async function runGatedFirstPartySelftest() {
     findings:bad.map((o,i)=>({step:i+1,rule:o.rule})),outcomes
   };
 }
+
+/** F2 source-only pre-contact check; syntax is never ownership or consent.
+ * No DNS, socket, network, token, process or external target interaction. */
+export function reviewF2StagingIntent(intent) {
+  const verdict=rule=>Object.freeze({status:'FAIL',rule,
+    connectionStatus:'NOT_ATTEMPTED',operatorVerified:false,
+    ownershipVerified:false,executionEnabled:false,externalTargetContacted:false});
+  try {
+    if(!intent || Object.getPrototypeOf(intent)!==Object.prototype)
+      return verdict('F2_INTENT_REJECTED');
+    const props=Object.getOwnPropertyDescriptors(intent);
+    if(Reflect.ownKeys(props).length!==3 ||
+       !['endpoint','protocolVersion','method'].every(k=>Object.hasOwn(props,k)&&
+         Object.hasOwn(props[k],'value')&&props[k].enumerable))
+      return verdict('F2_INTENT_REJECTED');
+    const {endpoint,protocolVersion,method}=intent;
+    if(protocolVersion!=='2026-07-28'||method!=='server/discover'||
+       typeof endpoint!=='string'||endpoint.length>512||
+       !/^https:\/\/[a-z0-9.-]+\/mcp$/.test(endpoint))
+      return verdict('F2_INTENT_REJECTED');
+    const target=new URL(endpoint),host=target.hostname;
+    if(target.href!==endpoint||target.port||!host.includes('.')||
+       host.split('.').some(x=>!x||x.startsWith('xn--')||
+         !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(x))||
+       /^(?:\d+\.){3}\d+$/.test(host))
+      return verdict('F2_INTENT_REJECTED');
+    return verdict('F2_AUTHORITY_NOT_VERIFIED');
+  } catch {return verdict('F2_INTENT_REJECTED');}
+}
