@@ -1,11 +1,19 @@
 # M4-B5 — decision packet for a future user-owned MCP target preview
 
-**Status: DESIGN + OFFLINE NON-CONTACT ENGINEERING ACCEPTED. NO REAL-TARGET IMPLEMENTATION OR OWNER APPROVAL.**  
+**Historical status (2026-10-23):** DESIGN + OFFLINE NON-CONTACT ENGINEERING ACCEPTED; no real target permission then. **New 2026-11-04 decision:** limited F2 source/test implementation approved; first actual external HTTPS target contact still NOT AUTHORIZED.  
 **Tracking:** [M4-B5 #76](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/76); original [M4 real-target RFC #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21).  
 **Baseline:** fixed first-party mock [M4-B4 #72](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/72), 438/438 tests per job.  
 **Candidate:** `0.0.10-rc.1`; no npm publish or stable release approval.
 
 This document is a **decision record for a proposed future capability**, not a runnable configuration, login guide or authorization. No user-owned URL is contacted; no real MCP stdio command is executed; no DNS, authentication, TLS, credential, OAuth or network code is added by M4-B5. The existing `adapter-check` and `adapter-policy-check` commands remain validation-only. A `PASS` from either **must never** permit target access.
+
+## 2026-11-04 bounded F2 implementation decision (historical hold superseded only for source/test)
+
+The owner authorized **development** of a first-party, non-production, disabled-by-default HTTPS staging discovery adapter: [decision #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21#issuecomment-6639531672), [implementation #403](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/403). The confirmed normative method is [MCP 2026-07-28 server/discover](https://modelcontextprotocol.io/specification/2026-07-28/server/discover); no legacy fallback, tool/resource call, credentials or unbounded targets.
+
+Historical M4-B5 pending checkboxes below were written *before* this decision and remain applicable to the **first real remote network contact**, not ordinary source-only implementation.
+
+**Still gated:** Any actual DNS/HTTPS connection to a separately hosted staging server (including our own) needs a verified exact target, independent operator/ownership evidence, exact method-bound revocable grant, demonstrated DNS/TLS/SSRF isolation and further exact-target owner approval under #21. Existing adapter-check stays validate-only; no release is approved. A passing loopback mock is not evidence of public HTTPS isolation.
 
 ## 1. Product workflow: three independent gates, then an effect boundary
 
