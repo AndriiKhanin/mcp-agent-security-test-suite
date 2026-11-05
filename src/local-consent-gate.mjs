@@ -7,7 +7,7 @@
  * Direct low-level driver APIs remain developer test utilities, not a
  * security sandbox or a runtime access-control system for real MCP servers.
  */
-import { randomUUID } from 'node:crypto';
+import { randomUUID,createHash,createPublicKey,verify as cryptoVerify } from 'node:crypto';
 import { descriptorFingerprint, evaluateAdapterConsent } from './adapter-consent.mjs';
 import { createFirstPartyDriver } from './local-adapter-drivers.mjs';
 
@@ -168,4 +168,69 @@ export function reviewF2StagingIntent(intent) {
       return verdict('F2_INTENT_REJECTED');
     return verdict('F2_AUTHORITY_NOT_VERIFIED');
   } catch {return verdict('F2_INTENT_REJECTED');}
+}
+
+/** F2 offline Ed25519 evidence verification only. An untrusted supplied key
+ * is NOT an independently anchored issuer, target or operator identity.
+ * Even a valid signature NEVER enables network traffic or consumes a grant. */
+export function inspectF2SignedGrantEvidence(intent,evidence,nowMs=Date.now()) {
+  const result=(rule,signatureVerified=false)=>Object.freeze({
+    status:'FAIL',rule,signatureVerified,operatorVerified:false,
+    ownershipVerified:false,executionEnabled:false,
+    connectionStatus:'NOT_ATTEMPTED',externalTargetContacted:false
+  });
+  if(reviewF2StagingIntent(intent).rule!=='F2_AUTHORITY_NOT_VERIFIED')
+    return result('F2_INTENT_REJECTED');
+  const exact=(o,names)=>{
+    if(!o||Object.getPrototypeOf(o)!==Object.prototype)return false;
+    const props=Object.getOwnPropertyDescriptors(o);
+    return Reflect.ownKeys(props).length===names.length&&
+      names.every(k=>Object.hasOwn(props,k)&&Object.hasOwn(props[k],'value')&&
+        props[k].enumerable);
+  };
+  try {
+    if(!exact(evidence,['grant','signature','issuerPublicKeyPem'])||
+       !exact(evidence.grant,['schemaVersion','endpoint','protocolVersion',
+         'method','operatorId','issuerId','intentSha256','nonce',
+         'issuedAt','expiresAt'])||!Number.isSafeInteger(nowMs)||nowMs<0)
+      return result('F2_SIGNED_EVIDENCE_REJECTED');
+    const g=evidence.grant;
+    if(g.schemaVersion!==1||typeof g.operatorId!=='string'||
+       !/^[a-zA-Z][\w.-]{0,63}$/.test(g.operatorId)||
+       typeof g.issuerId!=='string'||
+       !/^[a-zA-Z][\w.-]{0,63}$/.test(g.issuerId)||
+       typeof g.nonce!=='string'||!/^[0-9a-f]{32}$/.test(g.nonce)||
+       typeof g.intentSha256!=='string'||!/^[0-9a-f]{64}$/.test(g.intentSha256)||
+       typeof evidence.signature!=='string'||
+       !/^[A-Za-z0-9_-]{86}$/.test(evidence.signature)||
+       typeof evidence.issuerPublicKeyPem!=='string'||
+       evidence.issuerPublicKeyPem.length>256||
+       !Number.isSafeInteger(g.issuedAt)||!Number.isSafeInteger(g.expiresAt)||
+       g.issuedAt<0||g.expiresAt<=g.issuedAt||
+       g.expiresAt-g.issuedAt>300_000)
+      return result('F2_SIGNED_EVIDENCE_REJECTED');
+    const digest=createHash('sha256').update(JSON.stringify([
+      intent.endpoint,intent.protocolVersion,intent.method
+    ]),'utf8').digest('hex');
+    if(g.endpoint!==intent.endpoint||g.protocolVersion!==intent.protocolVersion||
+       g.method!==intent.method||g.intentSha256!==digest)
+      return result('F2_GRANT_SCOPE_MISMATCH');
+    const signature=Buffer.from(evidence.signature,'base64url');
+    if(signature.length!==64||signature.toString('base64url')!==evidence.signature)
+      return result('F2_SIGNED_EVIDENCE_REJECTED');
+    const key=createPublicKey(evidence.issuerPublicKeyPem);
+    if(key.asymmetricKeyType!=='ed25519')
+      return result('F2_SIGNED_EVIDENCE_REJECTED');
+    const message=Buffer.from('F2-SIGNED-INTENT-V1\n'+JSON.stringify([
+      g.schemaVersion,g.endpoint,g.protocolVersion,g.method,g.operatorId,
+      g.issuerId,g.intentSha256,g.nonce,g.issuedAt,g.expiresAt
+    ]),'utf8');
+    if(!cryptoVerify(null,message,key,signature))
+      return result('F2_SIGNATURE_INVALID');
+    if(g.issuedAt>nowMs||g.expiresAt<=nowMs)
+      return result('F2_GRANT_EXPIRED_OR_NOT_YET_VALID',true);
+    // External key input has no issuer trust anchor, verified target control,
+    // authenticated operator, durable replay/revocation or egress proof.
+    return result('F2_TRUST_ANCHOR_NOT_ESTABLISHED',true);
+  } catch {return result('F2_SIGNED_EVIDENCE_REJECTED');}
 }
