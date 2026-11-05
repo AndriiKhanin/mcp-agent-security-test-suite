@@ -372,6 +372,21 @@ test('M6-J: no release commands, symlink inputs, additional args or shipped path
     assert.equal(Object.hasOwn(pkg.scripts,k),false);
 });
 
+
+test('F2 custody migration: excluded source growth stays bounded separately',()=>{
+  const code=readFileSync(join(root,'tools/reviewer-handoff.mjs'),'utf8');
+  assert.match(code,/const MAX_TOTAL_BYTES=2_000_000;/);
+  assert.match(code,/const MAX_EXCLUDED_SOURCE_BYTES=2_250_000;/);
+  assert.match(code,/const MAX_EXCLUDED_FILES=240;/);
+  assert.match(code,/if\(total>MAX_EXCLUDED_SOURCE_BYTES\)denied\(\)/);
+  assert.match(code,/value\.excludedReview\.rawBytesTotal>MAX_EXCLUDED_SOURCE_BYTES/);
+  assert.match(code,/value\.packagedSource\.rawBytesTotal>MAX_TOTAL_BYTES/);
+  assert.match(code,/value\.localArchive\.byteLength>MAX_TOTAL_BYTES/);
+  const packet=sample();
+  packet.excludedReview.rawBytesTotal=2_250_001;
+  assert.throws(()=>validateHandoff(packet),/M6J_INVALID_LOCAL_PACKET/);
+});
+
 test('M54/F1: cloud CI manual-only; four-platform release gate retained',()=>{
   const y=readFileSync(join(root,'.github/workflows/ci.yml'),'utf8');
   assert.match(y,/^on:\r?\n  workflow_dispatch:\s*$/m);

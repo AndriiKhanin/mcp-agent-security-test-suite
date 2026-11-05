@@ -21,6 +21,9 @@ const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const decoder=new TextDecoder('utf-8',{fatal:true});
 const MAX_FILE_BYTES=1_048_576;
 const MAX_TOTAL_BYTES=2_000_000;
+// F2 reviewed migration: excluded source-only inventory has its own cap.
+// Packaged source and archive retain their original 2 MB hard ceiling.
+const MAX_EXCLUDED_SOURCE_BYTES=2_250_000;
 // Complete excluded-source custody is preserved and size-bounded.
 const MAX_PACKET_BYTES=65_536;
 // Allow bounded growth of reviewed source-only test/guide/fixture files.
@@ -75,7 +78,7 @@ function excludedFileIndex(){
         const bytes=readFileSync(path);
         if(bytes.length>MAX_FILE_BYTES)denied();
         total+=bytes.length;
-        if(total>MAX_TOTAL_BYTES)denied();
+        if(total>MAX_EXCLUDED_SOURCE_BYTES)denied();
         files.push({path:label,byteLength:bytes.length,sha256:sha(bytes)});
         if(files.length>MAX_EXCLUDED_FILES)denied();
       }else denied();
@@ -160,7 +163,7 @@ export function validateHandoff(value){
     value.excludedReview.fileCount>MAX_EXCLUDED_FILES||
     !Number.isSafeInteger(value.excludedReview.rawBytesTotal)||
     value.excludedReview.rawBytesTotal<0||
-    value.excludedReview.rawBytesTotal>MAX_TOTAL_BYTES||
+    value.excludedReview.rawBytesTotal>MAX_EXCLUDED_SOURCE_BYTES||
     !SHA256.test(value.excludedReview.indexSha256)||
     !Array.isArray(value.excludedReview.files)||
     value.excludedReview.files.length!==value.excludedReview.fileCount||
