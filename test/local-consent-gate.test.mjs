@@ -195,6 +195,9 @@ test('F2: signed intent verifies cryptographic integrity but never permits netwo
   assert.equal(run(e,120000).rule,'F2_GRANT_EXPIRED_OR_NOT_YET_VALID');
   assert.equal(run({...e,issuerPublicKeyPem:
     b.publicKey.export({format:'pem',type:'spki'})}).rule,'F2_SIGNATURE_INVALID');
+  assert.equal(run({...e,signature:
+    (e.signature[0]==='A'?'B':'A')+e.signature.slice(1)}).rule,
+    'F2_SIGNATURE_INVALID');
   assert.equal(run({...e,grant:{...g,method:'tools/call'}}).rule,
     'F2_GRANT_SCOPE_MISMATCH');
   assert.equal(run({...e,approved:true}).rule,'F2_SIGNED_EVIDENCE_REJECTED');
