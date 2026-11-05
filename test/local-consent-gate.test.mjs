@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { createHash,generateKeyPairSync,sign } from 'node:crypto';
 import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent }
+import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
 import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
@@ -167,4 +168,44 @@ test('F2: deny before network',()=>{
     i?'F2_INTENT_REJECTED':'F2_AUTHORITY_NOT_VERIFIED',
     'NOT_ATTEMPTED',false,false]);
   }
+});
+
+test('F2: signed intent verifies cryptographic integrity but never permits network',()=>{
+  const i={endpoint:'https://fixture.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover'};
+  const a=generateKeyPairSync('ed25519'),b=generateKeyPairSync('ed25519');
+  const g={schemaVersion:1,endpoint:i.endpoint,protocolVersion:i.protocolVersion,
+    method:i.method,operatorId:'firstPartyOperator',issuerId:'firstPartyIssuer',
+    intentSha256:createHash('sha256').update(JSON.stringify([
+      i.endpoint,i.protocolVersion,i.method])).digest('hex'),
+    nonce:'ab'.repeat(16),issuedAt:1000,expiresAt:120000};
+  const msg=Buffer.from('F2-SIGNED-INTENT-V1\n'+JSON.stringify([
+    g.schemaVersion,g.endpoint,g.protocolVersion,g.method,g.operatorId,
+    g.issuerId,g.intentSha256,g.nonce,g.issuedAt,g.expiresAt]),'utf8');
+  const e={grant:g,signature:sign(null,msg,a.privateKey).toString('base64url'),
+    issuerPublicKeyPem:a.publicKey.export({format:'pem',type:'spki'})};
+  const run=(ev,now=2000)=>inspectF2SignedGrantEvidence(i,ev,now);
+  const good=run(e);
+  assert.deepEqual([good.status,good.rule,good.signatureVerified,
+    good.operatorVerified,good.ownershipVerified,good.executionEnabled,
+    good.externalTargetContacted,good.connectionStatus],
+    ['FAIL','F2_TRUST_ANCHOR_NOT_ESTABLISHED',true,
+      false,false,false,false,'NOT_ATTEMPTED']);
+  assert.equal(run(e,999).rule,'F2_GRANT_EXPIRED_OR_NOT_YET_VALID');
+  assert.equal(run(e,120000).rule,'F2_GRANT_EXPIRED_OR_NOT_YET_VALID');
+  assert.equal(run({...e,issuerPublicKeyPem:
+    b.publicKey.export({format:'pem',type:'spki'})}).rule,'F2_SIGNATURE_INVALID');
+  assert.equal(run({...e,grant:{...g,method:'tools/call'}}).rule,
+    'F2_GRANT_SCOPE_MISMATCH');
+  assert.equal(run({...e,approved:true}).rule,'F2_SIGNED_EVIDENCE_REJECTED');
+  assert.equal(run({...e,grant:{...g,nonce:'short'}}).rule,
+    'F2_SIGNED_EVIDENCE_REJECTED');
+  assert.equal(run({...e,issuerPublicKeyPem:'BAD'}).rule,
+    'F2_SIGNED_EVIDENCE_REJECTED');
+  assert.equal(run({...e,grant:{...g,expiresAt:301001}}).rule,
+    'F2_SIGNED_EVIDENCE_REJECTED');
+  assert.equal(inspectF2SignedGrantEvidence({...i,method:'tools/call'},e,2000).rule,
+    'F2_INTENT_REJECTED');
+  assert.ok(!JSON.stringify(good).includes('firstPartyOperator'));
+  assert.ok(!JSON.stringify(good).includes(i.endpoint));
 });
