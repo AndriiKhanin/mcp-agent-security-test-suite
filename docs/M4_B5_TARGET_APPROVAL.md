@@ -1,6 +1,6 @@
 # M4-B5 — decision packet for a future user-owned MCP target preview
 
-**Historical status (2026-10-23):** DESIGN + OFFLINE NON-CONTACT ENGINEERING ACCEPTED; no real target permission then. **New 2026-11-04 decision:** limited F2 source/test implementation approved; first actual external HTTPS target contact still NOT AUTHORIZED.  
+**Historical status (2026-10-23):** DESIGN + OFFLINE NON-CONTACT ENGINEERING ACCEPTED; NO REAL-TARGET IMPLEMENTATION OR OWNER APPROVAL at that date. **New 2026-11-04 decision:** limited F2 source/test implementation approved; first actual external HTTPS target contact still NOT AUTHORIZED.  
 **Tracking:** [M4-B5 #76](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/76); original [M4 real-target RFC #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21).  
 **Baseline:** fixed first-party mock [M4-B4 #72](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/72), 438/438 tests per job.  
 **Candidate:** `0.0.10-rc.1`; no npm publish or stable release approval.
