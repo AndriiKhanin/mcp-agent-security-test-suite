@@ -211,4 +211,28 @@ test('F2: signed intent verifies cryptographic integrity but never permits netwo
     'F2_INTENT_REJECTED');
   assert.ok(!JSON.stringify(good).includes('firstPartyOperator'));
   assert.ok(!JSON.stringify(good).includes(i.endpoint));
+  // Own-descriptor snapshots must be stable even if Proxy get lies/throws.
+  // This is a no-contact inspection test, not a real MCP security claim.
+  const noGet=o=>new Proxy(o,{get(){throw Error('UNTRUSTED_GET_EXECUTED');}});
+  const captured=inspectF2SignedGrantEvidence(
+    noGet(i),noGet({...e,grant:noGet(g)}),2000);
+  assert.deepEqual([captured.rule,captured.signatureVerified,
+    captured.externalTargetContacted],
+    ['F2_TRUST_ANCHOR_NOT_ESTABLISHED',true,false]);
+  const forgedIntent=new Proxy({...i,method:'tools/call'},{
+    get(target,key){return key==='method'?'server/discover':Reflect.get(target,key);}
+  });
+  assert.equal(inspectF2SignedGrantEvidence(forgedIntent,e,2000).rule,
+    'F2_INTENT_REJECTED');
+  const forgedGrant=new Proxy({...g,method:'tools/call'},{
+    get(target,key){return key==='method'?'server/discover':Reflect.get(target,key);}
+  });
+  assert.equal(run({...e,grant:forgedGrant}).rule,'F2_GRANT_SCOPE_MISMATCH');
+  let accessorRead=false;
+  const accessorGrant={...g};
+  Object.defineProperty(accessorGrant,'nonce',{enumerable:true,
+    get(){accessorRead=true;return g.nonce;}});
+  assert.equal(run({...e,grant:accessorGrant}).rule,
+    'F2_SIGNED_EVIDENCE_REJECTED');
+  assert.equal(accessorRead,false);
 });
