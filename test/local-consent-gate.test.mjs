@@ -236,3 +236,52 @@ test('F2: signed intent verifies cryptographic integrity but never permits netwo
     'F2_SIGNED_EVIDENCE_REJECTED');
   assert.equal(accessorRead,false);
 });
+
+test('F2: standalone intent uses captured values without property reads',()=>{
+  const valid={endpoint:'https://fixture.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover'};
+  let reads=0;
+  const noGet=new Proxy(valid,{get(){reads++;throw Error('UNTRUSTED_GET_EXECUTED');}});
+  assert.deepEqual(reviewF2StagingIntent(noGet),reviewF2StagingIntent(valid));
+  assert.equal(reads,0);
+  for(const [key,value] of [
+    ['endpoint','https://127.0.0.1/mcp'],
+    ['protocolVersion','2025-11-25'],
+    ['method','tools/call']
+  ]){
+    const forged=new Proxy({...valid,[key]:value},{
+      get(target,name){reads++;return name===key?valid[key]:Reflect.get(target,name);}
+    });
+    assert.equal(reviewF2StagingIntent(forged).rule,'F2_INTENT_REJECTED',key);
+    assert.equal(reads,0,key);
+  }
+});
+
+test('F2: standalone intent rejects malformed descriptors without invoking accessors',()=>{
+  const valid={endpoint:'https://fixture.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover'};
+  let reads=0;
+  for(const key of Object.keys(valid)){
+    const accessor={...valid};
+    Object.defineProperty(accessor,key,{enumerable:true,
+      get(){reads++;return valid[key];}});
+    const hidden={...valid};
+    Object.defineProperty(hidden,key,{enumerable:false});
+    const missing={...valid};
+    delete missing[key];
+    for(const input of [accessor,hidden,missing]){
+      assert.equal(reviewF2StagingIntent(input).rule,'F2_INTENT_REJECTED',key);
+    }
+  }
+  for(const input of [
+    {...valid,extra:true},
+    {...valid,[Symbol('extra')]:true},
+    Object.assign(Object.create(null),valid),
+    new Proxy(valid,{getOwnPropertyDescriptor(){throw Error('UNTRUSTED_DESCRIPTOR');}})
+  ]){
+    const r=reviewF2StagingIntent(input);
+    assert.deepEqual([r.status,r.rule,r.connectionStatus,r.executionEnabled,
+      r.externalTargetContacted],['FAIL','F2_INTENT_REJECTED','NOT_ATTEMPTED',false,false]);
+  }
+  assert.equal(reads,0);
+});
