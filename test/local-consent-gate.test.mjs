@@ -717,6 +717,7 @@ test('F2-B: concurrent OS processes race for one synthetic nonce marker',async()
       '--input-type=module','-e',childScript,
       new URL('../src/local-consent-gate.mjs',import.meta.url).href,root,nonce
     ],{windowsHide:true,stdio:['ignore','pipe','pipe'],shell:false,
+      timeout:15000,
       env:{NODE_OPTIONS:'',PATH:process.env.PATH??'',
         SystemRoot:process.env.SystemRoot??'',TEMP:process.env.TEMP??'',
         TMP:process.env.TMP??'',TMPDIR:process.env.TMPDIR??''}});
