@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash,generateKeyPairSync,sign } from 'node:crypto';
 import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence }
+import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
 import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
@@ -283,5 +283,98 @@ test('F2: standalone intent rejects malformed descriptors without invoking acces
     assert.deepEqual([r.status,r.rule,r.connectionStatus,r.executionEnabled,
       r.externalTargetContacted],['FAIL','F2_INTENT_REJECTED','NOT_ATTEMPTED',false,false]);
   }
+  assert.equal(reads,0);
+});
+
+test('F2-A: fixed modern discovery wire is spec-shaped and never contacts a target',()=>{
+  const fixture=buildF2OfflineDiscoveryFixture();
+  const {request}=fixture;
+  const body=JSON.parse(request.body);
+  assert.deepEqual(Object.keys(request.headers).sort(),[
+    'Accept','Content-Type','MCP-Protocol-Version','Mcp-Method'].sort());
+  assert.deepEqual(request.headers,{
+    'Content-Type':'application/json',
+    Accept:'application/json, text/event-stream',
+    'MCP-Protocol-Version':'2026-07-28',
+    'Mcp-Method':'server/discover'
+  });
+  assert.equal(request.httpMethod,'POST');
+  assert.deepEqual([body.jsonrpc,body.id,body.method],
+    ['2.0','f2-discover-fixture-1','server/discover']);
+  assert.deepEqual(Reflect.ownKeys(body.params),['_meta']);
+  assert.deepEqual(body.params._meta,{
+    'io.modelcontextprotocol/protocolVersion':'2026-07-28',
+    'io.modelcontextprotocol/clientInfo':{
+      name:'mcp-agent-security-test-suite-fixture',version:'0.0.10-rc.1'
+    },
+    'io.modelcontextprotocol/clientCapabilities':{}
+  });
+  assert.ok(Buffer.byteLength(request.body,'utf8')<=4096);
+  assert.equal(fixture.requestSha256,
+    createHash('sha256').update(request.body).digest('hex'));
+  assert.deepEqual([
+    fixture.connectionStatus,fixture.executionEnabled,
+    fixture.operatorVerified,fixture.ownershipVerified,fixture.externalTargetContacted],
+    ['NOT_ATTEMPTED',false,false,false,false]);
+  assert.equal(reviewF2OfflineDiscoveryFixture(request).rule,
+    'F2_SOURCE_WIRE_FIXTURE_MATCH');
+  assert.ok(!Object.hasOwn(request,'endpoint'));
+  assert.ok(!Object.hasOwn(request.headers,'Mcp-Name'));
+});
+
+test('F2-A: mismatched wire fields or added authority requests fail closed',()=>{
+  const f=buildF2OfflineDiscoveryFixture().request;
+  const wire=(edit={})=>({...f,...edit,headers:{...f.headers}});
+  const body=JSON.parse(f.body);
+  const mutated=JSON.stringify({...body,method:'tools/call'});
+  const missingMeta=JSON.stringify({...body,params:{}});
+  for(const candidate of [
+    wire({httpMethod:'GET'}),wire({httpMethod:'PUT'}),
+    wire({body:mutated}),wire({body:missingMeta}),
+    wire({body:f.body+' '}),
+    wire({body:'x'.repeat(4097)}),
+    {...wire(),endpoint:'https://unapproved.example.org/mcp'},
+    {...wire(),headers:{...f.headers,'Mcp-Name':'malicious-tool'}},
+    {...wire(),headers:{...f.headers,'Mcp-Method':'tools/call'}},
+    {...wire(),headers:{...f.headers,'MCP-Protocol-Version':'2025-11-25'}},
+    {...wire(),headers:{...f.headers,Accept:'application/json'}},
+    {...wire(),headers:{...f.headers,'Content-Type':'text/plain'}},
+    {...wire(),headers:{...f.headers,Authorization:'Bearer fictional'}},
+    wire({headers:{...f.headers,Accept:'application/json'}}),
+    null,[],Object.assign(Object.create(null),wire())
+  ]) {
+    const r=reviewF2OfflineDiscoveryFixture(candidate);
+    assert.deepEqual([r.status,r.fixtureMatches,r.connectionStatus,
+      r.executionEnabled,r.externalTargetContacted],
+      ['FAIL',false,'NOT_ATTEMPTED',false,false]);
+    assert.ok(!JSON.stringify(r).includes('unapproved.example.org'));
+  }
+});
+
+test('F2-A: proxy getters and accessor-bearing wire objects never execute',()=>{
+  const f=buildF2OfflineDiscoveryFixture().request;
+  let reads=0;
+  const noGet=x=>new Proxy(x,{
+    get(){reads++;throw Error('UNTRUSTED_GET_EXECUTED');}
+  });
+  assert.equal(reviewF2OfflineDiscoveryFixture(
+    noGet({...f,headers:noGet({...f.headers})})).fixtureMatches,true);
+  assert.equal(reads,0);
+  const spoof=new Proxy({...f,headers:{...f.headers,'Mcp-Method':'tools/call'}},{
+    get(target,name){reads++;return name==='headers'?f.headers:Reflect.get(target,name);}
+  });
+  assert.equal(reviewF2OfflineDiscoveryFixture(spoof).fixtureMatches,false);
+  assert.equal(reads,0);
+  const withAccessor={...f};
+  Object.defineProperty(withAccessor,'body',{enumerable:true,
+    get(){reads++;return f.body;}});
+  assert.equal(reviewF2OfflineDiscoveryFixture(withAccessor).fixtureMatches,false);
+  assert.equal(reads,0);
+  const withSymbol={...f,[Symbol('hidden')]:true};
+  assert.equal(reviewF2OfflineDiscoveryFixture(withSymbol).fixtureMatches,false);
+  const descTrap=new Proxy({...f},{getOwnPropertyDescriptor(){
+    throw Error('UNTRUSTED_DESCRIPTOR');
+  }});
+  assert.equal(reviewF2OfflineDiscoveryFixture(descTrap).fixtureMatches,false);
   assert.equal(reads,0);
 });
