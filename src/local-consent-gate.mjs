@@ -280,6 +280,77 @@ export function inspectF2OfflineDiscoveryJsonResponse(contentType,body) {
   } catch {return reject();}
 }
 
+/** F2-A: bounded offline SSE response stream verdict, not a transport.
+ * It consumes only already-captured text. Unknown stream messages, replay
+ * markers, standalone RPC requests, and events after the final response are
+ * rejected. Parsing does not invoke tools, network or untrusted instructions.
+ * Only the pinned fixture profile is accepted, not arbitrary SSE traffic. */
+export function inspectF2OfflineDiscoverySseResponse(contentType,body) {
+  const verdict=(matched,events=0,notifications=0)=>Object.freeze({
+    status:matched?'PASS':'FAIL',schemaMatched:matched,
+    rule:matched?'F2_SOURCE_DISCOVERY_SSE_RESPONSE_MATCH':
+      'F2_SOURCE_DISCOVERY_SSE_RESPONSE_REJECTED',
+    eventsObserved:events,notificationsObserved:notifications,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+  const reject=()=>verdict(false);
+  if(contentType!=='text/event-stream'||typeof body!=='string'||
+     !body.length||Buffer.byteLength(body,'utf8')>32768||
+     body.includes('\0'))return reject();
+  try {
+    const normalized=body.replace(/\r\n?/g,'\n');
+    // A final SSE message is dispatched only at a blank line boundary.
+    if(!normalized.endsWith('\n\n'))return reject();
+    const lines=normalized.split('\n'),record=o=>
+      o!==null&&typeof o==='object'&&!Array.isArray(o)&&
+      Object.getPrototypeOf(o)===Object.prototype;
+    let events=0,notifications=0,finalSeen=false,eventName='',data=[];
+    for(const line of lines){
+      if(line===''){
+        if(data.length){
+          if(finalSeen||++events>8)return reject();
+          const payload=data.join('\n');
+          if(Buffer.byteLength(payload,'utf8')>8192)return reject();
+          const msg=JSON.parse(payload);
+          if(!record(msg)||msg.jsonrpc!=='2.0')return reject();
+          if(Object.hasOwn(msg,'method')){
+            if(Object.hasOwn(msg,'id')||Object.hasOwn(msg,'result')||
+               Object.hasOwn(msg,'error')||!record(msg.params)||
+               !['notifications/progress','notifications/message']
+                 .includes(msg.method))return reject();
+            notifications++;
+          }else{
+            if(!inspectF2OfflineDiscoveryJsonResponse(
+              'application/json',payload).schemaMatched)return reject();
+            finalSeen=true;
+          }
+          data=[];eventName='';
+        }else if(eventName!=='')return reject();
+        continue;
+      }
+      // Comments and request-scoped keep-alives never become instructions.
+      if(line.startsWith(':'))continue;
+      const colon=line.indexOf(':'),field=colon<0?line:line.slice(0,colon);
+      let value=colon<0?'':line.slice(colon+1);
+      if(value.startsWith(' '))value=value.slice(1);
+      if(field==='data'){
+        if(data.length>=64)return reject();
+        data.push(value);
+      }else if(field==='event'){
+        if(value!=='message'||eventName!=='')return reject();
+        eventName=value;
+      }else{
+        // id / retry / unknown fields are out of scope and fail closed,
+        // rather than accidentally creating session or replay semantics.
+        return reject();
+      }
+    }
+    if(!finalSeen||data.length||eventName!=='')return reject();
+    return verdict(true,events,notifications);
+  } catch {return reject();}
+}
+
 /** F2 offline Ed25519 evidence verification only. An untrusted supplied key
  * is NOT an independently anchored issuer, target or operator identity.
  * Even a valid signature NEVER enables network traffic or consumes a grant. */
