@@ -961,7 +961,7 @@ test('F2-E: actual owned-loopback TLS verifies JSON and request-scoped SSE',asyn
 
 test('F2-E: real TLS lab rejects redirects, oversized, stalled and malformed replies',async()=>{
   for(const fault of ['redirect','oversized','stall',
-    'wrong-version','wrong-content-type','invalid-json','untrusted-ca']){
+    'wrong-version','wrong-content-type','invalid-json','bad-utf8','untrusted-ca']){
     const r=await runF2OwnedHttpsLabSelftest({
       cert:F2_LAB_CERT,key:F2_LAB_KEY,fault,
       deadlineMs:fault==='stall'?650:3000
