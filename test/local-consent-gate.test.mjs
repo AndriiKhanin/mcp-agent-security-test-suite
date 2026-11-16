@@ -376,5 +376,24 @@ test('F2-A: proxy getters and accessor-bearing wire objects never execute',()=>{
     throw Error('UNTRUSTED_DESCRIPTOR');
   }});
   assert.equal(reviewF2OfflineDiscoveryFixture(descTrap).fixtureMatches,false);
+  // Proxy introspection can execute traps. This is a verdict checker, never
+  // an execution sandbox: trap side effects are not prevented by try/catch.
+  let introspectionTraps=0;
+  const ownKeysTrap=new Proxy({...f},{ownKeys(){
+    introspectionTraps++;
+    throw Error('UNTRUSTED_OWN_KEYS_TRAP');
+  }});
+  const protoTrap=new Proxy({...f},{getPrototypeOf(){
+    introspectionTraps++;
+    throw Error('UNTRUSTED_PROTOTYPE_TRAP');
+  }});
+  assert.equal(reviewF2OfflineDiscoveryFixture(ownKeysTrap).fixtureMatches,false);
+  assert.equal(reviewF2OfflineDiscoveryFixture(protoTrap).fixtureMatches,false);
+  assert.equal(introspectionTraps,2);
+  const ok=reviewF2OfflineDiscoveryFixture(f);
+  assert.deepEqual([ok.status,ok.fixtureMatches,ok.connectionStatus,
+    ok.executionEnabled,ok.operatorVerified,ok.ownershipVerified,
+    ok.externalTargetContacted],['PASS',true,'NOT_ATTEMPTED',
+    false,false,false,false]);
   assert.equal(reads,0);
 });
