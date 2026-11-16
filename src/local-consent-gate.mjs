@@ -245,6 +245,41 @@ export function reviewF2OfflineDiscoveryFixture(candidate) {
   } catch {return verdict(false);}
 }
 
+/** F2-A: bounded, no-contact JSON discovery response evidence only.
+ * This function accepts bytes already captured in a fictional fixture.
+ * It cannot open a socket or authenticate any alleged server. The server's
+ * instructions or self-reported identity are never elevated to authority.
+ * SSE and real target evidence remain separate F2 requirements. */
+export function inspectF2OfflineDiscoveryJsonResponse(contentType,body) {
+  const verdict=(matched,rule)=>Object.freeze({
+    status:matched?'PASS':'FAIL',schemaMatched:matched,rule,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+  const reject=()=>verdict(false,'F2_SOURCE_DISCOVERY_RESPONSE_REJECTED');
+  if(contentType!=='application/json'||typeof body!=='string'||
+     !body.length||Buffer.byteLength(body,'utf8')>32768)return reject();
+  try {
+    const message=JSON.parse(body);
+    const record=o=>o!==null&&typeof o==='object'&&
+      !Array.isArray(o)&&Object.getPrototypeOf(o)===Object.prototype;
+    if(!record(message)||message.jsonrpc!=='2.0'||
+       message.id!=='f2-discover-fixture-1'||Object.hasOwn(message,'error')||
+       !record(message.result))return reject();
+    const discovery=message.result,versions=discovery.supportedVersions;
+    if(discovery.resultType!=='complete'||!record(discovery.capabilities)||
+       !Array.isArray(versions)||versions.length===0||versions.length>8||
+       versions.some(v=>typeof v!=='string'||
+         !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v))||
+       new Set(versions).size!==versions.length)return reject();
+    if(!versions.includes('2026-07-28'))
+      return verdict(false,'F2_SOURCE_DISCOVERY_VERSION_UNSUPPORTED');
+    // Never copy untrusted result.instructions or _meta.serverInfo into
+    // the output. Schema match is NOT operator proof or approval to connect.
+    return verdict(true,'F2_SOURCE_DISCOVERY_RESPONSE_MATCH');
+  } catch {return reject();}
+}
+
 /** F2 offline Ed25519 evidence verification only. An untrusted supplied key
  * is NOT an independently anchored issuer, target or operator identity.
  * Even a valid signature NEVER enables network traffic or consumes a grant. */
