@@ -171,6 +171,76 @@ export function reviewF2StagingIntent(intent) {
   } catch {return verdict('F2_INTENT_REJECTED');}
 }
 
+/** F2-A: fixed normative 2026-07-28 discovery wire fixture, SOURCE ONLY.
+ * No endpoint, HTTP client, transport, authority, credential or network effect.
+ * Matching this wire fixture NEVER approves a staging connection.
+ * References: official 2026-07-28 server/discover and Streamable HTTP specs. */
+const F2_DISCOVERY_BODY=JSON.stringify({
+  jsonrpc:'2.0',id:'f2-discover-fixture-1',method:'server/discover',
+  params:{_meta:{
+    'io.modelcontextprotocol/protocolVersion':'2026-07-28',
+    'io.modelcontextprotocol/clientInfo':{
+      name:'mcp-agent-security-test-suite-fixture',version:'0.0.10-rc.1'
+    },
+    'io.modelcontextprotocol/clientCapabilities':{}
+  }}
+});
+const F2_DISCOVERY_HEADERS=Object.freeze({
+  'Content-Type':'application/json',
+  Accept:'application/json, text/event-stream',
+  'MCP-Protocol-Version':'2026-07-28',
+  'Mcp-Method':'server/discover'
+});
+
+/** Construct ONLY an inert, fixed first-party request description.
+ * The endpoint and any HTTP adapter deliberately do not exist here. */
+export function buildF2OfflineDiscoveryFixture() {
+  return Object.freeze({
+    profile:'F2_SOURCE_DISCOVERY_2026_07_28',
+    request:Object.freeze({
+      httpMethod:'POST',
+      headers:F2_DISCOVERY_HEADERS,
+      body:F2_DISCOVERY_BODY
+    }),
+    requestSha256:createHash('sha256').update(F2_DISCOVERY_BODY,'utf8').digest('hex'),
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+}
+
+/** Compare candidate wire bytes against the REVIEWED, exact source fixture.
+ * This is not generic MCP conformance, host validation or consent review.
+ * Capture descriptors once; never call untrusted getters or echo inputs. */
+export function reviewF2OfflineDiscoveryFixture(candidate) {
+  const verdict=matched=>Object.freeze({
+    status:matched?'PASS':'FAIL',fixtureMatches:matched,
+    rule:matched?'F2_SOURCE_WIRE_FIXTURE_MATCH':'F2_SOURCE_WIRE_FIXTURE_REJECTED',
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+  const own=(object,names)=>{
+    if(!object||typeof object!=='object'||
+       Object.getPrototypeOf(object)!==Object.prototype)return null;
+    const descriptors=Object.getOwnPropertyDescriptors(object);
+    if(Reflect.ownKeys(descriptors).length!==names.length||
+       !names.every(name=>Object.hasOwn(descriptors,name)&&
+         Object.hasOwn(descriptors[name],'value')&&
+         descriptors[name].enumerable))return null;
+    return Object.fromEntries(names.map(name=>[name,descriptors[name].value]));
+  };
+  try {
+    const request=own(candidate,['httpMethod','headers','body']);
+    const headers=request&&own(request.headers,
+      ['Content-Type','Accept','MCP-Protocol-Version','Mcp-Method']);
+    if(!request||!headers||request.httpMethod!=='POST'||
+       typeof request.body!=='string'||
+       Buffer.byteLength(request.body,'utf8')>4096||
+       request.body!==F2_DISCOVERY_BODY)return verdict(false);
+    return verdict(Object.keys(F2_DISCOVERY_HEADERS).every(
+      name=>headers[name]===F2_DISCOVERY_HEADERS[name]));
+  } catch {return verdict(false);}
+}
+
 /** F2 offline Ed25519 evidence verification only. An untrusted supplied key
  * is NOT an independently anchored issuer, target or operator identity.
  * Even a valid signature NEVER enables network traffic or consumes a grant. */
