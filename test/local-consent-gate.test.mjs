@@ -1,10 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawnSync,spawn } from 'node:child_process';
+import { mkdtempSync,rmSync,readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { createHash,generateKeyPairSync,sign } from 'node:crypto';
 import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse }
+import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,createF2OfflineDiskNonceWitness,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
 import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
@@ -660,4 +663,78 @@ test('F2-B: bad scope, time, extra fields, ambiguity and capacity fail closed',(
     'F2_SOURCE_LEDGER_CAPACITY_STOP');
   assert.equal(observe({...plain,nonce:'00'.repeat(16)}).rule,
     'F2_SOURCE_NONCE_REPLAY');
+});
+
+
+test('F2-B: OS marker persists across a new process and revocation wins before use',()=>{
+  const root=mkdtempSync(join(tmpdir(),'mcp-f2b-owned-'));
+  const nonce='ab'.repeat(16),revoked='bc'.repeat(16);
+  const marker=createF2OfflineDiskNonceWitness(root);
+  try {
+    const first=marker.markObservedFixtureNonce(nonce);
+    assert.deepEqual([first.status,first.rule,first.authorizationStatus,
+      first.executionEnabled,first.externalTargetContacted,
+      first.powerLossDurabilityProven],[
+      'FAIL','F2_SOURCE_OS_NONCE_MARKED_NO_AUTHORITY',
+      'NOT_ESTABLISHED',false,false,false]);
+    assert.equal(marker.markObservedFixtureNonce(nonce).rule,
+      'F2_SOURCE_OS_NONCE_ALREADY_MARKED');
+    const childScript='const m=await import(process.argv[1]);'+
+      'const j=m.createF2OfflineDiskNonceWitness(process.argv[2]);'+
+      'console.log(j.markObservedFixtureNonce(process.argv[3]).rule);';
+    const child=spawnSync(process.execPath,[
+      '--input-type=module','-e',childScript,
+      new URL('../src/local-consent-gate.mjs',import.meta.url).href,root,nonce
+    ],{encoding:'utf8',shell:false,windowsHide:true,timeout:15000,
+      maxBuffer:4096,env:{
+        NODE_OPTIONS:'',PATH:process.env.PATH??'',
+        SystemRoot:process.env.SystemRoot??'',
+        TEMP:process.env.TEMP??'',TMP:process.env.TMP??'',
+        TMPDIR:process.env.TMPDIR??''
+      }});
+    assert.equal(child.error,undefined);
+    assert.equal(child.status,0,child.stderr);
+    assert.equal(child.stdout.trim(),'F2_SOURCE_OS_NONCE_ALREADY_MARKED');
+    assert.equal(marker.markRevokedFixtureNonce(revoked).rule,
+      'F2_SOURCE_OS_NONCE_MARKED_NO_AUTHORITY');
+    assert.equal(marker.markObservedFixtureNonce(revoked).rule,
+      'F2_SOURCE_OS_NONCE_ALREADY_MARKED');
+    assert.equal(marker.markObservedFixtureNonce('not-a-nonce').rule,
+      'F2_SOURCE_NONCE_REJECTED');
+    assert.equal(readdirSync(root).length,2);
+    assert.ok(!JSON.stringify(first).includes(root));
+  }finally{rmSync(root,{recursive:true,force:true});}
+});
+
+test('F2-B: concurrent OS processes race for one synthetic nonce marker',async()=>{
+  const root=mkdtempSync(join(tmpdir(),'mcp-f2b-owned-'));
+  const nonce='cd'.repeat(16);
+  const childScript='const m=await import(process.argv[1]);'+
+    'const j=m.createF2OfflineDiskNonceWitness(process.argv[2]);'+
+    'console.log(j.markObservedFixtureNonce(process.argv[3]).rule);';
+  const run=()=>new Promise((resolveResult,reject)=>{
+    const proc=spawn(process.execPath,[
+      '--input-type=module','-e',childScript,
+      new URL('../src/local-consent-gate.mjs',import.meta.url).href,root,nonce
+    ],{windowsHide:true,stdio:['ignore','pipe','pipe'],shell:false,
+      env:{NODE_OPTIONS:'',PATH:process.env.PATH??'',
+        SystemRoot:process.env.SystemRoot??'',TEMP:process.env.TEMP??'',
+        TMP:process.env.TMP??'',TMPDIR:process.env.TMPDIR??''}});
+    let stdout='',stderr='';
+    proc.stdout.on('data',chunk=>stdout+=chunk);
+    proc.stderr.on('data',chunk=>stderr+=chunk);
+    proc.on('error',reject);
+    proc.on('close',code=>{
+      if(code!==0)return reject(Error('F2B_CHILD_FAILED'));
+      resolveResult(stdout.trim());
+    });
+  });
+  try {
+    const results=await Promise.all([run(),run(),run(),run()]);
+    assert.equal(results.filter(r=>
+      r==='F2_SOURCE_OS_NONCE_MARKED_NO_AUTHORITY').length,1);
+    assert.equal(results.filter(r=>
+      r==='F2_SOURCE_OS_NONCE_ALREADY_MARKED').length,3);
+    assert.equal(readdirSync(root).length,1);
+  }finally{rmSync(root,{recursive:true,force:true});}
 });
