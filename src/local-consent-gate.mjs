@@ -155,7 +155,8 @@ export function reviewF2StagingIntent(intent) {
        !['endpoint','protocolVersion','method'].every(k=>Object.hasOwn(props,k)&&
          Object.hasOwn(props[k],'value')&&props[k].enumerable))
       return verdict('F2_INTENT_REJECTED');
-    const {endpoint,protocolVersion,method}=intent;
+    const endpoint=props.endpoint.value,protocolVersion=props.protocolVersion.value,
+      method=props.method.value;
     if(protocolVersion!=='2026-07-28'||method!=='server/discover'||
        typeof endpoint!=='string'||endpoint.length>512||
        !/^https:\/\/[a-z0-9.-]+\/mcp$/.test(endpoint))
