@@ -210,7 +210,11 @@ export function buildF2OfflineDiscoveryFixture() {
 
 /** Compare candidate wire bytes against the REVIEWED, exact source fixture.
  * This is not generic MCP conformance, host validation or consent review.
- * Capture descriptors once; never call untrusted getters or echo inputs. */
+ * Capture descriptors once; never call untrusted property getters or echo inputs.
+ * IMPORTANT: Proxy getPrototypeOf/ownKeys/getOwnPropertyDescriptor traps can run
+ * arbitrary caller code during inspection. This validator is NOT an OS/process
+ * sandbox; source data must be obtained from an isolated, trusted JSON parser,
+ * not arbitrary executable JS objects, before any real security boundary. */
 export function reviewF2OfflineDiscoveryFixture(candidate) {
   const verdict=matched=>Object.freeze({
     status:matched?'PASS':'FAIL',fixtureMatches:matched,
