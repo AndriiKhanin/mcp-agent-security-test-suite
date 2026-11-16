@@ -913,6 +913,7 @@ export function inspectF2OfflineTripartiteEvidence(intent,raw,nowMs) {
          return typeof id==='string'&&
            /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/.test(id);
        })||
+       new Set([g.issuerId,g.operatorId,g.ownerId]).size!==3||
        !roles.every(r=>typeof packet.keys[r]==='string'&&
          packet.keys[r].length>0&&packet.keys[r].length<=256)||
        !roles.every(r=>typeof packet.signatures[r]==='string'&&
