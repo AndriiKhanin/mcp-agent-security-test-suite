@@ -619,3 +619,65 @@ export function inspectF2OfflineResolvedRoute(body) {
     return verdict('F2_SOURCE_ROUTE_SHAPE_MATCH_NO_AUTHORITY',true);
   } catch {return reject();}
 }
+
+
+/** F2-D: no-contact validation of a fictional HTTP discovery exchange.
+ * Captures are untrusted data, never observed DNS/TLS/peer identity or
+ * real HTTP. No socket, request, credential or execution permission.
+ * Actual transport must enforce byte/time/peer caps at I/O time. */
+export function inspectF2OfflineHttpDiscoveryExchange(raw) {
+  const verdict=(rule,matched=false)=>Object.freeze({
+    status:'FAIL',rule,httpShapeMatched:matched,
+    operatorVerified:false,ownershipVerified:false,tlsPeerVerified:false,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    externalTargetContacted:false
+  });
+  const reject=()=>verdict('F2_SOURCE_HTTP_ENVELOPE_REJECTED');
+  const exact=(o,keys)=>o!==null&&typeof o==='object'&&!Array.isArray(o)&&
+    Object.getPrototypeOf(o)===Object.prototype&&
+    Reflect.ownKeys(o).length===keys.length&&keys.every(k=>Object.hasOwn(o,k));
+  if(typeof raw!=='string'||!raw.length||
+     Buffer.byteLength(raw,'utf8')>65536)return reject();
+  try {
+    const x=parseStrictJson(raw);
+    if(!exact(x,['schemaVersion','request','statusCode','headers',
+       'body','elapsedMs','redirectsFollowed'])||x.schemaVersion!==1||
+       !Number.isSafeInteger(x.elapsedMs)||x.elapsedMs<0||x.elapsedMs>5000||
+       x.redirectsFollowed!==0||
+       !reviewF2OfflineDiscoveryFixture(x.request).fixtureMatches||
+       typeof x.body!=='string'||Buffer.byteLength(x.body,'utf8')>32768||
+       !Array.isArray(x.headers)||x.headers.length<1||x.headers.length>16)
+      return reject();
+    const names=new Set(),headers=Object.create(null);
+    const allowed=new Set(['content-type','content-length',
+      'cache-control','mcp-protocol-version','date']);
+    for(const pair of x.headers){
+      if(!Array.isArray(pair)||pair.length!==2||
+         typeof pair[0]!=='string'||typeof pair[1]!=='string'||
+         !/^[a-z][a-z0-9-]{0,63}$/.test(pair[0])||
+         pair[1].length>256||/[\r\n\0]/.test(pair[1])||
+         !allowed.has(pair[0])||names.has(pair[0]))return reject();
+      names.add(pair[0]);headers[pair[0]]=pair[1];
+    }
+    if(!names.has('content-type'))return reject();
+    if(names.has('content-length')&&
+       (!/^(?:0|[1-9][0-9]{0,4})$/.test(headers['content-length'])||
+        Number(headers['content-length'])!==Buffer.byteLength(x.body,'utf8')))
+      return reject();
+    if(x.statusCode===401||x.statusCode===403)
+      return verdict('F2_SOURCE_HTTP_AUTH_STATUS_TERMINAL');
+    if(Number.isSafeInteger(x.statusCode)&&x.statusCode>=300&&
+       x.statusCode<400)return verdict('F2_SOURCE_HTTP_REDIRECT_REJECTED');
+    if(x.statusCode!==200)return reject();
+    if(names.has('mcp-protocol-version')&&
+       headers['mcp-protocol-version']!=='2026-07-28')return reject();
+    const mime=headers['content-type'];
+    if(mime!=='application/json'&&mime!=='text/event-stream')return reject();
+    const check=mime==='application/json'?
+      inspectF2OfflineDiscoveryJsonResponse(mime,x.body):
+      inspectF2OfflineDiscoverySseResponse(mime,x.body);
+    if(!check.schemaMatched)return reject();
+    // Even matching response structures confer zero privileges.
+    return verdict('F2_SOURCE_HTTP_SHAPE_MATCH_NO_AUTHORITY',true);
+  } catch {return reject();}
+}
