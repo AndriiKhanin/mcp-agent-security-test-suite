@@ -424,3 +424,72 @@ export function inspectF2SignedGrantEvidence(intent,evidence,nowMs=Date.now()) {
     return result('F2_TRUST_ANCHOR_NOT_ESTABLISHED',true);
   } catch {return result('F2_SIGNED_EVIDENCE_REJECTED');}
 }
+
+/** F2-B OFFLINE ONLY: no issuer/owner trust, network, or durable replay store.
+ * This observes fictional grant claims in one JS process, NOT permission.
+ * A reset/crash discards the journal; clock is a caller-supplied test clock.
+ * No function returns actual authorization or a network execution token. */
+export function createF2OfflineNonceJournal() {
+  const seen=new Set(),revoked=new Set();
+  const nonceOk=n=>typeof n==='string'&&/^[0-9a-f]{32}$/.test(n);
+  const result=rule=>Object.freeze({
+    status:'FAIL',rule,authorizationStatus:'NOT_ESTABLISHED',
+    replayState:'IN_MEMORY_SOURCE_ONLY',signatureVerified:false,
+    operatorVerified:false,ownershipVerified:false,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    externalTargetContacted:false
+  });
+  const used=()=>seen.size+[...revoked].filter(n=>!seen.has(n)).length;
+  function observeGrantJson(body,nowMs) {
+    if(typeof body!=='string'||Buffer.byteLength(body,'utf8')>4096||
+       !Number.isSafeInteger(nowMs)||nowMs<0)
+      return result('F2_SOURCE_GRANT_REJECTED');
+    try {
+      // Strict JSON prevents duplicate keys and executable Proxy/getter input.
+      const g=parseStrictJson(body);
+      const keys=['schemaVersion','endpoint','protocolVersion','method',
+        'operatorId','issuerId','intentSha256','nonce','issuedAt','expiresAt'];
+      if(!g||typeof g!=='object'||Array.isArray(g)||
+         Object.getPrototypeOf(g)!==Object.prototype||
+         Reflect.ownKeys(g).length!==keys.length||
+         !keys.every(k=>Object.hasOwn(g,k)))
+        return result('F2_SOURCE_GRANT_REJECTED');
+      if(g.schemaVersion!==1||!nonceOk(g.nonce)||
+         typeof g.operatorId!=='string'||
+         !/^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$/.test(g.operatorId)||
+         typeof g.issuerId!=='string'||
+         !/^[a-zA-Z][a-zA-Z0-9_.-]{0,63}$/.test(g.issuerId)||
+         typeof g.intentSha256!=='string'||!/^[0-9a-f]{64}$/.test(g.intentSha256)||
+         !Number.isSafeInteger(g.issuedAt)||!Number.isSafeInteger(g.expiresAt)||
+         g.issuedAt<0||g.expiresAt<=g.issuedAt||
+         g.expiresAt-g.issuedAt>300000)
+        return result('F2_SOURCE_GRANT_REJECTED');
+      const scope={endpoint:g.endpoint,protocolVersion:g.protocolVersion,
+        method:g.method};
+      if(reviewF2StagingIntent(scope).rule!=='F2_AUTHORITY_NOT_VERIFIED')
+        return result('F2_SOURCE_SCOPE_REJECTED');
+      const digest=createHash('sha256').update(JSON.stringify([
+        scope.endpoint,scope.protocolVersion,scope.method
+      ]),'utf8').digest('hex');
+      if(g.intentSha256!==digest)return result('F2_SOURCE_SCOPE_REJECTED');
+      if(g.issuedAt>nowMs||g.expiresAt<=nowMs)
+        return result('F2_SOURCE_GRANT_OUTSIDE_WINDOW');
+      // Deliberately NOT a trusted signature or operator verification.
+      if(revoked.has(g.nonce))return result('F2_SOURCE_NONCE_REVOKED');
+      if(seen.has(g.nonce))return result('F2_SOURCE_NONCE_REPLAY');
+      if(used()>=64)return result('F2_SOURCE_LEDGER_CAPACITY_STOP');
+      seen.add(g.nonce);
+      return result('F2_SOURCE_NONCE_OBSERVED_NO_AUTHORITY');
+    } catch {return result('F2_SOURCE_GRANT_REJECTED');}
+  }
+  function revokeFixtureNonce(nonce) {
+    if(!nonceOk(nonce))return result('F2_SOURCE_NONCE_REJECTED');
+    if(!revoked.has(nonce)&&!seen.has(nonce)&&used()>=64)
+      return result('F2_SOURCE_LEDGER_CAPACITY_STOP');
+    revoked.add(nonce);
+    return result('F2_SOURCE_NONCE_REVOKED');
+  }
+  const counters=()=>Object.freeze({seen:seen.size,revoked:revoked.size,
+    durable:false,authorityEstablished:false,networkEnabled:false});
+  return Object.freeze({observeGrantJson,revokeFixtureNonce,counters});
+}
