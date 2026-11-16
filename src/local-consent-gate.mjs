@@ -775,6 +775,13 @@ export async function runF2OwnedHttpsLabSelftest(options) {
     deadline=setTimeout(()=>controller.abort(),deadlineMs);
     const started=Date.now();
     return await new Promise(resolveResult=>{
+      // Preserve actual successful TLS peer evidence across an AbortSignal
+      // error. A stalled HTTP response can time out AFTER TLS is verified.
+      let verifiedTlsOnce=false;
+      const noteTlsPeer=socket=>{
+        if(socket?.authorized===true&&socket?.encrypted===true&&
+           socket?.remoteAddress==='127.0.0.1')verifiedTlsOnce=true;
+      };
       const req=https.request({
         hostname:'127.0.0.1',port,path:'/mcp',method:'POST',agent:false,
         servername:'staging.example.org',rejectUnauthorized:true,
@@ -787,6 +794,7 @@ export async function runF2OwnedHttpsLabSelftest(options) {
         const peerVerified=res.socket?.authorized===true&&
           res.socket?.encrypted===true&&
           res.socket?.remoteAddress==='127.0.0.1';
+        if(peerVerified)verifiedTlsOnce=true;
         if(!peerVerified){
           res.destroy();resolveResult(report('F2_LAB_PEER_REJECTED',
             false,received));return;
@@ -838,8 +846,14 @@ export async function runF2OwnedHttpsLabSelftest(options) {
             'F2_LAB_EXCHANGE_REJECTED',
           verdict.httpShapeMatched,received,true));
       });
-      req.on('error',()=>resolveResult(
-        report('F2_LAB_TLS_OR_DEADLINE_REJECTED',false,received)));
+      // A stalled response can be aborted before the HTTP response callback
+      // runs. Capture the independently verified handshake on the TLS socket.
+      req.on('socket',socket=>{
+        noteTlsPeer(socket);
+        socket.once('secureConnect',()=>noteTlsPeer(socket));
+      });
+      req.on('error',()=>resolveResult(report(
+        'F2_LAB_TLS_OR_DEADLINE_REJECTED',false,received,verifiedTlsOnce)));
       req.end(fixture.request.body);
     });
   }catch{
