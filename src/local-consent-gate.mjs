@@ -10,6 +10,7 @@
 import { randomUUID,createHash,createPublicKey,verify as cryptoVerify } from 'node:crypto';
 import { descriptorFingerprint, evaluateAdapterConsent } from './adapter-consent.mjs';
 import { createFirstPartyDriver } from './local-adapter-drivers.mjs';
+import { parseStrictJson } from './strict-json.mjs';
 
 const PROFILE='fixed-first-party-admission-v1';
 const OWNER='suite-fixed-mock';
@@ -260,7 +261,7 @@ export function inspectF2OfflineDiscoveryJsonResponse(contentType,body) {
   if(contentType!=='application/json'||typeof body!=='string'||
      !body.length||Buffer.byteLength(body,'utf8')>32768)return reject();
   try {
-    const message=JSON.parse(body);
+    const message=parseStrictJson(body);
     const record=o=>o!==null&&typeof o==='object'&&
       !Array.isArray(o)&&Object.getPrototypeOf(o)===Object.prototype;
     if(!record(message)||message.jsonrpc!=='2.0'||
@@ -312,7 +313,7 @@ export function inspectF2OfflineDiscoverySseResponse(contentType,body) {
           if(finalSeen||++events>8)return reject();
           const payload=data.join('\n');
           if(Buffer.byteLength(payload,'utf8')>8192)return reject();
-          const msg=JSON.parse(payload);
+          const msg=parseStrictJson(payload);
           if(!record(msg)||msg.jsonrpc!=='2.0')return reject();
           if(Object.hasOwn(msg,'method')){
             if(Object.hasOwn(msg,'id')||Object.hasOwn(msg,'result')||
