@@ -12,7 +12,8 @@ import { descriptorFingerprint, evaluateAdapterConsent } from './adapter-consent
 import { createFirstPartyDriver } from './local-adapter-drivers.mjs';
 import { parseStrictJson } from './strict-json.mjs';
 import { lstatSync,realpathSync,writeFileSync } from 'node:fs';
-import { basename,join,resolve as resolvePath } from 'node:path';
+import { basename,dirname,join,resolve as resolvePath } from 'node:path';
+import { tmpdir } from 'node:os';
 
 const PROFILE='fixed-first-party-admission-v1';
 const OWNER='suite-fixed-mock';
@@ -516,10 +517,15 @@ export function createF2OfflineDiskNonceWitness(directory) {
   const isSafeRoot=()=>{
     if(!path||!basename(path).startsWith('mcp-f2b-owned-'))return false;
     const st=lstatSync(path);
-    if(!st.isDirectory()||st.isSymbolicLink()||realpathSync(path)!==path)
-      return false;
-    // POSIX mode 0700 is checked; Windows ACL trust is NOT established.
-    if(process.platform!=='win32'&&(st.mode&0o077)!==0)return false;
+    if(!st.isDirectory()||st.isSymbolicLink())return false;
+    // Source-only scratch scope: the canonical directory must be a DIRECT
+    // child of canonical os.tmpdir(), not an arbitrary similarly named path.
+    // This does not attest the OS temp directory's ownership or integrity.
+    if(dirname(realpathSync(path))!==realpathSync(tmpdir()))return false;
+    // On POSIX require own private 0700 directory. Windows ACL assurance
+    // is NOT provided; this remains a fictional-only laboratory helper.
+    if(process.platform!=='win32'&&
+       ((st.mode&0o077)!==0||st.uid!==process.getuid()))return false;
     return true;
   };
   const mark=(nonce,kind)=>{
