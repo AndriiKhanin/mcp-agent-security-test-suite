@@ -14,6 +14,7 @@ import { parseStrictJson } from './strict-json.mjs';
 import { lstatSync,realpathSync,writeFileSync } from 'node:fs';
 import { basename,dirname,join,resolve as resolvePath } from 'node:path';
 import { tmpdir } from 'node:os';
+import { isIP } from 'node:net';
 
 const PROFILE='fixed-first-party-admission-v1';
 const OWNER='suite-fixed-mock';
@@ -549,4 +550,72 @@ export function createF2OfflineDiskNonceWitness(directory) {
     markObservedFixtureNonce:nonce=>mark(nonce,'SPENT'),
     markRevokedFixtureNonce:nonce=>mark(nonce,'REVOKED')
   });
+}
+
+
+/** F2-C: NO-CONTACT inspection of a fictional DNS/peer snapshot.
+ * The record is UNTRUSTED source-only JSON. These are NOT actual DNS/socket
+ * observations or trusted target/issuer/operator authority. No DNS, TLS,
+ * HTTP, socket, proxy or other network operation exists in this helper.
+ * A future transport must independently enforce peer-IP pinning, SNI,
+ * certificate checks and no proxy/redirect at connection time. */
+export function inspectF2OfflineResolvedRoute(body) {
+  const verdict=(rule,routeShapeMatched=false)=>Object.freeze({
+    status:'FAIL',rule,routeShapeMatched,
+    operatorVerified:false,ownershipVerified:false,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    externalTargetContacted:false
+  });
+  const reject=()=>verdict('F2_SOURCE_ROUTE_REJECTED');
+  if(typeof body!=='string'||Buffer.byteLength(body,'utf8')>4096||
+     body.length===0)return reject();
+  const exact=(o,keys)=>o!==null&&typeof o==='object'&&!Array.isArray(o)&&
+    Object.getPrototypeOf(o)===Object.prototype&&
+    Reflect.ownKeys(o).length===keys.length&&
+    keys.every(k=>Object.hasOwn(o,k));
+  const isPublicV4=address=>{
+    if(typeof address!=='string'||isIP(address)!==4)return false;
+    const [a,b,c]=address.split('.').map(Number);
+    // Conservative fail-closed policy. IPv6, including v4-mapped v6, is
+    // unsupported in this v1 profile. No claim of exhaustive IANA coverage.
+    return !(
+      a===0||a===10||a===127||a>=224||
+      (a===100&&b>=64&&b<=127)||
+      (a===169&&b===254)||
+      (a===172&&b>=16&&b<=31)||
+      (a===192&&(b===0||b===168||(b===88&&c===99)))||
+      (a===198&&(b===18||b===19||(b===51&&c===100)))||
+      (a===203&&b===0&&c===113)
+    );
+  };
+  try {
+    const route=parseStrictJson(body);
+    const keys=['schemaVersion','endpoint','protocolVersion','method',
+      'dnsAnswersBefore','dnsAnswersAtConnect','selectedAddress',
+      'peerAddress','redirectCount','proxyConfigured'];
+    if(!exact(route,keys)||route.schemaVersion!==1||
+       route.redirectCount!==0||route.proxyConfigured!==false)
+      return reject();
+    const scope={endpoint:route.endpoint,
+      protocolVersion:route.protocolVersion,method:route.method};
+    if(reviewF2StagingIntent(scope).rule!=='F2_AUTHORITY_NOT_VERIFIED')
+      return reject();
+    const before=route.dnsAnswersBefore,after=route.dnsAnswersAtConnect;
+    if(!Array.isArray(before)||!Array.isArray(after)||
+       before.length===0||before.length>8||
+       before.length!==after.length||isIP(route.selectedAddress)!==4||
+       isIP(route.peerAddress)!==4||
+       !before.every(isPublicV4)||!after.every(isPublicV4)||
+       new Set(before).size!==before.length||
+       new Set(after).size!==after.length)
+      return reject();
+    const sortedBefore=[...before].sort(),sortedAfter=[...after].sort();
+    if(sortedBefore.some((ip,i)=>ip!==sortedAfter[i])||
+       !before.includes(route.selectedAddress)||
+       route.peerAddress!==route.selectedAddress)
+      return verdict('F2_SOURCE_ROUTE_MISMATCH');
+    // Matching caller-supplied strings are NOT actual resolution or peer
+    // evidence. Intent is still untrusted and no authority was established.
+    return verdict('F2_SOURCE_ROUTE_SHAPE_MATCH_NO_AUTHORITY',true);
+  } catch {return reject();}
 }
