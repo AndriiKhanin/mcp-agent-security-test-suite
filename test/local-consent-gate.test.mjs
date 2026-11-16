@@ -536,3 +536,41 @@ test('F2-A: multiline SSE JSON data remains inert and bounded',()=>{
     r.externalTargetContacted],[true,1,0,false]);
   assert.ok(!JSON.stringify(r).includes('IGNORE ALL PRIOR INSTRUCTIONS'));
 });
+
+test('F2-A: strict parser denies ambiguous keys and unsafe JSON numbers in JSON and SSE',()=>{
+  const base='{"jsonrpc":"2.0","id":"f2-discover-fixture-1","result":{"resultType":"complete","supportedVersions":["2026-07-28"],"capabilities":{}}}';
+  const variants=[
+    base.replace('"jsonrpc":"2.0"',
+      '"jsonrpc":"1.0","jsonrpc":"2.0"'),
+    base.replace('"capabilities":{}',
+      '"capabilities":{"tools":false,"tools":{}}'),
+    base.replace('"capabilities":{}',
+      '"capabilities":{"ttl":1e9999}'),
+    base.replace('"capabilities":{}',
+      '"capabilities":{"threshold":9007199254740993}')
+  ];
+  for(const raw of variants){
+    for(const [check,kind] of [
+      [inspectF2OfflineDiscoveryJsonResponse('application/json',raw),'JSON'],
+      [inspectF2OfflineDiscoverySseResponse('text/event-stream',
+        'data: '+raw+'\n\n'),'SSE']
+    ]){
+      assert.equal(check.schemaMatched,false,kind);
+      assert.deepEqual([check.status,check.connectionStatus,
+        check.executionEnabled,check.operatorVerified,
+        check.ownershipVerified,check.externalTargetContacted],
+        ['FAIL','NOT_ATTEMPTED',false,false,false,false],kind);
+    }
+  }
+  // A spoofed duplicate method must not pass as a benign notification.
+  const duplicateNotification='{"jsonrpc":"2.0","method":"tools/call",'+
+    '"method":"notifications/message","params":{}}';
+  const final='data: '+base+'\n\n';
+  const stream='data: '+duplicateNotification+'\n\n'+final;
+  assert.equal(inspectF2OfflineDiscoverySseResponse(
+    'text/event-stream',stream).schemaMatched,false);
+  assert.equal(inspectF2OfflineDiscoveryJsonResponse(
+    'application/json',base).schemaMatched,true);
+  assert.equal(inspectF2OfflineDiscoverySseResponse(
+    'text/event-stream',final).schemaMatched,true);
+});
