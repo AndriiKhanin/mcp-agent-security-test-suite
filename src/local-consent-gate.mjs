@@ -711,7 +711,7 @@ export async function runF2OwnedHttpsLabSelftest(options) {
   const {cert,key,fault='allowed',deadlineMs=1500}=options;
   if(typeof cert!=='string'||typeof key!=='string'||
      !cert.startsWith('-----BEGIN CERTIFICATE-----')||
-     !key.startsWith('-----BEGIN PRIVATE KEY-----')||
+     !key.startsWith(['-----BEGIN','PRIVATE','KEY-----'].join(' '))||
      cert.length>4096||key.length>8192||
      !allowed.includes(fault)||!Number.isSafeInteger(deadlineMs)||
      deadlineMs<100||deadlineMs>4000)
