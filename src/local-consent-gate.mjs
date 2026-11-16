@@ -11,6 +11,8 @@ import { randomUUID,createHash,createPublicKey,verify as cryptoVerify } from 'no
 import { descriptorFingerprint, evaluateAdapterConsent } from './adapter-consent.mjs';
 import { createFirstPartyDriver } from './local-adapter-drivers.mjs';
 import { parseStrictJson } from './strict-json.mjs';
+import { lstatSync,realpathSync,writeFileSync } from 'node:fs';
+import { basename,join,resolve as resolvePath } from 'node:path';
 
 const PROFILE='fixed-first-party-admission-v1';
 const OWNER='suite-fixed-mock';
@@ -492,4 +494,53 @@ export function createF2OfflineNonceJournal() {
   const counters=()=>Object.freeze({seen:seen.size,revoked:revoked.size,
     durable:false,authorityEstablished:false,networkEnabled:false});
   return Object.freeze({observeGrantJson,revokeFixtureNonce,counters});
+}
+
+
+/** F2-B test-only OS marker witness; NOT a trusted admission/consent store.
+ * The caller must supply an existing, disposable, private source-owned folder.
+ * Atomic local filesystem 'wx' gives a one-winner observation marker, but
+ * there is NO directory fsync, trusted ACL, tamper/path-swap protection,
+ * authenticated revoker, or power-loss durability proof.
+ * Never use this helper as permission for any network or tool effect. */
+export function createF2OfflineDiskNonceWitness(directory) {
+  const path=typeof directory==='string'&&directory.length<1024?
+    resolvePath(directory):null;
+  const result=rule=>Object.freeze({
+    status:'FAIL',rule,authorizationStatus:'NOT_ESTABLISHED',
+    replayState:'DISPOSABLE_OS_MARKER_SOURCE_ONLY',
+    operatorVerified:false,ownershipVerified:false,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    externalTargetContacted:false,powerLossDurabilityProven:false
+  });
+  const isSafeRoot=()=>{
+    if(!path||!basename(path).startsWith('mcp-f2b-owned-'))return false;
+    const st=lstatSync(path);
+    if(!st.isDirectory()||st.isSymbolicLink()||realpathSync(path)!==path)
+      return false;
+    // POSIX mode 0700 is checked; Windows ACL trust is NOT established.
+    if(process.platform!=='win32'&&(st.mode&0o077)!==0)return false;
+    return true;
+  };
+  const mark=(nonce,kind)=>{
+    if(typeof nonce!=='string'||!/^[0-9a-f]{32}$/.test(nonce))
+      return result('F2_SOURCE_NONCE_REJECTED');
+    try {
+      if(!isSafeRoot())return result('F2_SOURCE_DISK_ROOT_REJECTED');
+      const digest=createHash('sha256').update(nonce,'utf8').digest('hex');
+      // Neither nonce nor grant fields appear in filenames or verdicts.
+      writeFileSync(join(path,'nonce-'+digest+'.mark'),
+        kind==='REVOKED'?'FICTIONAL-REVOKED-V1\n':'FICTIONAL-SPENT-V1\n',
+        {encoding:'utf8',flag:'wx',mode:0o600});
+      return result('F2_SOURCE_OS_NONCE_MARKED_NO_AUTHORITY');
+    }catch(error){
+      if(error?.code==='EEXIST')
+        return result('F2_SOURCE_OS_NONCE_ALREADY_MARKED');
+      return result('F2_SOURCE_DISK_WITNESS_UNAVAILABLE');
+    }
+  };
+  return Object.freeze({
+    markObservedFixtureNonce:nonce=>mark(nonce,'SPENT'),
+    markRevokedFixtureNonce:nonce=>mark(nonce,'REVOKED')
+  });
 }
