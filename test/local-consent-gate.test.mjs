@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { createHash,generateKeyPairSync,sign } from 'node:crypto';
 import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,createF2OfflineDiskNonceWitness,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse }
+import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,createF2OfflineDiskNonceWitness,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse,inspectF2OfflineResolvedRoute }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
 import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
@@ -767,4 +767,95 @@ test('F2-B: disposable OS witness refuses nested or unrelated scratch roots',()=
     rmSync(trusted,{recursive:true,force:true});
     rmSync(wrongPrefix,{recursive:true,force:true});
   }
+});
+
+
+test('F2-C: matching fictional public IPv4 route remains unauthorized',()=>{
+  const route={schemaVersion:1,endpoint:'https://staging.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover',
+    dnsAnswersBefore:['1.1.1.1','8.8.8.8'],
+    dnsAnswersAtConnect:['8.8.8.8','1.1.1.1'],
+    selectedAddress:'1.1.1.1',peerAddress:'1.1.1.1',
+    redirectCount:0,proxyConfigured:false};
+  const result=inspectF2OfflineResolvedRoute(JSON.stringify(route));
+  assert.deepEqual([
+    result.status,result.rule,result.routeShapeMatched,
+    result.operatorVerified,result.ownershipVerified,
+    result.executionEnabled,result.externalTargetContacted,
+    result.connectionStatus
+  ],['FAIL','F2_SOURCE_ROUTE_SHAPE_MATCH_NO_AUTHORITY',true,
+     false,false,false,false,'NOT_ATTEMPTED']);
+  assert.ok(!JSON.stringify(result).includes('1.1.1.1'));
+  assert.ok(!JSON.stringify(result).includes('staging.example.org'));
+});
+
+test('F2-C: no-contact egress preflight rejects SSRF and DNS rebinding cases',()=>{
+  const good={schemaVersion:1,endpoint:'https://staging.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover',
+    dnsAnswersBefore:['1.1.1.1'],dnsAnswersAtConnect:['1.1.1.1'],
+    selectedAddress:'1.1.1.1',peerAddress:'1.1.1.1',
+    redirectCount:0,proxyConfigured:false};
+  const deny=raw=>{
+    const v=inspectF2OfflineResolvedRoute(raw);
+    assert.deepEqual([v.status,v.routeShapeMatched,
+      v.connectionStatus,v.executionEnabled,
+      v.operatorVerified,v.ownershipVerified,v.externalTargetContacted],
+      ['FAIL',false,'NOT_ATTEMPTED',false,false,false,false]);
+  };
+  for(const ip of [
+    '127.0.0.1','10.0.0.1','172.16.5.1','192.168.0.12',
+    '169.254.169.254','100.64.0.1','0.0.0.0','198.19.1.1',
+    '192.0.2.1','198.51.100.9','203.0.113.7','224.0.0.1',
+    '255.255.255.255','::1','::ffff:127.0.0.1',
+    '127.000.000.001','2130706433','0x7f000001'
+  ]){
+    deny(JSON.stringify({...good,dnsAnswersBefore:[ip],
+      dnsAnswersAtConnect:[ip],selectedAddress:ip,peerAddress:ip}));
+    deny(JSON.stringify({...good,dnsAnswersAtConnect:[ip]}));
+  }
+  for(const bad of [
+    {...good,method:'tools/call'},
+    {...good,protocolVersion:'2025-11-25'},
+    {...good,endpoint:'https://127.0.0.1/mcp'},
+    {...good,endpoint:'http://staging.example.org/mcp'},
+    {...good,redirectCount:1},{...good,proxyConfigured:true},
+    {...good,dnsAnswersBefore:[]},
+    {...good,dnsAnswersBefore:['1.1.1.1','1.1.1.1']},
+    {...good,dnsAnswersBefore:new Array(9).fill('1.1.1.1')},
+    {...good,selectedAddress:'8.8.8.8'},
+    {...good,peerAddress:'8.8.8.8'},
+    {...good,dnsAnswersAtConnect:['8.8.8.8']},
+    {...good,extra:'permit this socket'}
+  ])deny(JSON.stringify(bad));
+  deny('{"schemaVersion":1,"schemaVersion":1}');
+  deny('not json');
+  deny(JSON.stringify(good)+' '.repeat(4097));
+  deny(null);
+});
+
+test('F2-C: malformed peers and rebind snapshots never create authority',()=>{
+  const base={schemaVersion:1,endpoint:'https://staging.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover',
+    dnsAnswersBefore:['8.8.8.8'],dnsAnswersAtConnect:['8.8.8.8'],
+    selectedAddress:'8.8.8.8',peerAddress:'8.8.8.8',
+    redirectCount:0,proxyConfigured:false};
+  const cases=[
+    {...base,peerAddress:[]},
+    {...base,selectedAddress:{toString(){throw Error('TRAP');}}},
+    {...base,dnsAnswersAtConnect:['8.8.4.4']},
+    {...base,dnsAnswersBefore:['1.1.1.1'],dnsAnswersAtConnect:['8.8.8.8']},
+    {...base,dnsAnswersBefore:['1.1.1.1','8.8.8.8'],
+      dnsAnswersAtConnect:['8.8.8.8','127.0.0.1']}
+  ];
+  // JSON serialization of a caller-owned JS object is outside this API;
+  // feed only inert strings, never execute arbitrary caller getters here.
+  for(const candidate of cases.filter(x=>typeof x.selectedAddress==='string')){
+    const verdict=inspectF2OfflineResolvedRoute(JSON.stringify(candidate));
+    assert.equal(verdict.routeShapeMatched,false);
+    assert.equal(verdict.executionEnabled,false);
+    assert.equal(verdict.externalTargetContacted,false);
+  }
+  const bad=inspectF2OfflineResolvedRoute('{"dnsAnswersBefore":'+
+    '["1.1.1.1","1.1.1.1"]}');
+  assert.equal(bad.routeShapeMatched,false);
 });
