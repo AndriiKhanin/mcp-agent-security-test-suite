@@ -974,6 +974,14 @@ test('F2-E: real TLS lab rejects redirects, oversized, stalled and malformed rep
     assert.equal(r.ownershipVerified,false,fault);
     assert.equal(r.realUserServerTested,false,fault);
     assert.equal(r.ownedLabTlsVerified,fault!=='untrusted-ca',fault);
+    if(fault==='stall') {
+      // Abort may report via request 'error' or aborted response stream,
+      // but a previously observed verified TLS handshake must remain true.
+      assert.ok(['F2_LAB_TLS_OR_DEADLINE_REJECTED',
+        'F2_LAB_STREAM_REJECTED'].includes(r.rule),r.rule);
+    }
+    if(fault==='untrusted-ca')
+      assert.equal(r.ownedLabTlsVerified,false,'never infer trust on failed CA');
     assert.ok(r.requestsReceived===1 ||
       (fault==='untrusted-ca'&&r.requestsReceived===0),fault);
   }
