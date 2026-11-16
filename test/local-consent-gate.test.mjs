@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { createHash,generateKeyPairSync,sign } from 'node:crypto';
 import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,createF2OfflineDiskNonceWitness,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse,inspectF2OfflineResolvedRoute,inspectF2OfflineHttpDiscoveryExchange }
+import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,createF2OfflineDiskNonceWitness,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse,inspectF2OfflineResolvedRoute,inspectF2OfflineHttpDiscoveryExchange,runF2OwnedHttpsLabSelftest }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
 import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
@@ -929,5 +929,70 @@ test('F2-D: malformed and oversized captures fail without output leakage',()=>{
     assert.deepEqual([r.status,r.httpShapeMatched,r.executionEnabled,
       r.operatorVerified,r.ownershipVerified,r.connectionStatus],
       ['FAIL',false,false,false,false,'NOT_ATTEMPTED']);
+  }
+});
+
+const F2_LAB_CERT="-----BEGIN CERTIFICATE-----\nMIIDPTCCAiWgAwIBAgIUW77uEPerdOQDy+mREy+Qr/bjgJAwDQYJKoZIhvcNAQEL\nBQAwHjEcMBoGA1UEAwwTc3RhZ2luZy5leGFtcGxlLm9yZzAeFw0yNjExMTYxNzQ5\nMTBaFw0zNjExMTMxNzQ5MTBaMB4xHDAaBgNVBAMME3N0YWdpbmcuZXhhbXBsZS5v\ncmcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDOIqqTfmEgnU2rwJ/6\ncdwBY75/7y8f9MUdkaRArI1w/kHxFIP9txOy9tFXWgumCYKJ2G8COZNwHybjVBE4\nrkdFyZiwg1dLO++R/cbf03BwOrVP4DL4ItCbuFm5bhkykMe190QdPJRGg1BJR1SY\nA1MbilPg6JJO4Yv4bvfjE7UjspaEcV8KbSu6v4dU6zftvz2SXX6NUvcAMbr5plzv\n+zT1Dm8rtn2hmIafog2kJT8FyVCGr9Ha58QarGXGGT7kR0AzOpIsxovoUIQtQIQ7\nAObn47DSfBj+DQV4DsHVd/+VTNqLfNqnVTeNVNrpc7N1YmXUaCdCJwwSGj2NaoSC\nPmR3AgMBAAGjczBxMB0GA1UdDgQWBBRz/UnOSbvTjHInr7LaezRQmuyoEzAfBgNV\nHSMEGDAWgBRz/UnOSbvTjHInr7LaezRQmuyoEzAPBgNVHRMBAf8EBTADAQH/MB4G\nA1UdEQQXMBWCE3N0YWdpbmcuZXhhbXBsZS5vcmcwDQYJKoZIhvcNAQELBQADggEB\nAKQENK96h0YYCyKZEES48cD9G7rH4vPPgcBqvLP6QEQkQfa1eHSHSAWSP0FitWqi\njkH0Tzmorxi3BKgJG7jo7+LOnVxuXc7pUqeUtutv1BLSEfxK8SssJvzLbq568PX/\nRM798h4set13T8wNKNazWG8QHisXigwaz7VGsg8+lJCt29EZd38oWqZowaamPGei\nTfP9sy9uB1NoLiou8Wb1xXklAFiXVdoYqghbH7yeanQaG+lt2EqC6eRMwqdOZVZ4\nw0sbenwnS87rr7kOjoREIMsyfyrA0y54/NM0eF+lcJ6tCAkjdSmrojLGh35xuOBQ\nF1LSsdJXbWgDPwFK4zwv094=\n-----END CERTIFICATE-----";
+const F2_LAB_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDOIqqTfmEgnU2r\nwJ/6cdwBY75/7y8f9MUdkaRArI1w/kHxFIP9txOy9tFXWgumCYKJ2G8COZNwHybj\nVBE4rkdFyZiwg1dLO++R/cbf03BwOrVP4DL4ItCbuFm5bhkykMe190QdPJRGg1BJ\nR1SYA1MbilPg6JJO4Yv4bvfjE7UjspaEcV8KbSu6v4dU6zftvz2SXX6NUvcAMbr5\nplzv+zT1Dm8rtn2hmIafog2kJT8FyVCGr9Ha58QarGXGGT7kR0AzOpIsxovoUIQt\nQIQ7AObn47DSfBj+DQV4DsHVd/+VTNqLfNqnVTeNVNrpc7N1YmXUaCdCJwwSGj2N\naoSCPmR3AgMBAAECggEASnWZOgfnm7lWihjdcMDaIKJf+KR0WE25OhIWy8nIma0u\nMqAfgXE1K2seeTgshwBeZ96HUr1rdY+7I1iFk/zX/+xvPCtlR+bRheGuicE9lzyN\nq9mnb5xb0DQKLQIJFgvYJ/G2Z/0u7j2WrbGXbAWfao5P+CjqWJX+UnH7FspSnx7I\nOLwQ/tZTIz6EepB4JJfk2eYLA7um1zc6m0/EzNQhZxLsDql49/4kfm3AtpW6YOes\nG2lKl7aCz84ryr+OBV4alMnXxr6A4rm6wnbxqqd3F/LH1WqcVAEB7udHlA0BYWm7\ntgGhfRg2CHGioUE4B9GpXhWZUuFz7Ozd0CwlsonxaQKBgQDxWYHnhRkc5+swyaU4\nu1SlKY2xuZ0uYmiSnrVRBkJ12usU8e9EjlOk63EgGEagY96LgY3E4Ek+UhRMP+WC\n6AOaO7iSbHgnnm9GAGPW5p1cnn2KnZrUQGQoez/995pGV6Tam2plCwNFg4NrOlqg\nBjq2uZwlevQNMsRP6a/4OkDnRQKBgQDapfEPOINTggquc0GOM2DhKxYlavKVqYSp\n4/CwPzqQ71UulblXfXNa4SRs5jdDMXYvBJ7VX5EeTQiR2kFwK1NRf/GM21lZsDpQ\nBu3/66ogPXYzGEAe9fx0yOMntXVq9uusJ1a71DXLk5/lgPePaphHBckgQfOQDqNs\nngIubgmqiwKBgF4vBtG5kBZGrvJoDnD4Mc0OTTxI6fza7GIjSzCmV7M0Tj7rNusy\n+5NFSe0zbARVVNhuI0vsFskaMM+cs80FC7rZiWqip7UWT+gqaMvJTSmCtA0u+efQ\nhQWDK3LJeEvxEeU5dyidRpaO/u8OY6VFKQ57mmLJ+4lXAWMKF+CvovpdAoGAcU8r\n1LJ5xE4REQTjxTi1DRuSF4QMASlfedeJhRzPUgrlvwWSjleR71fb05+epfC9CXLA\niV1ETEqplURhQysAu6ytVkzaShN8tLpSnpzXhmuzlJkNqb3avf7ZUVvFZNBfo9Cj\nLyWzVzPC2mHyaV1ZWv0RlOj4uwALCx/7i2o1Ei8CgYBDH3Sd4rfqRSOFAX6yD1j+\nBJoTn9HRdqnqPlQmlMzEEFPe1Rt9gJV5nJQykA/rnnEZq3hATIv1zmJKd7z2cq+w\nZ5FX4U6clPJeoLV9x/OqPoKK3ZY+I7wxeJjmXFCmqvkFjsRZdaISwn5eMvxVxO3A\nGWm3MNwg5Nq0dEDqGP1TAw==\n-----END PRIVATE KEY-----";
+
+
+// Test-only self-signed keypair for staging.example.org (generated locally).
+// NEVER use these public fixture bytes for production signing or TLS.
+test('F2-E: actual owned-loopback TLS verifies JSON and request-scoped SSE',async()=>{
+  for(const fault of ['allowed','sse']){
+    const r=await runF2OwnedHttpsLabSelftest({
+      cert:F2_LAB_CERT,key:F2_LAB_KEY,fault,deadlineMs:3000
+    });
+    assert.deepEqual([
+      r.status,r.rule,r.profile,r.ownedLabExchangeMatched,
+      r.ownedLabTlsVerified,r.requestsReceived,
+      r.operatorVerified,r.ownershipVerified,
+      r.remoteStagingAuthorized,r.externalTargetContacted,
+      r.realUserServerTested
+    ],[
+      'PASS','F2_OWNED_LAB_HTTPS_EXCHANGE_MATCH',
+      'F2_OWNED_LOOPBACK_TLS_FIXTURE_ONLY',true,true,1,
+      false,false,false,false,false
+    ]);
+    assert.ok(!JSON.stringify(r).includes('PRIVATE KEY'));
+    assert.ok(!JSON.stringify(r).includes('127.0.0.1'));
+  }
+});
+
+test('F2-E: real TLS lab rejects redirects, oversized, stalled and malformed replies',async()=>{
+  for(const fault of ['redirect','oversized','stall',
+    'wrong-version','wrong-content-type','invalid-json','untrusted-ca']){
+    const r=await runF2OwnedHttpsLabSelftest({
+      cert:F2_LAB_CERT,key:F2_LAB_KEY,fault,
+      deadlineMs:fault==='stall'?650:3000
+    });
+    assert.equal(r.status,'FAIL',fault);
+    assert.equal(r.ownedLabExchangeMatched,false,fault);
+    assert.equal(r.remoteStagingAuthorized,false,fault);
+    assert.equal(r.externalTargetContacted,false,fault);
+    assert.equal(r.operatorVerified,false,fault);
+    assert.equal(r.ownershipVerified,false,fault);
+    assert.equal(r.realUserServerTested,false,fault);
+    assert.equal(r.ownedLabTlsVerified,fault!=='untrusted-ca',fault);
+    assert.ok(r.requestsReceived===1 ||
+      (fault==='untrusted-ca'&&r.requestsReceived===0),fault);
+  }
+});
+
+test('F2-E: no endpoint override or unsafe lab options accepted',async()=>{
+  for(const options of [
+    null,{}, {cert:F2_LAB_CERT,key:F2_LAB_KEY,
+      endpoint:'https://external.example.org/mcp'},
+    {cert:F2_LAB_CERT,key:F2_LAB_KEY,fault:'tools/call'},
+    {cert:F2_LAB_CERT,key:F2_LAB_KEY,deadlineMs:5001},
+    {cert:F2_LAB_CERT,key:F2_LAB_KEY,deadlineMs:0},
+    {cert:'bad',key:F2_LAB_KEY},
+    {cert:F2_LAB_CERT,key:'bad'}
+  ]){
+    const r=await runF2OwnedHttpsLabSelftest(options);
+    assert.equal(r.status,'FAIL');
+    assert.equal(r.rule,'F2_LAB_OPTIONS_REJECTED');
+    assert.equal(r.externalTargetContacted,false);
+    assert.equal(r.requestsReceived,0);
   }
 });
