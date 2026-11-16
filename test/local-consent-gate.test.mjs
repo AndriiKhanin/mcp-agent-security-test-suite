@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { createHash,generateKeyPairSync,sign } from 'node:crypto';
 import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse }
+import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
 import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
@@ -573,4 +573,91 @@ test('F2-A: strict parser denies ambiguous keys and unsafe JSON numbers in JSON 
     'application/json',base).schemaMatched,true);
   assert.equal(inspectF2OfflineDiscoverySseResponse(
     'text/event-stream',final).schemaMatched,true);
+});
+
+test('F2-B: source-only nonce observation stays unauthorized and rejects replay',()=>{
+  const gate=createF2OfflineNonceJournal();
+  const intent=['https://fixture.example.org/mcp','2026-07-28','server/discover'];
+  const g={schemaVersion:1,endpoint:intent[0],protocolVersion:intent[1],
+    method:intent[2],operatorId:'fixtureOperator',issuerId:'fixtureIssuer',
+    intentSha256:createHash('sha256').update(JSON.stringify(intent)).digest('hex'),
+    nonce:'ab'.repeat(16),issuedAt:1000,expiresAt:120000};
+  const observe=()=>gate.observeGrantJson(JSON.stringify(g),2000);
+  const first=observe();
+  assert.deepEqual([first.status,first.rule,first.authorizationStatus,
+    first.operatorVerified,first.ownershipVerified,first.signatureVerified,
+    first.executionEnabled,first.externalTargetContacted,first.connectionStatus],
+    ['FAIL','F2_SOURCE_NONCE_OBSERVED_NO_AUTHORITY','NOT_ESTABLISHED',
+     false,false,false,false,false,'NOT_ATTEMPTED']);
+  assert.equal(observe().rule,'F2_SOURCE_NONCE_REPLAY');
+  assert.deepEqual(gate.counters(),{
+    seen:1,revoked:0,durable:false,authorityEstablished:false,networkEnabled:false
+  });
+  assert.ok(!JSON.stringify(first).includes('fixtureOperator'));
+  assert.ok(!JSON.stringify(first).includes('fixture.example.org'));
+});
+
+test('F2-B: revocation before and after use never enables permission',()=>{
+  const gate=createF2OfflineNonceJournal();
+  const scope=['https://fixture.example.org/mcp','2026-07-28','server/discover'];
+  const make=nonce=>({schemaVersion:1,endpoint:scope[0],protocolVersion:scope[1],
+    method:scope[2],operatorId:'testOp',issuerId:'testIssuer',
+    intentSha256:createHash('sha256').update(JSON.stringify(scope)).digest('hex'),
+    nonce,issuedAt:1000,expiresAt:120000});
+  const first=make('11'.repeat(16)),second=make('22'.repeat(16));
+  assert.equal(gate.revokeFixtureNonce(first.nonce).rule,'F2_SOURCE_NONCE_REVOKED');
+  assert.equal(gate.observeGrantJson(JSON.stringify(first),2000).rule,'F2_SOURCE_NONCE_REVOKED');
+  assert.equal(gate.observeGrantJson(JSON.stringify(second),2000).rule,
+    'F2_SOURCE_NONCE_OBSERVED_NO_AUTHORITY');
+  assert.equal(gate.revokeFixtureNonce(second.nonce).rule,'F2_SOURCE_NONCE_REVOKED');
+  assert.equal(gate.observeGrantJson(JSON.stringify(second),2000).rule,
+    'F2_SOURCE_NONCE_REVOKED');
+  assert.equal(gate.revokeFixtureNonce(second.nonce).rule,'F2_SOURCE_NONCE_REVOKED');
+  assert.deepEqual(gate.counters(),{
+    seen:1,revoked:2,durable:false,authorityEstablished:false,networkEnabled:false
+  });
+  const fresh=createF2OfflineNonceJournal();
+  assert.equal(fresh.counters().durable,false);
+  assert.equal(fresh.observeGrantJson(JSON.stringify(second),2000).rule,
+    'F2_SOURCE_NONCE_OBSERVED_NO_AUTHORITY');
+  assert.equal(fresh.counters().networkEnabled,false);
+});
+
+test('F2-B: bad scope, time, extra fields, ambiguity and capacity fail closed',()=>{
+  const gate=createF2OfflineNonceJournal();
+  const scope=['https://fixture.example.org/mcp','2026-07-28','server/discover'];
+  const plain={schemaVersion:1,endpoint:scope[0],protocolVersion:scope[1],
+    method:scope[2],operatorId:'testOp',issuerId:'testIssuer',
+    intentSha256:createHash('sha256').update(JSON.stringify(scope)).digest('hex'),
+    nonce:'00'.repeat(16),issuedAt:1000,expiresAt:200000};
+  const observe=(g,at=1000)=>gate.observeGrantJson(JSON.stringify(g),at);
+  for(const g of [
+    {...plain,method:'tools/call'},
+    {...plain,endpoint:'http://127.0.0.1/mcp'},
+    {...plain,intentSha256:'f'.repeat(64)},
+    {...plain,nonce:'wrong'}, {...plain,expiresAt:301001},
+    {...plain,extra:'permit network'}
+  ]){
+    assert.ok(observe(g).rule!=='F2_SOURCE_NONCE_OBSERVED_NO_AUTHORITY');
+  }
+  assert.equal(observe({...plain,issuedAt:3000,expiresAt:4000},2000).rule,
+    'F2_SOURCE_GRANT_OUTSIDE_WINDOW');
+  assert.equal(observe({...plain,issuedAt:1000,expiresAt:2000},2000).rule,
+    'F2_SOURCE_GRANT_OUTSIDE_WINDOW');
+  const dup=JSON.stringify(plain).replace('"schemaVersion":1',
+    '"schemaVersion":2,"schemaVersion":1');
+  assert.equal(gate.observeGrantJson(dup,1000).rule,'F2_SOURCE_GRANT_REJECTED');
+  assert.equal(gate.observeGrantJson(plain,1000).rule,'F2_SOURCE_GRANT_REJECTED');
+  assert.equal(gate.revokeFixtureNonce('bad').rule,'F2_SOURCE_NONCE_REJECTED');
+  for(let i=0;i<64;i++){
+    const nonce=i.toString(16).padStart(32,'0');
+    const r=observe({...plain,nonce});
+    assert.equal(r.rule,'F2_SOURCE_NONCE_OBSERVED_NO_AUTHORITY');
+    assert.equal(r.executionEnabled,false);
+  }
+  assert.equal(gate.counters().seen,64);
+  assert.equal(observe({...plain,nonce:'ff'.repeat(16)}).rule,
+    'F2_SOURCE_LEDGER_CAPACITY_STOP');
+  assert.equal(observe({...plain,nonce:'00'.repeat(16)}).rule,
+    'F2_SOURCE_NONCE_REPLAY');
 });
