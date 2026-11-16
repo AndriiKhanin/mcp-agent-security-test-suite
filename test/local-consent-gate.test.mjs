@@ -324,7 +324,7 @@ test('F2-A: fixed modern discovery wire is spec-shaped and never contacts a targ
 
 test('F2-A: mismatched wire fields or added authority requests fail closed',()=>{
   const f=buildF2OfflineDiscoveryFixture().request;
-  const wire=(edit={})=>({...f,...edit,headers:{...f.headers}});
+  const wire=(edit={})=>({...f,...edit,headers:{...f.headers,...edit.headers}});
   const body=JSON.parse(f.body);
   const mutated=JSON.stringify({...body,method:'tools/call'});
   const missingMeta=JSON.stringify({...body,params:{}});
