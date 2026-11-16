@@ -7,7 +7,7 @@ import { tmpdir } from 'node:os';
 import { createHash,generateKeyPairSync,sign } from 'node:crypto';
 import { dirname,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,createF2OfflineDiskNonceWitness,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse,inspectF2OfflineResolvedRoute,inspectF2OfflineHttpDiscoveryExchange,runF2OwnedHttpsLabSelftest }
+import { runGatedFixedMockCase,runGatedFirstPartySelftest,reviewF2StagingIntent,inspectF2SignedGrantEvidence,createF2OfflineNonceJournal,createF2OfflineDiskNonceWitness,buildF2OfflineDiscoveryFixture,reviewF2OfflineDiscoveryFixture,inspectF2OfflineDiscoveryJsonResponse,inspectF2OfflineDiscoverySseResponse,inspectF2OfflineResolvedRoute,inspectF2OfflineHttpDiscoveryExchange,runF2OwnedHttpsLabSelftest,inspectF2OfflineTripartiteEvidence }
   from '../src/local-consent-gate.mjs';
 import { runFirstPartyAdapterSelftest } from '../src/local-adapter-drivers.mjs';
 import { runLocalStdioInitialization } from '../src/stdio-mcp-harness.mjs';
@@ -1003,4 +1003,84 @@ test('F2-E: no endpoint override or unsafe lab options accepted',async()=>{
     assert.equal(r.externalTargetContacted,false);
     assert.equal(r.requestsReceived,0);
   }
+});
+
+
+test('F2-F: three distinct real Ed25519 signatures match but never grant network',()=>{
+  const scope={endpoint:'https://staging.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover'};
+  const now=2_000_000;
+  const grant={schemaVersion:1,...scope,operatorId:'testOperator',
+    issuerId:'testIssuer',ownerId:'testOwner',
+    intentSha256:createHash('sha256').update(JSON.stringify([
+      scope.endpoint,scope.protocolVersion,scope.method])).digest('hex'),
+    requestSha256:buildF2OfflineDiscoveryFixture().requestSha256,
+    nonce:'0123456789abcdef0123456789abcdef',
+    issuedAt:now-1000,expiresAt:now+1000};
+  const roles=['issuer','operator','owner'],keys={},secrets={};
+  for(const role of roles){
+    const pair=generateKeyPairSync('ed25519');
+    keys[role]=pair.publicKey.export({format:'pem',type:'spki'});
+    secrets[role]=pair.privateKey;
+  }
+  const signatures={};
+  const signPacket=(g,role,key=secrets[role])=>sign(null,Buffer.from(
+    'F2-SOURCE-TRIPARTITE-V1\n'+role+'\n'+JSON.stringify([
+      g.schemaVersion,g.endpoint,g.protocolVersion,g.method,g.operatorId,
+      g.issuerId,g.ownerId,g.intentSha256,g.requestSha256,g.nonce,
+      g.issuedAt,g.expiresAt
+    ])),key).toString('base64url');
+  for(const role of roles)signatures[role]=signPacket(grant,role);
+  const packet={schemaVersion:1,grant,keys,signatures};
+  const run=(p,time=now)=>inspectF2OfflineTripartiteEvidence(
+    scope,JSON.stringify(p),time);
+  const good=run(packet);
+  assert.deepEqual([
+    good.status,good.rule,good.signaturesMatched,good.distinctKeys,
+    good.independentIssuerTrusted,good.operatorVerified,
+    good.ownershipVerified,good.requestAuthorized,
+    good.replayProtectionDurable,good.connectionStatus,
+    good.executionEnabled,good.externalTargetContacted
+  ],['FAIL','F2_TRIPARTITE_MATCH_NO_TRUST_ANCHOR',true,true,
+    false,false,false,false,false,'NOT_ATTEMPTED',false,false]);
+  assert.ok(!JSON.stringify(good).includes('staging.example.org'));
+  assert.ok(!JSON.stringify(good).includes('0123456789abcdef'));
+  assert.equal(run(packet,now+1000).rule,'F2_TRIPARTITE_OUTSIDE_WINDOW');
+  assert.equal(run(packet,now-1001).rule,'F2_TRIPARTITE_OUTSIDE_WINDOW');
+  assert.equal(run({...packet,grant:{...grant,requestSha256:'f'.repeat(64)}}).rule,
+    'F2_TRIPARTITE_SCOPE_MISMATCH');
+  assert.equal(run({...packet,grant:{...grant,endpoint:'https://other.example.org/mcp'}}).rule,
+    'F2_TRIPARTITE_SCOPE_MISMATCH');
+  assert.equal(run({...packet,signatures:{...signatures,
+    operator:signatures.issuer}}).rule,'F2_TRIPARTITE_SIGNATURE_INVALID');
+  assert.equal(run({...packet,keys:{...keys,owner:keys.operator}}).rule,
+    'F2_TRIPARTITE_KEY_REUSE_REJECTED');
+  assert.equal(run({...packet,grant:{...grant,nonce:'f'.repeat(32)}}).rule,
+    'F2_TRIPARTITE_SIGNATURE_INVALID');
+  assert.equal(run({...packet,grant:{...grant,expiresAt:now+300001}}).rule,
+    'F2_TRIPARTITE_PACKET_REJECTED');
+  assert.equal(run({...packet,extra:'grant-network'}).rule,
+    'F2_TRIPARTITE_PACKET_REJECTED');
+});
+
+test('F2-F: duplicate JSON, malformed role keys, and forged signatures fail closed',()=>{
+  const scope={endpoint:'https://staging.example.org/mcp',
+    protocolVersion:'2026-07-28',method:'server/discover'};
+  for(const raw of [
+    '',null,'[]','{}','not-json',
+    '{"schemaVersion":1,"schemaVersion":1}',
+    '{"schemaVersion":1,"grant":{},"keys":{},"signatures":{}}',
+    ' '.repeat(8193)
+  ]){
+    const v=inspectF2OfflineTripartiteEvidence(scope,raw,10);
+    assert.equal(v.status,'FAIL');
+    assert.equal(v.signaturesMatched,false);
+    assert.equal(v.operatorVerified,false);
+    assert.equal(v.ownershipVerified,false);
+    assert.equal(v.externalTargetContacted,false);
+  }
+  assert.equal(inspectF2OfflineTripartiteEvidence({
+    ...scope,method:'tools/call'},'{}',10).executionEnabled,false);
+  assert.equal(inspectF2OfflineTripartiteEvidence(
+    scope,'{}',-1).executionEnabled,false);
 });
