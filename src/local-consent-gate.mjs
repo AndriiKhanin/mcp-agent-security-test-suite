@@ -702,7 +702,7 @@ export async function runF2OwnedHttpsLabSelftest(options) {
       realUserServerTested:false
     });
   const allowed=['allowed','sse','redirect','oversized','stall',
-    'wrong-version','wrong-content-type','invalid-json','untrusted-ca'];
+    'wrong-version','wrong-content-type','invalid-json','bad-utf8','untrusted-ca'];
   if(!options||Object.getPrototypeOf(options)!==Object.prototype||
      Reflect.ownKeys(options).some(k=>!['cert','key','fault','deadlineMs'].includes(k)))
     return report('F2_LAB_OPTIONS_REJECTED');
@@ -752,6 +752,7 @@ export async function runF2OwnedHttpsLabSelftest(options) {
         }
         const payload=fault==='oversized'?'X'.repeat(32769):
           fault==='invalid-json'?'{bad':
+          fault==='bad-utf8'?Buffer.from([0xff,0xfe,0xfd]):
           fault==='sse'?'data: '+answer+'\n\n':answer;
         const headers={
           'Content-Type':fault==='sse'?'text/event-stream':
@@ -820,7 +821,13 @@ export async function runF2OwnedHttpsLabSelftest(options) {
           }
           pairs.push([name,value]);
         }
-        const payload=Buffer.concat(chunks).toString('utf8');
+        // Fatal UTF-8: Node Buffer.toString() silently substitutes U+FFFD.
+        // Invalid response bytes must never become trusted JSON/SSE text.
+        let payload;
+        try {payload=new TextDecoder('utf-8',{fatal:true}).decode(
+          Buffer.concat(chunks));}
+        catch {return resolveResult(report('F2_LAB_UTF8_REJECTED',
+          false,received,true));}
         const exchanged={schemaVersion:1,request:fixture.request,
           statusCode:res.statusCode,headers:pairs,body:payload,
           elapsedMs:Date.now()-started,redirectsFollowed:0};
