@@ -10,6 +10,7 @@
 import { randomUUID,createHash,createPublicKey,verify as cryptoVerify } from 'node:crypto';
 import { descriptorFingerprint, evaluateAdapterConsent } from './adapter-consent.mjs';
 import { createFirstPartyDriver } from './local-adapter-drivers.mjs';
+import { parseStrictJson } from './strict-json.mjs';
 
 const PROFILE='fixed-first-party-admission-v1';
 const OWNER='suite-fixed-mock';
@@ -169,6 +170,186 @@ export function reviewF2StagingIntent(intent) {
       return verdict('F2_INTENT_REJECTED');
     return verdict('F2_AUTHORITY_NOT_VERIFIED');
   } catch {return verdict('F2_INTENT_REJECTED');}
+}
+
+/** F2-A: fixed normative 2026-07-28 discovery wire fixture, SOURCE ONLY.
+ * No endpoint, HTTP client, transport, authority, credential or network effect.
+ * Matching this wire fixture NEVER approves a staging connection.
+ * References: official 2026-07-28 server/discover and Streamable HTTP specs. */
+const F2_DISCOVERY_BODY=JSON.stringify({
+  jsonrpc:'2.0',id:'f2-discover-fixture-1',method:'server/discover',
+  params:{_meta:{
+    'io.modelcontextprotocol/protocolVersion':'2026-07-28',
+    'io.modelcontextprotocol/clientInfo':{
+      name:'mcp-agent-security-test-suite-fixture',version:'0.0.10-rc.1'
+    },
+    'io.modelcontextprotocol/clientCapabilities':{}
+  }}
+});
+const F2_DISCOVERY_HEADERS=Object.freeze({
+  'Content-Type':'application/json',
+  Accept:'application/json, text/event-stream',
+  'MCP-Protocol-Version':'2026-07-28',
+  'Mcp-Method':'server/discover'
+});
+
+/** Construct ONLY an inert, fixed first-party request description.
+ * The endpoint and any HTTP adapter deliberately do not exist here. */
+export function buildF2OfflineDiscoveryFixture() {
+  return Object.freeze({
+    profile:'F2_SOURCE_DISCOVERY_2026_07_28',
+    request:Object.freeze({
+      httpMethod:'POST',
+      headers:F2_DISCOVERY_HEADERS,
+      body:F2_DISCOVERY_BODY
+    }),
+    requestSha256:createHash('sha256').update(F2_DISCOVERY_BODY,'utf8').digest('hex'),
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+}
+
+/** Compare candidate wire bytes against the REVIEWED, exact source fixture.
+ * This is not generic MCP conformance, host validation or consent review.
+ * Capture descriptors once; never call untrusted property getters or echo inputs.
+ * IMPORTANT: Proxy getPrototypeOf/ownKeys/getOwnPropertyDescriptor traps can run
+ * arbitrary caller code during inspection. This validator is NOT an OS/process
+ * sandbox; source data must be obtained from an isolated, trusted JSON parser,
+ * not arbitrary executable JS objects, before any real security boundary. */
+export function reviewF2OfflineDiscoveryFixture(candidate) {
+  const verdict=matched=>Object.freeze({
+    status:matched?'PASS':'FAIL',fixtureMatches:matched,
+    rule:matched?'F2_SOURCE_WIRE_FIXTURE_MATCH':'F2_SOURCE_WIRE_FIXTURE_REJECTED',
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+  const own=(object,names)=>{
+    if(!object||typeof object!=='object'||
+       Object.getPrototypeOf(object)!==Object.prototype)return null;
+    const descriptors=Object.getOwnPropertyDescriptors(object);
+    if(Reflect.ownKeys(descriptors).length!==names.length||
+       !names.every(name=>Object.hasOwn(descriptors,name)&&
+         Object.hasOwn(descriptors[name],'value')&&
+         descriptors[name].enumerable))return null;
+    return Object.fromEntries(names.map(name=>[name,descriptors[name].value]));
+  };
+  try {
+    const request=own(candidate,['httpMethod','headers','body']);
+    const headers=request&&own(request.headers,
+      ['Content-Type','Accept','MCP-Protocol-Version','Mcp-Method']);
+    if(!request||!headers||request.httpMethod!=='POST'||
+       typeof request.body!=='string'||
+       Buffer.byteLength(request.body,'utf8')>4096||
+       request.body!==F2_DISCOVERY_BODY)return verdict(false);
+    return verdict(Object.keys(F2_DISCOVERY_HEADERS).every(
+      name=>headers[name]===F2_DISCOVERY_HEADERS[name]));
+  } catch {return verdict(false);}
+}
+
+/** F2-A: bounded, no-contact JSON discovery response evidence only.
+ * This function accepts bytes already captured in a fictional fixture.
+ * It cannot open a socket or authenticate any alleged server. The server's
+ * instructions or self-reported identity are never elevated to authority.
+ * SSE and real target evidence remain separate F2 requirements. */
+export function inspectF2OfflineDiscoveryJsonResponse(contentType,body) {
+  const verdict=(matched,rule)=>Object.freeze({
+    status:matched?'PASS':'FAIL',schemaMatched:matched,rule,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+  const reject=()=>verdict(false,'F2_SOURCE_DISCOVERY_RESPONSE_REJECTED');
+  if(contentType!=='application/json'||typeof body!=='string'||
+     !body.length||Buffer.byteLength(body,'utf8')>32768)return reject();
+  try {
+    const message=parseStrictJson(body);
+    const record=o=>o!==null&&typeof o==='object'&&
+      !Array.isArray(o)&&Object.getPrototypeOf(o)===Object.prototype;
+    if(!record(message)||message.jsonrpc!=='2.0'||
+       message.id!=='f2-discover-fixture-1'||Object.hasOwn(message,'error')||
+       !record(message.result))return reject();
+    const discovery=message.result,versions=discovery.supportedVersions;
+    if(discovery.resultType!=='complete'||!record(discovery.capabilities)||
+       !Array.isArray(versions)||versions.length===0||versions.length>8||
+       versions.some(v=>typeof v!=='string'||
+         !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(v))||
+       new Set(versions).size!==versions.length)return reject();
+    if(!versions.includes('2026-07-28'))
+      return verdict(false,'F2_SOURCE_DISCOVERY_VERSION_UNSUPPORTED');
+    // Never copy untrusted result.instructions or _meta.serverInfo into
+    // the output. Schema match is NOT operator proof or approval to connect.
+    return verdict(true,'F2_SOURCE_DISCOVERY_RESPONSE_MATCH');
+  } catch {return reject();}
+}
+
+/** F2-A: bounded offline SSE response stream verdict, not a transport.
+ * It consumes only already-captured text. Unknown stream messages, replay
+ * markers, standalone RPC requests, and events after the final response are
+ * rejected. Parsing does not invoke tools, network or untrusted instructions.
+ * Only the pinned fixture profile is accepted, not arbitrary SSE traffic. */
+export function inspectF2OfflineDiscoverySseResponse(contentType,body) {
+  const verdict=(matched,events=0,notifications=0)=>Object.freeze({
+    status:matched?'PASS':'FAIL',schemaMatched:matched,
+    rule:matched?'F2_SOURCE_DISCOVERY_SSE_RESPONSE_MATCH':
+      'F2_SOURCE_DISCOVERY_SSE_RESPONSE_REJECTED',
+    eventsObserved:events,notificationsObserved:notifications,
+    connectionStatus:'NOT_ATTEMPTED',executionEnabled:false,
+    operatorVerified:false,ownershipVerified:false,externalTargetContacted:false
+  });
+  const reject=()=>verdict(false);
+  if(contentType!=='text/event-stream'||typeof body!=='string'||
+     !body.length||Buffer.byteLength(body,'utf8')>32768||
+     body.includes('\0'))return reject();
+  try {
+    const normalized=body.replace(/\r\n?/g,'\n');
+    // A final SSE message is dispatched only at a blank line boundary.
+    if(!normalized.endsWith('\n\n'))return reject();
+    const lines=normalized.split('\n'),record=o=>
+      o!==null&&typeof o==='object'&&!Array.isArray(o)&&
+      Object.getPrototypeOf(o)===Object.prototype;
+    let events=0,notifications=0,finalSeen=false,eventName='',data=[];
+    for(const line of lines){
+      if(line===''){
+        if(data.length){
+          if(finalSeen||++events>8)return reject();
+          const payload=data.join('\n');
+          if(Buffer.byteLength(payload,'utf8')>8192)return reject();
+          const msg=parseStrictJson(payload);
+          if(!record(msg)||msg.jsonrpc!=='2.0')return reject();
+          if(Object.hasOwn(msg,'method')){
+            if(Object.hasOwn(msg,'id')||Object.hasOwn(msg,'result')||
+               Object.hasOwn(msg,'error')||!record(msg.params)||
+               !['notifications/progress','notifications/message']
+                 .includes(msg.method))return reject();
+            notifications++;
+          }else{
+            if(!inspectF2OfflineDiscoveryJsonResponse(
+              'application/json',payload).schemaMatched)return reject();
+            finalSeen=true;
+          }
+          data=[];eventName='';
+        }else if(eventName!=='')return reject();
+        continue;
+      }
+      // Comments and request-scoped keep-alives never become instructions.
+      if(line.startsWith(':'))continue;
+      const colon=line.indexOf(':'),field=colon<0?line:line.slice(0,colon);
+      let value=colon<0?'':line.slice(colon+1);
+      if(value.startsWith(' '))value=value.slice(1);
+      if(field==='data'){
+        if(data.length>=64)return reject();
+        data.push(value);
+      }else if(field==='event'){
+        if(value!=='message'||eventName!=='')return reject();
+        eventName=value;
+      }else{
+        // id / retry / unknown fields are out of scope and fail closed,
+        // rather than accidentally creating session or replay semantics.
+        return reject();
+      }
+    }
+    if(!finalSeen||data.length||eventName!=='')return reject();
+    return verdict(true,events,notifications);
+  } catch {return reject();}
 }
 
 /** F2 offline Ed25519 evidence verification only. An untrusted supplied key
