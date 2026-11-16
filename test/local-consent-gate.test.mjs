@@ -1055,6 +1055,8 @@ test('F2-F: three distinct real Ed25519 signatures match but never grant network
     operator:signatures.issuer}}).rule,'F2_TRIPARTITE_SIGNATURE_INVALID');
   assert.equal(run({...packet,keys:{...keys,owner:keys.operator}}).rule,
     'F2_TRIPARTITE_KEY_REUSE_REJECTED');
+  assert.equal(run({...packet,grant:{...grant,ownerId:grant.operatorId}}).rule,
+    'F2_TRIPARTITE_PACKET_REJECTED');
   assert.equal(run({...packet,grant:{...grant,nonce:'f'.repeat(32)}}).rule,
     'F2_TRIPARTITE_SIGNATURE_INVALID');
   assert.equal(run({...packet,grant:{...grant,expiresAt:now+300001}}).rule,
