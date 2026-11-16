@@ -739,3 +739,32 @@ test('F2-B: concurrent OS processes race for one synthetic nonce marker',async()
     assert.equal(readdirSync(root).length,1);
   }finally{rmSync(root,{recursive:true,force:true});}
 });
+
+
+test('F2-B: disposable OS witness refuses nested or unrelated scratch roots',()=>{
+  const trusted=mkdtempSync(join(tmpdir(),'mcp-f2b-owned-'));
+  const wrongPrefix=mkdtempSync(join(tmpdir(),'mcp-f2b-unowned-'));
+  try {
+    const nested=mkdtempSync(join(trusted,'mcp-f2b-owned-'));
+    const nonce='ee'.repeat(16);
+    const nestedResult=createF2OfflineDiskNonceWitness(nested)
+      .markObservedFixtureNonce(nonce);
+    const wrongResult=createF2OfflineDiskNonceWitness(wrongPrefix)
+      .markObservedFixtureNonce(nonce);
+    for(const report of [nestedResult,wrongResult]) {
+      assert.equal(report.status,'FAIL');
+      assert.equal(report.rule,'F2_SOURCE_DISK_ROOT_REJECTED');
+      assert.equal(report.authorizationStatus,'NOT_ESTABLISHED');
+      assert.equal(report.executionEnabled,false);
+      assert.equal(report.externalTargetContacted,false);
+    }
+    assert.equal(readdirSync(nested).length,0);
+    assert.equal(readdirSync(wrongPrefix).length,0);
+    const normal=createF2OfflineDiskNonceWitness(trusted)
+      .markObservedFixtureNonce(nonce);
+    assert.equal(normal.rule,'F2_SOURCE_OS_NONCE_MARKED_NO_AUTHORITY');
+  }finally {
+    rmSync(trusted,{recursive:true,force:true});
+    rmSync(wrongPrefix,{recursive:true,force:true});
+  }
+});
