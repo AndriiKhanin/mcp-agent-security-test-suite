@@ -15,6 +15,8 @@ import { lstatSync,realpathSync,writeFileSync } from 'node:fs';
 import { basename,dirname,join,resolve as resolvePath } from 'node:path';
 import { tmpdir } from 'node:os';
 import { isIP } from 'node:net';
+import https from 'node:https';
+import { once } from 'node:events';
 
 const PROFILE='fixed-first-party-admission-v1';
 const OWNER='suite-fixed-mock';
@@ -680,4 +682,166 @@ export function inspectF2OfflineHttpDiscoveryExchange(raw) {
     // Even matching response structures confer zero privileges.
     return verdict('F2_SOURCE_HTTP_SHAPE_MATCH_NO_AUTHORITY',true);
   } catch {return reject();}
+}
+
+
+/** F2-E: REAL TLS on one source-owned disposable 127.0.0.1 HTTPS server.
+ * This is a first-party laboratory selftest ONLY, NOT remote staging.
+ * The certificate/key are test fixtures, never production trust anchors.
+ * Endpoint, peer IP, hostname, method and request bytes are source fixed;
+ * callers cannot select or contact an external service. A matching lab
+ * exchange cannot grant an F2 user/operator/target permission. */
+export async function runF2OwnedHttpsLabSelftest(options) {
+  const report=(rule,matched=false,received=0,tlsLabVerified=false)=>
+    Object.freeze({
+      status:matched?'PASS':'FAIL',rule,
+      profile:'F2_OWNED_LOOPBACK_TLS_FIXTURE_ONLY',
+      ownedLabExchangeMatched:matched,ownedLabTlsVerified:tlsLabVerified,
+      requestsReceived:received,operatorVerified:false,ownershipVerified:false,
+      remoteStagingAuthorized:false,externalTargetContacted:false,
+      realUserServerTested:false
+    });
+  const allowed=['allowed','sse','redirect','oversized','stall',
+    'wrong-version','wrong-content-type','invalid-json','untrusted-ca'];
+  if(!options||Object.getPrototypeOf(options)!==Object.prototype||
+     Reflect.ownKeys(options).some(k=>!['cert','key','fault','deadlineMs'].includes(k)))
+    return report('F2_LAB_OPTIONS_REJECTED');
+  // This is a LOCAL test API. It is NOT safe for executable untrusted
+  // Proxy objects; never expose it as an admission boundary.
+  const {cert,key,fault='allowed',deadlineMs=1500}=options;
+  if(typeof cert!=='string'||typeof key!=='string'||
+     !cert.startsWith('-----BEGIN CERTIFICATE-----')||
+     !key.startsWith('-----BEGIN PRIVATE KEY-----')||
+     cert.length>4096||key.length>8192||
+     !allowed.includes(fault)||!Number.isSafeInteger(deadlineMs)||
+     deadlineMs<100||deadlineMs>4000)
+    return report('F2_LAB_OPTIONS_REJECTED');
+  const fixture=buildF2OfflineDiscoveryFixture();
+  if(!reviewF2OfflineDiscoveryFixture(fixture.request).fixtureMatches||
+     Buffer.byteLength(fixture.request.body,'utf8')>4096)
+    return report('F2_LAB_FIXED_WIRE_REJECTED');
+  const answer=JSON.stringify({jsonrpc:'2.0',id:'f2-discover-fixture-1',
+    result:{resultType:'complete',supportedVersions:['2026-07-28'],
+      capabilities:{tools:{}}}});
+  let server,deadline,received=0;
+  try {
+    server=https.createServer({key,cert,minVersion:'TLSv1.2'},(req,res)=>{
+      received++;
+      if(received!==1||req.socket.remoteAddress!=='127.0.0.1'||
+         req.method!=='POST'||req.url!=='/mcp'||
+         req.headers.host!=='staging.example.org'||
+         req.headers['mcp-method']!=='server/discover'||
+         req.headers['mcp-protocol-version']!=='2026-07-28'||
+         req.headers.authorization||req.headers.cookie) {
+        res.writeHead(400,{'Connection':'close'});res.end();return;
+      }
+      let requestBytes=0,body='';
+      req.on('data',chunk=>{
+        requestBytes+=chunk.length;
+        if(requestBytes>4096){req.destroy();return;}
+        body+=chunk.toString('utf8');
+      });
+      req.on('end',()=>{
+        if(body!==fixture.request.body){
+          res.writeHead(400,{'Connection':'close'});res.end();return;
+        }
+        if(fault==='stall'){
+          res.writeHead(200,{'Content-Type':'application/json',
+            'Connection':'close'});
+          res.write('{');return;
+        }
+        const payload=fault==='oversized'?'X'.repeat(32769):
+          fault==='invalid-json'?'{bad':
+          fault==='sse'?'data: '+answer+'\n\n':answer;
+        const headers={
+          'Content-Type':fault==='sse'?'text/event-stream':
+            fault==='wrong-content-type'?'text/plain':'application/json',
+          'Content-Length':String(Buffer.byteLength(payload,'utf8')),
+          'Connection':'close',
+          ...(fault==='redirect'?{Location:'https://elsewhere.invalid/mcp'}:{}),
+          ...(fault==='wrong-version'?{'Mcp-Protocol-Version':'2025-11-25'}:{})
+        };
+        res.writeHead(fault==='redirect'?302:200,headers);
+        res.end(payload);
+      });
+    });
+    // Never allow the caller to specify the destination or bind address.
+    server.listen(0,'127.0.0.1');
+    await once(server,'listening');
+    const port=server.address()?.port;
+    if(!Number.isSafeInteger(port)||port<1)return report('F2_LAB_LISTENER_FAILED');
+    const controller=new AbortController();
+    deadline=setTimeout(()=>controller.abort(),deadlineMs);
+    const started=Date.now();
+    return await new Promise(resolveResult=>{
+      const req=https.request({
+        hostname:'127.0.0.1',port,path:'/mcp',method:'POST',agent:false,
+        servername:'staging.example.org',rejectUnauthorized:true,
+        ca:fault==='untrusted-ca'?[]:cert,minVersion:'TLSv1.2',
+        maxHeaderSize:4096,signal:controller.signal,
+        headers:{...fixture.request.headers,
+          Host:'staging.example.org',Connection:'close',
+          'Content-Length':String(Buffer.byteLength(fixture.request.body,'utf8'))}
+      },async res=>{
+        const peerVerified=res.socket?.authorized===true&&
+          res.socket?.encrypted===true&&
+          res.socket?.remoteAddress==='127.0.0.1';
+        if(!peerVerified){
+          res.destroy();resolveResult(report('F2_LAB_PEER_REJECTED',
+            false,received));return;
+        }
+        let bytes=0;const chunks=[];
+        try {
+          for await(const chunk of res) {
+            bytes+=chunk.length;
+            if(bytes>32768){
+              res.destroy();
+              resolveResult(report('F2_LAB_RESPONSE_TOO_LARGE',
+                false,received,true));return;
+            }
+            chunks.push(chunk);
+          }
+        }catch {
+          resolveResult(report('F2_LAB_STREAM_REJECTED',
+            false,received,true));return;
+        }
+        // Node may add a Connection: close transport header. Check it
+        // separately rather than promoting any other unknown header.
+        const pairs=[],raw=res.rawHeaders;
+        if(raw.length>32)return resolveResult(
+          report('F2_LAB_HEADERS_REJECTED',false,received,true));
+        for(let i=0;i<raw.length;i+=2){
+          const name=raw[i].toLowerCase(),value=raw[i+1];
+          if(name==='connection'){
+            if(value.toLowerCase()!=='close')
+              return resolveResult(report('F2_LAB_HEADERS_REJECTED',
+                false,received,true));
+            continue;
+          }
+          pairs.push([name,value]);
+        }
+        const payload=Buffer.concat(chunks).toString('utf8');
+        const exchanged={schemaVersion:1,request:fixture.request,
+          statusCode:res.statusCode,headers:pairs,body:payload,
+          elapsedMs:Date.now()-started,redirectsFollowed:0};
+        const verdict=inspectF2OfflineHttpDiscoveryExchange(
+          JSON.stringify(exchanged));
+        return resolveResult(report(
+          verdict.httpShapeMatched?'F2_OWNED_LAB_HTTPS_EXCHANGE_MATCH':
+            'F2_LAB_EXCHANGE_REJECTED',
+          verdict.httpShapeMatched,received,true));
+      });
+      req.on('error',()=>resolveResult(
+        report('F2_LAB_TLS_OR_DEADLINE_REJECTED',false,received)));
+      req.end(fixture.request.body);
+    });
+  }catch{
+    return report('F2_LAB_SETUP_REJECTED',false,received);
+  }finally{
+    clearTimeout(deadline);
+    if(server){
+      server.closeAllConnections();
+      await new Promise(done=>server.close(()=>done()));
+    }
+  }
 }
