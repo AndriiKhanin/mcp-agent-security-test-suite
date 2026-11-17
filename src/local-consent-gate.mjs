@@ -935,8 +935,15 @@ export function inspectF2OfflineTripartiteEvidence(intent,raw,nowMs) {
        ]),'utf8').digest('hex')||
        g.requestSha256!==buildF2OfflineDiscoveryFixture().requestSha256)
       return verdict('F2_TRIPARTITE_SCOPE_MISMATCH');
+    // Require exact canonical public-only SPKI PEM. Node's createPublicKey()
+    // also accepts PRIVATE KEY PEM; never treat that or concatenated blocks
+    // as a legitimate public-key claim from an untrusted packet.
+    if(roles.some(r=>!packet.keys[r].startsWith(
+      '-----BEGIN PUBLIC KEY-----\n')))
+      return verdict('F2_TRIPARTITE_KEY_REJECTED');
     const keys=roles.map(r=>createPublicKey(packet.keys[r]));
-    if(keys.some(k=>k.asymmetricKeyType!=='ed25519'))
+    if(keys.some((k,i)=>k.asymmetricKeyType!=='ed25519'||
+       k.export({type:'spki',format:'pem'})!==packet.keys[roles[i]]))
       return verdict('F2_TRIPARTITE_KEY_REJECTED');
     const fingerprints=keys.map(k=>k.export({type:'spki',format:'der'})
       .toString('hex'));
