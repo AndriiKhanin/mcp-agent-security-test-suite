@@ -866,3 +866,122 @@ export async function runF2OwnedHttpsLabSelftest(options) {
     }
   }
 }
+
+
+/** F2-F: source-only Ed25519 three-role signed claim consistency.
+ * An issuer, operator, and alleged owner must each sign the exact same
+ * canonical scoped grant, using three DISTINCT public keys. All keys arrive
+ * inside the same caller-controlled JSON packet: there is NO independent
+ * trust anchor, operator login, target-control proof, authenticated
+ * revocation, durable nonce ledger, or authority to create a socket.
+ * This function never accepts live endpoints or returns an execution token.
+ */
+export function inspectF2OfflineTripartiteEvidence(intent,raw,nowMs) {
+  const verdict=(rule,signaturesMatched=false,distinctKeys=false)=>
+    Object.freeze({
+      status:'FAIL',rule,signaturesMatched,distinctKeys,
+      independentIssuerTrusted:false,operatorVerified:false,
+      ownershipVerified:false,requestAuthorized:false,
+      replayProtectionDurable:false,connectionStatus:'NOT_ATTEMPTED',
+      executionEnabled:false,externalTargetContacted:false
+    });
+  const reject=()=>verdict('F2_TRIPARTITE_PACKET_REJECTED');
+  const exact=(o,keys)=>o!==null&&typeof o==='object'&&!Array.isArray(o)&&
+    Object.getPrototypeOf(o)===Object.prototype&&
+    Reflect.ownKeys(o).length===keys.length&&
+    keys.every(k=>Object.hasOwn(o,k));
+  if(typeof raw!=='string'||!raw.length||
+     Buffer.byteLength(raw,'utf8')>8192||
+     !Number.isSafeInteger(nowMs)||nowMs<0)return reject();
+  try {
+    // Capture the validated intent ONCE from own data descriptors. A Proxy
+    // can return different values through get than through descriptors;
+    // never re-read it when computing the signed scope digest.
+    if(!intent||typeof intent!=='object'||
+       Object.getPrototypeOf(intent)!==Object.prototype)
+      return verdict('F2_TRIPARTITE_INTENT_REJECTED');
+    const props=Object.getOwnPropertyDescriptors(intent);
+    const names=['endpoint','protocolVersion','method'];
+    if(Reflect.ownKeys(props).length!==names.length||
+       !names.every(k=>Object.hasOwn(props,k)&&
+         Object.hasOwn(props[k],'value')&&props[k].enumerable))
+      return verdict('F2_TRIPARTITE_INTENT_REJECTED');
+    const pinnedIntent=Object.fromEntries(names.map(k=>[k,props[k].value]));
+    if(reviewF2StagingIntent(pinnedIntent).rule!=='F2_AUTHORITY_NOT_VERIFIED')
+      return verdict('F2_TRIPARTITE_INTENT_REJECTED');
+    const packet=parseStrictJson(raw);
+    if(!exact(packet,['schemaVersion','grant','keys','signatures'])||
+       packet.schemaVersion!==1||
+       !exact(packet.grant,[
+         'schemaVersion','endpoint','protocolVersion','method',
+         'operatorId','issuerId','ownerId','intentSha256',
+         'requestSha256','nonce','issuedAt','expiresAt'])||
+       !exact(packet.keys,['issuer','operator','owner'])||
+       !exact(packet.signatures,['issuer','operator','owner']))
+      return reject();
+    const g=packet.grant,roles=['issuer','operator','owner'];
+    if(g.schemaVersion!==1||
+       !roles.every(r=>{
+         const id=g[r==='owner'?'ownerId':r==='operator'?'operatorId':'issuerId'];
+         return typeof id==='string'&&
+           /^[A-Za-z][A-Za-z0-9_.-]{0,63}$/.test(id);
+       })||
+       new Set([g.issuerId,g.operatorId,g.ownerId]).size!==3||
+       !roles.every(r=>typeof packet.keys[r]==='string'&&
+         packet.keys[r].length>0&&packet.keys[r].length<=256)||
+       !roles.every(r=>typeof packet.signatures[r]==='string'&&
+         /^[A-Za-z0-9_-]{86}$/.test(packet.signatures[r]))||
+       typeof g.nonce!=='string'||!/^[a-f0-9]{32}$/.test(g.nonce)||
+       typeof g.intentSha256!=='string'||!/^[a-f0-9]{64}$/.test(g.intentSha256)||
+       typeof g.requestSha256!=='string'||!/^[a-f0-9]{64}$/.test(g.requestSha256)||
+       !Number.isSafeInteger(g.issuedAt)||!Number.isSafeInteger(g.expiresAt)||
+       g.issuedAt<0||g.expiresAt<=g.issuedAt||
+       g.expiresAt-g.issuedAt>300000)
+      return reject();
+    // Only exact canonical source review scope; never trust a signed
+    // attacker-chosen endpoint, request bytes, method, or version.
+    if(g.endpoint!==pinnedIntent.endpoint||
+       g.protocolVersion!==pinnedIntent.protocolVersion||
+       g.method!==pinnedIntent.method||
+       g.intentSha256!==createHash('sha256').update(JSON.stringify([
+         pinnedIntent.endpoint,pinnedIntent.protocolVersion,pinnedIntent.method
+       ]),'utf8').digest('hex')||
+       g.requestSha256!==buildF2OfflineDiscoveryFixture().requestSha256)
+      return verdict('F2_TRIPARTITE_SCOPE_MISMATCH');
+    // Require exact canonical public-only SPKI PEM. Node's createPublicKey()
+    // also accepts PRIVATE KEY PEM; never treat that or concatenated blocks
+    // as a legitimate public-key claim from an untrusted packet.
+    if(roles.some(r=>!packet.keys[r].startsWith(
+      '-----BEGIN PUBLIC KEY-----\n')))
+      return verdict('F2_TRIPARTITE_KEY_REJECTED');
+    const keys=roles.map(r=>createPublicKey(packet.keys[r]));
+    if(keys.some((k,i)=>k.asymmetricKeyType!=='ed25519'||
+       k.export({type:'spki',format:'pem'})!==packet.keys[roles[i]]))
+      return verdict('F2_TRIPARTITE_KEY_REJECTED');
+    const fingerprints=keys.map(k=>k.export({type:'spki',format:'der'})
+      .toString('hex'));
+    if(new Set(fingerprints).size!==3)
+      return verdict('F2_TRIPARTITE_KEY_REUSE_REJECTED');
+    const tuple=JSON.stringify([
+      g.schemaVersion,g.endpoint,g.protocolVersion,g.method,
+      g.operatorId,g.issuerId,g.ownerId,g.intentSha256,g.requestSha256,
+      g.nonce,g.issuedAt,g.expiresAt
+    ]);
+    for(let i=0;i<3;i++){
+      const role=roles[i];
+      const sig=Buffer.from(packet.signatures[role],'base64url');
+      if(sig.length!==64||
+         sig.toString('base64url')!==packet.signatures[role])
+        return verdict('F2_TRIPARTITE_PACKET_REJECTED');
+      const message=Buffer.from(
+        'F2-SOURCE-TRIPARTITE-V1\n'+role+'\n'+tuple,'utf8');
+      if(!cryptoVerify(null,message,keys[i],sig))
+        return verdict('F2_TRIPARTITE_SIGNATURE_INVALID');
+    }
+    if(g.issuedAt>nowMs||g.expiresAt<=nowMs)
+      return verdict('F2_TRIPARTITE_OUTSIDE_WINDOW',true,true);
+    // Caller provided the alleged keys and identities. Cryptographically
+    // consistent source claims are NOT real operator/owner authentication.
+    return verdict('F2_TRIPARTITE_MATCH_NO_TRUST_ANCHOR',true,true);
+  } catch {return reject();}
+}
