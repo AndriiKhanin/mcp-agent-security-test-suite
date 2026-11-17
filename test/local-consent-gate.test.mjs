@@ -1055,6 +1055,24 @@ test('F2-F: three distinct real Ed25519 signatures match but never grant network
     operator:signatures.issuer}}).rule,'F2_TRIPARTITE_SIGNATURE_INVALID');
   assert.equal(run({...packet,keys:{...keys,owner:keys.operator}}).rule,
     'F2_TRIPARTITE_KEY_REUSE_REJECTED');
+  // createPublicKey() accepts PKCS8 PRIVATE KEY PEM as input in Node.js.
+  // A self-contained untrusted grant must not ingest that as public evidence.
+  const privatePem=secrets.issuer.export({format:'pem',type:'pkcs8'});
+  assert.equal(run({...packet,keys:{...keys,issuer:privatePem}}).rule,
+    'F2_TRIPARTITE_KEY_REJECTED');
+  // Reject padded, concatenated or otherwise noncanonical SPKI input.
+  for(const badKey of [
+    keys.issuer+'\\n',
+    keys.issuer+keys.issuer,
+    keys.issuer.replaceAll('\\n','\\r\\n')
+  ]) {
+    const v=run({...packet,keys:{...keys,issuer:badKey}});
+    assert.equal(v.rule,'F2_TRIPARTITE_KEY_REJECTED');
+    assert.equal(v.signaturesMatched,false);
+    assert.equal(v.executionEnabled,false);
+    assert.equal(v.externalTargetContacted,false);
+    assert.ok(!JSON.stringify(v).includes('PRIVATE KEY'));
+  }
   assert.equal(run({...packet,grant:{...grant,ownerId:grant.operatorId}}).rule,
     'F2_TRIPARTITE_PACKET_REJECTED');
   assert.equal(run({...packet,grant:{...grant,nonce:'f'.repeat(32)}}).rule,
