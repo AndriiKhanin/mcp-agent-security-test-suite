@@ -1062,9 +1062,9 @@ test('F2-F: three distinct real Ed25519 signatures match but never grant network
     'F2_TRIPARTITE_KEY_REJECTED');
   // Reject padded, concatenated or otherwise noncanonical SPKI input.
   for(const badKey of [
-    keys.issuer+'\\n',
+    keys.issuer+'\n',
     keys.issuer+keys.issuer,
-    keys.issuer.replaceAll('\\n','\\r\\n')
+    keys.issuer.replaceAll('\n','\r\n')
   ]) {
     const v=run({...packet,keys:{...keys,issuer:badKey}});
     assert.equal(v.rule,'F2_TRIPARTITE_KEY_REJECTED');
