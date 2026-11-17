@@ -1,16 +1,57 @@
 # MCP Agent Security Test Suite — v0.0.10-rc.1
 
+## Independent beta: one safe first run (about 10 minutes)
+
+This free, unpublished candidate runs **fictional security-contract checks**,
+not a vulnerability scan of your own MCP server. On Windows or Ubuntu,
+use a disposable checkout with Git and **Node.js 20 or 22**. Review
+[SECURITY.md](SECURITY.md) and the source before running local code.
+
+```sh
+git clone https://github.com/AndriiKhanin/mcp-agent-security-test-suite.git
+cd mcp-agent-security-test-suite
+git switch --detach c85b03d01ccfbbd1acb1c21850638712824ed412
+git rev-parse HEAD
+node --version
+node src/cli.mjs start --text
+node src/cli.mjs start examples/adapter-profiles/stdio-project.json --text
+node src/cli.mjs start
+node tools/beta-review.mjs
+```
+
+The two text starts and JSON start should each exit **0**; the JSON
+start should report `productStage:"F1"`, `status:"PASS"`,
+`externalTargetContacted:false`, `operatorVerified:false`, and
+`projectConnectionAuthorized:false`. The separate beta review should
+report **5/5 matched**, exit **0**. These are expected results, **not**
+a claim that your run passed. If your OS blocks the suite-owned
+`127.0.0.1` mock, report that rather than bypassing the restriction.
+
+This exact pinned commit is the reviewed **F1 beta baseline**, not the
+floating `main` branch or a published release. No `npm install`,
+API key, third-party MCP endpoint, private project config, or account
+is required. Do **not** submit raw logs, usernames, private paths,
+credentials or customer data. Share only independently observed,
+sanitized PASS/FAIL, OS, Node major, full public commit SHA, and
+setup friction using the
+[beta feedback form](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/new/choose).
+See the [full independent beta protocol](docs/BETA_TESTING.md#f1-independent-first-run-beta--reviewed-source-candidate)
+for reproducibility and safe disclosure. An independent participant
+must actually execute and report results before beta gate
+[#59](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/59)
+can advance.
+
 ## Start here: the finite product v1.0 roadmap
 
-**Current status (2026-10-31): F0 DONE, F1 IN PROGRESS,
-product v1.0 NOT RELEASED.** The suite has offline fictional contract
+**Current status (2026-11-17): F0 DONE, F1 IN PROGRESS;
+F2 offline/source-only development IN PROGRESS; product v1.0 NOT RELEASED.** The suite has offline fictional contract
 checks, owned local MCP mocks and CI, **not** an approved connection
 to an arbitrary MCP project or a general prompt-injection detector.
 
 **[See the single F0–F6 roadmap, release finish line and acceptance
 criteria](ROADMAP.md#product-v10--finite-finish-line-authoritative-delivery-plan)**
 and the [single v1.0 tracking issue #385](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/385).
-The latest merged M63 test comparison is [PR #384](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/384),
+The historical M63 test comparison is [PR #384](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/pull/384),
 [main CI 4/4](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/actions/runs/41208529559).
 Candidate `0.0.10-rc.1` has **not** been published.
 External target authorization [#21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21),
@@ -23,7 +64,7 @@ user-owned staging validation is still blocked by Issue #21.
 
 ## F2 development authorization (2026-11-04)
 
-Owner-approved source/test development of one **disabled-by-default**, narrowly scoped MCP `2026-07-28` HTTPS `server/discover` adapter against an **isolated, first-party non-production staging target class** is tracked in [#403](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/403), with the explicit [owner decision in #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21#issuecomment-6639531672). The current `start`/`adapter-check` commands still **do not** connect to user MCP servers. No actual remote DNS/HTTPS target request has yet been authorized: exact target ownership, operator consent, isolation and a separate first-contact decision remain required. F1 remains IN PROGRESS, F2 is not implemented or accepted, and the candidate is not released.
+Owner-approved source/test development of one **disabled-by-default**, narrowly scoped MCP `2026-07-28` HTTPS `server/discover` adapter against an **isolated, first-party non-production staging target class** is tracked in [#403](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/403), with the explicit [owner decision in #21](https://github.com/AndriiKhanin/mcp-agent-security-test-suite/issues/21#issuecomment-6639531672). The current `start`/`adapter-check` commands still **do not** connect to user MCP servers. No actual remote DNS/HTTPS target request has yet been authorized: exact target ownership, operator consent, isolation and a separate first-contact decision remain required. F1 remains IN PROGRESS; F2 has offline/source and isolated first-party HTTPS lab work, but no accepted external staging adapter or real-target authorization. The candidate is not released.
 
 ## Local tests — cloud CI runs only on request
 
