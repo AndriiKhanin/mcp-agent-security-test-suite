@@ -894,7 +894,20 @@ export function inspectF2OfflineTripartiteEvidence(intent,raw,nowMs) {
      Buffer.byteLength(raw,'utf8')>8192||
      !Number.isSafeInteger(nowMs)||nowMs<0)return reject();
   try {
-    if(reviewF2StagingIntent(intent).rule!=='F2_AUTHORITY_NOT_VERIFIED')
+    // Capture the validated intent ONCE from own data descriptors. A Proxy
+    // can return different values through get than through descriptors;
+    // never re-read it when computing the signed scope digest.
+    if(!intent||typeof intent!=='object'||
+       Object.getPrototypeOf(intent)!==Object.prototype)
+      return verdict('F2_TRIPARTITE_INTENT_REJECTED');
+    const props=Object.getOwnPropertyDescriptors(intent);
+    const names=['endpoint','protocolVersion','method'];
+    if(Reflect.ownKeys(props).length!==names.length||
+       !names.every(k=>Object.hasOwn(props,k)&&
+         Object.hasOwn(props[k],'value')&&props[k].enumerable))
+      return verdict('F2_TRIPARTITE_INTENT_REJECTED');
+    const pinnedIntent=Object.fromEntries(names.map(k=>[k,props[k].value]));
+    if(reviewF2StagingIntent(pinnedIntent).rule!=='F2_AUTHORITY_NOT_VERIFIED')
       return verdict('F2_TRIPARTITE_INTENT_REJECTED');
     const packet=parseStrictJson(raw);
     if(!exact(packet,['schemaVersion','grant','keys','signatures'])||
@@ -927,11 +940,11 @@ export function inspectF2OfflineTripartiteEvidence(intent,raw,nowMs) {
       return reject();
     // Only exact canonical source review scope; never trust a signed
     // attacker-chosen endpoint, request bytes, method, or version.
-    if(g.endpoint!==intent.endpoint||
-       g.protocolVersion!==intent.protocolVersion||
-       g.method!==intent.method||
+    if(g.endpoint!==pinnedIntent.endpoint||
+       g.protocolVersion!==pinnedIntent.protocolVersion||
+       g.method!==pinnedIntent.method||
        g.intentSha256!==createHash('sha256').update(JSON.stringify([
-         intent.endpoint,intent.protocolVersion,intent.method
+         pinnedIntent.endpoint,pinnedIntent.protocolVersion,pinnedIntent.method
        ]),'utf8').digest('hex')||
        g.requestSha256!==buildF2OfflineDiscoveryFixture().requestSha256)
       return verdict('F2_TRIPARTITE_SCOPE_MISMATCH');
