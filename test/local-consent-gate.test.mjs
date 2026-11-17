@@ -1045,6 +1045,28 @@ test('F2-F: three distinct real Ed25519 signatures match but never grant network
     false,false,false,false,false,'NOT_ATTEMPTED',false,false]);
   assert.ok(!JSON.stringify(good).includes('staging.example.org'));
   assert.ok(!JSON.stringify(good).includes('0123456789abcdef'));
+  // Intent values are snapshotted via own data descriptors, never re-read
+  // through untrusted Proxy getters after initial validation.
+  let reads=0;
+  const noGet=new Proxy(scope,{get(){reads++;throw Error('UNTRUSTED_GET');}});
+  const consistent=inspectF2OfflineTripartiteEvidence(
+    noGet,JSON.stringify(packet),now);
+  assert.equal(consistent.rule,'F2_TRIPARTITE_MATCH_NO_TRUST_ANCHOR');
+  assert.equal(consistent.requestAuthorized,false);
+  assert.equal(reads,0);
+  const forged=new Proxy({...scope,method:'tools/call'},{
+    get(target,key){reads++;return key==='method'
+      ? 'server/discover':Reflect.get(target,key);}
+  });
+  assert.equal(inspectF2OfflineTripartiteEvidence(
+    forged,JSON.stringify(packet),now).rule,'F2_TRIPARTITE_INTENT_REJECTED');
+  assert.equal(reads,0);
+  const withGetter={...scope};
+  Object.defineProperty(withGetter,'endpoint',{enumerable:true,
+    get(){reads++;return scope.endpoint;}});
+  assert.equal(inspectF2OfflineTripartiteEvidence(
+    withGetter,JSON.stringify(packet),now).rule,'F2_TRIPARTITE_INTENT_REJECTED');
+  assert.equal(reads,0);
   assert.equal(run(packet,now+1000).rule,'F2_TRIPARTITE_OUTSIDE_WINDOW');
   assert.equal(run(packet,now-1001).rule,'F2_TRIPARTITE_OUTSIDE_WINDOW');
   assert.equal(run({...packet,grant:{...grant,requestSha256:'f'.repeat(64)}}).rule,
