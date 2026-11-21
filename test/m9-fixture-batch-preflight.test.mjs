@@ -806,6 +806,28 @@ test('F1 metadata: complete scanner observations classify but never prove securi
   assert.equal(qualified.actualAgentBehaviorObserved,false);
   assert.equal(qualified.externalMcpContacted,false);
   assert.equal(qualified.limits.independentBetaVerified,false);
+  // Input shape must be captured through own data descriptors. An in-process
+  // Proxy get trap cannot change a previously qualified result or leak text.
+  let getterReads=0;
+  const noGet=o=>new Proxy(o,{get(){getterReads++;
+    throw Error('UNTRUSTED_METADATA_GET');}});
+  const snapshotSafe=noGet({
+    ...input,results:noGet(input.results.map(row=>noGet(row)))
+  });
+  assert.deepEqual(triageFictionalMetadataResults(snapshotSafe),qualified);
+  assert.equal(getterReads,0);
+  const lyingObservation=noGet({...input.results[0],observed:'UNTESTED'});
+  const proxyInput={...input,results:[lyingObservation,...input.results.slice(1)]};
+  assert.equal(triageFictionalMetadataResults(proxyInput).status,'ERROR');
+  assert.equal(getterReads,0);
+  let accessorInvoked=false;
+  const accessorRow={...input.results[1]};
+  Object.defineProperty(accessorRow,'observed',{enumerable:true,
+    get(){accessorInvoked=true;return 'FLAGGED';}});
+  assert.equal(triageFictionalMetadataResults({
+    ...input,results:[input.results[0],accessorRow,...input.results.slice(2)]
+  }).status,'ERROR');
+  assert.equal(accessorInvoked,false);
   const json=JSON.stringify(input);
   assert.deepEqual(triageFictionalMetadataJson(json),qualified);
   assert.deepEqual(await runFictionalMetadataTriageStdin([],
