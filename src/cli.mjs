@@ -159,7 +159,7 @@ const START_HELP_TEXT=[
   '',
   'Next: start --text, then inspect a fictional local config offline.',
   'Real non-production HTTPS staging needs separate exact-target approval under Issue #21.'
-].join('\\n')+'\\n';
+].join('\n')+'\n';
 
 async function runOfflineDemo() {
   // No caller-controlled paths: these two fictional fixtures are shipped in
