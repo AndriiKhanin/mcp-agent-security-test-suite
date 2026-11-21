@@ -145,6 +145,48 @@ test('F1: explicit one-server choice from multi-entry client settings is inert',
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 
+test('F1 packaged start --help is concise, read-free, and retains global JSON help',()=>{
+ const shown=cli('start','--help');
+ assert.equal(shown.error,undefined);
+ assert.equal(shown.status,0,shown.stderr);
+ assert.equal(shown.stderr,'');
+ assert.equal(cli('start','-h').stdout,shown.stdout);
+ assert.ok(!shown.stdout.trimStart().startsWith('{'));
+ for(const text of [
+  'start (F1: offline first run)',
+  'mcp-agent-security start [--text]',
+  'mcp-agent-security start <descriptor.json> [--text]',
+  '--client-config <config.json> [--server NAME] [--text]',
+  'max 4 KiB UTF-8','2-16 entries','JSON-v1 for CI',
+  'No user MCP server scan','Issue #21'
+ ])assert.ok(shown.stdout.includes(text),text);
+ assert.ok(!shown.stdout.includes('https://'));
+ assert.ok(!shown.stdout.includes('PRIVATE_F1_CANARY'));
+ const global=cli('--help'),parsed=JSON.parse(global.stdout);
+ assert.equal(global.status,0);
+ assert.equal(parsed.command,'help');
+ assert.equal(parsed.reportSchemaVersion,1);
+ const src=readFileSync(join(cwd,'src/cli.mjs'),'utf8');
+ assert.ok(src.indexOf("if(command==='start' && args.length===2")<
+   src.indexOf('const startText='),'start help must exit before mock/file work');
+});
+
+test('F1 invalid start help combinations fail with short sanitized guidance',()=>{
+ for(const args of [
+  ['start','--help','PRIVATE_F1_CANARY'],
+  ['start','--help','--text'],
+  ['start','--client-config','PRIVATE_F1_CANARY.json','--help'],
+  ['start','-h','--server','PRIVATE_F1_CANARY']
+ ]){
+  const result=cli(...args);
+  assert.equal(result.status,2,result.stderr);
+  assert.equal(JSON.parse(result.stdout).status,'ERROR');
+  assert.match(result.stderr,/Run start --help for offline input examples/);
+  assert.ok(!(result.stdout+result.stderr).includes('PRIVATE_F1_CANARY'));
+  assert.ok(!result.stderr.includes('adapter-synthetic-trace'));
+ }
+});
+
 test('F1 start gives fixed, privacy-safe 4 KiB error guidance',()=>{
  const dir=mkdtempSync(join(tmpdir(),'f1-bad-')),file=join(dir,'private.json');
  try{

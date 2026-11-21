@@ -159,6 +159,20 @@ test('R1: packed CLI installs from a temporary offline archive and handles PASS/
     assert.ok(!picked.stdout.includes('PRIVATE_F1_CANARY'));
 
 
+    // A new adopter can discover the F1 journey from the installed binary
+    // without a file, target, executable, or external server contact.
+    const startHelp=invokeNode(executable,['start','--help'],temp,env);
+    assert.equal(startHelp.status,0,'installed start help must work offline');
+    assert.equal(startHelp.stderr,'');
+    assert.match(startHelp.stdout,/F1: offline first run/);
+    assert.match(startHelp.stdout,/--client-config <config.json> \[--server NAME\]/);
+    assert.match(startHelp.stdout,/No user MCP server scan/);
+    assert.match(startHelp.stdout,/Issue #21/);
+    assert.ok(!startHelp.stdout.trimStart().startsWith('{'));
+    const startShort=invokeNode(executable,['start','-h'],temp,env);
+    assert.equal(startShort.status,0);
+    assert.equal(startShort.stdout,startHelp.stdout);
+
     const help = invokeNode(executable, ['--help'], temp, env);
     assert.equal(help.status, 0, 'installed CLI --help must pass');
     const helpReport=JSON.parse(help.stdout);
