@@ -210,7 +210,11 @@ async function main() {
       emitFictionalTerminalView(buildCliErrorReport('adapter-trace-expect','INVALID_CLI_ARGUMENTS'));
       return 2;
     }
+    if(command==='start'){
+      process.stderr.write('USAGE: mcp-agent-security start [local-descriptor.json] [--text] OR start --client-config <client-config.json> [--server NAME] [--text]. Run start --help for offline input examples.\n');
+    }else{
     process.stderr.write('USAGE: node src/cli.mjs start [local-descriptor.json] [--text] OR start --client-config <client-config.json> [--server NAME] [--text] OR help|version|demo|adapter-guide|adapter-selftest|staging-selftest|staging-process-selftest|adapter-staging-selftest|adapter-onboarding-demo OR adapter-template|adapter-kit stdio|streamable-http OR adapter-report-view|adapter-kit-verify|adapter-quickstart|adapter-trace-expect|adapter-synthetic-trace|adapter-fixture-audit|adapter-onboard|adapter-check|adapter-policy-check|scenario|trace|mock|witness|process|stdio|loopback|jsonrpc|era|negotiate <synthetic-file>\n');
+    }
     emit(buildCliErrorReport(CLI_COMMANDS.includes(command)?command:null,'INVALID_CLI_ARGUMENTS'));
     return 2;
   }
