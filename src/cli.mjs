@@ -133,6 +133,34 @@ function emitStartText(report) {
   ].join('\n')+'\n');
 }
 
+/**
+ * F1: one short, reviewed, literal-only help view on the installed command.
+ * This path is evaluated before reading any project file or starting even
+ * the first-party loopback mock. Global --help remains JSON-v1 compatible.
+ */
+const START_HELP_TEXT=[
+  'MCP Agent Security - start (F1: offline first run)',
+  '',
+  'Usage:',
+  '  mcp-agent-security start [--text]',
+  '  mcp-agent-security start <descriptor.json> [--text]',
+  '  mcp-agent-security start --client-config <config.json> [--server NAME] [--text]',
+  '  mcp-agent-security start --help',
+  '',
+  'What it does:',
+  '  - Runs fixed fictional security-contract checks and a disposable first-party 127.0.0.1 mock.',
+  '  - Optionally validates one local, credential-free descriptor or selected client entry (max 4 KiB UTF-8).',
+  '  - Requires --server NAME to choose from a client config containing 2-16 entries.',
+  '  - Returns text with --text; otherwise JSON-v1 for CI (exit 0=match, 1=check failure, 2=invalid).',
+  '',
+  'What it does NOT do:',
+  '  - No user MCP server scan, user process execution, credential handling or external target contact.',
+  '  - No operator authorization, independent beta/security audit, or product release.',
+  '',
+  'Next: start --text, then inspect a fictional local config offline.',
+  'Real non-production HTTPS staging needs separate exact-target approval under Issue #21.'
+].join('\\n')+'\\n';
+
 async function runOfflineDemo() {
   // No caller-controlled paths: these two fictional fixtures are shipped in
   // the reviewed npm package and opened via the same bounded input helper.
@@ -154,6 +182,12 @@ async function main() {
     '--help':'help', '-h':'help', '--version':'version', '-V':'version'
   });
   const command = Object.hasOwn(aliases, args[0]) ? aliases[args[0]] : args[0];
+  // F1 help is argument-free and runs before any file reads or local sockets.
+  if(command==='start' && args.length===2 &&
+     (args[1]==='--help' || args[1]==='-h')){
+    process.stdout.write(START_HELP_TEXT);
+    return 0;
+  }
   const startText=command==='start' && args.at(-1)==='--text';
   const startArgs=startText?args.slice(0,-1):args;
   const clientConfig=startArgs[0]==='start' && startArgs[1]==='--client-config';
