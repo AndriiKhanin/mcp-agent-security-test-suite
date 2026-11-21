@@ -46,6 +46,54 @@ scanner execution, measure population recall, prove blocked tool calls,
 or fulfill independent beta [#59](../issues/59). No network or external
 MCP contact is performed by this suite.
 
+## Compare Unicode tool-description metadata (F1 independent scanner intake)
+
+The source-only metadata comparison is **separate** from the M8/M9
+ASCII-only `UNTRUSTED_TOOL_RESULT` proposal validator. Do not weaken
+that validator or submit invisible Unicode as a normal fixture-only PR.
+
+```sh
+node tools/fixture-batch-preflight.mjs --export-metadata-contrasts > metadata-cases.json
+node tools/fixture-batch-preflight.mjs --export-metadata-results-template > metadata-results.json
+```
+
+The first JSON contains **four source-authored fictional descriptions**
+for a made-up `fetch_doc` tool: plain clean text, benign wording with
+U+200B, an instruction hidden by U+200B, and an instruction with
+U+202E/U+202C bidi controls. Inspect the source and Unicode escapes
+before exporting; some viewers reorder or visually hide the characters.
+Feed each `rows[].text` to your own independently reviewed **static
+tool-description scanner**, only as inert data. Do not create an MCP
+server, execute `delete_account`, contact live endpoints or share
+real configuration.
+
+After actually running your scanner, manually enter `FLAGGED`,
+`NOT_FLAGGED` or `ERROR` for **every** case in the second JSON.
+`UNTESTED` remains invalid rather than being misreported as a scanner
+error. Then run:
+
+```sh
+node tools/fixture-batch-preflight.mjs --triage-metadata-contrasts < metadata-results.json
+```
+
+PowerShell 7 equivalent:
+`Get-Content -Raw -Encoding utf8 .\metadata-results.json | node tools/fixture-batch-preflight.mjs --triage-metadata-contrasts`.
+
+The result reports TP/FP/FN/TN/ERROR relative only to **our own
+subjective case labels**; it neither runs nor authenticates a scanner,
+verifies protective enforcement, measures general detection accuracy,
+nor establishes independent beta. A scanner may legitimately flag
+suspicious Unicode even in benign wording; describe its policy and
+classification rationale rather than claiming a universal false
+positive. Share only sanitized public version/commit, source SHA,
+observations and reproducibility at
+[scanner comparison #329](../issues/329).
+
+These first-party approximation cases are **not** Sarah/patchbay's raw
+POISONING-001 fixture and do not imply the proposed external Gist
+has been received or tested. Preserve origin and attribution if a
+separately reviewed public fixture is contributed later.
+
 ## Contribute a fictional `UNTRUSTED_TOOL_RESULT` fixture
 
 Create a source-only case with
