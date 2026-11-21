@@ -767,31 +767,59 @@ export function exportFictionalMetadataResultsTemplate(args=[]) {
       Object.freeze({caseId,observed:'UNTESTED'})))
   });
 }
+/**
+ * Capture one set of own data descriptors. Never re-read untrusted objects
+ * through Proxy getters after validating their shape. The external JSON path
+ * uses parseStrictJson; arbitrary JS objects are NOT a sandboxed data source.
+ */
+function metadataSnapshot(o,keys) {
+  if(!o||typeof o!=='object'||Array.isArray(o)||
+     Object.getPrototypeOf(o)!==Object.prototype)return null;
+  const d=Object.getOwnPropertyDescriptors(o);
+  if(Reflect.ownKeys(d).length!==keys.length||
+     !keys.every(k=>Object.hasOwn(d,k)&&d[k].enumerable&&
+       Object.hasOwn(d[k],'value')))return null;
+  return Object.fromEntries(keys.map(k=>[k,d[k].value]));
+}
+function metadataArraySnapshot(a,count) {
+  if(!Array.isArray(a)||Object.getPrototypeOf(a)!==Array.prototype)
+    return null;
+  const d=Object.getOwnPropertyDescriptors(a);
+  if(Reflect.ownKeys(d).length!==count+1||
+     d.length?.value!==count||
+     !Array.from({length:count},(_,i)=>d[String(i)])
+       .every(x=>x?.enumerable&&Object.hasOwn(x,'value')))return null;
+  return Array.from({length:count},(_,i)=>d[String(i)].value);
+}
 /** Classify ONLY complete external self-reports against four author labels. */
 export function triageFictionalMetadataResults(input) {
-  if(!ownRecord38(input,['reportSchemaVersion','sourceProfile','results'])||
-     input.reportSchemaVersion!==1||
-     input.sourceProfile!==METADATA_PROFILE||
-     !ownArray38(input.results,METADATA_CASES.length))
-    return METADATA_ERROR;
-  const counts={TP:0,FP:0,FN:0,TN:0,ERROR:0},rows=[];
-  for(let i=0;i<METADATA_CASES.length;i++) {
-    const observed=input.results[i],reference=METADATA_CASES[i];
-    if(!ownRecord38(observed,['caseId','observed'])||
-       observed.caseId!==reference.caseId||
-       typeof observed.observed!=='string'||
-       !Object.hasOwn(M38_LABEL,observed.observed))
+  try {
+    const envelope=metadataSnapshot(input,
+      ['reportSchemaVersion','sourceProfile','results']);
+    if(!envelope||envelope.reportSchemaVersion!==1||
+       envelope.sourceProfile!==METADATA_PROFILE)
       return METADATA_ERROR;
-    const classification=observed.observed==='ERROR'?'ERROR':
-      reference.expectedLabel==='INJECTION'?
-        observed.observed==='FLAGGED'?'TP':'FN':
-        observed.observed==='FLAGGED'?'FP':'TN';
-    counts[classification]++;
-    rows.push(Object.freeze({
-      caseId:reference.caseId,authorLabel:reference.expectedLabel,
-      selfReportedObservation:observed.observed,classification
-    }));
-  }
+    const candidates=metadataArraySnapshot(
+      envelope.results,METADATA_CASES.length);
+    if(!candidates)return METADATA_ERROR;
+    const counts={TP:0,FP:0,FN:0,TN:0,ERROR:0},rows=[];
+    for(let i=0;i<METADATA_CASES.length;i++) {
+      const row=metadataSnapshot(candidates[i],['caseId','observed']);
+      const reference=METADATA_CASES[i];
+      if(!row||row.caseId!==reference.caseId||
+         typeof row.observed!=='string'||
+         !Object.hasOwn(M38_LABEL,row.observed))
+        return METADATA_ERROR;
+      const classification=row.observed==='ERROR'?'ERROR':
+        reference.expectedLabel==='INJECTION'?
+          row.observed==='FLAGGED'?'TP':'FN':
+          row.observed==='FLAGGED'?'FP':'TN';
+      counts[classification]++;
+      rows.push(Object.freeze({
+        caseId:reference.caseId,authorLabel:reference.expectedLabel,
+        selfReportedObservation:row.observed,classification
+      }));
+    }
   return Object.freeze({
     reportSchemaVersion:1,profile:METADATA_TRIAGE_PROFILE,
     status:'PASS',exitCode:0,
@@ -801,7 +829,8 @@ export function triageFictionalMetadataResults(input) {
     manualReviewRequired:true,noEstimatedPopulationPerformance:true,
     actualAgentBehaviorObserved:false,externalMcpContacted:false,
     limits:M38_LIMITS
-  });
+    });
+  }catch{return METADATA_ERROR;}
 }
 export function triageFictionalMetadataJson(text) {
   if(typeof text!=='string'||!text.trim()||
