@@ -55,6 +55,19 @@ remains separately blocked. Nothing here is an MCP server scan.
 # F1 — guided source or installed first run
 
 **Current delivery stage: F1 (one user journey); NOT real MCP scanning.**
+
+For a short, self-contained explanation of the supported `start`
+arguments, use `node src/cli.mjs start --help` in a source checkout,
+or `mcp-agent-security start --help` in the locally installed candidate.
+The short alias `start -h` is equivalent. This F1-specific help is
+**fixed text and exits 0 without reading a project file, executing a
+mock, opening a local socket, or contacting any target**. It explains
+the 4 KiB input limit, supported config shapes, explicit server selection,
+JSON-v1 versus `--text` and the authorization boundary. Unlike this
+subcommand-specific text view, the existing top-level `--help` still
+returns the versioned JSON help contract for tooling. Unsupported `start`
+arguments exit 2 with concise, input-free usage guidance.
+
 In a reviewed source checkout with Node.js 20 or 22:
 
 ```sh
